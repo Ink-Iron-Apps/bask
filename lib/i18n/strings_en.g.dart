@@ -888,8 +888,8 @@ class Translations$settings$en {
 	/// en: 'Simultaneous downloads'
 	String get concurrentDownloads => 'Simultaneous downloads';
 
-	/// en: 'How many downloads run at once. Raise for a faster queue; lower it if your server starts refusing downloads.'
-	String get concurrentDownloadsDescription => 'How many downloads run at once. Raise for a faster queue; lower it if your server starts refusing downloads.';
+	/// en: 'How many downloads run at once. Most servers only tolerate one — raise this only if yours does, and lower it again if downloads start failing and retrying.'
+	String get concurrentDownloadsDescription => 'How many downloads run at once. Most servers only tolerate one — raise this only if yours does, and lower it again if downloads start failing and retrying.';
 
 	/// en: '${count} at a time'
 	String concurrentDownloadsUnit({required Object count}) => '${count} at a time';
@@ -6653,7 +6653,7 @@ extension on Translations {
 			'settings.downloadOnWifiOnly' => 'Download on Wi-Fi only',
 			'settings.downloadOnWifiOnlyDescription' => 'Prevent downloads when on cellular data',
 			'settings.concurrentDownloads' => 'Simultaneous downloads',
-			'settings.concurrentDownloadsDescription' => 'How many downloads run at once. Raise for a faster queue; lower it if your server starts refusing downloads.',
+			'settings.concurrentDownloadsDescription' => 'How many downloads run at once. Most servers only tolerate one — raise this only if yours does, and lower it again if downloads start failing and retrying.',
 			'settings.concurrentDownloadsUnit' => ({required Object count}) => '${count} at a time',
 			'settings.concurrentDownloadsLabel' => 'Downloads',
 			'settings.autoRemoveWatchedDownloads' => 'Auto-remove watched downloads',

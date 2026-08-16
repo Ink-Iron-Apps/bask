@@ -8,13 +8,22 @@ part 'download_models.freezed.dart';
 /// Fewest downloads that may run at once. Zero would stall the queue entirely.
 const minConcurrentDownloads = 1;
 
-/// Most downloads that may run at once. Upstream pinned this to one because Plex
-/// servers can reject concurrent media downloads; the ceiling stops a raised
-/// setting from turning that rejection into every download failing.
+/// Most downloads that may run at once.
+///
+/// Raising this is genuinely risky, not merely inadvisable. Measured against a
+/// Plex Media Server at three slots, every transfer failed within a second or
+/// two of starting, at 3-7% progress: the task reported waitingToRetry, the
+/// retry produced a fresh task id, the stale-task guard cancelled it, and the
+/// queue thrashed between items without finishing any of them. One slot on the
+/// same server downloads steadily with no retries and no cancellations.
 const maxConcurrentDownloads = 5;
 
 /// Concurrency used when the setting has never been written.
-const defaultConcurrentDownloads = 3;
+///
+/// One, because that is what a Plex server was observed to tolerate. The
+/// setting exists for servers that handle more; the default must not gamble a
+/// working download queue on the assumption that they do.
+const defaultConcurrentDownloads = 1;
 
 enum DownloadStatus {
   queued,
