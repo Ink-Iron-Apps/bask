@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Plezy"
+    "title": "Plexy"
   },
   "auth": {
     "signInWithPlex": "Plexでサインイン",
@@ -101,7 +101,7 @@
   },
   "settings": {
     "title": "設定",
-    "supportDeveloper": "Plezyを支援",
+    "supportDeveloper": "Plexyを支援",
     "supportDeveloperDescription": "Liberapayで寄付して開発を支援",
     "language": "言語",
     "theme": "テーマ",
@@ -226,7 +226,7 @@
     "importSettingsDescription": "ファイルから設定を復元",
     "importSettingsConfirm": "現在の設定を置き換えます。続行しますか？",
     "importSettingsSuccess": "設定をインポートしました",
-    "importSettingsInvalidFile": "このファイルは有効なPlezyの設定エクスポートではありません",
+    "importSettingsInvalidFile": "このファイルは有効なPlexyの設定エクスポートではありません",
     "importSettingsNoUser": "設定をインポートする前にサインインしてください",
     "shortcutsReset": "ショートカットをデフォルトにリセットしました",
     "about": "アプリについて",
@@ -319,7 +319,7 @@
     "forceTvMode": "TVモードを強制",
     "forceTvModeDescription": "TVレイアウトを強制します。自動検出しないデバイス向けです。再起動が必要です。",
     "startInFullscreen": "全画面表示で起動",
-    "startInFullscreenDescription": "起動時にPlezyを全画面モードで開きます",
+    "startInFullscreenDescription": "起動時にPlexyを全画面モードで開きます",
     "exitFullscreenOnPlayerClose": "プレイヤーを閉じたときに全画面を終了",
     "exitFullscreenOnPlayerCloseDescription": "ビデオプレイヤーを閉じたときに自動的に全画面モードを終了します",
     "autoHidePerformanceOverlay": "パフォーマンスオーバーレイを自動非表示",
@@ -340,7 +340,7 @@
     "subtitlesAndConfig": "字幕と設定",
     "seekAndTiming": "シークとタイミング",
     "behavior": "動作",
-    "exportDialogTitle": "Plezyの設定をエクスポート"
+    "exportDialogTitle": "Plexyの設定をエクスポート"
   },
   "search": {
     "hint": "映画、番組、音楽を検索…",
@@ -533,8 +533,8 @@
     "deleteSharedFileHeading": {
       "other": "同じファイルに保存されている他の${n}エピソードも削除されます："
     },
-    "deleteScopeUnverifiedProbeFailed": "Plezyは削除対象のファイルを確認できなかったため、上記のアイテム以上に削除される可能性があります。キャンセルして再試行するか、それでも削除してください。",
-    "deleteScopeUnverifiedNoFileInfo": "サーバーがこのアイテムのファイル情報を提供しなかったため、Plezyは削除対象のファイルを確認できません。上記のアイテム以上に削除される可能性があります。",
+    "deleteScopeUnverifiedProbeFailed": "Plexyは削除対象のファイルを確認できなかったため、上記のアイテム以上に削除される可能性があります。キャンセルして再試行するか、それでも削除してください。",
+    "deleteScopeUnverifiedNoFileInfo": "サーバーがこのアイテムのファイル情報を提供しなかったため、Plexyは削除対象のファイルを確認できません。上記のアイテム以上に削除される可能性があります。",
     "mediaDeletedSuccessfully": "メディアアイテムを正常に削除しました",
     "mediaFailedToDelete": "メディアアイテムの削除に失敗しました",
     "rate": "評価",
@@ -798,7 +798,7 @@
     "confirmAction": "操作の確認"
   },
   "profiles": {
-    "addPlezyProfile": "Plezyプロフィールを追加",
+    "addPlezyProfile": "Plexyプロフィールを追加",
     "switchingProfile": "プロフィールを切り替え中…",
     "deleteThisProfileTitle": "このプロフィールを削除しますか？",
     "deleteThisProfileMessage": "${displayName}を削除します。接続には影響しません。",
@@ -871,7 +871,7 @@
     "sessionExpiredMany": "${count} 台のサーバーのセッションの有効期限が切れました",
     "signInAgain": "再度サインイン",
     "editMediaBrowserTitle": "${product}接続を編集",
-    "editMediaBrowserIntro": "${serverName}のURLを追加または削除します。Plezyは到達可能なURLのうち、レイテンシーが最も低いものを使用します。"
+    "editMediaBrowserIntro": "${serverName}のURLを追加または削除します。Plexyは到達可能なURLのうち、レイテンシーが最も低いものを使用します。"
   },
   "discover": {
     "title": "探す",
@@ -1032,9 +1032,9 @@
     "uploadLogs": "ログをアップロード"
   },
   "startup": {
-    "failedTitle": "Plezyを起動できませんでした",
+    "failedTitle": "Plexyを起動できませんでした",
     "failedBody": "起動中に問題が発生しました。以下の詳細に失敗の原因が示されています。",
-    "failedBodyRepairable": "Plezyの保存済み設定ファイルが破損しているため、Plezyを起動する前に再構築する必要があります。再試行しても解決しません —「ストレージを修復」を選択してください。",
+    "failedBodyRepairable": "Plexyの保存済み設定ファイルが破損しているため、Plexyを起動する前に再構築する必要があります。再試行しても解決しません —「ストレージを修復」を選択してください。",
     "phaseLabel": "ステップ",
     "showDetails": "詳細を表示",
     "hideDetails": "詳細を非表示",
@@ -1043,16 +1043,16 @@
     "uploadDetails": "詳細をアップロード",
     "repairStorage": "ストレージを修復",
     "repairTitle": "保存データを修復しますか？",
-    "repairBodyCommon": "Plezyの設定ファイルが破損しており読み取れません。修復するとすべての設定がデフォルトにリセットされます。",
+    "repairBodyCommon": "Plexyの設定ファイルが破損しており読み取れません。修復するとすべての設定がデフォルトにリセットされます。",
     "repairBodyOneCredential": "保存済みのサインインの1つが破損しており読み取れません。修復するとその1つだけが削除され、他の設定には影響しません。",
     "repairBodySignInsKept": "サーバーとプロフィールはサインインしたままになります。",
     "repairBodySignInsLost": "保存済みのサインインを保護するキーをこのファイルから復元できないため、すべてのサーバーとプロフィールに再度サインインする必要があります。メディアサーバー上のデータには影響ありません。",
-    "repairBodySessionsUncertain": "トラッカー（MAL、AniList、Simkl、Trakt）とSeerrは別途保存されており、保持されるかどうかは不明です。Plezyは保持した内容を正確にお知らせします。",
+    "repairBodySessionsUncertain": "トラッカー（MAL、AniList、Simkl、Trakt）とSeerrは別途保存されており、保持されるかどうかは不明です。Plexyは保持した内容を正確にお知らせします。",
     "repairConfirm": "修復",
     "repairSucceeded": "ストレージを修復しました",
     "repairNeedsRestart": "ストレージを修復しました — 再起動が必要です",
-    "restartRequiredBody": "データは修復されましたが、Plezyはそれを使用する前に再起動する必要があります。Plezyを閉じて再度開いてください。",
-    "quitPlezy": "Plezyを終了",
+    "restartRequiredBody": "データは修復されましたが、Plexyはそれを使用する前に再起動する必要があります。Plexyを閉じて再度開いてください。",
+    "quitPlezy": "Plexyを終了",
     "repairFailed": "修復に失敗しました",
     "repairKeptSignIns": "サーバーとプロフィールはサインインしたままです。",
     "repairLostSignIns": "保存済みのサインインを保護するキーを復元できませんでした。すべてのサーバーとプロフィールに再度サインインする必要があります。",
@@ -1061,7 +1061,7 @@
     "backupWarning": "このコピーにはサインイン資格情報が含まれています。アップロードや共有はしないでください。",
     "deleteBackup": "コピーを削除",
     "backupDeleted": "コピーを削除しました。",
-    "previousFailureTitle": "前回、Plezyは起動に失敗しました"
+    "previousFailureTitle": "前回、Plexyは起動に失敗しました"
   },
   "licenses": {
     "relatedPackages": "関連パッケージ",
@@ -1552,14 +1552,14 @@
       "bannerAction": "詳細",
       "sheetTitle": "バックグラウンドダウンロードはブロックされています",
       "sheetTitleDegraded": "バックグラウンドダウンロードが制限される場合があります",
-      "sheetIntro": "Androidにより、Plezyはバックグラウンドで安定してダウンロードできません。",
-      "sheetIntroDegraded": "端末により、Plezyがバックグラウンドでダウンロードできるタイミングが制限されています。",
-      "reasonBackgroundRestricted": "Plezyのバックグラウンド使用が制限されています。バッテリー使用量またはバックグラウンド使用を「制限なし」に設定してください。",
-      "reasonStandbyRestricted": "Androidにより、Plezyが制限付きのスタンバイ状態に設定されています。バッテリー使用量を「制限なし」に設定してください。",
+      "sheetIntro": "Androidにより、Plexyはバックグラウンドで安定してダウンロードできません。",
+      "sheetIntroDegraded": "端末により、Plexyがバックグラウンドでダウンロードできるタイミングが制限されています。",
+      "reasonBackgroundRestricted": "Plexyのバックグラウンド使用が制限されています。バッテリー使用量またはバックグラウンド使用を「制限なし」に設定してください。",
+      "reasonStandbyRestricted": "Androidにより、Plexyが制限付きのスタンバイ状態に設定されています。バッテリー使用量を「制限なし」に設定してください。",
       "reasonDownloadChannelBlocked": "ダウンロード通知がオフのため、進行状況や操作ボタンを利用できない場合があります。",
       "reasonNotificationsDisabled": "通知がオフです。Android 13以降では、長時間のバックグラウンドダウンロードに通知が必要です。",
       "reasonDataSaver": "データセーバーがオンのため、モバイルデータ通信ではバックグラウンドダウンロードがブロックされます。Wi-Fiでは引き続きダウンロードできるはずです。",
-      "reasonOemUnknown": "Plezyがバックグラウンドで動作中に、ダウンロードが繰り返し停止しました。Plezyのバッテリー使用量またはバックグラウンド使用の設定を確認してください。",
+      "reasonOemUnknown": "Plexyがバックグラウンドで動作中に、ダウンロードが繰り返し停止しました。Plexyのバッテリー使用量またはバックグラウンド使用の設定を確認してください。",
       "openSettings": "設定を開く",
       "stillNotWorking": "端末別のヘルプ",
       "stillNotWorkingDescription": "お使いの端末向けの手順を確認してください。問題が続く場合は、設定 › ログを表示 からログを送信してください。",
@@ -1620,19 +1620,19 @@
       "minimize": "最小化"
     },
     "pairing": {
-      "discoveryDescription": "同じPlexアカウントを使用しているPlezyデバイスがここに表示されます",
+      "discoveryDescription": "同じPlexアカウントを使用しているPlexyデバイスがここに表示されます",
       "hostAddressHint": "192.168.1.100:48632",
       "connecting": "接続中…",
       "searchingForDevices": "デバイスを検索中…",
       "noDevicesFound": "ネットワーク上にデバイスが見つかりません",
-      "noDevicesHint": "デスクトップでPlezyを開き、同じWi-Fiネットワークに接続してください",
+      "noDevicesHint": "デスクトップでPlexyを開き、同じWi-Fiネットワークに接続してください",
       "availableDevices": "利用可能なデバイス",
       "manualConnection": "手動接続",
       "cryptoInitFailed": "安全な接続を開始できませんでした。先にPlexにサインインしてください。",
       "validationHostRequired": "ホストアドレスを入力してください",
       "validationHostFormat": "形式はIP:ポートである必要があります（例: 192.168.1.100:48632）",
       "connectionTimedOut": "接続がタイムアウトしました。両方のデバイスで同じネットワークを使用してください。",
-      "sessionNotFound": "デバイスが見つかりません。ホストでPlezyが実行中か確認してください。",
+      "sessionNotFound": "デバイスが見つかりません。ホストでPlexyが実行中か確認してください。",
       "authFailed": "認証に失敗しました。両方のデバイスで同じPlexアカウントが必要です。",
       "failedToConnect": "接続に失敗しました: ${error}"
     },
@@ -1870,11 +1870,11 @@
     "connected": "接続済み",
     "connectedAs": "@${username}として接続済み",
     "disconnectConfirm": "Traktアカウントとの接続を解除しますか？",
-    "disconnectConfirmBody": "PlezyはTraktへのイベント送信を停止します。いつでも再接続できます。",
+    "disconnectConfirmBody": "PlexyはTraktへのイベント送信を停止します。いつでも再接続できます。",
     "scrobble": "リアルタイムのスクロブル",
     "scrobbleDescription": "再生中に再生・一時停止・停止の各イベントをTraktに送信します。",
     "watchedSync": "視聴済みステータスを同期",
-    "watchedSyncDescription": "Plezyで項目を視聴済みにすると、Traktでも視聴済みになります。"
+    "watchedSyncDescription": "Plexyで項目を視聴済みにすると、Traktでも視聴済みになります。"
   },
   "seerr": {
     "title": "Seerr",
@@ -1886,10 +1886,10 @@
     "signInWithEmby": "Embyでサインイン",
     "signInWithLocal": "ローカルアカウントを使う",
     "email": "メールアドレス",
-    "noSignInMethods": "この Seerr インスタンスには Plezy が対応しているサインイン方法がありません。",
+    "noSignInMethods": "この Seerr インスタンスには Plexy が対応しているサインイン方法がありません。",
     "instance": "インスタンス",
     "disconnectConfirm": "Seerr の接続を解除しますか？",
-    "disconnectConfirmBody": "Plezy はこの Seerr インスタンスの情報を削除します。いつでも再接続できます。",
+    "disconnectConfirmBody": "Plexy はこの Seerr インスタンスの情報を削除します。いつでも再接続できます。",
     "request": "リクエスト",
     "request4k": "4K でリクエスト",
     "seasons": "シーズン",
@@ -1926,7 +1926,7 @@
     "scrobble": "進捗を自動で記録",
     "scrobbleDescription": "エピソードや映画を見終えたときにリストを更新します。",
     "disconnectConfirm": "${service} の接続を解除しますか？",
-    "disconnectConfirmBody": "Plezyは${service}の更新を停止します。いつでも再接続できます。",
+    "disconnectConfirmBody": "Plexyは${service}の更新を停止します。いつでも再接続できます。",
     "connectFailed": "${service} に接続できませんでした。もう一度お試しください。",
     "names": {
       "mal": "MyAnimeList",
@@ -1936,7 +1936,7 @@
       "mdblist": "MDBList"
     },
     "deviceCode": {
-      "title": "${service} で Plezy を有効化",
+      "title": "${service} で Plexy を有効化",
       "instructions": "QRコードをスキャンするか、以下のアドレスにアクセスしてこのコードを入力してください:",
       "openToActivate": "${service} を開いて有効化",
       "copyCode": "アクティベーションコードをコピー",

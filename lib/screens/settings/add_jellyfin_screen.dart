@@ -451,7 +451,7 @@ class _AddJellyfinScreenState extends State<AddJellyfinScreen> with AsyncFormSta
     final clientVersion = await resolveJellyfinClientVersion();
     final deviceName = await _resolveDeviceName();
     return JellyfinConnectionAuthService(
-      clientName: 'Plezy',
+      clientName: 'Plexy',
       clientVersion: clientVersion,
       deviceName: deviceName,
       dialect: widget.dialect,
@@ -463,7 +463,7 @@ class _AddJellyfinScreenState extends State<AddJellyfinScreen> with AsyncFormSta
   Future<String> _resolveDeviceName() async {
     final identity = await DeviceIdentityService.resolve();
     final name = identity.deviceName?.trim();
-    return name == null || name.isEmpty ? 'Plezy' : name;
+    return name == null || name.isEmpty ? 'Plexy' : name;
   }
 
   @override

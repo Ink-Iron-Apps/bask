@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../connection/connection.dart';
 import '../connection/connection_registry.dart';
@@ -277,7 +278,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           mainAxisAlignment: .center,
                           crossAxisAlignment: .center,
                           children: [
-                            Image.asset('assets/plezy.png', width: 120, height: 120),
+                            SvgPicture.asset('assets/plexy.svg', width: 120, height: 120),
                             const SizedBox(height: 24),
                             Text(
                               t.app.title,
@@ -306,7 +307,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       mainAxisSize: .min,
                       crossAxisAlignment: .stretch,
                       children: [
-                        Image.asset('assets/plezy.png', width: 120, height: 120),
+                        SvgPicture.asset('assets/plexy.svg', width: 120, height: 120),
                         const SizedBox(height: 24),
                         Text(
                           t.app.title,

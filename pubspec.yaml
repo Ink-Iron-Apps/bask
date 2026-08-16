@@ -135,6 +135,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/plezy.png
+    - assets/plexy.svg
     - assets/plezy_adaptive_foreground.svg
     - assets/plex_chevron.svg
     - assets/jellyfin_icon.svg

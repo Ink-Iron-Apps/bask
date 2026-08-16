@@ -98,7 +98,7 @@ class _Translations$app$pl extends Translations$app$en {
 	final TranslationsPl _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Plezy';
+	@override String get title => 'Plexy';
 }
 
 // Path: auth
@@ -122,7 +122,7 @@ class _Translations$auth$pl extends Translations$auth$en {
 	@override String get quickConnectWaiting => 'Oczekiwanie na zatwierdzenie…';
 	@override String get quickConnectCancel => 'Anuluj';
 	@override String get quickConnectExpired => 'Quick Connect wygasł. Spróbuj ponownie.';
-	@override String get localDataRecoveryRequired => 'Plezy nie mogło bezpiecznie odzyskać lokalnych danych logowania ani oczekujących danych odtwarzania. Zaloguj się ponownie.';
+	@override String get localDataRecoveryRequired => 'Plexy nie mogło bezpiecznie odzyskać lokalnych danych logowania ani oczekujących danych odtwarzania. Zaloguj się ponownie.';
 	@override String get pinCheckRejected => 'Sprawdzenie kodu PIN Plex zostało odrzucone';
 }
 
@@ -222,7 +222,7 @@ class _Translations$settings$pl extends Translations$settings$en {
 
 	// Translations
 	@override String get title => 'Ustawienia';
-	@override String get supportDeveloper => 'Wesprzyj Plezy';
+	@override String get supportDeveloper => 'Wesprzyj Plexy';
 	@override String get supportDeveloperDescription => 'Wspomóż rozwój darowizną na Liberapay';
 	@override String get language => 'Język';
 	@override String get theme => 'Motyw';
@@ -347,7 +347,7 @@ class _Translations$settings$pl extends Translations$settings$en {
 	@override String get importSettingsDescription => 'Przywróć preferencje z pliku';
 	@override String get importSettingsConfirm => 'Bieżące ustawienia zostaną zastąpione. Kontynuować?';
 	@override String get importSettingsSuccess => 'Ustawienia zaimportowane';
-	@override String get importSettingsInvalidFile => 'Ten plik nie jest prawidłowym eksportem Plezy';
+	@override String get importSettingsInvalidFile => 'Ten plik nie jest prawidłowym eksportem Plexy';
 	@override String get importSettingsNoUser => 'Zaloguj się przed importem ustawień';
 	@override String get shortcutsReset => 'Skróty przywrócone do domyślnych';
 	@override String get about => 'O aplikacji';
@@ -440,7 +440,7 @@ class _Translations$settings$pl extends Translations$settings$en {
 	@override String get forceTvMode => 'Wymuś tryb TV';
 	@override String get forceTvModeDescription => 'Wymuś układ telewizyjny na urządzeniach, które nie wykrywają go automatycznie. Wymaga ponownego uruchomienia.';
 	@override String get startInFullscreen => 'Uruchom na pełnym ekranie';
-	@override String get startInFullscreenDescription => 'Otwiera Plezy w trybie pełnoekranowym przy uruchomieniu';
+	@override String get startInFullscreenDescription => 'Otwiera Plexy w trybie pełnoekranowym przy uruchomieniu';
 	@override String get exitFullscreenOnPlayerClose => 'Wyjdź z pełnego ekranu przy zamykaniu odtwarzacza';
 	@override String get exitFullscreenOnPlayerCloseDescription => 'Automatycznie wychodzi z trybu pełnoekranowego po zamknięciu odtwarzacza wideo';
 	@override String get autoHidePerformanceOverlay => 'Automatycznie ukrywaj nakładkę wydajności';
@@ -461,7 +461,7 @@ class _Translations$settings$pl extends Translations$settings$en {
 	@override String get subtitlesAndConfig => 'Napisy i konfiguracja';
 	@override String get seekAndTiming => 'Przewijanie i czas';
 	@override String get behavior => 'Zachowanie';
-	@override String get exportDialogTitle => 'Eksport ustawień Plezy';
+	@override String get exportDialogTitle => 'Eksport ustawień Plexy';
 }
 
 // Path: search
@@ -665,8 +665,8 @@ class _Translations$mediaMenu$pl extends Translations$mediaMenu$en {
 		many: 'W tym samym pliku przechowywanych jest jeszcze ${n} innych odcinków, które również zostaną usunięte:',
 		other: 'W tym samym pliku przechowywany jest jeszcze ${n} innego odcinka, który również zostanie usunięty:',
 	);
-	@override String get deleteScopeUnverifiedProbeFailed => 'Plezy nie mogło sprawdzić, które pliki zostaną usunięte, więc może usunąć więcej niż element wymieniony powyżej. Anuluj i spróbuj ponownie albo usuń mimo to.';
-	@override String get deleteScopeUnverifiedNoFileInfo => 'Twój serwer nie podał informacji o plikach tego elementu, więc Plezy nie może sprawdzić, które pliki zostaną usunięte. Może usunąć więcej niż element wymieniony powyżej.';
+	@override String get deleteScopeUnverifiedProbeFailed => 'Plexy nie mogło sprawdzić, które pliki zostaną usunięte, więc może usunąć więcej niż element wymieniony powyżej. Anuluj i spróbuj ponownie albo usuń mimo to.';
+	@override String get deleteScopeUnverifiedNoFileInfo => 'Twój serwer nie podał informacji o plikach tego elementu, więc Plexy nie może sprawdzić, które pliki zostaną usunięte. Może usunąć więcej niż element wymieniony powyżej.';
 	@override String get mediaDeletedSuccessfully => 'Usunięto element multimedialny';
 	@override String get mediaFailedToDelete => 'Nie udało się usunąć elementu multimedialnego';
 	@override String get rate => 'Oceń';
@@ -994,7 +994,7 @@ class _Translations$profiles$pl extends Translations$profiles$en {
 	final TranslationsPl _root; // ignore: unused_field
 
 	// Translations
-	@override String get addPlezyProfile => 'Dodaj profil Plezy';
+	@override String get addPlezyProfile => 'Dodaj profil Plexy';
 	@override String get switchingProfile => 'Przełączanie profilu…';
 	@override String get deleteThisProfileTitle => 'Usunąć ten profil?';
 	@override String deleteThisProfileMessage({required Object displayName}) => 'Usuń ${displayName}. Połączenia nie zostaną zmienione.';
@@ -1074,7 +1074,7 @@ class _Translations$connections$pl extends Translations$connections$en {
 	@override String sessionExpiredMany({required Object count}) => 'Sesja wygasła dla ${count} serwerów';
 	@override String get signInAgain => 'Zaloguj się ponownie';
 	@override String editMediaBrowserTitle({required Object product}) => 'Edytuj połączenie z ${product}';
-	@override String editMediaBrowserIntro({required Object serverName}) => 'Dodaj lub usuń adresy URL dla ${serverName}. Plezy będzie używać osiągalnego adresu URL o najniższym opóźnieniu.';
+	@override String editMediaBrowserIntro({required Object serverName}) => 'Dodaj lub usuń adresy URL dla ${serverName}. Plexy będzie używać osiągalnego adresu URL o najniższym opóźnieniu.';
 }
 
 // Path: discover
@@ -1249,9 +1249,9 @@ class _Translations$startup$pl extends Translations$startup$en {
 	final TranslationsPl _root; // ignore: unused_field
 
 	// Translations
-	@override String get failedTitle => 'Nie udało się uruchomić Plezy';
+	@override String get failedTitle => 'Nie udało się uruchomić Plexy';
 	@override String get failedBody => 'Coś poszło nie tak podczas uruchamiania. Poniższe szczegóły wskazują, co zawiodło.';
-	@override String get failedBodyRepairable => 'Zapisany plik ustawień Plezy jest uszkodzony i musi zostać odbudowany, zanim Plezy będzie mogło się uruchomić. Ponawianie nie pomoże — wybierz Napraw pamięć.';
+	@override String get failedBodyRepairable => 'Zapisany plik ustawień Plexy jest uszkodzony i musi zostać odbudowany, zanim Plexy będzie mogło się uruchomić. Ponawianie nie pomoże — wybierz Napraw pamięć.';
 	@override String get phaseLabel => 'Krok';
 	@override String get showDetails => 'Pokaż szczegóły';
 	@override String get hideDetails => 'Ukryj szczegóły';
@@ -1260,16 +1260,16 @@ class _Translations$startup$pl extends Translations$startup$en {
 	@override String get uploadDetails => 'Prześlij szczegóły';
 	@override String get repairStorage => 'Napraw pamięć';
 	@override String get repairTitle => 'Naprawić zapisane dane?';
-	@override String get repairBodyCommon => 'Plik ustawień Plezy jest uszkodzony i nie można go odczytać. Naprawa przywraca wszystkie ustawienia do wartości domyślnych.';
+	@override String get repairBodyCommon => 'Plik ustawień Plexy jest uszkodzony i nie można go odczytać. Naprawa przywraca wszystkie ustawienia do wartości domyślnych.';
 	@override String get repairBodyOneCredential => 'Jedno zapisane logowanie jest uszkodzone i nie można go odczytać. Naprawa usunie tylko je; pozostałe ustawienia pozostaną nietknięte.';
 	@override String get repairBodySignInsKept => 'Twoje serwery i profile powinny pozostać zalogowane.';
 	@override String get repairBodySignInsLost => 'Klucza chroniącego zapisane logowania nie można odzyskać z tego pliku, więc będziesz musiał zalogować się ponownie na każdym serwerze i profilu. Nic na Twoim serwerze multimediów nie zostanie zmienione.';
-	@override String get repairBodySessionsUncertain => 'Usługi śledzenia (MAL, AniList, Simkl, Trakt) i Seerr są przechowywane osobno i mogą, ale nie muszą przetrwać. Plezy dokładnie poinformuje Cię, co zachowało.';
+	@override String get repairBodySessionsUncertain => 'Usługi śledzenia (MAL, AniList, Simkl, Trakt) i Seerr są przechowywane osobno i mogą, ale nie muszą przetrwać. Plexy dokładnie poinformuje Cię, co zachowało.';
 	@override String get repairConfirm => 'Napraw';
 	@override String get repairSucceeded => 'Naprawiono pamięć';
 	@override String get repairNeedsRestart => 'Naprawiono pamięć — wymagany restart';
-	@override String get restartRequiredBody => 'Twoje dane zostały naprawione, ale Plezy musi uruchomić się od nowa, zanim będzie mogło z nich korzystać. Zamknij Plezy i otwórz je ponownie.';
-	@override String get quitPlezy => 'Zamknij Plezy';
+	@override String get restartRequiredBody => 'Twoje dane zostały naprawione, ale Plexy musi uruchomić się od nowa, zanim będzie mogło z nich korzystać. Zamknij Plexy i otwórz je ponownie.';
+	@override String get quitPlezy => 'Zamknij Plexy';
 	@override String get repairFailed => 'Naprawa nie powiodła się';
 	@override String get repairKeptSignIns => 'Twoje serwery i profile są nadal zalogowane.';
 	@override String get repairLostSignIns => 'Nie udało się odzyskać klucza chroniącego zapisane logowania. Musisz zalogować się ponownie na każdym serwerze i profilu.';
@@ -1278,7 +1278,7 @@ class _Translations$startup$pl extends Translations$startup$en {
 	@override String get backupWarning => 'Zawiera Twoje dane logowania. Nie przesyłaj ani nie udostępniaj jej.';
 	@override String get deleteBackup => 'Usuń kopię';
 	@override String get backupDeleted => 'Usunięto kopię.';
-	@override String get previousFailureTitle => 'Ostatnim razem nie udało się uruchomić Plezy';
+	@override String get previousFailureTitle => 'Ostatnim razem nie udało się uruchomić Plexy';
 }
 
 // Path: licenses
@@ -1996,11 +1996,11 @@ class _Translations$trakt$pl extends Translations$trakt$en {
 	@override String get connected => 'Połączono';
 	@override String connectedAs({required Object username}) => 'Połączono jako @${username}';
 	@override String get disconnectConfirm => 'Rozłączyć konto Trakt?';
-	@override String get disconnectConfirmBody => 'Plezy przestanie wysyłać zdarzenia do serwisu Trakt. Połączenie można przywrócić w dowolnym momencie.';
+	@override String get disconnectConfirmBody => 'Plexy przestanie wysyłać zdarzenia do serwisu Trakt. Połączenie można przywrócić w dowolnym momencie.';
 	@override String get scrobble => 'Śledzenie odtwarzania w czasie rzeczywistym';
 	@override String get scrobbleDescription => 'Wysyłaj do serwisu Trakt zdarzenia odtwarzania, wstrzymania i zatrzymania.';
 	@override String get watchedSync => 'Synchronizuj stan obejrzenia';
-	@override String get watchedSyncDescription => 'Gdy oznaczysz element jako obejrzany w Plezy, zostanie on również oznaczony jako obejrzany w serwisie Trakt.';
+	@override String get watchedSyncDescription => 'Gdy oznaczysz element jako obejrzany w Plexy, zostanie on również oznaczony jako obejrzany w serwisie Trakt.';
 }
 
 // Path: seerr
@@ -2019,10 +2019,10 @@ class _Translations$seerr$pl extends Translations$seerr$en {
 	@override String get signInWithEmby => 'Zaloguj się przez Emby';
 	@override String get signInWithLocal => 'Użyj konta lokalnego';
 	@override String get email => 'E-mail';
-	@override String get noSignInMethods => 'Ta instancja Seerr nie oferuje metody logowania obsługiwanej przez Plezy.';
+	@override String get noSignInMethods => 'Ta instancja Seerr nie oferuje metody logowania obsługiwanej przez Plexy.';
 	@override String get instance => 'Instancja';
 	@override String get disconnectConfirm => 'Odłączyć Seerr?';
-	@override String get disconnectConfirmBody => 'Plezy zapomni tę instancję Seerr. Połącz ponownie w dowolnym momencie.';
+	@override String get disconnectConfirmBody => 'Plexy zapomni tę instancję Seerr. Połącz ponownie w dowolnym momencie.';
 	@override String get request => 'Zamów';
 	@override String get request4k => 'Zamów w 4K';
 	@override String get seasons => 'Sezony';
@@ -2066,7 +2066,7 @@ class _Translations$services$pl extends Translations$services$en {
 	@override String get scrobble => 'Automatycznie śledź postęp';
 	@override String get scrobbleDescription => 'Aktualizuj swoją listę po ukończeniu odcinka lub filmu.';
 	@override String disconnectConfirm({required Object service}) => 'Odłączyć ${service}?';
-	@override String disconnectConfirmBody({required Object service}) => 'Plezy przestanie aktualizować ${service}. Połącz ponownie w dowolnym momencie.';
+	@override String disconnectConfirmBody({required Object service}) => 'Plexy przestanie aktualizować ${service}. Połącz ponownie w dowolnym momencie.';
 	@override String connectFailed({required Object service}) => 'Nie udało się połączyć z ${service}. Spróbuj ponownie.';
 	@override late final _Translations$services$names$pl names = _Translations$services$names$pl._(_root);
 	@override late final _Translations$services$deviceCode$pl deviceCode = _Translations$services$deviceCode$pl._(_root);
@@ -2509,14 +2509,14 @@ class _Translations$downloads$backgroundWarning$pl extends Translations$download
 	@override String get bannerAction => 'Szczegóły';
 	@override String get sheetTitle => 'Pobieranie w tle jest zablokowane';
 	@override String get sheetTitleDegraded => 'Pobieranie w tle może być ograniczone';
-	@override String get sheetIntro => 'Android uniemożliwia Plezy niezawodne pobieranie plików w tle.';
-	@override String get sheetIntroDegraded => 'Twoje urządzenie ogranicza możliwość pobierania w tle przez Plezy.';
-	@override String get reasonBackgroundRestricted => 'Działanie Plezy w tle jest ograniczone. Ustaw użycie baterii lub działanie w tle na „Bez ograniczeń”.';
-	@override String get reasonStandbyRestricted => 'Android umieścił Plezy w ograniczonym trybie gotowości. Ustaw użycie baterii na „Bez ograniczeń”.';
+	@override String get sheetIntro => 'Android uniemożliwia Plexy niezawodne pobieranie plików w tle.';
+	@override String get sheetIntroDegraded => 'Twoje urządzenie ogranicza możliwość pobierania w tle przez Plexy.';
+	@override String get reasonBackgroundRestricted => 'Działanie Plexy w tle jest ograniczone. Ustaw użycie baterii lub działanie w tle na „Bez ograniczeń”.';
+	@override String get reasonStandbyRestricted => 'Android umieścił Plexy w ograniczonym trybie gotowości. Ustaw użycie baterii na „Bez ograniczeń”.';
 	@override String get reasonDownloadChannelBlocked => 'Powiadomienia o pobieraniu są wyłączone, więc postęp i opcje sterowania mogą być niedostępne.';
 	@override String get reasonNotificationsDisabled => 'Powiadomienia są wyłączone. W Android 13 lub nowszym są wymagane przy długim pobieraniu w tle.';
 	@override String get reasonDataSaver => 'Oszczędzanie danych jest włączone, co blokuje pobieranie w tle przez mobilną transmisję danych. Pobieranie powinno nadal działać przez Wi-Fi.';
-	@override String get reasonOemUnknown => 'Pobieranie wielokrotnie przerywało się, gdy Plezy działało w tle. Sprawdź ustawienia baterii lub działania w tle dla Plezy.';
+	@override String get reasonOemUnknown => 'Pobieranie wielokrotnie przerywało się, gdy Plexy działało w tle. Sprawdź ustawienia baterii lub działania w tle dla Plexy.';
 	@override String get openSettings => 'Otwórz ustawienia';
 	@override String get stillNotWorking => 'Pomoc dla Twojego urządzenia';
 	@override String get stillNotWorkingDescription => 'Zobacz instrukcje dla swojego urządzenia lub, jeśli problem nadal występuje, wyślij log przez Ustawienia › Pokaż logi.';
@@ -2559,19 +2559,19 @@ class _Translations$companionRemote$pairing$pl extends Translations$companionRem
 	final TranslationsPl _root; // ignore: unused_field
 
 	// Translations
-	@override String get discoveryDescription => 'Urządzenia Plezy z tym samym kontem Plex pojawią się tutaj';
+	@override String get discoveryDescription => 'Urządzenia Plexy z tym samym kontem Plex pojawią się tutaj';
 	@override String get hostAddressHint => '192.168.1.100:48632';
 	@override String get connecting => 'Łączenie...';
 	@override String get searchingForDevices => 'Szukanie urządzeń...';
 	@override String get noDevicesFound => 'Nie znaleziono urządzeń w sieci';
-	@override String get noDevicesHint => 'Otwórz Plezy na komputerze i połącz oba urządzenia z tą samą siecią Wi-Fi';
+	@override String get noDevicesHint => 'Otwórz Plexy na komputerze i połącz oba urządzenia z tą samą siecią Wi-Fi';
 	@override String get availableDevices => 'Dostępne urządzenia';
 	@override String get manualConnection => 'Połączenie ręczne';
 	@override String get cryptoInitFailed => 'Nie udało się uruchomić bezpiecznego połączenia. Najpierw zaloguj się do Plex.';
 	@override String get validationHostRequired => 'Wprowadź adres hosta';
 	@override String get validationHostFormat => 'Format musi być IP:port (np. 192.168.1.100:48632)';
 	@override String get connectionTimedOut => 'Limit czasu połączenia. Użyj tej samej sieci na obu urządzeniach.';
-	@override String get sessionNotFound => 'Nie znaleziono urządzenia. Upewnij się, że Plezy działa na hoście.';
+	@override String get sessionNotFound => 'Nie znaleziono urządzenia. Upewnij się, że Plexy działa na hoście.';
 	@override String get authFailed => 'Uwierzytelnianie nie powiodło się. Oba urządzenia muszą używać tego samego konta Plex.';
 	@override String failedToConnect({required Object error}) => 'Nie udało się połączyć: ${error}';
 }
@@ -2650,7 +2650,7 @@ class _Translations$services$deviceCode$pl extends Translations$services$deviceC
 	final TranslationsPl _root; // ignore: unused_field
 
 	// Translations
-	@override String title({required Object service}) => 'Aktywuj Plezy w ${service}';
+	@override String title({required Object service}) => 'Aktywuj Plexy w ${service}';
 	@override String get instructions => 'Zeskanuj kod QR albo przejdź pod poniższy adres i wprowadź ten kod:';
 	@override String openToActivate({required Object service}) => 'Otwórz ${service}, aby aktywować';
 	@override String get copyCode => 'Skopiuj kod aktywacyjny';
@@ -2710,7 +2710,7 @@ class _Translations$services$libraryFilter$pl extends Translations$services$libr
 extension on TranslationsPl {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.title' => 'Plezy',
+			'app.title' => 'Plexy',
 			'auth.signInWithPlex' => 'Zaloguj się przez Plex',
 			'auth.showQRCode' => 'Pokaż kod QR',
 			'auth.authenticate' => 'Uwierzytelnij',
@@ -2725,7 +2725,7 @@ extension on TranslationsPl {
 			'auth.quickConnectWaiting' => 'Oczekiwanie na zatwierdzenie…',
 			'auth.quickConnectCancel' => 'Anuluj',
 			'auth.quickConnectExpired' => 'Quick Connect wygasł. Spróbuj ponownie.',
-			'auth.localDataRecoveryRequired' => 'Plezy nie mogło bezpiecznie odzyskać lokalnych danych logowania ani oczekujących danych odtwarzania. Zaloguj się ponownie.',
+			'auth.localDataRecoveryRequired' => 'Plexy nie mogło bezpiecznie odzyskać lokalnych danych logowania ani oczekujących danych odtwarzania. Zaloguj się ponownie.',
 			'auth.pinCheckRejected' => 'Sprawdzenie kodu PIN Plex zostało odrzucone',
 			'common.cancel' => 'Anuluj',
 			'common.save' => 'Zapisz',
@@ -2799,7 +2799,7 @@ extension on TranslationsPl {
 			'update.latestVersion' => 'Masz najnowszą wersję',
 			'update.checkFailed' => 'Nie udało się sprawdzić aktualizacji',
 			'settings.title' => 'Ustawienia',
-			'settings.supportDeveloper' => 'Wesprzyj Plezy',
+			'settings.supportDeveloper' => 'Wesprzyj Plexy',
 			'settings.supportDeveloperDescription' => 'Wspomóż rozwój darowizną na Liberapay',
 			'settings.language' => 'Język',
 			'settings.theme' => 'Motyw',
@@ -2924,7 +2924,7 @@ extension on TranslationsPl {
 			'settings.importSettingsDescription' => 'Przywróć preferencje z pliku',
 			'settings.importSettingsConfirm' => 'Bieżące ustawienia zostaną zastąpione. Kontynuować?',
 			'settings.importSettingsSuccess' => 'Ustawienia zaimportowane',
-			'settings.importSettingsInvalidFile' => 'Ten plik nie jest prawidłowym eksportem Plezy',
+			'settings.importSettingsInvalidFile' => 'Ten plik nie jest prawidłowym eksportem Plexy',
 			'settings.importSettingsNoUser' => 'Zaloguj się przed importem ustawień',
 			'settings.shortcutsReset' => 'Skróty przywrócone do domyślnych',
 			'settings.about' => 'O aplikacji',
@@ -3017,7 +3017,7 @@ extension on TranslationsPl {
 			'settings.forceTvMode' => 'Wymuś tryb TV',
 			'settings.forceTvModeDescription' => 'Wymuś układ telewizyjny na urządzeniach, które nie wykrywają go automatycznie. Wymaga ponownego uruchomienia.',
 			'settings.startInFullscreen' => 'Uruchom na pełnym ekranie',
-			'settings.startInFullscreenDescription' => 'Otwiera Plezy w trybie pełnoekranowym przy uruchomieniu',
+			'settings.startInFullscreenDescription' => 'Otwiera Plexy w trybie pełnoekranowym przy uruchomieniu',
 			'settings.exitFullscreenOnPlayerClose' => 'Wyjdź z pełnego ekranu przy zamykaniu odtwarzacza',
 			'settings.exitFullscreenOnPlayerCloseDescription' => 'Automatycznie wychodzi z trybu pełnoekranowego po zamknięciu odtwarzacza wideo',
 			'settings.autoHidePerformanceOverlay' => 'Automatycznie ukrywaj nakładkę wydajności',
@@ -3038,7 +3038,7 @@ extension on TranslationsPl {
 			'settings.subtitlesAndConfig' => 'Napisy i konfiguracja',
 			'settings.seekAndTiming' => 'Przewijanie i czas',
 			'settings.behavior' => 'Zachowanie',
-			'settings.exportDialogTitle' => 'Eksport ustawień Plezy',
+			'settings.exportDialogTitle' => 'Eksport ustawień Plexy',
 			'search.hint' => 'Szukaj filmów, seriali, muzyki...',
 			'search.tryDifferentTerm' => 'Spróbuj innego wyszukiwania',
 			'search.searchYourMedia' => 'Przeszukaj swoje media',
@@ -3215,8 +3215,8 @@ extension on TranslationsPl {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(n, one: 'Usunięty zostanie ${n} odcinek w nim oraz jego plik.', few: 'Usunięte zostaną ${n} odcinki w nim oraz ich pliki.', many: 'Usuniętych zostanie ${n} odcinków w nim oraz ich pliki.', other: 'Usuniętych zostanie ${n} odcinka w nim oraz ich pliki.', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(n, one: 'Ten element jest przechowywany jako ${n} plik, który zostanie usunięty.', few: 'Ten element jest przechowywany w ${n} plikach, które wszystkie zostaną usunięte.', many: 'Ten element jest przechowywany w ${n} plikach, które wszystkie zostaną usunięte.', other: 'Ten element jest przechowywany w ${n} pliku, który zostanie usunięty.', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(n, one: 'W tym samym pliku przechowywany jest jeszcze ${n} inny odcinek, który również zostanie usunięty:', few: 'W tym samym pliku przechowywane są jeszcze ${n} inne odcinki, które również zostaną usunięte:', many: 'W tym samym pliku przechowywanych jest jeszcze ${n} innych odcinków, które również zostaną usunięte:', other: 'W tym samym pliku przechowywany jest jeszcze ${n} innego odcinka, który również zostanie usunięty:', ), 
-			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plezy nie mogło sprawdzić, które pliki zostaną usunięte, więc może usunąć więcej niż element wymieniony powyżej. Anuluj i spróbuj ponownie albo usuń mimo to.',
-			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Twój serwer nie podał informacji o plikach tego elementu, więc Plezy nie może sprawdzić, które pliki zostaną usunięte. Może usunąć więcej niż element wymieniony powyżej.',
+			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexy nie mogło sprawdzić, które pliki zostaną usunięte, więc może usunąć więcej niż element wymieniony powyżej. Anuluj i spróbuj ponownie albo usuń mimo to.',
+			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Twój serwer nie podał informacji o plikach tego elementu, więc Plexy nie może sprawdzić, które pliki zostaną usunięte. Może usunąć więcej niż element wymieniony powyżej.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Usunięto element multimedialny',
 			'mediaMenu.mediaFailedToDelete' => 'Nie udało się usunąć elementu multimedialnego',
 			'mediaMenu.rate' => 'Oceń',
@@ -3457,7 +3457,7 @@ extension on TranslationsPl {
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# comment',
 			'mpvConfig.embeddedVoHint' => 'vo, gpu-context i gpu-api są ignorowane w systemie Linux: wbudowane wideo jest zawsze renderowane przez vo=libmpv na płaszczyźnie wideo, a gpu-next (wymagany przez shadery obliczeniowe takie jak ArtCNN) nie może działać w trybie wbudowanym.',
 			'dialog.confirmAction' => 'Potwierdź działanie',
-			'profiles.addPlezyProfile' => 'Dodaj profil Plezy',
+			'profiles.addPlezyProfile' => 'Dodaj profil Plexy',
 			'profiles.switchingProfile' => 'Przełączanie profilu…',
 			'profiles.deleteThisProfileTitle' => 'Usunąć ten profil?',
 			'profiles.deleteThisProfileMessage' => ({required Object displayName}) => 'Usuń ${displayName}. Połączenia nie zostaną zmienione.',
@@ -3528,7 +3528,7 @@ extension on TranslationsPl {
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Sesja wygasła dla ${count} serwerów',
 			'connections.signInAgain' => 'Zaloguj się ponownie',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Edytuj połączenie z ${product}',
-			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Dodaj lub usuń adresy URL dla ${serverName}. Plezy będzie używać osiągalnego adresu URL o najniższym opóźnieniu.',
+			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Dodaj lub usuń adresy URL dla ${serverName}. Plexy będzie używać osiągalnego adresu URL o najniższym opóźnieniu.',
 			'discover.title' => 'Odkryj',
 			'discover.noContentAvailable' => 'Brak dostępnych treści',
 			'discover.addMediaToLibraries' => 'Dodaj multimedia do swoich bibliotek',
@@ -3663,9 +3663,9 @@ extension on TranslationsPl {
 			'logs.clearLogs' => 'Wyczyść logi',
 			'logs.copyLogs' => 'Kopiuj logi',
 			'logs.uploadLogs' => 'Prześlij logi',
-			'startup.failedTitle' => 'Nie udało się uruchomić Plezy',
+			'startup.failedTitle' => 'Nie udało się uruchomić Plexy',
 			'startup.failedBody' => 'Coś poszło nie tak podczas uruchamiania. Poniższe szczegóły wskazują, co zawiodło.',
-			'startup.failedBodyRepairable' => 'Zapisany plik ustawień Plezy jest uszkodzony i musi zostać odbudowany, zanim Plezy będzie mogło się uruchomić. Ponawianie nie pomoże — wybierz Napraw pamięć.',
+			'startup.failedBodyRepairable' => 'Zapisany plik ustawień Plexy jest uszkodzony i musi zostać odbudowany, zanim Plexy będzie mogło się uruchomić. Ponawianie nie pomoże — wybierz Napraw pamięć.',
 			'startup.phaseLabel' => 'Krok',
 			'startup.showDetails' => 'Pokaż szczegóły',
 			'startup.hideDetails' => 'Ukryj szczegóły',
@@ -3674,16 +3674,16 @@ extension on TranslationsPl {
 			'startup.uploadDetails' => 'Prześlij szczegóły',
 			'startup.repairStorage' => 'Napraw pamięć',
 			'startup.repairTitle' => 'Naprawić zapisane dane?',
-			'startup.repairBodyCommon' => 'Plik ustawień Plezy jest uszkodzony i nie można go odczytać. Naprawa przywraca wszystkie ustawienia do wartości domyślnych.',
+			'startup.repairBodyCommon' => 'Plik ustawień Plexy jest uszkodzony i nie można go odczytać. Naprawa przywraca wszystkie ustawienia do wartości domyślnych.',
 			'startup.repairBodyOneCredential' => 'Jedno zapisane logowanie jest uszkodzone i nie można go odczytać. Naprawa usunie tylko je; pozostałe ustawienia pozostaną nietknięte.',
 			'startup.repairBodySignInsKept' => 'Twoje serwery i profile powinny pozostać zalogowane.',
 			'startup.repairBodySignInsLost' => 'Klucza chroniącego zapisane logowania nie można odzyskać z tego pliku, więc będziesz musiał zalogować się ponownie na każdym serwerze i profilu. Nic na Twoim serwerze multimediów nie zostanie zmienione.',
-			'startup.repairBodySessionsUncertain' => 'Usługi śledzenia (MAL, AniList, Simkl, Trakt) i Seerr są przechowywane osobno i mogą, ale nie muszą przetrwać. Plezy dokładnie poinformuje Cię, co zachowało.',
+			'startup.repairBodySessionsUncertain' => 'Usługi śledzenia (MAL, AniList, Simkl, Trakt) i Seerr są przechowywane osobno i mogą, ale nie muszą przetrwać. Plexy dokładnie poinformuje Cię, co zachowało.',
 			'startup.repairConfirm' => 'Napraw',
 			'startup.repairSucceeded' => 'Naprawiono pamięć',
 			'startup.repairNeedsRestart' => 'Naprawiono pamięć — wymagany restart',
-			'startup.restartRequiredBody' => 'Twoje dane zostały naprawione, ale Plezy musi uruchomić się od nowa, zanim będzie mogło z nich korzystać. Zamknij Plezy i otwórz je ponownie.',
-			'startup.quitPlezy' => 'Zamknij Plezy',
+			'startup.restartRequiredBody' => 'Twoje dane zostały naprawione, ale Plexy musi uruchomić się od nowa, zanim będzie mogło z nich korzystać. Zamknij Plexy i otwórz je ponownie.',
+			'startup.quitPlezy' => 'Zamknij Plexy',
 			'startup.repairFailed' => 'Naprawa nie powiodła się',
 			'startup.repairKeptSignIns' => 'Twoje serwery i profile są nadal zalogowane.',
 			'startup.repairLostSignIns' => 'Nie udało się odzyskać klucza chroniącego zapisane logowania. Musisz zalogować się ponownie na każdym serwerze i profilu.',
@@ -3692,7 +3692,7 @@ extension on TranslationsPl {
 			'startup.backupWarning' => 'Zawiera Twoje dane logowania. Nie przesyłaj ani nie udostępniaj jej.',
 			'startup.deleteBackup' => 'Usuń kopię',
 			'startup.backupDeleted' => 'Usunięto kopię.',
-			'startup.previousFailureTitle' => 'Ostatnim razem nie udało się uruchomić Plezy',
+			'startup.previousFailureTitle' => 'Ostatnim razem nie udało się uruchomić Plexy',
 			'licenses.relatedPackages' => 'Powiązane pakiety',
 			'licenses.license' => 'Licencja',
 			'licenses.licenseNumber' => ({required Object number}) => 'Licencja ${number}',
@@ -4136,14 +4136,14 @@ extension on TranslationsPl {
 			'downloads.backgroundWarning.bannerAction' => 'Szczegóły',
 			'downloads.backgroundWarning.sheetTitle' => 'Pobieranie w tle jest zablokowane',
 			'downloads.backgroundWarning.sheetTitleDegraded' => 'Pobieranie w tle może być ograniczone',
-			'downloads.backgroundWarning.sheetIntro' => 'Android uniemożliwia Plezy niezawodne pobieranie plików w tle.',
-			'downloads.backgroundWarning.sheetIntroDegraded' => 'Twoje urządzenie ogranicza możliwość pobierania w tle przez Plezy.',
-			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Działanie Plezy w tle jest ograniczone. Ustaw użycie baterii lub działanie w tle na „Bez ograniczeń”.',
-			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android umieścił Plezy w ograniczonym trybie gotowości. Ustaw użycie baterii na „Bez ograniczeń”.',
+			'downloads.backgroundWarning.sheetIntro' => 'Android uniemożliwia Plexy niezawodne pobieranie plików w tle.',
+			'downloads.backgroundWarning.sheetIntroDegraded' => 'Twoje urządzenie ogranicza możliwość pobierania w tle przez Plexy.',
+			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Działanie Plexy w tle jest ograniczone. Ustaw użycie baterii lub działanie w tle na „Bez ograniczeń”.',
+			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android umieścił Plexy w ograniczonym trybie gotowości. Ustaw użycie baterii na „Bez ograniczeń”.',
 			'downloads.backgroundWarning.reasonDownloadChannelBlocked' => 'Powiadomienia o pobieraniu są wyłączone, więc postęp i opcje sterowania mogą być niedostępne.',
 			'downloads.backgroundWarning.reasonNotificationsDisabled' => 'Powiadomienia są wyłączone. W Android 13 lub nowszym są wymagane przy długim pobieraniu w tle.',
 			'downloads.backgroundWarning.reasonDataSaver' => 'Oszczędzanie danych jest włączone, co blokuje pobieranie w tle przez mobilną transmisję danych. Pobieranie powinno nadal działać przez Wi-Fi.',
-			'downloads.backgroundWarning.reasonOemUnknown' => 'Pobieranie wielokrotnie przerywało się, gdy Plezy działało w tle. Sprawdź ustawienia baterii lub działania w tle dla Plezy.',
+			'downloads.backgroundWarning.reasonOemUnknown' => 'Pobieranie wielokrotnie przerywało się, gdy Plexy działało w tle. Sprawdź ustawienia baterii lub działania w tle dla Plexy.',
 			'downloads.backgroundWarning.openSettings' => 'Otwórz ustawienia',
 			'downloads.backgroundWarning.stillNotWorking' => 'Pomoc dla Twojego urządzenia',
 			'downloads.backgroundWarning.stillNotWorkingDescription' => 'Zobacz instrukcje dla swojego urządzenia lub, jeśli problem nadal występuje, wyślij log przez Ustawienia › Pokaż logi.',
@@ -4196,19 +4196,19 @@ extension on TranslationsPl {
 			'companionRemote.session.startServer' => 'Uruchom serwer',
 			'companionRemote.session.stopServer' => 'Zatrzymaj serwer',
 			'companionRemote.session.minimize' => 'Minimalizuj',
-			'companionRemote.pairing.discoveryDescription' => 'Urządzenia Plezy z tym samym kontem Plex pojawią się tutaj',
+			'companionRemote.pairing.discoveryDescription' => 'Urządzenia Plexy z tym samym kontem Plex pojawią się tutaj',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => 'Łączenie...',
 			'companionRemote.pairing.searchingForDevices' => 'Szukanie urządzeń...',
 			'companionRemote.pairing.noDevicesFound' => 'Nie znaleziono urządzeń w sieci',
-			'companionRemote.pairing.noDevicesHint' => 'Otwórz Plezy na komputerze i połącz oba urządzenia z tą samą siecią Wi-Fi',
+			'companionRemote.pairing.noDevicesHint' => 'Otwórz Plexy na komputerze i połącz oba urządzenia z tą samą siecią Wi-Fi',
 			'companionRemote.pairing.availableDevices' => 'Dostępne urządzenia',
 			'companionRemote.pairing.manualConnection' => 'Połączenie ręczne',
 			'companionRemote.pairing.cryptoInitFailed' => 'Nie udało się uruchomić bezpiecznego połączenia. Najpierw zaloguj się do Plex.',
 			'companionRemote.pairing.validationHostRequired' => 'Wprowadź adres hosta',
 			'companionRemote.pairing.validationHostFormat' => 'Format musi być IP:port (np. 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Limit czasu połączenia. Użyj tej samej sieci na obu urządzeniach.',
-			'companionRemote.pairing.sessionNotFound' => 'Nie znaleziono urządzenia. Upewnij się, że Plezy działa na hoście.',
+			'companionRemote.pairing.sessionNotFound' => 'Nie znaleziono urządzenia. Upewnij się, że Plexy działa na hoście.',
 			'companionRemote.pairing.authFailed' => 'Uwierzytelnianie nie powiodło się. Oba urządzenia muszą używać tego samego konta Plex.',
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Nie udało się połączyć: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Czy chcesz się rozłączyć od sesji zdalnej?',
@@ -4429,11 +4429,11 @@ extension on TranslationsPl {
 			'trakt.connected' => 'Połączono',
 			'trakt.connectedAs' => ({required Object username}) => 'Połączono jako @${username}',
 			'trakt.disconnectConfirm' => 'Rozłączyć konto Trakt?',
-			'trakt.disconnectConfirmBody' => 'Plezy przestanie wysyłać zdarzenia do serwisu Trakt. Połączenie można przywrócić w dowolnym momencie.',
+			'trakt.disconnectConfirmBody' => 'Plexy przestanie wysyłać zdarzenia do serwisu Trakt. Połączenie można przywrócić w dowolnym momencie.',
 			'trakt.scrobble' => 'Śledzenie odtwarzania w czasie rzeczywistym',
 			'trakt.scrobbleDescription' => 'Wysyłaj do serwisu Trakt zdarzenia odtwarzania, wstrzymania i zatrzymania.',
 			'trakt.watchedSync' => 'Synchronizuj stan obejrzenia',
-			'trakt.watchedSyncDescription' => 'Gdy oznaczysz element jako obejrzany w Plezy, zostanie on również oznaczony jako obejrzany w serwisie Trakt.',
+			'trakt.watchedSyncDescription' => 'Gdy oznaczysz element jako obejrzany w Plexy, zostanie on również oznaczony jako obejrzany w serwisie Trakt.',
 			'seerr.title' => 'Seerr',
 			'seerr.connectTitle' => 'Połącz Seerr',
 			'seerr.serverUrl' => 'Adres URL serwera',
@@ -4443,10 +4443,10 @@ extension on TranslationsPl {
 			'seerr.signInWithEmby' => 'Zaloguj się przez Emby',
 			'seerr.signInWithLocal' => 'Użyj konta lokalnego',
 			'seerr.email' => 'E-mail',
-			'seerr.noSignInMethods' => 'Ta instancja Seerr nie oferuje metody logowania obsługiwanej przez Plezy.',
+			'seerr.noSignInMethods' => 'Ta instancja Seerr nie oferuje metody logowania obsługiwanej przez Plexy.',
 			'seerr.instance' => 'Instancja',
 			'seerr.disconnectConfirm' => 'Odłączyć Seerr?',
-			'seerr.disconnectConfirmBody' => 'Plezy zapomni tę instancję Seerr. Połącz ponownie w dowolnym momencie.',
+			'seerr.disconnectConfirmBody' => 'Plexy zapomni tę instancję Seerr. Połącz ponownie w dowolnym momencie.',
 			'seerr.request' => 'Zamów',
 			'seerr.request4k' => 'Zamów w 4K',
 			'seerr.seasons' => 'Sezony',
@@ -4481,14 +4481,14 @@ extension on TranslationsPl {
 			'services.scrobble' => 'Automatycznie śledź postęp',
 			'services.scrobbleDescription' => 'Aktualizuj swoją listę po ukończeniu odcinka lub filmu.',
 			'services.disconnectConfirm' => ({required Object service}) => 'Odłączyć ${service}?',
-			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezy przestanie aktualizować ${service}. Połącz ponownie w dowolnym momencie.',
+			'services.disconnectConfirmBody' => ({required Object service}) => 'Plexy przestanie aktualizować ${service}. Połącz ponownie w dowolnym momencie.',
 			'services.connectFailed' => ({required Object service}) => 'Nie udało się połączyć z ${service}. Spróbuj ponownie.',
 			'services.names.mal' => 'MyAnimeList',
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
-			'services.deviceCode.title' => ({required Object service}) => 'Aktywuj Plezy w ${service}',
+			'services.deviceCode.title' => ({required Object service}) => 'Aktywuj Plexy w ${service}',
 			'services.deviceCode.instructions' => 'Zeskanuj kod QR albo przejdź pod poniższy adres i wprowadź ten kod:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Otwórz ${service}, aby aktywować',
 			'services.deviceCode.copyCode' => 'Skopiuj kod aktywacyjny',
