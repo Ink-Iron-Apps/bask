@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import '../models/download_models.dart' show defaultConcurrentDownloads;
 import '../models/hotkey_model.dart';
 import 'image_cache_service.dart';
 import 'package:plezy/utils/app_logger.dart';
@@ -419,6 +420,7 @@ class SettingsService extends BaseSharedPreferencesService {
   static const creditsPattern = StringPref('credits_pattern', defaultValue: defaultCreditsPattern);
   static const customDownloadPathType = NullableStringPref('custom_download_path_type');
   static const downloadOnWifiOnly = BoolPref('download_on_wifi_only');
+  static const concurrentDownloads = IntPref('concurrent_downloads', defaultValue: defaultConcurrentDownloads);
   static const autoRemoveWatchedDownloads = BoolPref('auto_remove_watched_downloads');
 
   /// Set once the user has seen the pre-flight "background downloads are

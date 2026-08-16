@@ -47,8 +47,19 @@ void main() {
       expect(androidDownloaderConfig, contains((Config.runInForeground, Config.always)));
     });
 
-    test('keeps Plex concurrency at one download at a time', () {
-      expect(globalDownloaderConfig, contains((Config.holdingQueue, (1, 1, 1))));
+    test('routes the configured concurrency into the holding queue', () {
+      expect(globalDownloaderConfig(3), contains((Config.holdingQueue, (3, 3, 3))));
+    });
+
+    test('clamps concurrency to a range the server can survive', () {
+      // A holding queue of 0 would stall every download outright, and an
+      // unbounded one invites the Plex rejections the single-slot default
+      // was guarding against.
+      expect(globalDownloaderConfig(0), contains((Config.holdingQueue, (1, 1, 1))));
+      expect(
+        globalDownloaderConfig(99),
+        contains((Config.holdingQueue, (maxConcurrentDownloads, maxConcurrentDownloads, maxConcurrentDownloads))),
+      );
     });
   });
 

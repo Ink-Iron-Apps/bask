@@ -60,8 +60,13 @@ typedef DownloadLocationSnapshot = ({String? path, String? type});
 
 /// Downloader config routed to every platform.
 ///
-/// Plex servers can reject concurrent media downloads, so one task at a time.
-const globalDownloaderConfig = <(String, dynamic)>[(Config.holdingQueue, (1, 1, 1))];
+/// The holding queue takes (total, per-host, per-group) slots. All three move
+/// together: the only host and group in play is the one media server, so
+/// holding any of them at one would cap the other two regardless.
+List<(String, dynamic)> globalDownloaderConfig(int concurrentDownloads) {
+  final slots = concurrentDownloads.clamp(minConcurrentDownloads, maxConcurrentDownloads);
+  return <(String, dynamic)>[(Config.holdingQueue, (slots, slots, slots))];
+}
 
 /// Downloader config routed to Android only.
 ///
@@ -881,8 +886,9 @@ class DownloadManagerService {
           progressBar: true,
         );
 
+    final settings = await SettingsService.getInstance();
     await FileDownloader().configure(
-      globalConfig: globalDownloaderConfig,
+      globalConfig: globalDownloaderConfig(settings.read(SettingsService.concurrentDownloads)),
       androidConfig: androidDownloaderConfig,
     );
 
@@ -891,6 +897,18 @@ class DownloadManagerService {
     await FileDownloader().resumeFromBackground();
 
     _fileDownloaderInitialized = true;
+  }
+
+  /// Re-sizes the holding queue after the user changes the concurrency setting.
+  ///
+  /// Applies to the queue immediately, so a raised limit starts the extra
+  /// downloads without waiting for a restart. Tasks already running are left
+  /// alone: lowering the limit stops new ones starting rather than cancelling
+  /// transfers that are part-way through.
+  Future<void> applyConcurrentDownloadLimit(int concurrentDownloads) async {
+    if (!_fileDownloaderInitialized) return;
+    if (_skipDownloadsUnsupported('concurrency reconfigure')) return;
+    await FileDownloader().configure(globalConfig: globalDownloaderConfig(concurrentDownloads));
   }
 
   /// Recover downloads that were interrupted when the app was killed.
