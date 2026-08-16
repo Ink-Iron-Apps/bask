@@ -58,6 +58,22 @@ typedef NativeTaskPartition = ({List<Task> current, List<Task> stale});
 
 typedef DownloadLocationSnapshot = ({String? path, String? type});
 
+/// Downloader config routed to every platform.
+///
+/// Plex servers can reject concurrent media downloads, so one task at a time.
+const globalDownloaderConfig = <(String, dynamic)>[(Config.holdingQueue, (1, 1, 1))];
+
+/// Downloader config routed to Android only.
+///
+/// Android downloads must run inside a foreground service. Without one the
+/// download is an ordinary deferrable WorkManager job whose only protection is
+/// the app being the top process: background the app and the platform stops the
+/// job, the task reports failed, and the retry layer re-enqueues a fresh task
+/// that is stopped just as fast — so every download fails within seconds of the
+/// screen locking. iOS needs none of this; its background URLSession already
+/// owns the transfer, and the key is a no-op there.
+const androidDownloaderConfig = <(String, dynamic)>[(Config.runInForeground, Config.always)];
+
 @visibleForTesting
 NativeTaskPartition partitionNativeTasks(Iterable<Task> tasks, String? currentTaskId) {
   final current = <Task>[];
@@ -865,8 +881,10 @@ class DownloadManagerService {
           progressBar: true,
         );
 
-    // Plex servers can reject concurrent media downloads.
-    await FileDownloader().configure(globalConfig: (Config.holdingQueue, (1, 1, 1)));
+    await FileDownloader().configure(
+      globalConfig: globalDownloaderConfig,
+      androidConfig: androidDownloaderConfig,
+    );
 
     await FileDownloader().trackTasks();
     // Deliver status updates from iOS background-to-foreground transitions

@@ -40,6 +40,18 @@ import '../test_helpers/prefs.dart';
 import '../test_helpers/media_items.dart';
 
 void main() {
+  group('downloader configuration', () {
+    test('runs Android downloads inside a foreground service', () {
+      // Without this the download job is an ordinary deferrable WorkManager
+      // job, which the OS stops the moment the app leaves the foreground.
+      expect(androidDownloaderConfig, contains((Config.runInForeground, Config.always)));
+    });
+
+    test('keeps Plex concurrency at one download at a time', () {
+      expect(globalDownloaderConfig, contains((Config.holdingQueue, (1, 1, 1))));
+    });
+  });
+
   group('downloadExtensionFromUrl', () {
     test('uses path extension when present', () {
       expect(downloadExtensionFromUrl('https://example.com/movie.mkv?Container=mp4'), 'mkv');
