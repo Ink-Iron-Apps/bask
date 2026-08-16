@@ -1,6 +1,7 @@
 package com.edde746.plezy.watchnext
 
 import android.content.ContentProvider
+import com.edde746.plezy.BuildConfig
 import android.content.ContentValues
 import android.database.Cursor
 import android.graphics.BitmapFactory
@@ -20,7 +21,9 @@ import java.util.concurrent.TimeUnit
 
 class SystemShelfArtworkProvider : ContentProvider() {
   companion object {
-    const val AUTHORITY = "com.edde746.plezy.systemshelf.artwork"
+    // Derived from the applicationId so a rebranded build does not clash with another
+    // install's provider authority. Mirrors the manifest's ${applicationId} placeholder.
+    val AUTHORITY = "${BuildConfig.APPLICATION_ID}.systemshelf.artwork"
   }
 
   override fun onCreate(): Boolean = context != null
