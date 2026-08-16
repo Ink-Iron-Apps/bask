@@ -658,6 +658,23 @@ class PlexServer {
       }
     }
 
+    // Within the local buckets, put the physical LAN ahead of overlay-network
+    // addresses so the race's first responder is already the fast path and the
+    // latency phase has nothing to correct. Stable so the existing order is
+    // otherwise preserved.
+    void lanBeforeTunnel(List<_ConnectionCandidate> bucket) {
+      final tunnelled = bucket.where((c) => isTunnelledLocalAddress(c.connection.address)).toList();
+      if (tunnelled.isEmpty || tunnelled.length == bucket.length) return;
+      final direct = bucket.where((c) => !isTunnelledLocalAddress(c.connection.address)).toList();
+      bucket
+        ..clear()
+        ..addAll(direct)
+        ..addAll(tunnelled);
+    }
+
+    lanBeforeTunnel(httpsLocal);
+    lanBeforeTunnel(httpLocal);
+
     final all = [...httpsLocal, ...httpsRemote, ...httpsRelay, ...httpLocal, ...httpRemote, ...httpRelay];
 
     // Failover reachability filter. After discovery, failover should stay within
@@ -797,6 +814,13 @@ class PlexServer {
 
     // Sort by protocol first (HTTPS enables H2 multiplexing), then latency, then URL type
     entries.sort((a, b) {
+      // Prefer a physical LAN address over an overlay-network one. Both are
+      // reported local and the overlay usually wins on latency, but it is
+      // markedly slower for sustained transfers, so this outranks latency.
+      final aIsTunnelled = isTunnelledLocalAddress(a.key.connection.address);
+      final bIsTunnelled = isTunnelledLocalAddress(b.key.connection.address);
+      if (aIsTunnelled != bIsTunnelled) return aIsTunnelled ? 1 : -1;
+
       // Prefer HTTPS over HTTP
       final aIsHttps = a.key.isHttps;
       final bIsHttps = b.key.isHttps;
@@ -926,6 +950,25 @@ class PlexServer {
 
     return false;
   }
+}
+
+/// Whether [address] is a carrier-grade NAT address (100.64.0.0/10).
+///
+/// Plex advertises every interface the server can see as a *local* connection,
+/// including a Tailscale (or similar overlay) interface. Such a connection is
+/// genuinely reachable and answers with a very low round-trip time, so a
+/// latency-ranked race picks it over the physical LAN even when both lead to
+/// the same machine on the same Wi-Fi. Throughput tells the opposite story:
+/// the overlay re-encrypts and copies every packet in userspace, measured here
+/// at roughly half the LAN's rate for bulk downloads. Ranking these last among
+/// local candidates keeps the direct path for transfers while leaving the
+/// overlay as the fallback that carries the connection from outside the LAN.
+bool isTunnelledLocalAddress(String address) {
+  final octets = address.split('.');
+  if (octets.length != 4) return false;
+  final parsed = octets.map(int.tryParse).toList();
+  if (parsed.any((octet) => octet == null || octet < 0 || octet > 255)) return false;
+  return parsed[0] == 100 && parsed[1]! >= 64 && parsed[1]! <= 127;
 }
 
 /// Represents a connection to a Plex server
