@@ -98,7 +98,7 @@ class _Translations$app$ja extends Translations$app$en {
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Plezy';
+	@override String get title => 'Plexy';
 }
 
 // Path: auth
@@ -222,7 +222,7 @@ class _Translations$settings$ja extends Translations$settings$en {
 
 	// Translations
 	@override String get title => '設定';
-	@override String get supportDeveloper => 'Plezyを支援';
+	@override String get supportDeveloper => 'Plexyを支援';
 	@override String get supportDeveloperDescription => 'Liberapayで寄付して開発を支援';
 	@override String get language => '言語';
 	@override String get theme => 'テーマ';
@@ -347,7 +347,7 @@ class _Translations$settings$ja extends Translations$settings$en {
 	@override String get importSettingsDescription => 'ファイルから設定を復元';
 	@override String get importSettingsConfirm => '現在の設定を置き換えます。続行しますか？';
 	@override String get importSettingsSuccess => '設定をインポートしました';
-	@override String get importSettingsInvalidFile => 'このファイルは有効なPlezyの設定エクスポートではありません';
+	@override String get importSettingsInvalidFile => 'このファイルは有効なPlexyの設定エクスポートではありません';
 	@override String get importSettingsNoUser => '設定をインポートする前にサインインしてください';
 	@override String get shortcutsReset => 'ショートカットをデフォルトにリセットしました';
 	@override String get about => 'アプリについて';
@@ -440,7 +440,7 @@ class _Translations$settings$ja extends Translations$settings$en {
 	@override String get forceTvMode => 'TVモードを強制';
 	@override String get forceTvModeDescription => 'TVレイアウトを強制します。自動検出しないデバイス向けです。再起動が必要です。';
 	@override String get startInFullscreen => '全画面表示で起動';
-	@override String get startInFullscreenDescription => '起動時にPlezyを全画面モードで開きます';
+	@override String get startInFullscreenDescription => '起動時にPlexyを全画面モードで開きます';
 	@override String get exitFullscreenOnPlayerClose => 'プレイヤーを閉じたときに全画面を終了';
 	@override String get exitFullscreenOnPlayerCloseDescription => 'ビデオプレイヤーを閉じたときに自動的に全画面モードを終了します';
 	@override String get autoHidePerformanceOverlay => 'パフォーマンスオーバーレイを自動非表示';
@@ -461,7 +461,7 @@ class _Translations$settings$ja extends Translations$settings$en {
 	@override String get subtitlesAndConfig => '字幕と設定';
 	@override String get seekAndTiming => 'シークとタイミング';
 	@override String get behavior => '動作';
-	@override String get exportDialogTitle => 'Plezyの設定をエクスポート';
+	@override String get exportDialogTitle => 'Plexyの設定をエクスポート';
 }
 
 // Path: search
@@ -656,8 +656,8 @@ class _Translations$mediaMenu$ja extends Translations$mediaMenu$en {
 	@override String deleteSharedFileHeading({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n,
 		other: '同じファイルに保存されている他の${n}エピソードも削除されます：',
 	);
-	@override String get deleteScopeUnverifiedProbeFailed => 'Plezyは削除対象のファイルを確認できなかったため、上記のアイテム以上に削除される可能性があります。キャンセルして再試行するか、それでも削除してください。';
-	@override String get deleteScopeUnverifiedNoFileInfo => 'サーバーがこのアイテムのファイル情報を提供しなかったため、Plezyは削除対象のファイルを確認できません。上記のアイテム以上に削除される可能性があります。';
+	@override String get deleteScopeUnverifiedProbeFailed => 'Plexyは削除対象のファイルを確認できなかったため、上記のアイテム以上に削除される可能性があります。キャンセルして再試行するか、それでも削除してください。';
+	@override String get deleteScopeUnverifiedNoFileInfo => 'サーバーがこのアイテムのファイル情報を提供しなかったため、Plexyは削除対象のファイルを確認できません。上記のアイテム以上に削除される可能性があります。';
 	@override String get mediaDeletedSuccessfully => 'メディアアイテムを正常に削除しました';
 	@override String get mediaFailedToDelete => 'メディアアイテムの削除に失敗しました';
 	@override String get rate => '評価';
@@ -982,7 +982,7 @@ class _Translations$profiles$ja extends Translations$profiles$en {
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get addPlezyProfile => 'Plezyプロフィールを追加';
+	@override String get addPlezyProfile => 'Plexyプロフィールを追加';
 	@override String get switchingProfile => 'プロフィールを切り替え中…';
 	@override String get deleteThisProfileTitle => 'このプロフィールを削除しますか？';
 	@override String deleteThisProfileMessage({required Object displayName}) => '${displayName}を削除します。接続には影響しません。';
@@ -1062,7 +1062,7 @@ class _Translations$connections$ja extends Translations$connections$en {
 	@override String sessionExpiredMany({required Object count}) => '${count} 台のサーバーのセッションの有効期限が切れました';
 	@override String get signInAgain => '再度サインイン';
 	@override String editMediaBrowserTitle({required Object product}) => '${product}接続を編集';
-	@override String editMediaBrowserIntro({required Object serverName}) => '${serverName}のURLを追加または削除します。Plezyは到達可能なURLのうち、レイテンシーが最も低いものを使用します。';
+	@override String editMediaBrowserIntro({required Object serverName}) => '${serverName}のURLを追加または削除します。Plexyは到達可能なURLのうち、レイテンシーが最も低いものを使用します。';
 }
 
 // Path: discover
@@ -1234,9 +1234,9 @@ class _Translations$startup$ja extends Translations$startup$en {
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get failedTitle => 'Plezyを起動できませんでした';
+	@override String get failedTitle => 'Plexyを起動できませんでした';
 	@override String get failedBody => '起動中に問題が発生しました。以下の詳細に失敗の原因が示されています。';
-	@override String get failedBodyRepairable => 'Plezyの保存済み設定ファイルが破損しているため、Plezyを起動する前に再構築する必要があります。再試行しても解決しません —「ストレージを修復」を選択してください。';
+	@override String get failedBodyRepairable => 'Plexyの保存済み設定ファイルが破損しているため、Plexyを起動する前に再構築する必要があります。再試行しても解決しません —「ストレージを修復」を選択してください。';
 	@override String get phaseLabel => 'ステップ';
 	@override String get showDetails => '詳細を表示';
 	@override String get hideDetails => '詳細を非表示';
@@ -1245,16 +1245,16 @@ class _Translations$startup$ja extends Translations$startup$en {
 	@override String get uploadDetails => '詳細をアップロード';
 	@override String get repairStorage => 'ストレージを修復';
 	@override String get repairTitle => '保存データを修復しますか？';
-	@override String get repairBodyCommon => 'Plezyの設定ファイルが破損しており読み取れません。修復するとすべての設定がデフォルトにリセットされます。';
+	@override String get repairBodyCommon => 'Plexyの設定ファイルが破損しており読み取れません。修復するとすべての設定がデフォルトにリセットされます。';
 	@override String get repairBodyOneCredential => '保存済みのサインインの1つが破損しており読み取れません。修復するとその1つだけが削除され、他の設定には影響しません。';
 	@override String get repairBodySignInsKept => 'サーバーとプロフィールはサインインしたままになります。';
 	@override String get repairBodySignInsLost => '保存済みのサインインを保護するキーをこのファイルから復元できないため、すべてのサーバーとプロフィールに再度サインインする必要があります。メディアサーバー上のデータには影響ありません。';
-	@override String get repairBodySessionsUncertain => 'トラッカー（MAL、AniList、Simkl、Trakt）とSeerrは別途保存されており、保持されるかどうかは不明です。Plezyは保持した内容を正確にお知らせします。';
+	@override String get repairBodySessionsUncertain => 'トラッカー（MAL、AniList、Simkl、Trakt）とSeerrは別途保存されており、保持されるかどうかは不明です。Plexyは保持した内容を正確にお知らせします。';
 	@override String get repairConfirm => '修復';
 	@override String get repairSucceeded => 'ストレージを修復しました';
 	@override String get repairNeedsRestart => 'ストレージを修復しました — 再起動が必要です';
-	@override String get restartRequiredBody => 'データは修復されましたが、Plezyはそれを使用する前に再起動する必要があります。Plezyを閉じて再度開いてください。';
-	@override String get quitPlezy => 'Plezyを終了';
+	@override String get restartRequiredBody => 'データは修復されましたが、Plexyはそれを使用する前に再起動する必要があります。Plexyを閉じて再度開いてください。';
+	@override String get quitPlezy => 'Plexyを終了';
 	@override String get repairFailed => '修復に失敗しました';
 	@override String get repairKeptSignIns => 'サーバーとプロフィールはサインインしたままです。';
 	@override String get repairLostSignIns => '保存済みのサインインを保護するキーを復元できませんでした。すべてのサーバーとプロフィールに再度サインインする必要があります。';
@@ -1263,7 +1263,7 @@ class _Translations$startup$ja extends Translations$startup$en {
 	@override String get backupWarning => 'このコピーにはサインイン資格情報が含まれています。アップロードや共有はしないでください。';
 	@override String get deleteBackup => 'コピーを削除';
 	@override String get backupDeleted => 'コピーを削除しました。';
-	@override String get previousFailureTitle => '前回、Plezyは起動に失敗しました';
+	@override String get previousFailureTitle => '前回、Plexyは起動に失敗しました';
 }
 
 // Path: licenses
@@ -1972,11 +1972,11 @@ class _Translations$trakt$ja extends Translations$trakt$en {
 	@override String get connected => '接続済み';
 	@override String connectedAs({required Object username}) => '@${username}として接続済み';
 	@override String get disconnectConfirm => 'Traktアカウントとの接続を解除しますか？';
-	@override String get disconnectConfirmBody => 'PlezyはTraktへのイベント送信を停止します。いつでも再接続できます。';
+	@override String get disconnectConfirmBody => 'PlexyはTraktへのイベント送信を停止します。いつでも再接続できます。';
 	@override String get scrobble => 'リアルタイムのスクロブル';
 	@override String get scrobbleDescription => '再生中に再生・一時停止・停止の各イベントをTraktに送信します。';
 	@override String get watchedSync => '視聴済みステータスを同期';
-	@override String get watchedSyncDescription => 'Plezyで項目を視聴済みにすると、Traktでも視聴済みになります。';
+	@override String get watchedSyncDescription => 'Plexyで項目を視聴済みにすると、Traktでも視聴済みになります。';
 }
 
 // Path: seerr
@@ -1995,10 +1995,10 @@ class _Translations$seerr$ja extends Translations$seerr$en {
 	@override String get signInWithEmby => 'Embyでサインイン';
 	@override String get signInWithLocal => 'ローカルアカウントを使う';
 	@override String get email => 'メールアドレス';
-	@override String get noSignInMethods => 'この Seerr インスタンスには Plezy が対応しているサインイン方法がありません。';
+	@override String get noSignInMethods => 'この Seerr インスタンスには Plexy が対応しているサインイン方法がありません。';
 	@override String get instance => 'インスタンス';
 	@override String get disconnectConfirm => 'Seerr の接続を解除しますか？';
-	@override String get disconnectConfirmBody => 'Plezy はこの Seerr インスタンスの情報を削除します。いつでも再接続できます。';
+	@override String get disconnectConfirmBody => 'Plexy はこの Seerr インスタンスの情報を削除します。いつでも再接続できます。';
 	@override String get request => 'リクエスト';
 	@override String get request4k => '4K でリクエスト';
 	@override String get seasons => 'シーズン';
@@ -2042,7 +2042,7 @@ class _Translations$services$ja extends Translations$services$en {
 	@override String get scrobble => '進捗を自動で記録';
 	@override String get scrobbleDescription => 'エピソードや映画を見終えたときにリストを更新します。';
 	@override String disconnectConfirm({required Object service}) => '${service} の接続を解除しますか？';
-	@override String disconnectConfirmBody({required Object service}) => 'Plezyは${service}の更新を停止します。いつでも再接続できます。';
+	@override String disconnectConfirmBody({required Object service}) => 'Plexyは${service}の更新を停止します。いつでも再接続できます。';
 	@override String connectFailed({required Object service}) => '${service} に接続できませんでした。もう一度お試しください。';
 	@override late final _Translations$services$names$ja names = _Translations$services$names$ja._(_root);
 	@override late final _Translations$services$deviceCode$ja deviceCode = _Translations$services$deviceCode$ja._(_root);
@@ -2479,14 +2479,14 @@ class _Translations$downloads$backgroundWarning$ja extends Translations$download
 	@override String get bannerAction => '詳細';
 	@override String get sheetTitle => 'バックグラウンドダウンロードはブロックされています';
 	@override String get sheetTitleDegraded => 'バックグラウンドダウンロードが制限される場合があります';
-	@override String get sheetIntro => 'Androidにより、Plezyはバックグラウンドで安定してダウンロードできません。';
-	@override String get sheetIntroDegraded => '端末により、Plezyがバックグラウンドでダウンロードできるタイミングが制限されています。';
-	@override String get reasonBackgroundRestricted => 'Plezyのバックグラウンド使用が制限されています。バッテリー使用量またはバックグラウンド使用を「制限なし」に設定してください。';
-	@override String get reasonStandbyRestricted => 'Androidにより、Plezyが制限付きのスタンバイ状態に設定されています。バッテリー使用量を「制限なし」に設定してください。';
+	@override String get sheetIntro => 'Androidにより、Plexyはバックグラウンドで安定してダウンロードできません。';
+	@override String get sheetIntroDegraded => '端末により、Plexyがバックグラウンドでダウンロードできるタイミングが制限されています。';
+	@override String get reasonBackgroundRestricted => 'Plexyのバックグラウンド使用が制限されています。バッテリー使用量またはバックグラウンド使用を「制限なし」に設定してください。';
+	@override String get reasonStandbyRestricted => 'Androidにより、Plexyが制限付きのスタンバイ状態に設定されています。バッテリー使用量を「制限なし」に設定してください。';
 	@override String get reasonDownloadChannelBlocked => 'ダウンロード通知がオフのため、進行状況や操作ボタンを利用できない場合があります。';
 	@override String get reasonNotificationsDisabled => '通知がオフです。Android 13以降では、長時間のバックグラウンドダウンロードに通知が必要です。';
 	@override String get reasonDataSaver => 'データセーバーがオンのため、モバイルデータ通信ではバックグラウンドダウンロードがブロックされます。Wi-Fiでは引き続きダウンロードできるはずです。';
-	@override String get reasonOemUnknown => 'Plezyがバックグラウンドで動作中に、ダウンロードが繰り返し停止しました。Plezyのバッテリー使用量またはバックグラウンド使用の設定を確認してください。';
+	@override String get reasonOemUnknown => 'Plexyがバックグラウンドで動作中に、ダウンロードが繰り返し停止しました。Plexyのバッテリー使用量またはバックグラウンド使用の設定を確認してください。';
 	@override String get openSettings => '設定を開く';
 	@override String get stillNotWorking => '端末別のヘルプ';
 	@override String get stillNotWorkingDescription => 'お使いの端末向けの手順を確認してください。問題が続く場合は、設定 › ログを表示 からログを送信してください。';
@@ -2529,19 +2529,19 @@ class _Translations$companionRemote$pairing$ja extends Translations$companionRem
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String get discoveryDescription => '同じPlexアカウントを使用しているPlezyデバイスがここに表示されます';
+	@override String get discoveryDescription => '同じPlexアカウントを使用しているPlexyデバイスがここに表示されます';
 	@override String get hostAddressHint => '192.168.1.100:48632';
 	@override String get connecting => '接続中…';
 	@override String get searchingForDevices => 'デバイスを検索中…';
 	@override String get noDevicesFound => 'ネットワーク上にデバイスが見つかりません';
-	@override String get noDevicesHint => 'デスクトップでPlezyを開き、同じWi-Fiネットワークに接続してください';
+	@override String get noDevicesHint => 'デスクトップでPlexyを開き、同じWi-Fiネットワークに接続してください';
 	@override String get availableDevices => '利用可能なデバイス';
 	@override String get manualConnection => '手動接続';
 	@override String get cryptoInitFailed => '安全な接続を開始できませんでした。先にPlexにサインインしてください。';
 	@override String get validationHostRequired => 'ホストアドレスを入力してください';
 	@override String get validationHostFormat => '形式はIP:ポートである必要があります（例: 192.168.1.100:48632）';
 	@override String get connectionTimedOut => '接続がタイムアウトしました。両方のデバイスで同じネットワークを使用してください。';
-	@override String get sessionNotFound => 'デバイスが見つかりません。ホストでPlezyが実行中か確認してください。';
+	@override String get sessionNotFound => 'デバイスが見つかりません。ホストでPlexyが実行中か確認してください。';
 	@override String get authFailed => '認証に失敗しました。両方のデバイスで同じPlexアカウントが必要です。';
 	@override String failedToConnect({required Object error}) => '接続に失敗しました: ${error}';
 }
@@ -2620,7 +2620,7 @@ class _Translations$services$deviceCode$ja extends Translations$services$deviceC
 	final TranslationsJa _root; // ignore: unused_field
 
 	// Translations
-	@override String title({required Object service}) => '${service} で Plezy を有効化';
+	@override String title({required Object service}) => '${service} で Plexy を有効化';
 	@override String get instructions => 'QRコードをスキャンするか、以下のアドレスにアクセスしてこのコードを入力してください:';
 	@override String openToActivate({required Object service}) => '${service} を開いて有効化';
 	@override String get copyCode => 'アクティベーションコードをコピー';
@@ -2680,7 +2680,7 @@ class _Translations$services$libraryFilter$ja extends Translations$services$libr
 extension on TranslationsJa {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.title' => 'Plezy',
+			'app.title' => 'Plexy',
 			'auth.signInWithPlex' => 'Plexでサインイン',
 			'auth.showQRCode' => 'QRコードを表示',
 			'auth.authenticate' => '認証',
@@ -2769,7 +2769,7 @@ extension on TranslationsJa {
 			'update.latestVersion' => '最新バージョンです',
 			'update.checkFailed' => 'アップデートの確認に失敗しました',
 			'settings.title' => '設定',
-			'settings.supportDeveloper' => 'Plezyを支援',
+			'settings.supportDeveloper' => 'Plexyを支援',
 			'settings.supportDeveloperDescription' => 'Liberapayで寄付して開発を支援',
 			'settings.language' => '言語',
 			'settings.theme' => 'テーマ',
@@ -2894,7 +2894,7 @@ extension on TranslationsJa {
 			'settings.importSettingsDescription' => 'ファイルから設定を復元',
 			'settings.importSettingsConfirm' => '現在の設定を置き換えます。続行しますか？',
 			'settings.importSettingsSuccess' => '設定をインポートしました',
-			'settings.importSettingsInvalidFile' => 'このファイルは有効なPlezyの設定エクスポートではありません',
+			'settings.importSettingsInvalidFile' => 'このファイルは有効なPlexyの設定エクスポートではありません',
 			'settings.importSettingsNoUser' => '設定をインポートする前にサインインしてください',
 			'settings.shortcutsReset' => 'ショートカットをデフォルトにリセットしました',
 			'settings.about' => 'アプリについて',
@@ -2987,7 +2987,7 @@ extension on TranslationsJa {
 			'settings.forceTvMode' => 'TVモードを強制',
 			'settings.forceTvModeDescription' => 'TVレイアウトを強制します。自動検出しないデバイス向けです。再起動が必要です。',
 			'settings.startInFullscreen' => '全画面表示で起動',
-			'settings.startInFullscreenDescription' => '起動時にPlezyを全画面モードで開きます',
+			'settings.startInFullscreenDescription' => '起動時にPlexyを全画面モードで開きます',
 			'settings.exitFullscreenOnPlayerClose' => 'プレイヤーを閉じたときに全画面を終了',
 			'settings.exitFullscreenOnPlayerCloseDescription' => 'ビデオプレイヤーを閉じたときに自動的に全画面モードを終了します',
 			'settings.autoHidePerformanceOverlay' => 'パフォーマンスオーバーレイを自動非表示',
@@ -3008,7 +3008,7 @@ extension on TranslationsJa {
 			'settings.subtitlesAndConfig' => '字幕と設定',
 			'settings.seekAndTiming' => 'シークとタイミング',
 			'settings.behavior' => '動作',
-			'settings.exportDialogTitle' => 'Plezyの設定をエクスポート',
+			'settings.exportDialogTitle' => 'Plexyの設定をエクスポート',
 			'search.hint' => '映画、番組、音楽を検索…',
 			'search.tryDifferentTerm' => '別の検索語をお試しください',
 			'search.searchYourMedia' => 'メディアを検索',
@@ -3185,8 +3185,8 @@ extension on TranslationsJa {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, other: '中の全${n}エピソードとそのファイルが削除されます。', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, other: 'このアイテムは${n}個のファイルにまたがって保存されており、すべて削除されます。', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(n, other: '同じファイルに保存されている他の${n}エピソードも削除されます：', ), 
-			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plezyは削除対象のファイルを確認できなかったため、上記のアイテム以上に削除される可能性があります。キャンセルして再試行するか、それでも削除してください。',
-			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'サーバーがこのアイテムのファイル情報を提供しなかったため、Plezyは削除対象のファイルを確認できません。上記のアイテム以上に削除される可能性があります。',
+			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexyは削除対象のファイルを確認できなかったため、上記のアイテム以上に削除される可能性があります。キャンセルして再試行するか、それでも削除してください。',
+			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'サーバーがこのアイテムのファイル情報を提供しなかったため、Plexyは削除対象のファイルを確認できません。上記のアイテム以上に削除される可能性があります。',
 			'mediaMenu.mediaDeletedSuccessfully' => 'メディアアイテムを正常に削除しました',
 			'mediaMenu.mediaFailedToDelete' => 'メディアアイテムの削除に失敗しました',
 			'mediaMenu.rate' => '評価',
@@ -3427,7 +3427,7 @@ extension on TranslationsJa {
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# comment',
 			'mpvConfig.embeddedVoHint' => 'Linux では vo、gpu-context、gpu-api は無視されます。埋め込み動画は常にビデオプレーン上で vo=libmpv を通してレンダリングされ、gpu-next（ArtCNN のようなコンピュートシェーダーに必要）は埋め込みでは実行できません。',
 			'dialog.confirmAction' => '操作の確認',
-			'profiles.addPlezyProfile' => 'Plezyプロフィールを追加',
+			'profiles.addPlezyProfile' => 'Plexyプロフィールを追加',
 			'profiles.switchingProfile' => 'プロフィールを切り替え中…',
 			'profiles.deleteThisProfileTitle' => 'このプロフィールを削除しますか？',
 			'profiles.deleteThisProfileMessage' => ({required Object displayName}) => '${displayName}を削除します。接続には影響しません。',
@@ -3498,7 +3498,7 @@ extension on TranslationsJa {
 			'connections.sessionExpiredMany' => ({required Object count}) => '${count} 台のサーバーのセッションの有効期限が切れました',
 			'connections.signInAgain' => '再度サインイン',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => '${product}接続を編集',
-			'connections.editMediaBrowserIntro' => ({required Object serverName}) => '${serverName}のURLを追加または削除します。Plezyは到達可能なURLのうち、レイテンシーが最も低いものを使用します。',
+			'connections.editMediaBrowserIntro' => ({required Object serverName}) => '${serverName}のURLを追加または削除します。Plexyは到達可能なURLのうち、レイテンシーが最も低いものを使用します。',
 			'discover.title' => '探す',
 			'discover.noContentAvailable' => 'コンテンツがありません',
 			'discover.addMediaToLibraries' => 'ライブラリにメディアを追加してください',
@@ -3633,9 +3633,9 @@ extension on TranslationsJa {
 			'logs.clearLogs' => 'ログをクリア',
 			'logs.copyLogs' => 'ログをコピー',
 			'logs.uploadLogs' => 'ログをアップロード',
-			'startup.failedTitle' => 'Plezyを起動できませんでした',
+			'startup.failedTitle' => 'Plexyを起動できませんでした',
 			'startup.failedBody' => '起動中に問題が発生しました。以下の詳細に失敗の原因が示されています。',
-			'startup.failedBodyRepairable' => 'Plezyの保存済み設定ファイルが破損しているため、Plezyを起動する前に再構築する必要があります。再試行しても解決しません —「ストレージを修復」を選択してください。',
+			'startup.failedBodyRepairable' => 'Plexyの保存済み設定ファイルが破損しているため、Plexyを起動する前に再構築する必要があります。再試行しても解決しません —「ストレージを修復」を選択してください。',
 			'startup.phaseLabel' => 'ステップ',
 			'startup.showDetails' => '詳細を表示',
 			'startup.hideDetails' => '詳細を非表示',
@@ -3644,16 +3644,16 @@ extension on TranslationsJa {
 			'startup.uploadDetails' => '詳細をアップロード',
 			'startup.repairStorage' => 'ストレージを修復',
 			'startup.repairTitle' => '保存データを修復しますか？',
-			'startup.repairBodyCommon' => 'Plezyの設定ファイルが破損しており読み取れません。修復するとすべての設定がデフォルトにリセットされます。',
+			'startup.repairBodyCommon' => 'Plexyの設定ファイルが破損しており読み取れません。修復するとすべての設定がデフォルトにリセットされます。',
 			'startup.repairBodyOneCredential' => '保存済みのサインインの1つが破損しており読み取れません。修復するとその1つだけが削除され、他の設定には影響しません。',
 			'startup.repairBodySignInsKept' => 'サーバーとプロフィールはサインインしたままになります。',
 			'startup.repairBodySignInsLost' => '保存済みのサインインを保護するキーをこのファイルから復元できないため、すべてのサーバーとプロフィールに再度サインインする必要があります。メディアサーバー上のデータには影響ありません。',
-			'startup.repairBodySessionsUncertain' => 'トラッカー（MAL、AniList、Simkl、Trakt）とSeerrは別途保存されており、保持されるかどうかは不明です。Plezyは保持した内容を正確にお知らせします。',
+			'startup.repairBodySessionsUncertain' => 'トラッカー（MAL、AniList、Simkl、Trakt）とSeerrは別途保存されており、保持されるかどうかは不明です。Plexyは保持した内容を正確にお知らせします。',
 			'startup.repairConfirm' => '修復',
 			'startup.repairSucceeded' => 'ストレージを修復しました',
 			'startup.repairNeedsRestart' => 'ストレージを修復しました — 再起動が必要です',
-			'startup.restartRequiredBody' => 'データは修復されましたが、Plezyはそれを使用する前に再起動する必要があります。Plezyを閉じて再度開いてください。',
-			'startup.quitPlezy' => 'Plezyを終了',
+			'startup.restartRequiredBody' => 'データは修復されましたが、Plexyはそれを使用する前に再起動する必要があります。Plexyを閉じて再度開いてください。',
+			'startup.quitPlezy' => 'Plexyを終了',
 			'startup.repairFailed' => '修復に失敗しました',
 			'startup.repairKeptSignIns' => 'サーバーとプロフィールはサインインしたままです。',
 			'startup.repairLostSignIns' => '保存済みのサインインを保護するキーを復元できませんでした。すべてのサーバーとプロフィールに再度サインインする必要があります。',
@@ -3662,7 +3662,7 @@ extension on TranslationsJa {
 			'startup.backupWarning' => 'このコピーにはサインイン資格情報が含まれています。アップロードや共有はしないでください。',
 			'startup.deleteBackup' => 'コピーを削除',
 			'startup.backupDeleted' => 'コピーを削除しました。',
-			'startup.previousFailureTitle' => '前回、Plezyは起動に失敗しました',
+			'startup.previousFailureTitle' => '前回、Plexyは起動に失敗しました',
 			'licenses.relatedPackages' => '関連パッケージ',
 			'licenses.license' => 'ライセンス',
 			'licenses.licenseNumber' => ({required Object number}) => 'ライセンス ${number}',
@@ -4106,14 +4106,14 @@ extension on TranslationsJa {
 			'downloads.backgroundWarning.bannerAction' => '詳細',
 			'downloads.backgroundWarning.sheetTitle' => 'バックグラウンドダウンロードはブロックされています',
 			'downloads.backgroundWarning.sheetTitleDegraded' => 'バックグラウンドダウンロードが制限される場合があります',
-			'downloads.backgroundWarning.sheetIntro' => 'Androidにより、Plezyはバックグラウンドで安定してダウンロードできません。',
-			'downloads.backgroundWarning.sheetIntroDegraded' => '端末により、Plezyがバックグラウンドでダウンロードできるタイミングが制限されています。',
-			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plezyのバックグラウンド使用が制限されています。バッテリー使用量またはバックグラウンド使用を「制限なし」に設定してください。',
-			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Androidにより、Plezyが制限付きのスタンバイ状態に設定されています。バッテリー使用量を「制限なし」に設定してください。',
+			'downloads.backgroundWarning.sheetIntro' => 'Androidにより、Plexyはバックグラウンドで安定してダウンロードできません。',
+			'downloads.backgroundWarning.sheetIntroDegraded' => '端末により、Plexyがバックグラウンドでダウンロードできるタイミングが制限されています。',
+			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plexyのバックグラウンド使用が制限されています。バッテリー使用量またはバックグラウンド使用を「制限なし」に設定してください。',
+			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Androidにより、Plexyが制限付きのスタンバイ状態に設定されています。バッテリー使用量を「制限なし」に設定してください。',
 			'downloads.backgroundWarning.reasonDownloadChannelBlocked' => 'ダウンロード通知がオフのため、進行状況や操作ボタンを利用できない場合があります。',
 			'downloads.backgroundWarning.reasonNotificationsDisabled' => '通知がオフです。Android 13以降では、長時間のバックグラウンドダウンロードに通知が必要です。',
 			'downloads.backgroundWarning.reasonDataSaver' => 'データセーバーがオンのため、モバイルデータ通信ではバックグラウンドダウンロードがブロックされます。Wi-Fiでは引き続きダウンロードできるはずです。',
-			'downloads.backgroundWarning.reasonOemUnknown' => 'Plezyがバックグラウンドで動作中に、ダウンロードが繰り返し停止しました。Plezyのバッテリー使用量またはバックグラウンド使用の設定を確認してください。',
+			'downloads.backgroundWarning.reasonOemUnknown' => 'Plexyがバックグラウンドで動作中に、ダウンロードが繰り返し停止しました。Plexyのバッテリー使用量またはバックグラウンド使用の設定を確認してください。',
 			'downloads.backgroundWarning.openSettings' => '設定を開く',
 			'downloads.backgroundWarning.stillNotWorking' => '端末別のヘルプ',
 			'downloads.backgroundWarning.stillNotWorkingDescription' => 'お使いの端末向けの手順を確認してください。問題が続く場合は、設定 › ログを表示 からログを送信してください。',
@@ -4166,19 +4166,19 @@ extension on TranslationsJa {
 			'companionRemote.session.startServer' => 'サーバーを起動',
 			'companionRemote.session.stopServer' => 'サーバーを停止',
 			'companionRemote.session.minimize' => '最小化',
-			'companionRemote.pairing.discoveryDescription' => '同じPlexアカウントを使用しているPlezyデバイスがここに表示されます',
+			'companionRemote.pairing.discoveryDescription' => '同じPlexアカウントを使用しているPlexyデバイスがここに表示されます',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => '接続中…',
 			'companionRemote.pairing.searchingForDevices' => 'デバイスを検索中…',
 			'companionRemote.pairing.noDevicesFound' => 'ネットワーク上にデバイスが見つかりません',
-			'companionRemote.pairing.noDevicesHint' => 'デスクトップでPlezyを開き、同じWi-Fiネットワークに接続してください',
+			'companionRemote.pairing.noDevicesHint' => 'デスクトップでPlexyを開き、同じWi-Fiネットワークに接続してください',
 			'companionRemote.pairing.availableDevices' => '利用可能なデバイス',
 			'companionRemote.pairing.manualConnection' => '手動接続',
 			'companionRemote.pairing.cryptoInitFailed' => '安全な接続を開始できませんでした。先にPlexにサインインしてください。',
 			'companionRemote.pairing.validationHostRequired' => 'ホストアドレスを入力してください',
 			'companionRemote.pairing.validationHostFormat' => '形式はIP:ポートである必要があります（例: 192.168.1.100:48632）',
 			'companionRemote.pairing.connectionTimedOut' => '接続がタイムアウトしました。両方のデバイスで同じネットワークを使用してください。',
-			'companionRemote.pairing.sessionNotFound' => 'デバイスが見つかりません。ホストでPlezyが実行中か確認してください。',
+			'companionRemote.pairing.sessionNotFound' => 'デバイスが見つかりません。ホストでPlexyが実行中か確認してください。',
 			'companionRemote.pairing.authFailed' => '認証に失敗しました。両方のデバイスで同じPlexアカウントが必要です。',
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => '接続に失敗しました: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'リモートセッションを切断しますか？',
@@ -4399,11 +4399,11 @@ extension on TranslationsJa {
 			'trakt.connected' => '接続済み',
 			'trakt.connectedAs' => ({required Object username}) => '@${username}として接続済み',
 			'trakt.disconnectConfirm' => 'Traktアカウントとの接続を解除しますか？',
-			'trakt.disconnectConfirmBody' => 'PlezyはTraktへのイベント送信を停止します。いつでも再接続できます。',
+			'trakt.disconnectConfirmBody' => 'PlexyはTraktへのイベント送信を停止します。いつでも再接続できます。',
 			'trakt.scrobble' => 'リアルタイムのスクロブル',
 			'trakt.scrobbleDescription' => '再生中に再生・一時停止・停止の各イベントをTraktに送信します。',
 			'trakt.watchedSync' => '視聴済みステータスを同期',
-			'trakt.watchedSyncDescription' => 'Plezyで項目を視聴済みにすると、Traktでも視聴済みになります。',
+			'trakt.watchedSyncDescription' => 'Plexyで項目を視聴済みにすると、Traktでも視聴済みになります。',
 			'seerr.title' => 'Seerr',
 			'seerr.connectTitle' => 'Seerrに接続',
 			'seerr.serverUrl' => 'サーバー URL',
@@ -4413,10 +4413,10 @@ extension on TranslationsJa {
 			'seerr.signInWithEmby' => 'Embyでサインイン',
 			'seerr.signInWithLocal' => 'ローカルアカウントを使う',
 			'seerr.email' => 'メールアドレス',
-			'seerr.noSignInMethods' => 'この Seerr インスタンスには Plezy が対応しているサインイン方法がありません。',
+			'seerr.noSignInMethods' => 'この Seerr インスタンスには Plexy が対応しているサインイン方法がありません。',
 			'seerr.instance' => 'インスタンス',
 			'seerr.disconnectConfirm' => 'Seerr の接続を解除しますか？',
-			'seerr.disconnectConfirmBody' => 'Plezy はこの Seerr インスタンスの情報を削除します。いつでも再接続できます。',
+			'seerr.disconnectConfirmBody' => 'Plexy はこの Seerr インスタンスの情報を削除します。いつでも再接続できます。',
 			'seerr.request' => 'リクエスト',
 			'seerr.request4k' => '4K でリクエスト',
 			'seerr.seasons' => 'シーズン',
@@ -4451,14 +4451,14 @@ extension on TranslationsJa {
 			'services.scrobble' => '進捗を自動で記録',
 			'services.scrobbleDescription' => 'エピソードや映画を見終えたときにリストを更新します。',
 			'services.disconnectConfirm' => ({required Object service}) => '${service} の接続を解除しますか？',
-			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezyは${service}の更新を停止します。いつでも再接続できます。',
+			'services.disconnectConfirmBody' => ({required Object service}) => 'Plexyは${service}の更新を停止します。いつでも再接続できます。',
 			'services.connectFailed' => ({required Object service}) => '${service} に接続できませんでした。もう一度お試しください。',
 			'services.names.mal' => 'MyAnimeList',
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
-			'services.deviceCode.title' => ({required Object service}) => '${service} で Plezy を有効化',
+			'services.deviceCode.title' => ({required Object service}) => '${service} で Plexy を有効化',
 			'services.deviceCode.instructions' => 'QRコードをスキャンするか、以下のアドレスにアクセスしてこのコードを入力してください:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => '${service} を開いて有効化',
 			'services.deviceCode.copyCode' => 'アクティベーションコードをコピー',

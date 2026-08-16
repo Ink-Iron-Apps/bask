@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Plezy"
+    "title": "Plexy"
   },
   "auth": {
     "signInWithPlex": "Log ind med Plex",
@@ -17,7 +17,7 @@
     "quickConnectWaiting": "Venter på godkendelse…",
     "quickConnectCancel": "Annuller",
     "quickConnectExpired": "Quick Connect er udløbet. Prøv igen.",
-    "localDataRecoveryRequired": "Plezy kunne ikke gendanne lokale loginoplysninger og ventende afspilningsdata på en sikker måde. Log ind igen.",
+    "localDataRecoveryRequired": "Plexy kunne ikke gendanne lokale loginoplysninger og ventende afspilningsdata på en sikker måde. Log ind igen.",
     "pinCheckRejected": "Plex PIN-kontrollen blev afvist"
   },
   "common": {
@@ -101,7 +101,7 @@
   },
   "settings": {
     "title": "Indstillinger",
-    "supportDeveloper": "Støt Plezy",
+    "supportDeveloper": "Støt Plexy",
     "supportDeveloperDescription": "Doner via Liberapay for at finansiere udviklingen",
     "language": "Sprog",
     "theme": "Tema",
@@ -226,7 +226,7 @@
     "importSettingsDescription": "Gendan præferencer fra en fil",
     "importSettingsConfirm": "Dette vil erstatte dine nuværende indstillinger. Fortsæt?",
     "importSettingsSuccess": "Indstillinger importeret",
-    "importSettingsInvalidFile": "Denne fil er ikke en gyldig eksport af Plezy-indstillinger",
+    "importSettingsInvalidFile": "Denne fil er ikke en gyldig eksport af Plexy-indstillinger",
     "importSettingsNoUser": "Log ind før import af indstillinger",
     "shortcutsReset": "Genveje nulstillet til standard",
     "about": "Om",
@@ -319,7 +319,7 @@
     "forceTvMode": "Gennemtving TV-tilstand",
     "forceTvModeDescription": "Tving TV-layout. Til enheder, der ikke registreres automatisk. Kræver genstart.",
     "startInFullscreen": "Start i fuldskærm",
-    "startInFullscreenDescription": "Åbn Plezy i fuldskærmstilstand ved opstart",
+    "startInFullscreenDescription": "Åbn Plexy i fuldskærmstilstand ved opstart",
     "exitFullscreenOnPlayerClose": "Forlad fuldskærm ved lukning af afspiller",
     "exitFullscreenOnPlayerCloseDescription": "Afslut automatisk fuldskærm, når videoafspilleren lukkes",
     "autoHidePerformanceOverlay": "Skjul ydelsesoverlay automatisk",
@@ -340,7 +340,7 @@
     "subtitlesAndConfig": "Undertekster og konfiguration",
     "seekAndTiming": "Søgning og timing",
     "behavior": "Adfærd",
-    "exportDialogTitle": "Eksportér Plezy-indstillinger"
+    "exportDialogTitle": "Eksportér Plexy-indstillinger"
   },
   "search": {
     "hint": "Søg film, serier, musik...",
@@ -536,8 +536,8 @@
       "one": "${n} anden episode er gemt i samme fil og vil også blive slettet:",
       "other": "${n} andre episoder er gemt i samme fil og vil også blive slettet:"
     },
-    "deleteScopeUnverifiedProbeFailed": "Plezy kunne ikke kontrollere, hvilke filer dette vil fjerne, så det kan slette mere end det ovennævnte emne. Annuller og prøv igen, eller slet alligevel.",
-    "deleteScopeUnverifiedNoFileInfo": "Din server leverede ikke filoplysninger for dette emne, så Plezy kan ikke kontrollere, hvilke filer dette vil fjerne. Det kan slette mere end det ovennævnte emne.",
+    "deleteScopeUnverifiedProbeFailed": "Plexy kunne ikke kontrollere, hvilke filer dette vil fjerne, så det kan slette mere end det ovennævnte emne. Annuller og prøv igen, eller slet alligevel.",
+    "deleteScopeUnverifiedNoFileInfo": "Din server leverede ikke filoplysninger for dette emne, så Plexy kan ikke kontrollere, hvilke filer dette vil fjerne. Det kan slette mere end det ovennævnte emne.",
     "mediaDeletedSuccessfully": "Mediet blev slettet",
     "mediaFailedToDelete": "Mediet kunne ikke slettes",
     "rate": "Bedøm",
@@ -802,7 +802,7 @@
     "confirmAction": "Bekræft handling"
   },
   "profiles": {
-    "addPlezyProfile": "Tilføj Plezy-profil",
+    "addPlezyProfile": "Tilføj Plexy-profil",
     "switchingProfile": "Skifter profil…",
     "deleteThisProfileTitle": "Slet denne profil?",
     "deleteThisProfileMessage": "Fjern ${displayName}. Forbindelser påvirkes ikke.",
@@ -875,7 +875,7 @@
     "sessionExpiredMany": "Sessionerne er udløbet for ${count} servere",
     "signInAgain": "Log ind igen",
     "editMediaBrowserTitle": "Rediger ${product}-forbindelse",
-    "editMediaBrowserIntro": "Tilføj eller fjern URL'er for ${serverName}. Plezy bruger den tilgængelige URL med laveste latenstid."
+    "editMediaBrowserIntro": "Tilføj eller fjern URL'er for ${serverName}. Plexy bruger den tilgængelige URL med laveste latenstid."
   },
   "discover": {
     "title": "Opdag",
@@ -1037,9 +1037,9 @@
     "uploadLogs": "Upload logfiler"
   },
   "startup": {
-    "failedTitle": "Plezy kunne ikke starte",
+    "failedTitle": "Plexy kunne ikke starte",
     "failedBody": "Der gik noget galt under opstart. Oplysningerne nedenfor viser, hvad der gik galt.",
-    "failedBodyRepairable": "Plezy's gemte indstillingsfil er beskadiget og skal genopbygges, før Plezy kan starte. Det hjælper ikke at prøve igen — vælg Reparer lager.",
+    "failedBodyRepairable": "Plexy's gemte indstillingsfil er beskadiget og skal genopbygges, før Plexy kan starte. Det hjælper ikke at prøve igen — vælg Reparer lager.",
     "phaseLabel": "Trin",
     "showDetails": "Vis detaljer",
     "hideDetails": "Skjul detaljer",
@@ -1048,16 +1048,16 @@
     "uploadDetails": "Upload detaljer",
     "repairStorage": "Reparer lager",
     "repairTitle": "Reparer gemte data?",
-    "repairBodyCommon": "Plezy's indstillingsfil er beskadiget og kan ikke læses. Reparation nulstiller alle indstillinger til deres standardværdier.",
+    "repairBodyCommon": "Plexy's indstillingsfil er beskadiget og kan ikke læses. Reparation nulstiller alle indstillinger til deres standardværdier.",
     "repairBodyOneCredential": "Én gemt loginoplysning er beskadiget og kan ikke læses. Reparation fjerner kun den; dine andre indstillinger forbliver urørt.",
     "repairBodySignInsKept": "Dine servere og profiler bør forblive logget ind.",
     "repairBodySignInsLost": "Nøglen, der beskytter dine gemte loginoplysninger, kan ikke gendannes fra denne fil, så du skal logge ind på alle servere og profiler igen. Intet på din medieserver er påvirket.",
-    "repairBodySessionsUncertain": "Trackere (MAL, AniList, Simkl, Trakt) og Seerr gemmes separat, og det er uvist, om de overlever. Plezy fortæller dig præcis, hvad det beholdt.",
+    "repairBodySessionsUncertain": "Trackere (MAL, AniList, Simkl, Trakt) og Seerr gemmes separat, og det er uvist, om de overlever. Plexy fortæller dig præcis, hvad det beholdt.",
     "repairConfirm": "Reparer",
     "repairSucceeded": "Lager repareret",
     "repairNeedsRestart": "Lager repareret — genstart påkrævet",
-    "restartRequiredBody": "Dine data er blevet repareret, men Plezy skal starte på ny, før det kan bruge dem. Luk Plezy, og åbn det igen.",
-    "quitPlezy": "Afslut Plezy",
+    "restartRequiredBody": "Dine data er blevet repareret, men Plexy skal starte på ny, før det kan bruge dem. Luk Plexy, og åbn det igen.",
+    "quitPlezy": "Afslut Plexy",
     "repairFailed": "Reparation mislykkedes",
     "repairKeptSignIns": "Dine servere og profiler er stadig logget ind.",
     "repairLostSignIns": "Nøglen, der beskytter dine gemte loginoplysninger, kunne ikke gendannes. Du skal logge ind på alle servere og profiler igen.",
@@ -1066,7 +1066,7 @@
     "backupWarning": "Den indeholder dine loginoplysninger. Upload eller del den ikke.",
     "deleteBackup": "Slet kopi",
     "backupDeleted": "Kopi slettet.",
-    "previousFailureTitle": "Plezy kunne ikke starte sidste gang"
+    "previousFailureTitle": "Plexy kunne ikke starte sidste gang"
   },
   "licenses": {
     "relatedPackages": "Relaterede pakker",
@@ -1562,14 +1562,14 @@
       "bannerAction": "Detaljer",
       "sheetTitle": "Downloads i baggrunden er blokeret",
       "sheetTitleDegraded": "Downloads i baggrunden kan være begrænsede",
-      "sheetIntro": "Android forhindrer Plezy i at downloade stabilt i baggrunden.",
-      "sheetIntroDegraded": "Din enhed begrænser, hvornår Plezy kan downloade i baggrunden.",
-      "reasonBackgroundRestricted": "Plezys baggrundsaktivitet er begrænset. Indstil batteriforbruget eller baggrundsaktiviteten til \"Ubegrænset\".",
-      "reasonStandbyRestricted": "Android har sat Plezy i begrænset standbytilstand. Indstil batteriforbruget til \"Ubegrænset\".",
+      "sheetIntro": "Android forhindrer Plexy i at downloade stabilt i baggrunden.",
+      "sheetIntroDegraded": "Din enhed begrænser, hvornår Plexy kan downloade i baggrunden.",
+      "reasonBackgroundRestricted": "Plexys baggrundsaktivitet er begrænset. Indstil batteriforbruget eller baggrundsaktiviteten til \"Ubegrænset\".",
+      "reasonStandbyRestricted": "Android har sat Plexy i begrænset standbytilstand. Indstil batteriforbruget til \"Ubegrænset\".",
       "reasonDownloadChannelBlocked": "Notifikationer om downloads er slået fra, så status og betjeningsknapper muligvis ikke er tilgængelige.",
       "reasonNotificationsDisabled": "Notifikationer er slået fra. På Android 13 eller nyere er de nødvendige ved lange downloads i baggrunden.",
       "reasonDataSaver": "Datasparefunktionen er slået til, hvilket blokerer downloads i baggrunden via mobildata. Downloads bør stadig køre på Wi-Fi.",
-      "reasonOemUnknown": "Downloads stoppede gentagne gange, mens Plezy var i baggrunden. Tjek Plezys indstillinger for batteriforbrug eller baggrundsaktivitet.",
+      "reasonOemUnknown": "Downloads stoppede gentagne gange, mens Plexy var i baggrunden. Tjek Plexys indstillinger for batteriforbrug eller baggrundsaktivitet.",
       "openSettings": "Åbn indstillinger",
       "stillNotWorking": "Enhedsspecifik hjælp",
       "stillNotWorkingDescription": "Se vejledningen til din enhed, eller send en logfil fra Indstillinger › Vis logfiler, hvis problemet fortsætter.",
@@ -1630,19 +1630,19 @@
       "minimize": "Minimér"
     },
     "pairing": {
-      "discoveryDescription": "Plezy-enheder med samme Plex-konto vises her",
+      "discoveryDescription": "Plexy-enheder med samme Plex-konto vises her",
       "hostAddressHint": "192.168.1.100:48632",
       "connecting": "Opretter forbindelse...",
       "searchingForDevices": "Søger efter enheder...",
       "noDevicesFound": "Ingen enheder fundet på dit netværk",
-      "noDevicesHint": "Åbn Plezy på din computer, og brug det samme Wi-Fi-netværk",
+      "noDevicesHint": "Åbn Plexy på din computer, og brug det samme Wi-Fi-netværk",
       "availableDevices": "Tilgængelige enheder",
       "manualConnection": "Manuel forbindelse",
       "cryptoInitFailed": "Kunne ikke starte sikker forbindelse. Log ind på Plex først.",
       "validationHostRequired": "Angiv en værtsadresse",
       "validationHostFormat": "Format skal være IP:port (f.eks. 192.168.1.100:48632)",
       "connectionTimedOut": "Forbindelsen fik timeout. Brug samme netværk på begge enheder.",
-      "sessionNotFound": "Enhed ikke fundet. Sørg for, at Plezy kører på værten.",
+      "sessionNotFound": "Enhed ikke fundet. Sørg for, at Plexy kører på værten.",
       "authFailed": "Godkendelse mislykkedes. Begge enheder skal bruge samme Plex-konto.",
       "failedToConnect": "Kunne ikke oprette forbindelse: ${error}"
     },
@@ -1880,11 +1880,11 @@
     "connected": "Forbundet",
     "connectedAs": "Forbundet som @${username}",
     "disconnectConfirm": "Frakobl Trakt-konto?",
-    "disconnectConfirmBody": "Plezy stopper med at sende hændelser til Trakt. Du kan tilslutte igen når som helst.",
+    "disconnectConfirmBody": "Plexy stopper med at sende hændelser til Trakt. Du kan tilslutte igen når som helst.",
     "scrobble": "Realtids-scrobbling",
     "scrobbleDescription": "Send afspil-, pause- og stop-begivenheder til Trakt under afspilning.",
     "watchedSync": "Synkroniser set-status",
-    "watchedSyncDescription": "Når du markerer elementer som set i Plezy, markeres de også på Trakt."
+    "watchedSyncDescription": "Når du markerer elementer som set i Plexy, markeres de også på Trakt."
   },
   "seerr": {
     "title": "Seerr",
@@ -1896,10 +1896,10 @@
     "signInWithEmby": "Log ind med Emby",
     "signInWithLocal": "Brug en lokal konto",
     "email": "E-mail",
-    "noSignInMethods": "Denne Seerr-instans tilbyder ingen loginmetode, som Plezy understøtter.",
+    "noSignInMethods": "Denne Seerr-instans tilbyder ingen loginmetode, som Plexy understøtter.",
     "instance": "Instans",
     "disconnectConfirm": "Afbryd forbindelsen til Seerr?",
-    "disconnectConfirmBody": "Plezy glemmer denne Seerr-instans. Du kan altid oprette forbindelse igen.",
+    "disconnectConfirmBody": "Plexy glemmer denne Seerr-instans. Du kan altid oprette forbindelse igen.",
     "request": "Anmod",
     "request4k": "Anmod i 4K",
     "seasons": "Sæsoner",
@@ -1936,7 +1936,7 @@
     "scrobble": "Registrer fremgang automatisk",
     "scrobbleDescription": "Opdater din liste, når du er færdig med et afsnit eller en film.",
     "disconnectConfirm": "Afbryd forbindelsen til ${service}?",
-    "disconnectConfirmBody": "Plezy stopper med at opdatere ${service}. Du kan altid oprette forbindelse igen.",
+    "disconnectConfirmBody": "Plexy stopper med at opdatere ${service}. Du kan altid oprette forbindelse igen.",
     "connectFailed": "Kunne ikke forbinde til ${service}. Prøv igen.",
     "names": {
       "mal": "MyAnimeList",
@@ -1946,7 +1946,7 @@
       "mdblist": "MDBList"
     },
     "deviceCode": {
-      "title": "Aktiver Plezy på ${service}",
+      "title": "Aktiver Plexy på ${service}",
       "instructions": "Scan QR-koden, eller gå til adressen nedenfor, og indtast denne kode:",
       "openToActivate": "Åbn ${service} for at aktivere",
       "copyCode": "Kopiér aktiveringskode",
