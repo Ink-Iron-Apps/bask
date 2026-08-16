@@ -76,6 +76,15 @@
                 <data android:scheme="plezy" android:host="play"/>
             </intent-filter>
         </activity>
+        <!-- background_downloader promotes its download worker with
+             FOREGROUND_SERVICE_TYPE_DATA_SYNC, but androidx.work declares this service with no
+             foregroundServiceType at all. startForeground rejects any type that is not a subset
+             of the manifest's, so without this the first background download crashes the process
+             with "foregroundServiceType 0x00000001 is not a subset of ... 0x00000000". -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:replace="android:foregroundServiceType" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
