@@ -5,6 +5,17 @@ import '../utils/formatters.dart';
 
 part 'download_models.freezed.dart';
 
+/// Fewest downloads that may run at once. Zero would stall the queue entirely.
+const minConcurrentDownloads = 1;
+
+/// Most downloads that may run at once. Upstream pinned this to one because Plex
+/// servers can reject concurrent media downloads; the ceiling stops a raised
+/// setting from turning that rejection into every download failing.
+const maxConcurrentDownloads = 5;
+
+/// Concurrency used when the setting has never been written.
+const defaultConcurrentDownloads = 3;
+
 enum DownloadStatus {
   queued,
   downloading,
