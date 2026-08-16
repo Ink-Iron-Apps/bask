@@ -334,8 +334,14 @@ android {
     targetCompatibility = JavaVersion.VERSION_17
   }
 
+  // Provider authorities and FileProvider lookups derive from the applicationId so this
+  // fork installs alongside upstream Plezy instead of colliding with its authorities.
+  buildFeatures {
+    buildConfig = true
+  }
+
   defaultConfig {
-    applicationId = "com.edde746.plezy"
+    applicationId = "com.inknironapps.plexy"
     minSdk = 25 // Fire OS 6.x (API 25); overrides libmpv-android's minSdk=26
     targetSdk = flutter.targetSdkVersion
     versionCode = flutter.versionCode
