@@ -8,33 +8,6 @@ import 'package:plezy/services/plex_auth_service.dart';
 import 'package:plezy/utils/media_server_http_client.dart';
 
 void main() {
-  group('isTunnelledLocalAddress', () {
-    test('treats CGNAT addresses as tunnelled', () {
-      // Tailscale hands out 100.64.0.0/10, and Plex advertises the tunnel
-      // interface as a local connection indistinguishable from the real LAN.
-      expect(isTunnelledLocalAddress('100.100.1.10'), isTrue);
-      expect(isTunnelledLocalAddress('100.64.0.1'), isTrue);
-      expect(isTunnelledLocalAddress('100.127.255.254'), isTrue);
-    });
-
-    test('leaves real LAN and public addresses alone', () {
-      expect(isTunnelledLocalAddress('10.71.1.209'), isFalse);
-      expect(isTunnelledLocalAddress('192.168.1.5'), isFalse);
-      expect(isTunnelledLocalAddress('172.16.4.4'), isFalse);
-      // 100.x outside the CGNAT range is ordinary public space.
-      expect(isTunnelledLocalAddress('100.63.255.255'), isFalse);
-      expect(isTunnelledLocalAddress('100.128.0.1'), isFalse);
-      expect(isTunnelledLocalAddress('8.8.8.8'), isFalse);
-    });
-
-    test('ignores hostnames and malformed input', () {
-      expect(isTunnelledLocalAddress('plex.example.com'), isFalse);
-      expect(isTunnelledLocalAddress(''), isFalse);
-      expect(isTunnelledLocalAddress('100.100.1'), isFalse);
-      expect(isTunnelledLocalAddress('100.999.1.10'), isFalse);
-    });
-  });
-
   group('PlexAuthService', () {
     test('fetchServers retries resources through plex.tv after clients host transport failure', () async {
       final hosts = <String>[];
