@@ -169,6 +169,7 @@ jobs:
           git push origin HEAD:main
 
       - name: Publish release
+        id: publish
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag || steps.version.outputs.tag }}
@@ -180,3 +181,22 @@ jobs:
 
             Install `arm64-v8a` on any modern phone. Signed with the same key as
             previous builds, so it updates in place.
+
+      - name: Finish a release the API left as a draft
+        # Uploading the assets and flipping the release to published are separate
+        # API calls. A transient GitHub error between them leaves a complete build
+        # stranded as a draft, where the in-app updater cannot see it: the
+        # releases/latest endpoint skips drafts entirely.
+        if: failure() && steps.publish.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag || steps.version.outputs.tag }}
+        run: |
+          state=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null || echo missing)
+          if [ "$state" = "true" ]; then
+            echo "Release $TAG was left as a draft; publishing it."
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+          else
+            echo "Release $TAG is $state; nothing to finish."
+            exit 1
+          fi
