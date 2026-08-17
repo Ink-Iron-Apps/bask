@@ -59,8 +59,11 @@ dependencies:
   # Keep the same-filesystem move/resume cleanup; no per-host TLS bypass.
   background_downloader:
     git:
-      url: https://github.com/edde746/background_downloader
-      ref: 021e2075260e324b7440a5c81b57bf0242d35020
+      # Fork of edde746@021e207 adding ForegroundSlot: one task at a time holds the
+      # process's WorkManager foreground service, so a holding queue wider than one
+      # stops cancelling its own workers.
+      url: https://github.com/LightWraith8268/background_downloader
+      ref: 82266e180e02db96f424e5b6e7779be184233376
   sentry_flutter: ^9.25.0
   auto_updater:
     git:
