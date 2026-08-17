@@ -37,12 +37,31 @@ Future<void> closeArtworkHttpClientGracefully({Duration drainTimeout = const Dur
 class PlexImageCacheManager extends ce_cache.DefaultCacheManager {
   static final PlexImageCacheManager instance = PlexImageCacheManager._();
 
+  /// Artwork is kept until the server replaces it rather than expiring on a
+  /// timer.
+  ///
+  /// The previous 14 days / 3000 objects meant a library of any size evicted
+  /// constantly — roughly a thousand items fills three thousand objects once
+  /// poster, thumbnail and backdrop are counted — so scrolling re-downloaded
+  /// artwork that had already been fetched many times.
+  ///
+  /// Expiry is unnecessary here: a Plex artwork URL carries the artwork's
+  /// version, so replaced artwork arrives as a different URL and a kept copy
+  /// cannot be served stale. The count is a backstop against unbounded growth
+  /// from superseded versions, not a working limit; at typical poster sizes it
+  /// is a few gigabytes.
+  static const _artworkRetention = Duration(days: 3650);
+  static const _artworkObjectLimit = 100000;
+
   PlexImageCacheManager._()
     : super(
-        stalePeriod: const Duration(days: 14),
-        maxNrOfCacheObjects: 3000,
+        stalePeriod: _artworkRetention,
+        maxNrOfCacheObjects: _artworkObjectLimit,
         httpClientFactory: () => _SharedHttpClient(_artworkHttpClient.inner, _artworkRequestLimiter),
-        cacheDirectoryProvider: getApplicationCacheDirectory,
+        // Application support, not the cache directory: Android reclaims cache
+        // directories under storage pressure, which would discard the whole
+        // library's artwork at the moment the device is busiest.
+        cacheDirectoryProvider: getApplicationSupportDirectory,
       );
 
   @override

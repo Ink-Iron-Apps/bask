@@ -23,6 +23,51 @@ class _SizedUrlFakeClient implements MediaServerClient {
 MediaItem _item(MediaKind kind) => testMediaItem(kind: kind);
 
 void main() {
+  group('artwork cache key', () {
+    test('ignores the access token so re-auth does not discard the cache', () {
+      // The token appears twice: plain, and inside the encoded url= parameter.
+      const a =
+          'http://s:32400/photo/:/transcode?width=300&height=450&url=%2Flibrary%2Fmetadata%2F1%2Fthumb%2F1699%3FX-Plex-Token%3DAAA&X-Plex-Token=AAA';
+      const b =
+          'http://s:32400/photo/:/transcode?width=300&height=450&url=%2Flibrary%2Fmetadata%2F1%2Fthumb%2F1699%3FX-Plex-Token%3DBBB&X-Plex-Token=BBB';
+
+      expect(MediaImageHelper.debugServerArtworkCacheKey(a), MediaImageHelper.debugServerArtworkCacheKey(b));
+    });
+
+    test('changes when the server replaces the artwork', () {
+      // Plex puts an artwork version in the thumb path, so replaced artwork is a
+      // different URL and a permanently cached copy can never be served stale.
+      const old =
+          'http://s:32400/photo/:/transcode?width=300&url=%2Flibrary%2Fmetadata%2F1%2Fthumb%2F1699&X-Plex-Token=AAA';
+      const updated =
+          'http://s:32400/photo/:/transcode?width=300&url=%2Flibrary%2Fmetadata%2F1%2Fthumb%2F1800&X-Plex-Token=AAA';
+
+      expect(
+        MediaImageHelper.debugServerArtworkCacheKey(old),
+        isNot(MediaImageHelper.debugServerArtworkCacheKey(updated)),
+      );
+    });
+
+    test('keeps different sizes apart', () {
+      const small = 'http://s:32400/photo/:/transcode?width=300&url=%2Fthumb%2F1&X-Plex-Token=AAA';
+      const large = 'http://s:32400/photo/:/transcode?width=900&url=%2Fthumb%2F1&X-Plex-Token=AAA';
+
+      expect(
+        MediaImageHelper.debugServerArtworkCacheKey(small),
+        isNot(MediaImageHelper.debugServerArtworkCacheKey(large)),
+      );
+    });
+
+    test('keeps different items apart', () {
+      const one = 'http://s:32400/photo/:/transcode?width=300&url=%2Flibrary%2Fmetadata%2F1%2Fthumb%2F9';
+      const two = 'http://s:32400/photo/:/transcode?width=300&url=%2Flibrary%2Fmetadata%2F2%2Fthumb%2F9';
+
+      expect(
+        MediaImageHelper.debugServerArtworkCacheKey(one),
+        isNot(MediaImageHelper.debugServerArtworkCacheKey(two)),
+      );
+    });
+  });
   group('MediaImageHelper.getOptimizedImageUrl', () {
     test('adds size hints to absolute Jellyfin artwork URLs', () {
       final url = MediaImageHelper.getOptimizedImageUrl(
