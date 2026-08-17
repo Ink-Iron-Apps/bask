@@ -888,8 +888,8 @@ class Translations$settings$en {
 	/// en: 'Simultaneous downloads'
 	String get concurrentDownloads => 'Simultaneous downloads';
 
-	/// en: 'How many downloads run at once. Most servers only tolerate one — raise this only if yours does, and lower it again if downloads start failing and retrying.'
-	String get concurrentDownloadsDescription => 'How many downloads run at once. Most servers only tolerate one — raise this only if yours does, and lower it again if downloads start failing and retrying.';
+	/// en: 'How many downloads run at once. Extra downloads share your server's throughput rather than adding to it, so raise this to keep a long queue moving, not to make one download faster.'
+	String get concurrentDownloadsDescription => 'How many downloads run at once. Extra downloads share your server\'s throughput rather than adding to it, so raise this to keep a long queue moving, not to make one download faster.';
 
 	/// en: '${count} at a time'
 	String concurrentDownloadsUnit({required Object count}) => '${count} at a time';
@@ -6653,7 +6653,7 @@ extension on Translations {
 			'settings.downloadOnWifiOnly' => 'Download on Wi-Fi only',
 			'settings.downloadOnWifiOnlyDescription' => 'Prevent downloads when on cellular data',
 			'settings.concurrentDownloads' => 'Simultaneous downloads',
-			'settings.concurrentDownloadsDescription' => 'How many downloads run at once. Most servers only tolerate one — raise this only if yours does, and lower it again if downloads start failing and retrying.',
+			'settings.concurrentDownloadsDescription' => 'How many downloads run at once. Extra downloads share your server\'s throughput rather than adding to it, so raise this to keep a long queue moving, not to make one download faster.',
 			'settings.concurrentDownloadsUnit' => ({required Object count}) => '${count} at a time',
 			'settings.concurrentDownloadsLabel' => 'Downloads',
 			'settings.autoRemoveWatchedDownloads' => 'Auto-remove watched downloads',

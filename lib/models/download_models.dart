@@ -10,20 +10,21 @@ const minConcurrentDownloads = 1;
 
 /// Most downloads that may run at once.
 ///
-/// Raising this is genuinely risky, not merely inadvisable. Measured against a
-/// Plex Media Server at three slots, every transfer failed within a second or
-/// two of starting, at 3-7% progress: the task reported waitingToRetry, the
-/// retry produced a fresh task id, the stale-task guard cancelled it, and the
-/// queue thrashed between items without finishing any of them. One slot on the
-/// same server downloads steadily with no retries and no cancellations.
+/// A ceiling rather than a measured limit: three slots were verified against a
+/// Plex server, and each additional slot divides the same server-side
+/// throughput rather than adding to it.
 const maxConcurrentDownloads = 5;
 
 /// Concurrency used when the setting has never been written.
 ///
-/// One, because that is what a Plex server was observed to tolerate. The
-/// setting exists for servers that handle more; the default must not gamble a
-/// working download queue on the assumption that they do.
-const defaultConcurrentDownloads = 1;
+/// Three concurrent downloads were measured running continuously, both in the
+/// foreground and with the app backgrounded and the screen locked. Two earlier
+/// defects made concurrency look impossible and are fixed elsewhere: the
+/// downloader promoted every task to the process's single foreground service
+/// and WorkManager cancelled the ones that lost, and downloads requested the
+/// part as playback so the server evicted each transfer as the next one
+/// started.
+const defaultConcurrentDownloads = 3;
 
 enum DownloadStatus {
   queued,
