@@ -31,6 +31,7 @@ import '../../services/keyboard_shortcuts_service.dart';
 import '../../services/background_work_diagnostics_service.dart';
 import '../../services/settings_service.dart' as settings;
 import '../../widgets/background_download_warning_banner.dart';
+import '../../services/app_update_service.dart';
 import '../../services/update_service.dart';
 import '../../utils/dialogs.dart';
 import '../../utils/snackbar_helper.dart';
@@ -119,6 +120,13 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   // Update checking state
   bool _isCheckingForUpdate = false;
   Map<String, dynamic>? _updateInfo;
+
+  // In-app updater (Android sideloads)
+  final AppUpdateService _appUpdateService = AppUpdateService();
+  AvailableUpdate? _appUpdate;
+  bool _isCheckingAppUpdate = false;
+  String? _appUpdateError;
+  double? _appUpdateProgress;
 
   @override
   void initState() {
@@ -583,7 +591,95 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
     subtitle: t.settings.autoCheckUpdatesOnStartupDescription,
   );
 
+  /// Android sideloads update themselves from the private release mirror; every
+  /// other platform keeps the upstream check-and-open-a-link behaviour.
+  Widget _buildInAppUpdateSection() {
+    final update = _appUpdate;
+    final downloading = _appUpdateProgress != null;
+    final subtitle = switch (null) {
+      _ when _appUpdateError != null => _appUpdateError!,
+      _ when downloading => t.settings.downloadingUpdate(percent: ((_appUpdateProgress ?? 0) * 100).round().toString()),
+      _ when update != null => t.update.versionAvailable(version: update.version),
+      _ => null,
+    };
+
+    return SettingsGroup(
+      title: t.settings.updates,
+      children: [
+        FocusableListTile(
+          focusNode: _focusTracker.get(_kCheckForUpdates),
+          leading: AppIcon(
+            update != null ? Symbols.system_update_rounded : Symbols.check_circle_rounded,
+            fill: 1,
+            color: update != null ? Theme.of(context).colorScheme.primary : null,
+          ),
+          title: Text(update != null ? t.settings.installUpdate : t.settings.checkForUpdates),
+          subtitle: subtitle == null ? null : Text(subtitle),
+          trailing: (_isCheckingAppUpdate || downloading)
+              ? const LoadingIndicatorBox(size: 24)
+              : const AppIcon(Symbols.chevron_right_rounded, fill: 1),
+          onTap: (_isCheckingAppUpdate || downloading)
+              ? null
+              : () => update != null ? _installAppUpdate(update) : _checkAppUpdate(),
+        ),
+        _buildAutoCheckUpdatesOnStartupTile(),
+      ],
+    );
+  }
+
+  Future<void> _checkAppUpdate() async {
+    setStateIfMounted(() {
+      _isCheckingAppUpdate = true;
+      _appUpdateError = null;
+    });
+    try {
+      final found = await _appUpdateService.checkForUpdate();
+      setStateIfMounted(() {
+        _appUpdate = found;
+        _isCheckingAppUpdate = false;
+        // A successful check with nothing newer still deserves a word, or the
+        // row looks like it did nothing.
+        _appUpdateError = found == null ? t.settings.upToDate : null;
+      });
+    } on AppUpdateException catch (e) {
+      setStateIfMounted(() {
+        _isCheckingAppUpdate = false;
+        _appUpdateError = e.message;
+      });
+    } catch (e) {
+      setStateIfMounted(() {
+        _isCheckingAppUpdate = false;
+        _appUpdateError = '$e';
+      });
+    }
+  }
+
+  Future<void> _installAppUpdate(AvailableUpdate update) async {
+    setStateIfMounted(() {
+      _appUpdateProgress = 0;
+      _appUpdateError = null;
+    });
+    try {
+      await _appUpdateService.downloadAndInstall(
+        update,
+        onProgress: (p) => setStateIfMounted(() => _appUpdateProgress = p),
+      );
+      setStateIfMounted(() => _appUpdateProgress = null);
+    } on AppUpdateException catch (e) {
+      setStateIfMounted(() {
+        _appUpdateProgress = null;
+        _appUpdateError = e.message;
+      });
+    } catch (e) {
+      setStateIfMounted(() {
+        _appUpdateProgress = null;
+        _appUpdateError = '$e';
+      });
+    }
+  }
+
   Widget _buildUpdateSection() {
+    if (_appUpdateService.isSupported) return _buildInAppUpdateSection();
     if (UpdateService.useNativeUpdater) {
       return SettingsGroup(
         title: t.settings.updates,
