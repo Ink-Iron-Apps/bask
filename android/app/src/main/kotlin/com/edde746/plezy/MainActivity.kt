@@ -95,6 +95,7 @@ class MainActivity : FlutterActivity() {
   private val TEXT_INPUT_CHANNEL = "com.plezy/text_input"
   private val APP_EXIT_CHANNEL = "com.plezy/app_exit"
   private val CAR_RESTRICTIONS_CHANNEL = "com.plezy/car_restrictions"
+  private val APK_INSTALL_CHANNEL = "com.plezy/apk_install"
   private var watchNextPlugin: WatchNextPlugin? = null
   private var carRestrictions: CarRestrictionsMonitor? = null
   private var carRestrictionsChannel: MethodChannel? = null
@@ -111,6 +112,7 @@ class MainActivity : FlutterActivity() {
   private var flutterSurfaceReconnectPending = false
   private var activityStarted = false
   private val externalPlayerChannel = ExternalPlayerChannel(this)
+  private val apkInstallChannel = ApkInstallChannel(this)
   private val exitDiagnosticsRequested = AtomicBoolean(false)
 
   private inline fun logTextInputDiag(message: () -> String) {
@@ -734,6 +736,9 @@ class MainActivity : FlutterActivity() {
       when (call.method) {
         "getTvDetection" -> result.success(getAndroidTvDetection())
         "getDeviceName" -> result.success(getDeviceName())
+        // Ordered by preference, so the updater picks the ABI this device
+        // actually runs rather than guessing from the release's asset list.
+        "getSupportedAbis" -> result.success(android.os.Build.SUPPORTED_ABIS.toList())
         "getPerformanceSignals" -> result.success(getPerformanceSignals())
         "getBackgroundWorkSignals" -> result.success(
           BackgroundWorkClassifier.toMap(BackgroundWorkDiagnostics.read(this))
@@ -777,6 +782,10 @@ class MainActivity : FlutterActivity() {
         }
         else -> result.notImplemented()
       }
+    }
+
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, APK_INSTALL_CHANNEL).setMethodCallHandler { call, result ->
+      apkInstallChannel.handle(call, result)
     }
 
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_ADJUSTMENT_CHANNEL).setMethodCallHandler { call, result ->

@@ -777,6 +777,15 @@ class Translations$settings$en {
 	/// en: 'Update Available'
 	String get updateAvailable => 'Update Available';
 
+	/// en: 'Install update'
+	String get installUpdate => 'Install update';
+
+	/// en: 'Downloading… ${percent}%'
+	String downloadingUpdate({required Object percent}) => 'Downloading… ${percent}%';
+
+	/// en: 'You are on the latest version'
+	String get upToDate => 'You are on the latest version';
+
 	/// en: 'Check for Updates'
 	String get checkForUpdates => 'Check for Updates';
 
@@ -6616,6 +6625,9 @@ extension on Translations {
 			'settings.aboutDescription' => 'App information and licenses',
 			'settings.updates' => 'Updates',
 			'settings.updateAvailable' => 'Update Available',
+			'settings.installUpdate' => 'Install update',
+			'settings.downloadingUpdate' => ({required Object percent}) => 'Downloading… ${percent}%',
+			'settings.upToDate' => 'You are on the latest version',
 			'settings.checkForUpdates' => 'Check for Updates',
 			'settings.autoCheckUpdatesOnStartup' => 'Automatically check for updates on startup',
 			'settings.autoCheckUpdatesOnStartupDescription' => 'Notify when an update is available at launch',
@@ -6904,11 +6916,11 @@ extension on Translations {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This deletes all ${n} episode in it, and its file.', other: 'This deletes all ${n} episodes in it, and their files.', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This item is stored as ${n} file, which will be deleted.', other: 'This item is stored across ${n} files, and all of them will be deleted.', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} other episode is stored in the same file and will be deleted too:', other: '${n} other episodes are stored in the same file and will be deleted too:', ), 
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.',
 			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Your server did not provide file details for this item, so Plexy cannot check which files this will remove. It may delete more than the item named above.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Media item deleted successfully',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.mediaFailedToDelete' => 'Failed to delete media item',
 			'mediaMenu.rate' => 'Rate',
 			'mediaMenu.playFromBeginning' => 'Play from Beginning',
@@ -7418,11 +7430,11 @@ extension on Translations {
 			'explore.addedToWatchlist' => 'Added to watchlist',
 			'explore.removedFromWatchlist' => 'Removed from watchlist',
 			'explore.watchlistUpdateFailed' => 'Couldn\'t update watchlist',
+			_ => null,
+		} ?? switch (path) {
 			'explore.watchlistNoMatch' => 'Couldn\'t match this item to a watchlist',
 			'explore.notInLibrary' => 'Not in your library',
 			'explore.inTheseLibraries' => 'In these libraries',
-			_ => null,
-		} ?? switch (path) {
 			'explore.checkingLibrary' => 'Checking your library...',
 			'explore.emptyTitle' => 'Nothing here yet',
 			'explore.emptyMessage' => ({required Object source}) => 'Rows from ${source} will appear here once they have content.',
@@ -7932,11 +7944,11 @@ extension on Translations {
 			'companionRemote.errors.serverStartFailed' => ({required Object error}) => 'Failed to start remote server: ${error}',
 			'companionRemote.errors.commandFailed' => ({required Object error}) => 'Failed to send remote command: ${error}',
 			'companionRemote.errors.joinTimedOut' => 'Timed out joining session',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.errors.failedToConnectAnyAddress' => 'Failed to connect to any address',
 			'companionRemote.errors.connectionLostAfterAttempts' => ({required Object attempts}) => 'Connection lost after ${attempts} attempts',
 			'companionRemote.errors.connectionLost' => 'Connection lost',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.closedBeforeAuth' => 'The connection closed before authentication',
 			'videoSettings.playbackSpeed' => 'Playback Speed',
 			'videoSettings.normalSpeed' => 'Normal',

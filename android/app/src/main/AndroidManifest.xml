@@ -18,6 +18,9 @@
     <uses-permission android:name="android.permission.REORDER_TASKS"/>
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Sideloaded builds update themselves from a GitHub release; the system installer
+         still shows its own confirmation, which a sideloaded app cannot bypass. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
 
     <!-- Explicitly remove media permissions that media_kit may add -->
