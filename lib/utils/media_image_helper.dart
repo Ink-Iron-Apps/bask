@@ -327,6 +327,16 @@ class MediaImageHelper {
   static final _serverArtworkCacheKeys = <String, String>{};
   static const _serverArtworkCacheKeyLimit = 512;
 
+  @visibleForTesting
+  static String debugServerArtworkCacheKey(String imageUrl) => _serverArtworkCacheKey(imageUrl);
+
+  /// Access tokens, which change on re-auth and on every profile switch and say
+  /// nothing about which image this is.
+  static final _volatileAuthParams = RegExp(
+    r'(X-Plex-Token|api_key|ApiKey|X-Emby-Token)(=|%3D)[^&%]*',
+    caseSensitive: false,
+  );
+
   static String _serverArtworkCacheKey(String imageUrl) {
     final cached = _serverArtworkCacheKeys.remove(imageUrl);
     if (cached != null) {
@@ -334,7 +344,14 @@ class MediaImageHelper {
       return cached;
     }
 
-    final key = 'plex_optimized_${sha1.convert(utf8.encode(imageUrl))}';
+    // Key on the artwork's identity, not the credential used to fetch it. The
+    // token appears both plainly and inside the encoded `url=` parameter, and
+    // hashing it in meant a re-auth or profile switch silently discarded every
+    // cached poster. What remains — item, artwork version and requested size —
+    // still changes whenever the server replaces the artwork, so a permanently
+    // cached image cannot be served stale.
+    final identity = imageUrl.replaceAll(_volatileAuthParams, '');
+    final key = 'plex_optimized_${sha1.convert(utf8.encode(identity))}';
     if (_serverArtworkCacheKeys.length >= _serverArtworkCacheKeyLimit) {
       _serverArtworkCacheKeys.remove(_serverArtworkCacheKeys.keys.first);
     }
