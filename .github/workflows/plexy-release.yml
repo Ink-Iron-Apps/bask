@@ -157,17 +157,6 @@ jobs:
             [ -f "app-$abi-release.apk" ] && mv "app-$abi-release.apk" "Plexy-${TAG}-${abi}.apk"
           done
 
-      - name: Record the bumped version
-        # Committed after a successful build, so a failed run does not leave the
-        # repository claiming a version that was never released. [skip ci] keeps
-        # this from triggering another release of itself.
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pubspec.yaml
-          git commit -m "chore(release): ${{ steps.version.outputs.tag }} [skip ci]" || exit 0
-          git push origin HEAD:main
-
       - name: Publish release
         # gh with a real backoff rather than an action that gives up after three
         # rapid retries: GitHub answers "No server is currently available" often
@@ -205,3 +194,15 @@ jobs:
           count=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets | length')
           echo "$TAG published with $count asset(s)"
           [ "$count" -gt 0 ] || { echo "::error::Release $TAG has no assets"; exit 1; }
+
+      - name: Record the bumped version
+        # Only after the release exists and carries its APKs. Committing earlier
+        # left main claiming a version no release had, so the next run bumped from
+        # a version that was never published. [skip ci] keeps this commit from
+        # triggering a release of itself.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore(release): ${{ steps.version.outputs.tag }} [skip ci]" || exit 0
+          git push origin HEAD:main
