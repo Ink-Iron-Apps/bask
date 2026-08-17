@@ -4434,8 +4434,11 @@ class PlexClient
         );
       }
     }
+    // Request the part as a download, not playback: playback requests open a
+    // session per request and the server keeps only one per client, so
+    // concurrent downloads evict each other. See [asPlexDownload].
     return DownloadResolution(
-      videoUrl: playbackData.videoUrl,
+      videoUrl: playbackData.videoUrl?.asPlexDownload(),
       mediaSourceId: playbackData.mediaInfo?.mediaSourceId,
       externalSubtitles: subtitles,
     );
