@@ -16,12 +16,16 @@ import '../utils/app_logger.dart';
 /// never updates is worse than one that says why.
 const _updateReadToken = String.fromEnvironment('UPDATE_READ_TOKEN');
 
-/// Releases live in their own private repository, holding built artifacts and
-/// nothing else, so the token embedded in the APK can never read source or
-/// history even if the APK is shared.
+/// Releases are read straight from the private source repository.
+///
+/// A separate artifacts-only mirror would keep the embedded token away from
+/// source if a build were shared, which is worth doing for a distributed app.
+/// This one is built for a single device and never handed out, so the mirror
+/// would add a repository, a second token and a CI step to guard against
+/// something that cannot happen here.
 const _releasesApiBase = String.fromEnvironment(
   'UPDATE_RELEASES_REPO',
-  defaultValue: 'https://api.github.com/repos/LightWraith8268/plexy-releases',
+  defaultValue: 'https://api.github.com/repos/LightWraith8268/plexy',
 );
 
 /// Whether [latest] is a higher version than [current].
