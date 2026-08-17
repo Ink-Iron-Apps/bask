@@ -132,19 +132,3 @@ jobs:
 
             Install `arm64-v8a` on any modern phone. Signed with the same key as
             previous builds, so it updates in place.
-
-      - name: Mirror APKs for the in-app updater
-        # The installed app polls this mirror, which holds artifacts only, so the
-        # token it carries can never reach source or history.
-        env:
-          GH_TOKEN: ${{ secrets.RELEASES_WRITE_TOKEN }}
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "::warning::RELEASES_WRITE_TOKEN is not set — skipping mirror. The in-app updater will not see this release."
-            exit 0
-          fi
-          gh release create "${{ steps.meta.outputs.tag }}" \
-            --repo LightWraith8268/plexy-releases \
-            --title "Plexy ${{ steps.meta.outputs.tag }}" \
-            --notes "Artifacts for ${{ steps.meta.outputs.tag }} (source commit ${{ github.sha }})." \
-            build/app/outputs/flutter-apk/Plexy-*.apk
