@@ -5,27 +5,6 @@ import '../utils/formatters.dart';
 
 part 'download_models.freezed.dart';
 
-/// Fewest downloads that may run at once. Zero would stall the queue entirely.
-const minConcurrentDownloads = 1;
-
-/// Most downloads that may run at once.
-///
-/// A ceiling rather than a measured limit: three slots were verified against a
-/// Plex server, and each additional slot divides the same server-side
-/// throughput rather than adding to it.
-const maxConcurrentDownloads = 5;
-
-/// Concurrency used when the setting has never been written.
-///
-/// Three concurrent downloads were measured running continuously, both in the
-/// foreground and with the app backgrounded and the screen locked. Two earlier
-/// defects made concurrency look impossible and are fixed elsewhere: the
-/// downloader promoted every task to the process's single foreground service
-/// and WorkManager cancelled the ones that lost, and downloads requested the
-/// part as playback so the server evicted each transfer as the next one
-/// started.
-const defaultConcurrentDownloads = 3;
-
 enum DownloadStatus {
   queued,
   downloading,

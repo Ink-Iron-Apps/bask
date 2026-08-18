@@ -894,18 +894,6 @@ class Translations$settings$en {
 	/// en: 'Prevent downloads when on cellular data'
 	String get downloadOnWifiOnlyDescription => 'Prevent downloads when on cellular data';
 
-	/// en: 'Simultaneous downloads'
-	String get concurrentDownloads => 'Simultaneous downloads';
-
-	/// en: 'How many downloads run at once. Extra downloads share your server's throughput rather than adding to it, so raise this to keep a long queue moving, not to make one download faster.'
-	String get concurrentDownloadsDescription => 'How many downloads run at once. Extra downloads share your server\'s throughput rather than adding to it, so raise this to keep a long queue moving, not to make one download faster.';
-
-	/// en: '${count} at a time'
-	String concurrentDownloadsUnit({required Object count}) => '${count} at a time';
-
-	/// en: 'Downloads'
-	String get concurrentDownloadsLabel => 'Downloads';
-
 	/// en: 'Auto-remove watched downloads'
 	String get autoRemoveWatchedDownloads => 'Auto-remove watched downloads';
 
@@ -6664,10 +6652,6 @@ extension on Translations {
 			'settings.downloadLocationPickerUnavailable' => 'Folder selection is not available on this device',
 			'settings.downloadOnWifiOnly' => 'Download on Wi-Fi only',
 			'settings.downloadOnWifiOnlyDescription' => 'Prevent downloads when on cellular data',
-			'settings.concurrentDownloads' => 'Simultaneous downloads',
-			'settings.concurrentDownloadsDescription' => 'How many downloads run at once. Extra downloads share your server\'s throughput rather than adding to it, so raise this to keep a long queue moving, not to make one download faster.',
-			'settings.concurrentDownloadsUnit' => ({required Object count}) => '${count} at a time',
-			'settings.concurrentDownloadsLabel' => 'Downloads',
 			'settings.autoRemoveWatchedDownloads' => 'Auto-remove watched downloads',
 			'settings.autoRemoveWatchedDownloadsDescription' => 'Delete watched downloads automatically',
 			'settings.cellularDownloadBlocked' => 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.',
@@ -6916,12 +6900,12 @@ extension on Translations {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This deletes all ${n} episode in it, and its file.', other: 'This deletes all ${n} episodes in it, and their files.', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This item is stored as ${n} file, which will be deleted.', other: 'This item is stored across ${n} files, and all of them will be deleted.', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} other episode is stored in the same file and will be deleted too:', other: '${n} other episodes are stored in the same file and will be deleted too:', ), 
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.',
 			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Your server did not provide file details for this item, so Plexy cannot check which files this will remove. It may delete more than the item named above.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Media item deleted successfully',
 			'mediaMenu.mediaFailedToDelete' => 'Failed to delete media item',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.rate' => 'Rate',
 			'mediaMenu.playFromBeginning' => 'Play from Beginning',
 			'mediaMenu.playVersion' => 'Play Version...',
@@ -7430,12 +7414,12 @@ extension on Translations {
 			'explore.addedToWatchlist' => 'Added to watchlist',
 			'explore.removedFromWatchlist' => 'Removed from watchlist',
 			'explore.watchlistUpdateFailed' => 'Couldn\'t update watchlist',
-			_ => null,
-		} ?? switch (path) {
 			'explore.watchlistNoMatch' => 'Couldn\'t match this item to a watchlist',
 			'explore.notInLibrary' => 'Not in your library',
 			'explore.inTheseLibraries' => 'In these libraries',
 			'explore.checkingLibrary' => 'Checking your library...',
+			_ => null,
+		} ?? switch (path) {
 			'explore.emptyTitle' => 'Nothing here yet',
 			'explore.emptyMessage' => ({required Object source}) => 'Rows from ${source} will appear here once they have content.',
 			'explore.searchHint' => ({required Object source}) => 'Search ${source}',
@@ -7944,12 +7928,12 @@ extension on Translations {
 			'companionRemote.errors.serverStartFailed' => ({required Object error}) => 'Failed to start remote server: ${error}',
 			'companionRemote.errors.commandFailed' => ({required Object error}) => 'Failed to send remote command: ${error}',
 			'companionRemote.errors.joinTimedOut' => 'Timed out joining session',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.errors.failedToConnectAnyAddress' => 'Failed to connect to any address',
 			'companionRemote.errors.connectionLostAfterAttempts' => ({required Object attempts}) => 'Connection lost after ${attempts} attempts',
 			'companionRemote.errors.connectionLost' => 'Connection lost',
 			'companionRemote.closedBeforeAuth' => 'The connection closed before authentication',
+			_ => null,
+		} ?? switch (path) {
 			'videoSettings.playbackSpeed' => 'Playback Speed',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Active (${duration})',

@@ -167,11 +167,6 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     return _downloadManager.resetDownloadLocation();
   }
 
-  /// Re-size the holding queue after the concurrency setting changes.
-  Future<void> applyConcurrentDownloadLimit(int concurrentDownloads) {
-    return _downloadManager.applyConcurrentDownloadLimit(concurrentDownloads);
-  }
-
   /// Switch the visible sync-rule scope to [profileId]. Physical downloads are
   /// intentionally not reloaded because they are shared across profiles.
   void setActiveProfileId(String? profileId) {
