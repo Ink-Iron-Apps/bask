@@ -89,6 +89,7 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
                 if (downmixOn) _downmixNormalizeTile(),
                 if (exoActive) _dvConversionModeTile(),
                 _bufferSizeTile(),
+                _diskCacheTile(),
                 if (exoActive) _playbackBufferTile(),
                 _defaultQualityTile(),
                 _musicQualityTile(),
@@ -424,6 +425,22 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
       },
     );
   }
+
+  Widget _diskCacheTile() => SettingSelectionTile<int>(
+    pref: SettingsService.diskCacheSizeGB,
+    icon: Symbols.hard_drive_2_rounded,
+    title: t.settings.diskCache,
+    subtitleBuilder: (v) => v == 0
+        ? t.settings.diskCacheOff
+        : '${t.settings.diskCacheGB(size: v.toString())} · ${t.settings.diskCacheDescription}',
+    options: const [
+      0,
+      2,
+      4,
+      8,
+      16,
+    ].map((s) => DialogOption(value: s, title: s == 0 ? t.settings.diskCacheOff : '$s GB')).toList(),
+  );
 
   Widget _playbackBufferTile() => SettingSelectionTile<PlaybackBufferTier>(
     pref: SettingsService.playbackBufferTier,

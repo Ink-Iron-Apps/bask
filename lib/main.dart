@@ -32,6 +32,7 @@ import 'profiles/plex_home_service.dart';
 import 'screens/auth_screen.dart';
 import 'screens/profile/pin_entry_dialog.dart';
 import 'screens/profile/profile_switch_screen.dart';
+import 'services/playback_disk_cache.dart';
 import 'services/storage_service.dart';
 import 'services/device_performance.dart';
 import 'services/macos_window_service.dart';
@@ -151,6 +152,10 @@ void _bootstrapApp() {
 
   // Off the critical path: the version label only decorates a diagnostic.
   unawaited(_primeDiagnosticsVersion());
+
+  // Also off the critical path: sweep playback buffers left behind by a session
+  // that ended without mpv cleaning up after itself.
+  unawaited(PlaybackDiskCache.pruneDefault());
 
   AndroidExitDiagnostics.markStartupPhase(AndroidStartupPhase.runApp);
   runApp(

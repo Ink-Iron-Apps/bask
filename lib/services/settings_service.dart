@@ -542,6 +542,13 @@ class SettingsService extends BaseSharedPreferencesService {
   static const exitFullscreenOnPlayerClose = BoolPref('exit_fullscreen_on_player_close');
 
   static const bufferSize = _BufferSizePref();
+
+  /// Gigabytes of read-ahead to keep on disk, or 0 to buffer in memory only.
+  ///
+  /// The in-memory buffer is bounded by the device heap, which on a phone is a
+  /// minute or two of a high-bitrate stream — pausing to get ahead of a weak
+  /// connection barely helps. Buffering to storage lifts that ceiling.
+  static const diskCacheSizeGB = IntPref('disk_cache_size_gb', defaultValue: 4);
   static const playbackBufferTier = EnumPref<PlaybackBufferTier>(
     'playback_buffer_tier',
     values: PlaybackBufferTier.values,
@@ -979,6 +986,7 @@ class SettingsService extends BaseSharedPreferencesService {
     themeMode,
     videoPlayerNavigationEnabled,
     bufferSize,
+    diskCacheSizeGB,
     playbackBufferTier,
     libraryDensity,
     automotiveUiScale,
