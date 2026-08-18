@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:drift/drift.dart' show Value;
 import '../media/ids.dart';
 import 'package:flutter/foundation.dart';
 import '../i18n/strings.g.dart';
@@ -97,6 +99,10 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   // (profileId|serverId:ratingKey). Downloads remain public/shared.
   final Map<String, SyncRuleItem> _syncRules = {};
 
+  /// Rules whose display name has already been fetched this session, so a
+  /// server that answers with nothing is not asked again on every rebuild.
+  final Set<String> _titleBackfillAttempted = {};
+
   /// Download keys each sync rule pulled in, keyed by the rule's global key.
   /// Mirrors the SyncRuleDownloads table so the downloads screen can group a
   /// playlist's contents under it without touching the database per rebuild.
@@ -181,6 +187,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     _ownedDownloadKeys.clear();
     _syncRules.clear();
     _syncRuleDownloadKeys.clear();
+    _titleBackfillAttempted.clear();
     _metadata.clear();
     _activeProfileId = profileId;
     _metadataStore.setActiveProfileId(profileId);
@@ -294,6 +301,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     _ownedDownloadKeys.clear();
     _syncRules.clear();
     _syncRuleDownloadKeys.clear();
+    _titleBackfillAttempted.clear();
     safeNotifyListeners();
   }
 
@@ -1875,6 +1883,47 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   }
 
   /// Update the episode count for an existing show/season sync rule.
+  /// Fetches display names for rules that never stored one.
+  ///
+  /// Rules created before the title column existed fall back to the raw rating
+  /// key — a bare number in the sync rules list, and "unknown playlist" in the
+  /// downloads tree. The name only lives on the server, so ask for it once and
+  /// persist it. Rules whose server is offline are left for a later pass rather
+  /// than being marked as attempted.
+  Future<void> backfillSyncRuleTitles(MediaServerClient? Function(ServerId serverId) clientFor) async {
+    final pending = _syncRules.values
+        .where((rule) => (rule.title ?? '').isEmpty && !_titleBackfillAttempted.contains(rule.globalKey))
+        .toList();
+    if (pending.isEmpty) return;
+
+    var changed = false;
+    for (final rule in pending) {
+      final client = clientFor(ServerId(rule.serverId));
+      if (client == null) continue;
+      _titleBackfillAttempted.add(rule.globalKey);
+      try {
+        final item = await client.fetchItem(rule.ratingKey);
+        final title = item?.title;
+        if (title == null || title.isEmpty) continue;
+
+        await _database.updateSyncRuleTitle(rule.globalKey, title);
+        final existing = _syncRules[rule.globalKey];
+        if (existing == null) continue;
+        _syncRules[rule.globalKey] = existing.copyWith(title: Value(title));
+        // The rules screen prefers live metadata over the stored name; seed it
+        // so both surfaces agree without a second fetch.
+        final publicGlobalKey = buildGlobalKey(ServerId(rule.serverId), rule.ratingKey);
+        if (item != null && !_metadata.containsKey(publicGlobalKey)) {
+          _metadata[publicGlobalKey] = item;
+        }
+        changed = true;
+      } catch (e) {
+        appLogger.d('Sync rule ${rule.globalKey}: title backfill failed', error: e);
+      }
+    }
+    if (changed) safeNotifyListeners();
+  }
+
   Future<void> updateSyncRuleCount(String globalKey, int episodeCount) async {
     _requireActiveProfileId();
     await _database.updateSyncRuleCount(globalKey, episodeCount);
