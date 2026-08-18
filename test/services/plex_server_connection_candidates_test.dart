@@ -78,10 +78,7 @@ void main() {
         ),
       ).withCustomEndpoints(const ['http://desktop.tail66425b.ts.net:32400']);
 
-      expect(
-        server.networkClassForUrl('http://desktop.tail66425b.ts.net:32400'),
-        PlexNetworkClass.local,
-      );
+      expect(server.networkClassForUrl('http://desktop.tail66425b.ts.net:32400'), PlexNetworkClass.local);
     });
 
     test('ignores blank and unparseable custom endpoints', () {
@@ -163,12 +160,7 @@ void main() {
             uri: 'http://100.101.102.103:32400',
             local: true,
           ),
-          _connectionJson(
-            protocol: 'https',
-            address: 'plex.example.com',
-            port: 443,
-            uri: 'https://plex.example.com',
-          ),
+          _connectionJson(protocol: 'https', address: 'plex.example.com', port: 443, uri: 'https://plex.example.com'),
         ]),
       );
 
