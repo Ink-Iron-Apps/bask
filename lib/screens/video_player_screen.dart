@@ -60,6 +60,7 @@ import '../services/multi_server_manager.dart';
 import '../services/offline_watch_sync_service.dart';
 import '../services/display_mode_service.dart';
 import '../services/media_control_router.dart';
+import '../services/playback_disk_cache.dart';
 import '../services/settings_service.dart';
 import '../services/sleep_timer_service.dart';
 import '../services/subtitle_preference.dart';
@@ -1364,13 +1365,38 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
       if (Platform.isIOS || Platform.isMacOS) {
         await currentPlayer.setProperty('dv-conversion-log', debugLoggingEnabled ? 'yes' : 'no');
       }
-      if (bufferSizeMB > 0) {
+      // Buffering to storage rather than the heap. The heap tiers below exist to
+      // keep mpv from being OOM-killed; once the payload lives on disk that
+      // ceiling no longer applies, so the read-ahead can be large enough that
+      // pausing on a weak connection actually builds a lead.
+      final diskCacheGB = settingsService.read(SettingsService.diskCacheSizeGB);
+      var diskCacheActive = false;
+      if (diskCacheGB > 0) {
+        final cacheDirectory = await PlaybackDiskCache.ensureDirectory();
+        if (!_isPlayerInitializationCurrent(generation)) return;
+        if (cacheDirectory != null) {
+          try {
+            await currentPlayer.setProperty('cache', 'yes');
+            await currentPlayer.setProperty('demuxer-cache-dir', cacheDirectory.path);
+            await currentPlayer.setProperty('cache-on-disk', 'yes');
+            await currentPlayer.setProperty('demuxer-max-bytes', '${diskCacheGB * 1024 * 1024 * 1024}');
+            diskCacheActive = true;
+          } catch (e) {
+            // A build without on-disk cache support: fall back to the memory
+            // tiers rather than leaving the player unconfigured.
+            appLogger.w('On-disk playback cache unavailable; using memory buffer', error: e);
+          }
+          unawaited(PlaybackDiskCache.prune(cacheDirectory));
+        }
+      }
+
+      if (!diskCacheActive && bufferSizeMB > 0) {
         final bufferSizeBytes = bufferSizeMB * 1024 * 1024;
         await currentPlayer.setProperty('demuxer-max-bytes', bufferSizeBytes.toString());
         final backBytes = bufferSizeBytes ~/ 4;
         await currentPlayer.setProperty('demuxer-max-back-bytes', backBytes.toString());
       }
-      if (Platform.isAndroid) {
+      if (Platform.isAndroid && !diskCacheActive) {
         // Cap demuxer buffers based on device heap to prevent OOM crashes.
         // Without limits, mpv defaults can consume 225MB+ just for demuxer
         // buffering, which combined with decoded frames and GPU textures
