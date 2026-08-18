@@ -88,15 +88,7 @@ jobs:
         run: flutter pub get
 
       - name: Run tests
-        # Two known-bad tests are excluded rather than silenced: the backdrop test
-        # fails the same way on unmodified upstream, and the LAN discovery test is
-        # a flaky UDP loopback timing check.
-        run: |
-          flutter test \
-            --exclude-tags none \
-            $(find test -name '*_test.dart' \
-              ! -name 'cycling_media_backdrop_test.dart' \
-              ! -name 'jellyfin_lan_discovery_service_test.dart' | tr '\n' ' ')
+        run: flutter test
 
       - name: Bump version from conventional commits
         id: version
