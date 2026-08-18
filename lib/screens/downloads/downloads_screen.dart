@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -61,6 +62,13 @@ class DownloadsScreenState extends State<DownloadsScreen>
   void initState() {
     super.initState();
     initTabNavigation();
+    // Rules created before names were stored show a bare rating key until the
+    // server is asked what it is called.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final servers = context.read<MultiServerProvider>();
+      unawaited(context.read<DownloadProvider>().backfillSyncRuleTitles(servers.getClientForServer));
+    });
   }
 
   @override
@@ -268,10 +276,15 @@ List<DownloadPlaylistGroup> _playlistGroups(DownloadProvider provider) {
     if (rule.targetType != ContentTypes.playlist) continue;
     final memberKeys = membership[rule.globalKey];
     if (memberKeys == null || memberKeys.isEmpty) continue;
+
+    // Same precedence as the sync rules screen: live metadata, then the name
+    // stored on the rule, so the two surfaces never disagree.
+    final publicGlobalKey = buildGlobalKey(ServerId(rule.serverId), rule.ratingKey);
+    final title = provider.metadata[publicGlobalKey]?.title ?? rule.title;
     groups.add(
       DownloadPlaylistGroup(
         key: rule.globalKey,
-        title: rule.title ?? t.downloads.unknownPlaylist,
+        title: (title == null || title.isEmpty) ? t.downloads.unknownPlaylist : title,
         memberKeys: memberKeys,
       ),
     );
