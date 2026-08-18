@@ -46,6 +46,77 @@ MediaItem _episodeMeta({
 );
 
 void main() {
+  group('buildDownloadTree ordering', () {
+    MediaItem movieMeta(String id, String title) => testMediaItem(
+      id: id,
+      backend: MediaBackend.plex,
+      kind: MediaKind.movie,
+      title: title,
+      serverId: ServerId('plex1'),
+    );
+
+    DownloadProgress progress(String globalKey, DownloadStatus status) =>
+        DownloadProgress(globalKey: globalKey, status: status);
+
+    test('a downloading show outranks a completed movie', () {
+      // Categories used to be concatenated movies-then-shows, so a show being
+      // downloaded right now sank below every finished movie.
+      final downloads = {
+        'plex1:movie1': progress('plex1:movie1', DownloadStatus.completed),
+        'plex1:ep1': progress('plex1:ep1', DownloadStatus.downloading),
+      };
+      final metadata = {
+        'plex1:movie1': movieMeta('movie1', 'Finished Movie'),
+        'plex1:ep1': _episodeMeta(id: 'ep1', serverId: ServerId('plex1'), grandparentId: '42', parentId: '7'),
+      };
+
+      final tree = buildDownloadTree(downloads: downloads, metadata: metadata);
+
+      expect(tree.first.type, DownloadNodeType.show);
+      expect(tree.first.status, DownloadStatus.downloading);
+    });
+
+    test('queued and paused items also sort above completed ones', () {
+      final downloads = {
+        'plex1:movie1': progress('plex1:movie1', DownloadStatus.completed),
+        'plex1:movie2': progress('plex1:movie2', DownloadStatus.queued),
+        'plex1:movie3': progress('plex1:movie3', DownloadStatus.paused),
+        'plex1:movie4': progress('plex1:movie4', DownloadStatus.downloading),
+      };
+      final metadata = {
+        'plex1:movie1': movieMeta('movie1', 'A Completed'),
+        'plex1:movie2': movieMeta('movie2', 'B Queued'),
+        'plex1:movie3': movieMeta('movie3', 'C Paused'),
+        'plex1:movie4': movieMeta('movie4', 'D Downloading'),
+      };
+
+      final tree = buildDownloadTree(downloads: downloads, metadata: metadata);
+
+      expect(tree.map((n) => n.status).take(3), [
+        DownloadStatus.downloading,
+        DownloadStatus.queued,
+        DownloadStatus.paused,
+      ]);
+      expect(tree.last.status, DownloadStatus.completed);
+    });
+
+    test('a failed item stays below active work', () {
+      final downloads = {
+        'plex1:movie1': progress('plex1:movie1', DownloadStatus.failed),
+        'plex1:movie2': progress('plex1:movie2', DownloadStatus.queued),
+      };
+      final metadata = {
+        'plex1:movie1': movieMeta('movie1', 'A Failed'),
+        'plex1:movie2': movieMeta('movie2', 'B Queued'),
+      };
+
+      final tree = buildDownloadTree(downloads: downloads, metadata: metadata);
+
+      expect(tree.first.status, DownloadStatus.queued);
+      expect(tree.last.status, DownloadStatus.failed);
+    });
+  });
+
   group('resolveDownloadContainerGlobalKey', () {
     test('show node: builds globalKey from leaf serverId + grandparentId', () {
       final ep = _episodeNode('plex1:ep100');
