@@ -204,6 +204,42 @@ void main() {
     });
   });
 
+  group('container item counts', () {
+    DownloadTreeNode ep(String key, DownloadStatus status) =>
+        DownloadTreeNode(key: key, title: key, type: DownloadNodeType.episode, status: status);
+
+    test('a show counts episodes, not seasons', () {
+      // Ted Lasso reported "0/4" — its season count — while 36 episodes were
+      // queued underneath.
+      final show = _showNode(
+        key: 'show1',
+        children: [
+          _seasonNode(key: 's1', children: [ep('e1', DownloadStatus.queued), ep('e2', DownloadStatus.completed)]),
+          _seasonNode(key: 's2', children: [ep('e3', DownloadStatus.queued)]),
+        ],
+      );
+
+      expect(show.leafCount, 3);
+      expect(show.completedLeafCount, 1);
+    });
+
+    test('a season still counts its own episodes', () {
+      final season = _seasonNode(
+        key: 's1',
+        children: [ep('e1', DownloadStatus.completed), ep('e2', DownloadStatus.completed)],
+      );
+
+      expect(season.leafCount, 2);
+      expect(season.completedLeafCount, 2);
+    });
+
+    test('a leaf counts as one', () {
+      expect(ep('e1', DownloadStatus.completed).leafCount, 1);
+      expect(ep('e1', DownloadStatus.completed).completedLeafCount, 1);
+      expect(ep('e1', DownloadStatus.queued).completedLeafCount, 0);
+    });
+  });
+
   group('container retry-all visibility', () {
     DownloadTreeNode leaf(String key, DownloadStatus status) =>
         DownloadTreeNode(key: key, title: key, type: DownloadNodeType.episode, status: status);

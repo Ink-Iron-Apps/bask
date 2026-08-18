@@ -41,6 +41,20 @@ class DownloadTreeNode {
   int get completedChildrenCount {
     return children.where((child) => child.status == DownloadStatus.completed).length;
   }
+
+  /// Every download below this node, at any depth.
+  ///
+  /// A show's children are seasons, so counting children reported a show as
+  /// "0/4" — its season count — when what is being downloaded is episodes.
+  int get leafCount {
+    if (!hasChildren) return 1;
+    return children.fold(0, (sum, child) => sum + child.leafCount);
+  }
+
+  int get completedLeafCount {
+    if (!hasChildren) return status == DownloadStatus.completed ? 1 : 0;
+    return children.fold(0, (sum, child) => sum + child.completedLeafCount);
+  }
 }
 
 /// Type of node in the download tree
@@ -543,8 +557,8 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
   }
 
   String _getNodeSummary() {
-    final total = widget.node.children.length;
-    final completed = widget.node.completedChildrenCount;
+    final total = widget.node.leafCount;
+    final completed = widget.node.completedLeafCount;
     return t.downloads.completedOfTotal(completed: completed, total: total);
   }
 

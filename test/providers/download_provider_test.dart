@@ -30,6 +30,33 @@ import '../test_helpers/media_items.dart';
 
 /// Implements only [fetchPlayableDescendants], the surface [collectEpisodes]
 /// uses. Every other call reaches [noSuchMethod] and throws.
+/// Answers [fetchItem] with a canned title and records what was asked for, so
+/// the sync-rule title backfill can be tested without a server.
+class _TitleLookupClient implements MediaServerClient {
+  _TitleLookupClient({this.title = 'Road Trip', this.fails = false});
+
+  final String? title;
+  final bool fails;
+  final List<String> requested = [];
+
+  @override
+  ServerId get serverId => ServerId('srv');
+
+  @override
+  MediaBackend get backend => MediaBackend.plex;
+
+  @override
+  Future<MediaItem?> fetchItem(String id) async {
+    requested.add(id);
+    if (fails) throw StateError('test: fetchItem intentionally fails');
+    if (title == null) return null;
+    return testMediaItem(id: id, backend: MediaBackend.plex, kind: MediaKind.movie, title: title, serverId: serverId);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 class _ThrowingClient implements MediaServerClient {
   @override
   ServerId get serverId => ServerId('srv');
@@ -470,6 +497,73 @@ void main() {
 
       expect(await p.getCompletedDownload('srv:unowned'), isNull);
       expect(await p.getCompletedDownload('srv:partial'), isNull);
+
+      p.dispose();
+    });
+  });
+
+  group('DownloadProvider — sync rule title backfill', () {
+    Future<DownloadProvider> providerWithUntitledRule() async {
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      await p.ensureInitialized();
+      await p.createSyncRule(
+        serverId: ServerId('srv'),
+        ratingKey: '10',
+        targetType: 'playlist',
+        episodeCount: 0,
+        includeSpecials: false,
+      );
+      return p;
+    }
+
+    test('fetches and stores a name for a rule that never had one', () async {
+      final p = await providerWithUntitledRule();
+      final ruleKey = p.syncRuleKeyFor(ServerId('srv'), '10');
+      expect(p.getSyncRule(ruleKey)!.title, isNull);
+
+      final client = _TitleLookupClient();
+      await p.backfillSyncRuleTitles((_) => client);
+
+      expect(client.requested, ['10']);
+      expect(p.getSyncRule(ruleKey)!.title, 'Road Trip');
+      expect((await db.getSyncRule(ruleKey))!.title, 'Road Trip');
+
+      p.dispose();
+    });
+
+    test('does not ask twice for a rule the server could not name', () async {
+      final p = await providerWithUntitledRule();
+      final client = _TitleLookupClient(title: null);
+
+      await p.backfillSyncRuleTitles((_) => client);
+      await p.backfillSyncRuleTitles((_) => client);
+
+      expect(client.requested, ['10']);
+
+      p.dispose();
+    });
+
+    test('leaves an offline server for a later pass', () async {
+      final p = await providerWithUntitledRule();
+      final ruleKey = p.syncRuleKeyFor(ServerId('srv'), '10');
+
+      await p.backfillSyncRuleTitles((_) => null);
+      expect(p.getSyncRule(ruleKey)!.title, isNull);
+
+      final client = _TitleLookupClient();
+      await p.backfillSyncRuleTitles((_) => client);
+      expect(p.getSyncRule(ruleKey)!.title, 'Road Trip');
+
+      p.dispose();
+    });
+
+    test('a failed lookup leaves the rule alone', () async {
+      final p = await providerWithUntitledRule();
+      final ruleKey = p.syncRuleKeyFor(ServerId('srv'), '10');
+
+      await p.backfillSyncRuleTitles((_) => _TitleLookupClient(fails: true));
+
+      expect(p.getSyncRule(ruleKey)!.title, isNull);
 
       p.dispose();
     });
