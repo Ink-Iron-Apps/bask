@@ -104,7 +104,11 @@ class AppUpdateService {
 
   final HttpClient _httpClient;
 
-  bool get isSupported => !kIsWeb && Platform.isAndroid;
+  /// Android sideloads update themselves. Static so the Settings screen can
+  /// decide whether to show the section without building a service first.
+  static bool get isSupportedPlatform => !kIsWeb && Platform.isAndroid;
+
+  bool get isSupported => isSupportedPlatform;
   bool get hasToken => _updateReadToken.isNotEmpty;
 
   /// Latest release if it is newer than the running build, else null.
