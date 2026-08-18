@@ -209,7 +209,7 @@ class _SyncRuleTileState extends State<_SyncRuleTile> {
   String _title() {
     final publicGlobalKey = '${rule.serverId}:${rule.ratingKey}';
     final meta = metadata[rule.globalKey] ?? metadata[publicGlobalKey];
-    return meta?.title ?? rule.ratingKey;
+    return meta?.title ?? rule.title ?? rule.ratingKey;
   }
 
   Future<void> _removeRule(BuildContext context) async {
