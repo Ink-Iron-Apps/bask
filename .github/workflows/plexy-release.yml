@@ -42,6 +42,19 @@ jobs:
           # last one. Credentials persist so the bump can be pushed back.
           fetch-depth: 0
 
+      - name: Free runner disk space
+        # The runner ships ~25 GB of toolchains this build never touches, and the
+        # pinned NDK, the restored Gradle cache and the build outputs together
+        # overflow what is left. That surfaced at the very end of the job as tar
+        # failing to write the cache archive ("Wrote only 2048 of 10240 bytes"),
+        # so every run started from a cold Gradle cache. The preinstalled NDKs go
+        # too — the pinned one is installed below.
+        run: |
+          df -h /
+          sudo rm -rf             /usr/share/dotnet             /usr/share/swift             /usr/local/lib/node_modules             /usr/local/share/powershell             /usr/local/.ghcup             /opt/ghc             /opt/hostedtoolcache/CodeQL             "$ANDROID_HOME/ndk"
+          docker image prune --all --force || true
+          df -h /
+
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
