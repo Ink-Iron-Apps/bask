@@ -634,7 +634,7 @@ class MultiServerManager {
       // before closing it, so a client found here is never mid-close.
       final existing = _jellyfinByCompoundId[connection.id];
       if (existing != null && canReuseJellyfinClient(live: existing.connection, incoming: connection)) {
-        return _reuseJellyfinClient(existing);
+        return await _reuseJellyfinClient(existing);
       }
 
       var resolvedConnection = connection;

@@ -1,0 +1,98 @@
+name: Auto-merge claude/dev
+
+# Lands work pushed to claude/dev on main and starts the release build.
+#
+# The merge is made with GITHUB_TOKEN, and GitHub deliberately does not fire
+# workflows for pushes made with that token — otherwise a workflow could
+# trigger itself forever. So the release is started explicitly with a
+# workflow_dispatch at the end of this job (hence `actions: write`) rather
+# than left to the `push: branches: [main]` trigger in the release workflow.
+
+on:
+  push:
+    branches: [claude/dev]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  # Two pushes in quick succession must not race to merge the same branch.
+  group: auto-merge-claude-dev
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge claude/dev into main
+        id: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
+            echo "main already at $(git rev-parse --short HEAD); nothing to merge"
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git merge-base --is-ancestor HEAD origin/main; then
+            echo "claude/dev is already contained in main; nothing to merge"
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          number=$(gh pr list --head claude/dev --base main --state open --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            title=$(git log -1 --format=%s)
+            body=$(git log --format='- %s' origin/main..HEAD)
+            gh pr create --base main --head claude/dev --title "$title" --body "$body"
+            number=$(gh pr list --head claude/dev --base main --state open --json number --jq '.[0].number')
+          fi
+          echo "merging PR #$number"
+
+          # A merge commit rather than a squash: the release workflow derives the
+          # version bump from the conventional-commit subjects in the range, and
+          # squashing would collapse them into one subject. A freshly created PR
+          # reports an unknown mergeable state for a moment, so retry before
+          # falling back to an admin merge.
+          merged=false
+          for attempt in 1 2 3 4 5; do
+            if gh pr merge "$number" --merge; then merged=true; break; fi
+            echo "merge attempt $attempt failed; retrying"
+            sleep 10
+          done
+          if [ "$merged" = false ]; then
+            gh pr merge "$number" --merge --admin
+          fi
+
+          # The dispatch below builds whatever main points at, so make sure the
+          # merge is actually visible before asking for it.
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            git fetch --no-tags origin main:refs/remotes/origin/main
+            if git merge-base --is-ancestor HEAD origin/main; then
+              echo "main now contains $(git rev-parse --short HEAD)"
+              echo "merged=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "waiting for the merge to land (attempt $attempt)"
+            sleep 5
+          done
+          echo "::error::main never picked up $(git rev-parse --short HEAD)"
+          exit 1
+
+      - name: Start the release build
+        if: steps.merge.outputs.merged == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh workflow run "Plexy release" --ref main
+          echo "dispatched Plexy release on main"

@@ -305,6 +305,7 @@ Future<bool?> navigateToVideoPlayer(
     }
   }
 
+  final Route<bool> route;
   try {
     // Check if external player is enabled
     try {
@@ -361,7 +362,7 @@ Future<bool?> navigateToVideoPlayer(
       return null;
     }
 
-    final route = buildVideoPlayerRoute(
+    route = buildVideoPlayerRoute(
       builder: (_) => VideoPlayerScreen(
         metadata: metadata,
         preferredAudioTrack: preferredAudioTrack,
@@ -374,13 +375,15 @@ Future<bool?> navigateToVideoPlayer(
         isOffline: isOffline,
       ),
     );
-
-    return usePushReplacement ? navigator.pushReplacement<bool, bool>(route) : navigator.push<bool>(route);
   } finally {
     if (markedInFlight) {
       _videoPlayerNavigationInFlightGuard.finish(launchIdentity);
     }
   }
+
+  // Pushed outside the guard: the guard covers building the launch, not the
+  // player session, and this future only completes once the player pops.
+  return usePushReplacement ? navigator.pushReplacement<bool, bool>(route) : navigator.push<bool>(route);
 }
 
 /// Navigates to the video player and optionally refreshes content when returning.

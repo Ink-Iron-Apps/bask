@@ -4,6 +4,17 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "build/**"
+    # Vendored plugin forks: their tests need mockito codegen and their pigeon
+    # definitions need the pigeon dev dependency, neither of which this app pulls in.
+    - "packages/*/test/**"
+    - "packages/*/pigeons/**"
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
