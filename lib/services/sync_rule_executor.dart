@@ -249,15 +249,20 @@ class SyncRuleExecutor {
       return null;
     }
 
-    // Migration safety net for rules created before targetMetadata was passed
-    // at creation time: fetch the rule target's title once so the snackbar
-    // doesn't fall back to "Unknown". On failure, keep the original map.
+    // Migration safety net for rules created before titles were stored on the
+    // row: fetch the rule target's title once, use it for the snackbar, and
+    // persist it so the sync rules screen stops falling back to the raw
+    // ratingKey after a restart. On failure, keep the original map.
     var resolvedMetadata = metadata;
     if (metadata[rule.globalKey]?.title == null) {
       try {
         final fetched = await client.fetchItem(rule.ratingKey);
         if (fetched != null) {
           resolvedMetadata = {...metadata, rule.globalKey: fetched};
+          final fetchedTitle = fetched.title;
+          if (fetchedTitle != null && fetchedTitle.isNotEmpty && fetchedTitle != rule.title) {
+            await _database.updateSyncRuleTitle(rule.globalKey, fetchedTitle);
+          }
         }
       } catch (e) {
         appLogger.d('Sync rule ${rule.globalKey}: title fetch failed', error: e);
@@ -316,32 +321,40 @@ class SyncRuleExecutor {
     required AssociateSyncRuleDownload associateDownload,
     required QueueSyncRuleDownload queueSingleDownload,
   }) async {
+    // A 'all' rule mirrors every episode, watched or not; 'unwatched' keeps a
+    // rolling window of what is still to watch. Either way the set is re-derived
+    // from the server on each run, so episodes added after the rule was created
+    // are picked up automatically.
+    final syncAll = rule.downloadFilter == SyncRuleFilter.all;
+
     final fromServer = <MediaItem>[];
     final sourceMetadata = metadata[rule.globalKey];
     await collectEpisodes(
       client,
       rule.ratingKey,
-      unwatchedOnly: true,
+      unwatchedOnly: !syncAll,
       out: fromServer,
       fallback: sourceMetadata,
       includeSpecials: rule.targetType != ContentTypes.show || rule.includeSpecials,
     );
 
-    final unwatchedEpisodes = await _excludeLocallyWatched(
-      episodes: fromServer,
-      serverId: ServerId(rule.serverId),
-      profileId: profileId,
-      clientScopeId: clientScopeId,
-    );
+    final candidateEpisodes = syncAll
+        ? fromServer
+        : await _excludeLocallyWatched(
+            episodes: fromServer,
+            serverId: ServerId(rule.serverId),
+            profileId: profileId,
+            clientScopeId: clientScopeId,
+          );
 
-    if (unwatchedEpisodes.isEmpty) {
-      appLogger.d('Sync rule ${rule.globalKey}: no unwatched episodes available');
+    if (candidateEpisodes.isEmpty) {
+      appLogger.d('Sync rule ${rule.globalKey}: no candidate episodes available');
       await _completeRuleExecution(rule.globalKey);
       return null;
     }
 
     int alreadyHave = 0;
-    for (final ep in unwatchedEpisodes) {
+    for (final ep in candidateEpisodes) {
       final gk = buildGlobalKey(ServerId(rule.serverId), ep.id);
       if (_isActiveDownload(downloads[gk])) {
         alreadyHave++;
@@ -349,8 +362,9 @@ class SyncRuleExecutor {
       }
     }
 
-    // episodeCount == 0 means "all unwatched" — target is total unwatched count
-    final targetCount = rule.episodeCount > 0 ? rule.episodeCount : unwatchedEpisodes.length;
+    // episodeCount == 0 means "everything matching the filter" — target is the
+    // full candidate count.
+    final targetCount = rule.episodeCount > 0 ? rule.episodeCount : candidateEpisodes.length;
     final deficit = targetCount - alreadyHave;
     if (deficit <= 0) {
       appLogger.d('Sync rule ${rule.globalKey}: no deficit ($alreadyHave/$targetCount already have)');
@@ -359,7 +373,7 @@ class SyncRuleExecutor {
     }
 
     int queued = 0;
-    for (final ep in unwatchedEpisodes) {
+    for (final ep in candidateEpisodes) {
       if (queued >= deficit) break;
 
       final gk = buildGlobalKey(ServerId(rule.serverId), ep.id);

@@ -160,7 +160,10 @@ Future<DownloadResult?> showDownloadOptionsAndQueue(
         return null;
     }
 
-    if (filter == DownloadFilter.unwatched && kind == MediaKind.show && context.mounted) {
+    // Offer Keep Synced for every show choice, not just the unwatched ones:
+    // "Download all" should keep pulling episodes that air after the download,
+    // which is exactly what a rule with episodeCount 0 does.
+    if (kind == MediaKind.show && context.mounted) {
       final syncChoice = await _showSyncChoiceDialog(context);
       if (syncChoice == null || !context.mounted) return null;
       keepSynced = syncChoice == _SyncChoice.keepSynced;
@@ -175,7 +178,7 @@ Future<DownloadResult?> showDownloadOptionsAndQueue(
   // Create or update sync rule before queueing (so the rule exists even if queue fails)
   bool syncRuleUpdated = false;
   if (keepSynced) {
-    final syncCount = maxCount ?? 0; // 0 means "all unwatched" for the rule
+    final syncCount = maxCount ?? 0; // 0 means "everything matching the filter"
     final ruleKey = downloadProvider.syncRuleKeyFor(ServerId(metadata.serverId ?? client.serverId), metadata.id);
     syncRuleUpdated = downloadProvider.hasSyncRule(ruleKey);
 
@@ -185,6 +188,7 @@ Future<DownloadResult?> showDownloadOptionsAndQueue(
       targetType: metadata.kind.id.isNotEmpty ? metadata.kind.id : ContentTypes.show,
       episodeCount: syncCount,
       mediaIndex: versionConfig.mediaIndex,
+      downloadFilter: filter == DownloadFilter.all ? SyncRuleFilter.all : SyncRuleFilter.unwatched,
       includeSpecials: includeSpecials,
       targetMetadata: metadata,
     );
