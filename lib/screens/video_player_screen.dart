@@ -61,6 +61,7 @@ import '../services/offline_watch_sync_service.dart';
 import '../services/display_mode_service.dart';
 import '../services/media_control_router.dart';
 import '../services/playback_disk_cache.dart';
+import '../services/video_equalizer.dart';
 import '../services/settings_service.dart';
 import '../services/sleep_timer_service.dart';
 import '../services/subtitle_preference.dart';
@@ -1365,6 +1366,17 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
       if (Platform.isIOS || Platform.isMacOS) {
         await currentPlayer.setProperty('dv-conversion-log', debugLoggingEnabled ? 'yes' : 'no');
       }
+      // Picture adjustments persist across videos, so reapply them to the new
+      // player before anything is shown.
+      final storedEqualizer = _storedVideoEqualizer(settingsService);
+      if (!storedEqualizer.isNeutral) {
+        final filterManager = _videoFilterManager;
+        if (filterManager != null) {
+          await filterManager.setEqualizer(storedEqualizer);
+          if (!_isPlayerInitializationCurrent(generation)) return;
+        }
+      }
+
       // Buffering to storage rather than the heap. The heap tiers below exist to
       // keep mpv from being OOM-killed; once the payload lives on disk that
       // ceiling no longer applies, so the read-ahead can be large enough that

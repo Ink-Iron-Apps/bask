@@ -82,6 +82,32 @@ extension _VideoPlayerShaderMethods on VideoPlayerScreenState {
     _toastController.show(Symbols.zoom_in_rounded, t.videoControls.zoomPercent(percent: (zoomScale * 100).round()));
   }
 
+  /// Applies picture adjustments and remembers them for the next video.
+  void _setVideoEqualizer(VideoEqualizer equalizer) {
+    final filterManager = _videoFilterManager;
+    if (filterManager == null) return;
+
+    unawaited(filterManager.setEqualizer(equalizer));
+    unawaited(_persistVideoEqualizer(equalizer));
+    if (mounted) _setPlayerState(() {});
+  }
+
+  Future<void> _persistVideoEqualizer(VideoEqualizer equalizer) async {
+    final settings = await SettingsService.getInstance();
+    await settings.write(SettingsService.videoBrightness, equalizer.brightness);
+    await settings.write(SettingsService.videoContrast, equalizer.contrast);
+    await settings.write(SettingsService.videoSaturation, equalizer.saturation);
+    await settings.write(SettingsService.videoGamma, equalizer.gamma);
+  }
+
+  /// The stored picture adjustments, as written by [_setVideoEqualizer].
+  VideoEqualizer _storedVideoEqualizer(SettingsService settings) => VideoEqualizer(
+    brightness: settings.read(SettingsService.videoBrightness),
+    contrast: settings.read(SettingsService.videoContrast),
+    saturation: settings.read(SettingsService.videoSaturation),
+    gamma: settings.read(SettingsService.videoGamma),
+  );
+
   double _setVideoZoom(double zoomScale, {bool showToast = true}) {
     final filterManager = _videoFilterManager;
     if (filterManager == null) return 1.0;

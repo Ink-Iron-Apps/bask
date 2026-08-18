@@ -4344,6 +4344,24 @@ class Translations$videoSettings$en {
 
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
+
+	/// en: 'Picture'
+	String get pictureAdjustments => 'Picture';
+
+	/// en: 'Brightness'
+	String get pictureBrightness => 'Brightness';
+
+	/// en: 'Contrast'
+	String get pictureContrast => 'Contrast';
+
+	/// en: 'Saturation'
+	String get pictureSaturation => 'Saturation';
+
+	/// en: 'Gamma'
+	String get pictureGamma => 'Gamma';
+
+	/// en: 'Default'
+	String get pictureNeutral => 'Default';
 }
 
 // Path: performanceOverlay
@@ -8037,6 +8055,12 @@ extension on Translations {
 			'videoSettings.audioOutputStereo' => 'Stereo',
 			'videoSettings.audioNormalization' => 'Normalize Loudness',
 			'videoSettings.audioDownmix' => 'Downmix to Stereo',
+			'videoSettings.pictureAdjustments' => 'Picture',
+			'videoSettings.pictureBrightness' => 'Brightness',
+			'videoSettings.pictureContrast' => 'Contrast',
+			'videoSettings.pictureSaturation' => 'Saturation',
+			'videoSettings.pictureGamma' => 'Gamma',
+			'videoSettings.pictureNeutral' => 'Default',
 			'performanceOverlay.color' => 'Color',
 			'performanceOverlay.performance' => 'Performance',
 			'performanceOverlay.buffer' => 'Buffer',
