@@ -64,20 +64,26 @@ bool isNewerVersion({required String latest, required String current}) {
 ///
 /// Falls back to an APK with no ABI in its name — a universal build — so a
 /// device on an architecture we do not publish per-ABI still updates.
+///
+/// The ABI has to be a whole trailing name component: 'x86_64'.contains('x86')
+/// is true, so a substring match would hand an x86-only device — an emulator,
+/// usually — a 64-bit APK it cannot install.
 Map<String, dynamic>? selectApkAsset(List<Map<String, dynamic>> assets, {required List<String> abis}) {
   final apks = assets.where((a) => (a['name'] as String? ?? '').endsWith('.apk')).toList();
   if (apks.isEmpty) return null;
 
+  bool carries(String name, String abi) => name.endsWith('-$abi.apk');
+
   for (final abi in abis) {
     for (final apk in apks) {
-      if ((apk['name'] as String).contains(abi)) return apk;
+      if (carries(apk['name'] as String, abi)) return apk;
     }
   }
 
   const knownAbis = ['arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'];
   for (final apk in apks) {
     final name = apk['name'] as String;
-    if (!knownAbis.any(name.contains)) return apk;
+    if (!knownAbis.any((abi) => carries(name, abi))) return apk;
   }
   return null;
 }

@@ -55,6 +55,14 @@ void main() {
       expect(selectApkAsset(assets, abis: ['armeabi-v7a', 'arm64-v8a'])?['name'], 'Plexy-armeabi-v7a.apk');
     });
 
+    test('does not hand a 32-bit x86 device the 64-bit build', () {
+      // 'x86_64'.contains('x86') is true, so a substring match installs an APK
+      // the device cannot run. Emulators are exactly where x86-only shows up.
+      final assets = [asset('Plexy-v2.14.0-x86_64.apk'), asset('Plexy-v2.14.0-arm64-v8a.apk')];
+
+      expect(selectApkAsset(assets, abis: ['x86']), isNull);
+    });
+
     test('falls back to a universal APK when no ABI matches', () {
       final assets = [asset('Plexy-v2.14.0.apk'), asset('Plexy-v2.14.0-x86_64.apk')];
 
