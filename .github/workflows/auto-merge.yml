@@ -30,7 +30,7 @@ env:
   FLUTTER_VERSION: "3.47.0"
 
 jobs:
-  verify:
+  static:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -61,11 +61,31 @@ jobs:
           dart run dart_code_linter:metrics check-unused-files lib --fatal-unused
           dart run dart_code_linter:metrics check-unused-code lib --fatal-unused
 
-      - name: Run tests
-        run: flutter test
+  test:
+    # The suite is ~19 minutes on a runner against ~3 locally — it is CPU-bound,
+    # not setup-bound, so it is split across runners rather than cached harder.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests (shard ${{ matrix.shard }} of 4)
+        run: flutter test --total-shards 4 --shard-index ${{ matrix.shard }}
 
   merge:
-    needs: verify
+    needs: [static, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
