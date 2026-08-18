@@ -387,7 +387,9 @@
       "subSeekPrev": "Seek to Previous Subtitle",
       "shaderToggle": "Toggle Shaders",
       "skipMarker": "Skip Intro/Credits",
-      "screenshot": "Take Screenshot"
+      "screenshot": "Take Screenshot",
+      "frameStepForward": "Step Forward One Frame",
+      "frameStepBackward": "Step Back One Frame"
     }
   },
   "fileInfo": {
