@@ -87,6 +87,17 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Check for unused files and code
+        # dart_code_linter's analyzer plugin crashes on Linux, so its checks run
+        # as explicit commands. --fatal-unused matters: without it the command
+        # reports findings and still exits 0, which is a gate that never fails.
+        run: |
+          dart run dart_code_linter:metrics check-unused-files lib --fatal-unused
+          dart run dart_code_linter:metrics check-unused-code lib --fatal-unused
+
       - name: Run tests
         run: flutter test
 
