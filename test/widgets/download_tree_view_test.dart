@@ -217,7 +217,7 @@ void main() {
         children: [leaf('ep1', DownloadStatus.downloading), leaf('ep2', DownloadStatus.failed)],
       );
 
-      expect(debugHasFailedLeaf(season), isTrue);
+      expect(hasFailedLeaf(season), isTrue);
     });
 
     test('a container with nothing failed reports none', () {
@@ -226,14 +226,14 @@ void main() {
         children: [leaf('ep1', DownloadStatus.completed), leaf('ep2', DownloadStatus.downloading)],
       );
 
-      expect(debugHasFailedLeaf(season), isFalse);
+      expect(hasFailedLeaf(season), isFalse);
     });
 
     test('a failure nested two levels down still counts', () {
       final season = _seasonNode(key: 'show42:season7', children: [leaf('ep1', DownloadStatus.failed)]);
       final show = _showNode(key: 'show42', children: [season]);
 
-      expect(debugHasFailedLeaf(show), isTrue);
+      expect(hasFailedLeaf(show), isTrue);
     });
   });
 

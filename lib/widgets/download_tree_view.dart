@@ -583,7 +583,7 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
       // Retry all button. Driven by whether any leaf actually failed rather
       // than by the container's aggregate status, which reports the most
       // pressing state — a container still downloading hides its failures.
-      if (widget.onRetry != null && _hasFailedLeaf(widget.node)) {
+      if (widget.onRetry != null && hasFailedLeaf(widget.node)) {
         actions.add((
           icon: Symbols.refresh_rounded,
           tooltip: t.downloads.retryAll,
@@ -687,13 +687,14 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
   }
 }
 
-@visibleForTesting
-bool debugHasFailedLeaf(DownloadTreeNode node) => _hasFailedLeaf(node);
-
 /// Whether any leaf below [node] failed, at any depth.
-bool _hasFailedLeaf(DownloadTreeNode node) {
+///
+/// Drives the retry-all button: the container's own aggregate status reports
+/// the most pressing state, so a container still downloading would hide the
+/// failures underneath it.
+bool hasFailedLeaf(DownloadTreeNode node) {
   if (!node.hasChildren) return node.status == DownloadStatus.failed;
-  return node.children.any(_hasFailedLeaf);
+  return node.children.any(hasFailedLeaf);
 }
 
 /// Builds the manage-tab tree: shows -> seasons -> episodes, albums -> tracks,
