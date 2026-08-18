@@ -4017,6 +4017,12 @@ class Translations$downloads$en {
 	/// en: 'Delete all'
 	String get deleteAll => 'Delete all';
 
+	/// en: 'Retry all failed'
+	String get retryAll => 'Retry all failed';
+
+	/// en: 'Retry ${count} failed downloads'
+	String retryAllFailed({required Object count}) => 'Retry ${count} failed downloads';
+
 	/// en: 'Select Version'
 	String get selectVersion => 'Select Version';
 
@@ -4141,6 +4147,9 @@ class Translations$downloads$en {
 
 	/// en: 'Unknown Album'
 	String get unknownAlbum => 'Unknown Album';
+
+	/// en: 'Unknown playlist'
+	String get unknownPlaylist => 'Unknown playlist';
 
 	/// en: '${completed}/${total} completed'
 	String completedOfTotal({required Object completed, required Object total}) => '${completed}/${total} completed';
@@ -7829,6 +7838,8 @@ extension on Translations {
 			'downloads.pauseAll' => 'Pause all',
 			'downloads.resumeAll' => 'Resume all',
 			'downloads.deleteAll' => 'Delete all',
+			'downloads.retryAll' => 'Retry all failed',
+			'downloads.retryAllFailed' => ({required Object count}) => 'Retry ${count} failed downloads',
 			'downloads.selectVersion' => 'Select Version',
 			'downloads.allEpisodes' => 'All episodes',
 			'downloads.unwatchedOnly' => 'Unwatched only',
@@ -7896,6 +7907,7 @@ extension on Translations {
 			'downloads.unknownShow' => 'Unknown Show',
 			'downloads.unknownSeason' => 'Unknown Season',
 			'downloads.unknownAlbum' => 'Unknown Album',
+			'downloads.unknownPlaylist' => 'Unknown playlist',
 			'downloads.completedOfTotal' => ({required Object completed, required Object total}) => '${completed}/${total} completed',
 			'downloads.errorFileNotFound' => 'File not found (404)',
 			'downloads.errorDownloadFailed' => 'Download failed',
@@ -7970,11 +7982,11 @@ extension on Translations {
 			'companionRemote.remote.volume' => 'Volume',
 			'companionRemote.remote.volumeDown' => 'Down',
 			'companionRemote.remote.volumeUp' => 'Up',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.fullscreen' => 'Fullscreen',
 			'companionRemote.remote.subtitles' => 'Subtitles',
 			'companionRemote.remote.audio' => 'Audio',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.remote.searchHint' => 'Search on desktop...',
 			'companionRemote.errors.noNetworkInterface' => 'No network interface found',
 			'companionRemote.errors.authenticationFailed' => 'Authentication failed',

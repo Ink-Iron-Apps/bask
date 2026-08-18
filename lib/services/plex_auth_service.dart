@@ -730,6 +730,16 @@ class PlexServer {
       if (_allowsHttpFallback(connection)) {
         addCandidate(connection, _httpFallbackUrl(connection), false, false);
       }
+
+      // Last resort for this endpoint: the address the plex.direct name stands
+      // for, so the server stays reachable when name resolution is not. An
+      // Android device dozing behind a VPN loses its resolver before it loses
+      // the route, which strands every candidate at once when they are all
+      // hostnames.
+      final literalUrl = _plexDirectLiteralUrl(connection);
+      if (literalUrl != null) {
+        addCandidate(connection, literalUrl, false, false);
+      }
     }
 
     // A tailnet address is local, but the LAN address is the direct route when
@@ -928,6 +938,28 @@ class PlexServer {
       return connection.uri.replaceFirst('https://', 'http://');
     }
     return connection.httpDirectUrl;
+  }
+
+  /// The literal address a plex.direct hostname stands for, as a plain HTTP
+  /// URL, or `null` when [connection] is not a plex.direct endpoint.
+  ///
+  /// `100-100-1-10.<hash>.plex.direct` resolves to `100.100.1.10`; the name
+  /// exists so Plex can present a certificate for an address, and it carries
+  /// the address in its first label. HTTP rather than HTTPS: the certificate
+  /// is issued for the name, so requesting the address directly cannot present
+  /// a valid one.
+  static String? _plexDirectLiteralUrl(PlexConnection connection) {
+    final host = _normalizedHost(connection.address);
+    if (!host.endsWith('.plex.direct')) return null;
+
+    final label = host.split('.').first;
+    final octets = label.split('-');
+    if (octets.length != 4) return null;
+    for (final octet in octets) {
+      final value = int.tryParse(octet);
+      if (value == null || value < 0 || value > 255) return null;
+    }
+    return 'http://${octets.join('.')}:${connection.port}';
   }
 
   static bool _isPlexDirectUri(String uri) {
