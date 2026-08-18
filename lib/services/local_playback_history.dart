@@ -55,7 +55,7 @@ class LocalPlaybackHistory {
   static Future<Map<String, int>> snapshot() async {
     try {
       final settings = await SettingsService.getInstance();
-      return settings.read(SettingsService.localLastPlayedAt);
+      return await settings.read(SettingsService.localLastPlayedAt);
     } catch (_) {
       return const {};
     }

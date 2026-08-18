@@ -724,7 +724,7 @@ class PlaybackProgressTracker {
   Future<bool> _shouldReportTrackSelections() async {
     try {
       final settings = await SettingsService.getInstance();
-      return settings.read(SettingsService.rememberTrackSelections);
+      return await settings.read(SettingsService.rememberTrackSelections);
     } catch (e) {
       appLogger.d('Could not read track-selection persistence setting; reporting selected streams', error: e);
       return true;
