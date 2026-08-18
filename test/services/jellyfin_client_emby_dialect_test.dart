@@ -164,11 +164,10 @@ void main() {
         'IsResumable',
         reason: 'the Emby resume leg lost its server-side filter',
       );
-      expect(
-        jellyfinRequests.requests.map((request) => '${request.method} ${request.url.path}').toList(),
-        ['GET /UserItems/Resume', 'GET /Shows/NextUp'],
-        reason: jellyfinRequests.log.join('\n'),
-      );
+      expect(jellyfinRequests.requests.map((request) => '${request.method} ${request.url.path}').toList(), [
+        'GET /UserItems/Resume',
+        'GET /Shows/NextUp',
+      ], reason: jellyfinRequests.log.join('\n'));
       final embyResume = embyRequests.requests.first;
       final jellyfinResume = jellyfinRequests.requests.first;
       expect(embyResume.url.queryParameters, {
@@ -1240,11 +1239,10 @@ void main() {
       final video = await client.fetchPlaylistsPage(playlistType: 'video');
       final audio = await client.fetchPlaylistsPage(playlistType: 'audio');
 
-      expect(
-        requests.requests.map((request) => '${request.method} ${request.url.path}').toList(),
-        ['GET /Items', 'GET /Items'],
-        reason: requests.log.join('\n'),
-      );
+      expect(requests.requests.map((request) => '${request.method} ${request.url.path}').toList(), [
+        'GET /Items',
+        'GET /Items',
+      ], reason: requests.log.join('\n'));
       for (final request in requests.requests) {
         expect(request.url.queryParameters, {
           'userId': 'user-1',
@@ -1311,11 +1309,10 @@ void main() {
       final video = await client.fetchPlaylistsPage(playlistType: 'video');
       final audio = await client.fetchPlaylistsPage(playlistType: 'audio');
 
-      expect(
-        requests.requests.map((request) => '${request.method} ${request.url.path}').toList(),
-        ['GET /Items', 'GET /Items'],
-        reason: requests.log.join('\n'),
-      );
+      expect(requests.requests.map((request) => '${request.method} ${request.url.path}').toList(), [
+        'GET /Items',
+        'GET /Items',
+      ], reason: requests.log.join('\n'));
       expect(requests.requests.map((request) => request.url.queryParameters['MediaTypes']).toList(), [
         'Video',
         'Audio',
@@ -1535,11 +1532,9 @@ void main() {
 
       final extras = await client.fetchPlaybackExtras('item-1');
 
-      expect(
-        requests.requests.map((request) => '${request.method} ${request.url.path}').toList(),
-        ['GET /Users/user-1/Items/item-1'],
-        reason: requests.log.join('\n'),
-      );
+      expect(requests.requests.map((request) => '${request.method} ${request.url.path}').toList(), [
+        'GET /Users/user-1/Items/item-1',
+      ], reason: requests.log.join('\n'));
       expect(requests.requests.where((request) => request.url.path == '/MediaSegments/item-1'), isEmpty);
       expect(extras.markers.map((marker) => marker.type).toList(), ['intro', 'credits']);
       expect(extras.markers.first.startTimeOffset, 10000);
@@ -1567,11 +1562,10 @@ void main() {
 
       final extras = await client.fetchPlaybackExtras('item-1');
 
-      expect(
-        requests.requests.map((request) => '${request.method} ${request.url.path}').toList(),
-        ['GET /Users/user-1/Items/item-1', 'GET /MediaSegments/item-1'],
-        reason: requests.log.join('\n'),
-      );
+      expect(requests.requests.map((request) => '${request.method} ${request.url.path}').toList(), [
+        'GET /Users/user-1/Items/item-1',
+        'GET /MediaSegments/item-1',
+      ], reason: requests.log.join('\n'));
       expect(requests.requests.last.url.query, isEmpty);
       expect(extras.markers.map((marker) => marker.type).toList(), ['intro']);
       expect(extras.markers.single.startTimeOffset, 5000);

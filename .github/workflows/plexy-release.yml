@@ -87,6 +87,15 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Check formatting
+        # dart format has no exclude flag, and generated sources are formatted by
+        # whatever generated them, so format everything and then ask git whether
+        # anything that is not generated actually moved.
+        run: |
+          dart format lib test > /dev/null
+          git diff --exit-code -- ':!*.g.dart' ':!*.freezed.dart'
+          git checkout -- .
+
       - name: Analyze
         run: flutter analyze
 
