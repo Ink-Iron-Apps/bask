@@ -1843,6 +1843,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       mediaIndex: mediaIndex,
       downloadFilter: downloadFilter,
       includeSpecials: includeSpecials,
+      title: targetMetadata?.title,
     );
 
     if (targetMetadata != null) {

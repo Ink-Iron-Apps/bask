@@ -359,7 +359,7 @@ class AppDatabase extends _$AppDatabase {
   static const FormatException _invalidRecoveryImage = FormatException('Invalid tvOS database recovery image');
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration {
@@ -724,6 +724,10 @@ class AppDatabase extends _$AppDatabase {
             'Index idx_sync_rule_downloads_profile_key',
             () => m.create(idxSyncRuleDownloadsProfileKey),
           );
+        }
+        if (from < 21) {
+          appLogger.i('Adding title column to SyncRules (v21 migration)');
+          await _ignoreAlreadyExists('SyncRules.title column', () => m.addColumn(syncRules, syncRules.title));
         }
       },
     );
@@ -1125,6 +1129,14 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Backfills the display name for a rule created before titles were stored,
+  /// or whose target was renamed on the server.
+  Future<void> updateSyncRuleTitle(String globalKey, String title) {
+    return (update(
+      syncRules,
+    )..where((t) => t.globalKey.equals(globalKey))).write(SyncRulesCompanion(title: Value(title)));
+  }
+
   Future<void> markSyncRuleDownloadLinksInitialized(String globalKey) {
     return (update(syncRules)..where((t) => t.globalKey.equals(globalKey))).write(
       const SyncRulesCompanion(downloadLinksInitialized: Value(true)),
@@ -1206,6 +1218,7 @@ class AppDatabase extends _$AppDatabase {
     int mediaIndex = 0,
     String downloadFilter = 'unwatched',
     bool includeSpecials = true,
+    String? title,
   }) async {
     // [insertOnConflictUpdate] defaults the conflict target to the primary
     // key (`id`), which is auto-incremented — the conflict never triggers
@@ -1224,6 +1237,7 @@ class AppDatabase extends _$AppDatabase {
         mediaIndex: Value(mediaIndex),
         downloadFilter: Value(downloadFilter),
         includeSpecials: Value(includeSpecials),
+        title: Value(title),
       ),
       onConflict: DoUpdate(
         (_) => SyncRulesCompanion(
@@ -1235,6 +1249,9 @@ class AppDatabase extends _$AppDatabase {
           mediaIndex: Value(mediaIndex),
           downloadFilter: Value(downloadFilter),
           includeSpecials: Value(includeSpecials),
+          // Never clobber a stored title with null: a re-created rule may not
+          // carry metadata, and the old name is better than a raw ratingKey.
+          title: title != null ? Value(title) : const Value.absent(),
         ),
         target: [syncRules.globalKey],
       ),
