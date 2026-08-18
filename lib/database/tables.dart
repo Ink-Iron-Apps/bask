@@ -98,6 +98,14 @@ class SyncRules extends Table {
   TextColumn get ratingKey => text()();
   TextColumn get globalKey => text().unique()();
   TextColumn get targetType => text()(); // 'show', 'season', 'collection', 'playlist'
+
+  /// Display name of the rule target, captured at creation time.
+  ///
+  /// [DownloadProvider.refreshMetadataFromCache] only rehydrates metadata for
+  /// keys in `_downloads`, and a rule target (a show, playlist or collection)
+  /// is not itself a download. Without a persisted copy the sync rules screen
+  /// falls back to the raw ratingKey after a restart.
+  TextColumn get title => text().nullable()();
   IntColumn get episodeCount => integer()();
   BoolColumn get enabled => boolean().withDefault(const Constant(true))();
   IntColumn get createdAt => integer()();

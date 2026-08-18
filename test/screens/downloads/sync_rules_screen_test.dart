@@ -370,7 +370,7 @@ void main() {
     expect(downloadProvider.syncRules.values.single.enabled, isFalse);
   });
 
-  testWidgets('setting sync rule count to zero removes the rule', (tester) async {
+  testWidgets('setting sync rule count to zero lifts the cap instead of removing the rule', (tester) async {
     multiServerProvider = testMultiServerProvider(serverManager);
     await insertRule(ServerId('orphan-srv'), '76672');
 
@@ -378,20 +378,33 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text('Episode count'));
+    await tester.pumpAndSettle();
+
     await tester.enterText(find.byType(TextField), '0');
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
+
+    // 0 is the stored value for "every episode matching the filter" — the
+    // same thing "Download all" creates — so it must not delete the rule.
+    expect(downloadProvider.syncRules.values.single.episodeCount, 0);
+    expect(find.text('No sync rules'), findsNothing);
+  });
+
+  testWidgets('show sync rule can change its download filter', (tester) async {
+    multiServerProvider = testMultiServerProvider(serverManager);
+    await insertRule(ServerId('orphan-srv'), '76672');
+
+    await pumpScreen(tester, keyboardMode: true);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
 
-    expect(find.text('Stop syncing "76672"? Downloaded episodes will be kept.'), findsOneWidget);
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.tap(find.text('Sync filter'));
     await tester.pumpAndSettle();
 
-    expect(downloadProvider.syncRules, isEmpty);
-    expect(find.text('No sync rules'), findsOneWidget);
+    await tester.tap(find.text('All episodes'));
+    await tester.pumpAndSettle();
+
+    expect(downloadProvider.syncRules.values.single.downloadFilter, 'all');
   });
 }
