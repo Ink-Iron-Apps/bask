@@ -1533,6 +1533,8 @@
     "pauseAll": "Pause all",
     "resumeAll": "Resume all",
     "deleteAll": "Delete all",
+    "retryAll": "Retry all failed",
+    "retryAllFailed": "Retry ${count} failed downloads",
     "selectVersion": "Select Version",
     "allEpisodes": "All episodes",
     "unwatchedOnly": "Unwatched only",

@@ -4017,6 +4017,12 @@ class Translations$downloads$en {
 	/// en: 'Delete all'
 	String get deleteAll => 'Delete all';
 
+	/// en: 'Retry all failed'
+	String get retryAll => 'Retry all failed';
+
+	/// en: 'Retry ${count} failed downloads'
+	String retryAllFailed({required Object count}) => 'Retry ${count} failed downloads';
+
 	/// en: 'Select Version'
 	String get selectVersion => 'Select Version';
 
@@ -7832,6 +7838,8 @@ extension on Translations {
 			'downloads.pauseAll' => 'Pause all',
 			'downloads.resumeAll' => 'Resume all',
 			'downloads.deleteAll' => 'Delete all',
+			'downloads.retryAll' => 'Retry all failed',
+			'downloads.retryAllFailed' => ({required Object count}) => 'Retry ${count} failed downloads',
 			'downloads.selectVersion' => 'Select Version',
 			'downloads.allEpisodes' => 'All episodes',
 			'downloads.unwatchedOnly' => 'Unwatched only',
@@ -7974,10 +7982,10 @@ extension on Translations {
 			'companionRemote.remote.volume' => 'Volume',
 			'companionRemote.remote.volumeDown' => 'Down',
 			'companionRemote.remote.volumeUp' => 'Up',
-			'companionRemote.remote.fullscreen' => 'Fullscreen',
-			'companionRemote.remote.subtitles' => 'Subtitles',
 			_ => null,
 		} ?? switch (path) {
+			'companionRemote.remote.fullscreen' => 'Fullscreen',
+			'companionRemote.remote.subtitles' => 'Subtitles',
 			'companionRemote.remote.audio' => 'Audio',
 			'companionRemote.remote.searchHint' => 'Search on desktop...',
 			'companionRemote.errors.noNetworkInterface' => 'No network interface found',
