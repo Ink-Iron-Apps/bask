@@ -1,6 +1,7 @@
 import 'dart:async' show StreamSubscription, Timer, unawaited;
 import 'dart:io' show Platform;
 
+import '../../services/video_equalizer.dart';
 import '../../media/ids.dart';
 
 import 'package:flutter/gestures.dart'
@@ -543,6 +544,8 @@ class PlexVideoControls extends StatefulWidget {
   final PlaybackSourceChangeCallback? onPlaybackSourceChanged;
   final int boxFitMode;
   final double videoZoomScale;
+  final VideoEqualizer videoEqualizer;
+  final ValueChanged<VideoEqualizer>? onVideoEqualizerChanged;
   final VoidCallback? onTogglePIPMode;
   final VoidCallback? onCycleBoxFitMode;
   final ValueChanged<double>? onVideoZoomChanged;
@@ -676,6 +679,8 @@ class PlexVideoControls extends StatefulWidget {
     this.onPlaybackSourceChanged,
     this.boxFitMode = 0,
     this.videoZoomScale = 1.0,
+    this.videoEqualizer = VideoEqualizer.neutral,
+    this.onVideoEqualizerChanged,
     this.onTogglePIPMode,
     this.onCycleBoxFitMode,
     this.onVideoZoomChanged,

@@ -1733,7 +1733,13 @@
     "audioOutputSpatial": "Spatial Audio",
     "audioOutputStereo": "Stereo",
     "audioNormalization": "Normalize Loudness",
-    "audioDownmix": "Downmix to Stereo"
+    "audioDownmix": "Downmix to Stereo",
+    "pictureAdjustments": "Picture",
+    "pictureBrightness": "Brightness",
+    "pictureContrast": "Contrast",
+    "pictureSaturation": "Saturation",
+    "pictureGamma": "Gamma",
+    "pictureNeutral": "Default"
   },
   "performanceOverlay": {
     "color": "Color",

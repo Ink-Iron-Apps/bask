@@ -543,6 +543,12 @@ class SettingsService extends BaseSharedPreferencesService {
 
   static const bufferSize = _BufferSizePref();
 
+  /// Picture adjustments, mpv's -100..100 scale with 0 meaning untouched.
+  static const videoBrightness = IntPref('video_brightness');
+  static const videoContrast = IntPref('video_contrast');
+  static const videoSaturation = IntPref('video_saturation');
+  static const videoGamma = IntPref('video_gamma');
+
   /// Gigabytes of read-ahead to keep on disk, or 0 to buffer in memory only.
   ///
   /// The in-memory buffer is bounded by the device heap, which on a phone is a
@@ -987,6 +993,10 @@ class SettingsService extends BaseSharedPreferencesService {
     videoPlayerNavigationEnabled,
     bufferSize,
     diskCacheSizeGB,
+    videoBrightness,
+    videoContrast,
+    videoSaturation,
+    videoGamma,
     playbackBufferTier,
     libraryDensity,
     automotiveUiScale,

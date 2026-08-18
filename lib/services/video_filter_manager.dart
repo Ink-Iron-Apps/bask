@@ -6,6 +6,7 @@ import 'package:rate_limiter/rate_limiter.dart';
 import '../mpv/mpv.dart';
 
 import '../utils/app_logger.dart';
+import 'video_equalizer.dart';
 import 'ambient_lighting_service.dart';
 
 /// Manages video filtering, aspect ratio modes, and subtitle positioning for video playback.
@@ -107,6 +108,26 @@ class VideoFilterManager {
 
   /// Current BoxFit mode (0=contain, 1=cover, 2=fill)
   int get boxFitMode => _boxFitMode;
+
+  VideoEqualizer _equalizer = VideoEqualizer.neutral;
+
+  /// Picture adjustments currently applied to the video.
+  VideoEqualizer get equalizer => _equalizer;
+
+  /// Applies picture adjustments, writing only the channels that moved.
+  Future<void> setEqualizer(VideoEqualizer equalizer) async {
+    if (_equalizer == equalizer) return;
+    _equalizer = equalizer;
+    try {
+      for (final entry in equalizer.properties.entries) {
+        await _applyProperty(entry.key, entry.value);
+      }
+    } catch (e) {
+      // A backend without mpv's video equalizer (ExoPlayer) simply refuses the
+      // write; the stored value stays so it applies if the backend changes.
+      appLogger.w('Failed to apply video equalizer', error: e);
+    }
+  }
 
   double get zoomScale => _zoomScale;
 
