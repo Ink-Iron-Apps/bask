@@ -186,6 +186,58 @@ void main() {
       expect(server.networkClassForUrl('http://100.101.102.103:32400'), PlexNetworkClass.local);
     });
 
+    test('offers a DNS-free address for a plex.direct endpoint', () {
+      // plex.direct names encode the address they resolve to. Keeping a literal
+      // candidate means the server is still reachable when name resolution is
+      // not — an Android device dozing with the screen off loses its DNS
+      // resolver before it loses the network.
+      final server = PlexServer.fromJson(
+        _serverJson(
+          _connectionJson(
+            protocol: 'https',
+            address: '100-100-1-10.aaeeec6950f24e0caaeca85204369b8f.plex.direct',
+            port: 32400,
+            uri: 'https://100-100-1-10.aaeeec6950f24e0caaeca85204369b8f.plex.direct:32400',
+          ),
+        ),
+      );
+
+      final urls = server.prioritizedEndpointUrls();
+
+      expect(urls, contains('http://100.100.1.10:32400'));
+      // The name is still tried first: it is the one with a usable certificate.
+      expect(
+        urls.indexOf('https://100-100-1-10.aaeeec6950f24e0caaeca85204369b8f.plex.direct:32400'),
+        lessThan(urls.indexOf('http://100.100.1.10:32400')),
+      );
+    });
+
+    test('does not invent an address for a non-plex.direct hostname', () {
+      final server = PlexServer.fromJson(
+        _serverJson(
+          _connectionJson(protocol: 'https', address: 'plex.example.com', port: 443, uri: 'https://plex.example.com'),
+        ),
+      );
+
+      expect(server.prioritizedEndpointUrls(), ['https://plex.example.com']);
+    });
+
+    test('ignores a plex.direct label that is not an address', () {
+      final server = PlexServer.fromJson(
+        _serverJson(
+          _connectionJson(
+            protocol: 'https',
+            address: 'not-an-ip.aaeeec6950f24e0caaeca85204369b8f.plex.direct',
+            port: 32400,
+            uri: 'https://not-an-ip.aaeeec6950f24e0caaeca85204369b8f.plex.direct:32400',
+          ),
+        ),
+      );
+
+      expect(server.prioritizedEndpointUrls().where((u) => u.startsWith('http://not')), hasLength(1));
+      expect(server.prioritizedEndpointUrls().any((u) => RegExp(r'http://\d').hasMatch(u)), isFalse);
+    });
+
     test('adds HTTP fallback for custom native Plex hostname on port 32400', () {
       final server = PlexServer.fromJson(
         _serverJson(

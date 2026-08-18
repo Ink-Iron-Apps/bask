@@ -1163,6 +1163,24 @@ class AppDatabase extends _$AppDatabase {
     return (select(syncRuleDownloads)..where((t) => t.syncRuleId.equals(syncRuleId))).get();
   }
 
+  /// Every rule's download links for [profileId], keyed by the rule's global
+  /// key. One query rather than one per rule: the downloads screen needs the
+  /// whole picture to group a playlist's contents under it.
+  Future<Map<String, Set<String>>> getSyncRuleDownloadKeysByRule(String profileId) async {
+    final query = select(syncRules).join([
+      innerJoin(syncRuleDownloads, syncRuleDownloads.syncRuleId.equalsExp(syncRules.id)),
+    ])..where(syncRules.profileId.equals(profileId));
+
+    final rows = await query.get();
+    final grouped = <String, Set<String>>{};
+    for (final row in rows) {
+      final rule = row.readTable(syncRules);
+      final link = row.readTable(syncRuleDownloads);
+      grouped.putIfAbsent(rule.globalKey, () => <String>{}).add(link.downloadGlobalKey);
+    }
+    return grouped;
+  }
+
   Future<List<String>> getOwnedDownloadKeysForAncestorRule({
     required String profileId,
     required ServerId serverId,

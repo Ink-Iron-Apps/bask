@@ -96,6 +96,11 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   // Persistent sync rules keyed by profile-scoped globalKey
   // (profileId|serverId:ratingKey). Downloads remain public/shared.
   final Map<String, SyncRuleItem> _syncRules = {};
+
+  /// Download keys each sync rule pulled in, keyed by the rule's global key.
+  /// Mirrors the SyncRuleDownloads table so the downloads screen can group a
+  /// playlist's contents under it without touching the database per rebuild.
+  final Map<String, Set<String>> _syncRuleDownloadKeys = {};
   final Set<String> _removingSyncRuleKeys = {};
   bool _syncRuleCleanupInProgress = false;
 
@@ -175,6 +180,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     _queueing.clear();
     _ownedDownloadKeys.clear();
     _syncRules.clear();
+    _syncRuleDownloadKeys.clear();
     _metadata.clear();
     _activeProfileId = profileId;
     _metadataStore.setActiveProfileId(profileId);
@@ -287,6 +293,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     await _database.clearAllDownloadOwners();
     _ownedDownloadKeys.clear();
     _syncRules.clear();
+    _syncRuleDownloadKeys.clear();
     safeNotifyListeners();
   }
 
@@ -1759,6 +1766,9 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   }
 
   /// Check if a sync rule exists for the given item
+  /// Download keys owned by each sync rule, keyed by the rule's global key.
+  Map<String, Set<String>> get syncRuleDownloadKeys => Map.unmodifiable(_syncRuleDownloadKeys);
+
   bool hasSyncRule(String globalKey) => _syncRules.containsKey(globalKey);
 
   /// Get a sync rule for the given item
@@ -1787,6 +1797,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     final currentRule = _syncRules[rule.globalKey];
     if (currentRule == null) return;
     await _database.associateSyncRuleDownload(currentRule, downloadGlobalKey);
+    _syncRuleDownloadKeys.putIfAbsent(currentRule.globalKey, () => <String>{}).add(downloadGlobalKey);
   }
 
   Future<bool> _queueSyncRuleDownload(
@@ -2031,6 +2042,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
         : buildGlobalKey(ServerId(existing.serverId), existing.ratingKey);
     await _database.deleteSyncRule(globalKey);
     _syncRules.remove(globalKey);
+    _syncRuleDownloadKeys.remove(globalKey);
     // createSyncRule may have stashed targetMetadata for collection/playlist
     // rules with no underlying download; release it if nothing else holds it.
     if (!_downloads.containsKey(publicGlobalKey)) {
@@ -2119,6 +2131,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       final profileId = _activeProfileId;
       if (profileId == null || profileId.isEmpty) {
         _syncRules.clear();
+        _syncRuleDownloadKeys.clear();
         return;
       }
       await _database.adoptLegacySyncRulesForProfile(profileId);
@@ -2128,6 +2141,12 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       _syncRules
         ..clear()
         ..addEntries(rules.map((rule) => MapEntry(rule.globalKey, rule)));
+
+      final links = await _database.getSyncRuleDownloadKeysByRule(profileId);
+      if (_activeProfileId != profileId) return;
+      _syncRuleDownloadKeys
+        ..clear()
+        ..addAll(links);
     } catch (e) {
       appLogger.w('Failed to load sync rules', error: e);
     }
