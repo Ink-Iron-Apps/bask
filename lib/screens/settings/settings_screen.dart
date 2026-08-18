@@ -17,7 +17,6 @@ import '../main_screen.dart';
 import '../../mixins/mounted_set_state_mixin.dart';
 import '../../mixins/refreshable.dart';
 import '../../providers/hidden_libraries_provider.dart';
-import '../../models/download_models.dart';
 import '../../providers/download_provider.dart';
 import '../../providers/libraries_provider.dart';
 import '../../services/donation_service.dart';
@@ -400,17 +399,6 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           icon: Symbols.wifi_rounded,
           title: t.settings.downloadOnWifiOnly,
           subtitle: t.settings.downloadOnWifiOnlyDescription,
-        ),
-        SettingNumberTile(
-          pref: settings.SettingsService.concurrentDownloads,
-          icon: Symbols.download_for_offline_rounded,
-          title: t.settings.concurrentDownloads,
-          subtitleBuilder: (v) => t.settings.concurrentDownloadsUnit(count: v.toString()),
-          labelText: t.settings.concurrentDownloadsLabel,
-          suffixText: '',
-          min: minConcurrentDownloads,
-          max: maxConcurrentDownloads,
-          onAfterWrite: (value) => context.read<DownloadProvider>().applyConcurrentDownloadLimit(value),
         ),
         SettingSwitchTile(
           focusNode: _focusTracker.get(_kAutoRemoveWatchedDownloads),

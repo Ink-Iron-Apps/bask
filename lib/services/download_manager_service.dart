@@ -58,15 +58,21 @@ typedef NativeTaskPartition = ({List<Task> current, List<Task> stale});
 
 typedef DownloadLocationSnapshot = ({String? path, String? type});
 
-/// Downloader config routed to every platform.
+/// Downloader config routed to every platform: one download at a time.
 ///
-/// The holding queue takes (total, per-host, per-group) slots. All three move
-/// together: the only host and group in play is the one media server, so
-/// holding any of them at one would cap the other two regardless.
-List<(String, dynamic)> globalDownloaderConfig(int concurrentDownloads) {
-  final slots = concurrentDownloads.clamp(minConcurrentDownloads, maxConcurrentDownloads);
-  return <(String, dynamic)>[(Config.holdingQueue, (slots, slots, slots))];
-}
+/// Not a bandwidth limit. Plex tracks every download as an activity backed by
+/// database transactions, and requests serialise behind them — the server's own
+/// log reports "Held transaction for too long" while downloads run. Measured
+/// against a Plex Media Server, time to answer /identity from the server itself:
+///
+///   1 download    36-66ms
+///   4 downloads   8300-12600ms
+///
+/// At four concurrent the server was unusable — library browsing timed out and
+/// the downloads themselves stalled, each starving the others. Concurrency was
+/// briefly configurable here; it is fixed at one because no value above one was
+/// worth the server it runs against.
+const globalDownloaderConfig = <(String, dynamic)>[(Config.holdingQueue, (1, 1, 1))];
 
 /// Downloader config routed to Android only.
 ///
@@ -886,9 +892,8 @@ class DownloadManagerService {
           progressBar: true,
         );
 
-    final settings = await SettingsService.getInstance();
     await FileDownloader().configure(
-      globalConfig: globalDownloaderConfig(settings.read(SettingsService.concurrentDownloads)),
+      globalConfig: globalDownloaderConfig,
       androidConfig: androidDownloaderConfig,
     );
 
@@ -897,18 +902,6 @@ class DownloadManagerService {
     await FileDownloader().resumeFromBackground();
 
     _fileDownloaderInitialized = true;
-  }
-
-  /// Re-sizes the holding queue after the user changes the concurrency setting.
-  ///
-  /// Applies to the queue immediately, so a raised limit starts the extra
-  /// downloads without waiting for a restart. Tasks already running are left
-  /// alone: lowering the limit stops new ones starting rather than cancelling
-  /// transfers that are part-way through.
-  Future<void> applyConcurrentDownloadLimit(int concurrentDownloads) async {
-    if (!_fileDownloaderInitialized) return;
-    if (_skipDownloadsUnsupported('concurrency reconfigure')) return;
-    await FileDownloader().configure(globalConfig: globalDownloaderConfig(concurrentDownloads));
   }
 
   /// Recover downloads that were interrupted when the app was killed.
