@@ -125,6 +125,15 @@ class MultiServerManager {
     if (scope != null) _plexScopeByServer[serverId] = scope;
   }
 
+  /// [server] with any user-pinned endpoints folded into its candidate list.
+  ///
+  /// plex.tv only advertises what it can reach from the internet, so endpoints
+  /// behind a VPN or an internal proxy reach the app solely through here.
+  Future<PlexServer> _withPinnedEndpoints(PlexServer server) async {
+    final storage = await StorageService.getInstance();
+    return server.withCustomEndpoints(storage.getServerCustomEndpoints(ServerId(server.clientIdentifier)));
+  }
+
   /// Whether [compoundId] is still the client bound as the active user for
   /// [machineId]. Async MediaBrowser work must re-check this before publishing
   /// a result — a profile switch can rebind the machine mid-probe.
@@ -545,8 +554,12 @@ class MultiServerManager {
       return const {};
     }
     final bound = <String>{};
-    final futures = connection.servers.map((server) async {
-      final serverId = server.clientIdentifier;
+    final futures = connection.servers.map((discoveredServer) async {
+      final serverId = discoveredServer.clientIdentifier;
+      // Fold in the user's pinned endpoints before anything registers or
+      // connects, so `_plexServers` and the client share one instance — the
+      // endpoint-promotion path identity-checks them against each other.
+      final server = await _withPinnedEndpoints(discoveredServer);
       final profileScopeId = buildPlexProfileScopeId(serverId: ServerId(serverId), profileId: profileId);
       final existing = _clients[serverId];
       if (existing is PlexClient && ((_serverStatus[serverId] ?? false) || _authErrorServers.contains(serverId))) {

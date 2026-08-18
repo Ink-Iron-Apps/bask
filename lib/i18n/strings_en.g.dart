@@ -2592,6 +2592,8 @@ class Translations$profiles$en {
 
 	/// en: 'The Plex profile token resolved to an unexpected server'
 	String get tokenIdentityMismatch => 'The Plex profile token resolved to an unexpected server';
+
+	late final Translations$profiles$plexEndpoints$en plexEndpoints = Translations$profiles$plexEndpoints$en.internal(_root);
 }
 
 // Path: connections
@@ -5334,6 +5336,45 @@ class Translations$videoControls$pipErrors$en {
 	String unknown({required Object error}) => 'An error occurred: ${error}';
 }
 
+// Path: profiles.plexEndpoints
+class Translations$profiles$plexEndpoints$en {
+	Translations$profiles$plexEndpoints$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Server addresses'
+	String get title => 'Server addresses';
+
+	/// en: 'Pin an address Plex cannot advertise'
+	String get subtitle => 'Pin an address Plex cannot advertise';
+
+	/// en: 'Plex only advertises addresses it can reach from the internet, so an address that works only over a VPN, split DNS or an internal proxy never reaches this app. Pin it here and Plexy will try it alongside the addresses Plex does advertise.'
+	String get explanation => 'Plex only advertises addresses it can reach from the internet, so an address that works only over a VPN, split DNS or an internal proxy never reaches this app. Pin it here and Plexy will try it alongside the addresses Plex does advertise.';
+
+	/// en: 'Custom address'
+	String get fieldLabel => 'Custom address';
+
+	/// en: 'http://100.100.1.10:32400'
+	String get fieldHint => 'http://100.100.1.10:32400';
+
+	/// en: 'Advertised by Plex: ${addresses}'
+	String advertised({required Object addresses}) => 'Advertised by Plex: ${addresses}';
+
+	/// en: 'Plex advertises no addresses for this server'
+	String get advertisedNone => 'Plex advertises no addresses for this server';
+
+	/// en: 'Enter a full address, such as http://100.100.1.10:32400'
+	String get invalid => 'Enter a full address, such as http://100.100.1.10:32400';
+
+	/// en: 'Server addresses updated'
+	String get saved => 'Server addresses updated';
+
+	/// en: 'A pinned address is tried after the local network address, so Wi-Fi still takes the direct route.'
+	String get order => 'A pinned address is tried after the local network address, so Wi-Fi still takes the direct route.';
+}
+
 // Path: libraries.tabs
 class Translations$libraries$tabs$en {
 	Translations$libraries$tabs$en.internal(this._root);
@@ -7205,6 +7246,16 @@ extension on Translations {
 			'profiles.continueButton' => 'Continue',
 			'profiles.pinsDontMatch' => 'PINs don\'t match',
 			'profiles.tokenIdentityMismatch' => 'The Plex profile token resolved to an unexpected server',
+			'profiles.plexEndpoints.title' => 'Server addresses',
+			'profiles.plexEndpoints.subtitle' => 'Pin an address Plex cannot advertise',
+			'profiles.plexEndpoints.explanation' => 'Plex only advertises addresses it can reach from the internet, so an address that works only over a VPN, split DNS or an internal proxy never reaches this app. Pin it here and Plexy will try it alongside the addresses Plex does advertise.',
+			'profiles.plexEndpoints.fieldLabel' => 'Custom address',
+			'profiles.plexEndpoints.fieldHint' => 'http://100.100.1.10:32400',
+			'profiles.plexEndpoints.advertised' => ({required Object addresses}) => 'Advertised by Plex: ${addresses}',
+			'profiles.plexEndpoints.advertisedNone' => 'Plex advertises no addresses for this server',
+			'profiles.plexEndpoints.invalid' => 'Enter a full address, such as http://100.100.1.10:32400',
+			'profiles.plexEndpoints.saved' => 'Server addresses updated',
+			'profiles.plexEndpoints.order' => 'A pinned address is tried after the local network address, so Wi-Fi still takes the direct route.',
 			'connections.sectionTitle' => 'Connections',
 			'connections.addConnection' => 'Add connection',
 			'connections.addConnectionSubtitleNoProfile' => 'Sign in with Plex or connect a Jellyfin or Emby server',
@@ -7408,6 +7459,8 @@ extension on Translations {
 			'explore.status.upcoming' => 'Upcoming',
 			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} episode', other: '${n} episodes', ), 
 			'explore.cast' => 'Cast',
+			_ => null,
+		} ?? switch (path) {
 			'explore.characters' => 'Characters',
 			'explore.addToWatchlist' => 'Add to Watchlist',
 			'explore.removeFromWatchlist' => 'Remove from Watchlist',
@@ -7418,8 +7471,6 @@ extension on Translations {
 			'explore.notInLibrary' => 'Not in your library',
 			'explore.inTheseLibraries' => 'In these libraries',
 			'explore.checkingLibrary' => 'Checking your library...',
-			_ => null,
-		} ?? switch (path) {
 			'explore.emptyTitle' => 'Nothing here yet',
 			'explore.emptyMessage' => ({required Object source}) => 'Rows from ${source} will appear here once they have content.',
 			'explore.searchHint' => ({required Object source}) => 'Search ${source}',
@@ -7922,6 +7973,8 @@ extension on Translations {
 			'companionRemote.remote.fullscreen' => 'Fullscreen',
 			'companionRemote.remote.subtitles' => 'Subtitles',
 			'companionRemote.remote.audio' => 'Audio',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.searchHint' => 'Search on desktop...',
 			'companionRemote.errors.noNetworkInterface' => 'No network interface found',
 			'companionRemote.errors.authenticationFailed' => 'Authentication failed',
@@ -7932,8 +7985,6 @@ extension on Translations {
 			'companionRemote.errors.connectionLostAfterAttempts' => ({required Object attempts}) => 'Connection lost after ${attempts} attempts',
 			'companionRemote.errors.connectionLost' => 'Connection lost',
 			'companionRemote.closedBeforeAuth' => 'The connection closed before authentication',
-			_ => null,
-		} ?? switch (path) {
 			'videoSettings.playbackSpeed' => 'Playback Speed',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Active (${duration})',

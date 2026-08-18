@@ -21,6 +21,7 @@ class StorageService extends BaseSharedPreferencesService {
 
   // Key prefixes for per-id storage
   static const String _prefixServerEndpoint = 'server_endpoint_';
+  static const String _prefixServerCustomEndpoints = 'server_custom_endpoints_';
   static const String _prefixLibraryFilters = 'library_filters_';
   static const String _prefixLibrarySort = 'library_sort_';
   static const String _prefixLibraryGrouping = 'library_grouping_';
@@ -157,6 +158,24 @@ class StorageService extends BaseSharedPreferencesService {
 
   Future<void> clearServerEndpoint(ServerId serverId) async {
     await prefs.remove('$_prefixServerEndpoint$serverId');
+  }
+
+  // User-pinned endpoints for a server, for addresses plex.tv cannot advertise
+  // because it cannot reach them (VPN, split-horizon DNS, internal proxy).
+  Future<void> saveServerCustomEndpoints(ServerId serverId, List<String> urls) async {
+    final cleaned = urls.map((u) => u.trim()).where((u) => u.isNotEmpty).toList();
+    if (cleaned.isEmpty) {
+      await prefs.remove('$_prefixServerCustomEndpoints$serverId');
+      return;
+    }
+    for (final url in cleaned) {
+      LogRedactionManager.registerServerUrl(url);
+    }
+    await prefs.setStringList('$_prefixServerCustomEndpoints$serverId', cleaned);
+  }
+
+  List<String> getServerCustomEndpoints(ServerId serverId) {
+    return prefs.getStringList('$_prefixServerCustomEndpoints$serverId') ?? const [];
   }
 
   // Plex.tv Token — read once by [ConnectionBootstrap.migrateLegacyPlexAccount]
