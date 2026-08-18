@@ -759,9 +759,7 @@ class PlexServer {
     if (restrictTo == PlexNetworkClass.remote || restrictTo == PlexNetworkClass.relay) {
       final filtered = all
           .where(
-            (c) =>
-                c.connection.networkClass != PlexNetworkClass.local ||
-                isVpnReachableLocalHost(c.connection.address),
+            (c) => c.connection.networkClass != PlexNetworkClass.local || isVpnReachableLocalHost(c.connection.address),
           )
           .toList();
       if (filtered.isNotEmpty) return filtered;
