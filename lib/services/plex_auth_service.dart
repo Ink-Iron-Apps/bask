@@ -658,17 +658,38 @@ class PlexServer {
       }
     }
 
+    // A tailnet address is local, but the LAN address is the direct route when
+    // the client is actually on the LAN — so it sorts behind its LAN siblings
+    // while staying ahead of remote and relay.
+    void lanBeforeVpn(List<_ConnectionCandidate> bucket) {
+      final lan = bucket.where((c) => !isVpnReachableLocalHost(c.connection.address)).toList();
+      final vpn = bucket.where((c) => isVpnReachableLocalHost(c.connection.address)).toList();
+      bucket
+        ..clear()
+        ..addAll(lan)
+        ..addAll(vpn);
+    }
+
+    lanBeforeVpn(httpsLocal);
+    lanBeforeVpn(httpLocal);
+
     final all = [...httpsLocal, ...httpsRemote, ...httpsRelay, ...httpLocal, ...httpRemote, ...httpRelay];
 
     // Failover reachability filter. After discovery, failover should stay within
     // endpoint families plausible for the current session: when a remote or relay
     // endpoint is what's working, LAN-only endpoints are unreachable from off-LAN
     // clients and only pollute the retry chain (see GH #902). Reconnect /
-    // reoptimization widens the search again via _reoptimizeServer. Local is kept
-    // conservative — it may still be reachable over VPN/routed-LAN, but those
-    // setups re-widen on the next connectivity event.
+    // reoptimization widens the search again via _reoptimizeServer. Tailnet
+    // endpoints are exempt: they are advertised local but reachable wherever the
+    // VPN is up, so culling them stranded Tailscale users on relay.
     if (restrictTo == PlexNetworkClass.remote || restrictTo == PlexNetworkClass.relay) {
-      final filtered = all.where((c) => c.connection.networkClass != PlexNetworkClass.local).toList();
+      final filtered = all
+          .where(
+            (c) =>
+                c.connection.networkClass != PlexNetworkClass.local ||
+                isVpnReachableLocalHost(c.connection.address),
+          )
+          .toList();
       if (filtered.isNotEmpty) return filtered;
     }
     return all;
@@ -865,6 +886,25 @@ class PlexServer {
   static String _normalizedHost(String host) {
     final bare = host.startsWith('[') && host.endsWith(']') ? host.substring(1, host.length - 1) : host;
     return bare.toLowerCase();
+  }
+
+  /// Whether [host] is a local endpoint that stays reachable off-LAN.
+  ///
+  /// Tailscale hands out CGNAT (100.64/10) addresses and `.ts.net` names, and
+  /// plex.tv advertises them as local because the server sees them on a local
+  /// interface. They behave nothing like a LAN address though: a LAN address
+  /// dies the moment the client leaves the network, while a tailnet address
+  /// works anywhere the VPN is up.
+  static bool isVpnReachableLocalHost(String host) {
+    final normalized = _normalizedHost(host);
+    if (normalized.endsWith('.ts.net')) return true;
+
+    final address = InternetAddress.tryParse(normalized);
+    if (address == null || address.type != InternetAddressType.IPv4) return false;
+
+    final bytes = address.rawAddress;
+    if (bytes.length != 4) return false;
+    return bytes.first == 100 && bytes[1] >= 64 && bytes[1] <= 127;
   }
 
   static bool _isLocalOrPrivateHost(String host) {

@@ -22,6 +22,85 @@ Map<String, dynamic> _connectionJson({
 
 void main() {
   group('PlexServer connection candidates', () {
+    test('prefers the LAN address over a tailnet address', () {
+      // Both are advertised local. On Wi-Fi the LAN address is the direct route;
+      // the tailnet address goes through the VPN even when the server is a hop
+      // away, so it must not win the ordering.
+      final server = PlexServer.fromJson(
+        _serverJsonWithConnections([
+          _connectionJson(
+            protocol: 'http',
+            address: '100.101.102.103',
+            port: 32400,
+            uri: 'http://100.101.102.103:32400',
+            local: true,
+          ),
+          _connectionJson(
+            protocol: 'http',
+            address: '192.168.1.50',
+            port: 32400,
+            uri: 'http://192.168.1.50:32400',
+            local: true,
+          ),
+        ]),
+      );
+
+      final urls = server.prioritizedEndpointUrls();
+
+      expect(urls.indexOf('http://192.168.1.50:32400'), lessThan(urls.indexOf('http://100.101.102.103:32400')));
+    });
+
+    test('keeps a tailnet address in the chain when failing over from a remote endpoint', () {
+      // A LAN address is unreachable once the client is off-LAN, which is why
+      // local candidates are culled during remote failover (#902). A tailnet
+      // address is reachable from anywhere the VPN is up, so it must survive.
+      final server = PlexServer.fromJson(
+        _serverJsonWithConnections([
+          _connectionJson(
+            protocol: 'http',
+            address: '192.168.1.50',
+            port: 32400,
+            uri: 'http://192.168.1.50:32400',
+            local: true,
+          ),
+          _connectionJson(
+            protocol: 'http',
+            address: '100.101.102.103',
+            port: 32400,
+            uri: 'http://100.101.102.103:32400',
+            local: true,
+          ),
+          _connectionJson(
+            protocol: 'https',
+            address: 'plex.example.com',
+            port: 443,
+            uri: 'https://plex.example.com',
+          ),
+        ]),
+      );
+
+      final urls = server.prioritizedEndpointUrls(preferredFirst: 'https://plex.example.com');
+
+      expect(urls, contains('http://100.101.102.103:32400'));
+      expect(urls, isNot(contains('http://192.168.1.50:32400')));
+    });
+
+    test('classifies a tailnet address as local', () {
+      final server = PlexServer.fromJson(
+        _serverJson(
+          _connectionJson(
+            protocol: 'http',
+            address: '100.101.102.103',
+            port: 32400,
+            uri: 'http://100.101.102.103:32400',
+            local: true,
+          ),
+        ),
+      );
+
+      expect(server.networkClassForUrl('http://100.101.102.103:32400'), PlexNetworkClass.local);
+    });
+
     test('adds HTTP fallback for custom native Plex hostname on port 32400', () {
       final server = PlexServer.fromJson(
         _serverJson(
