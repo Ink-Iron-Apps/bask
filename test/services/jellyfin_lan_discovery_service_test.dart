@@ -95,10 +95,17 @@ void main() {
       );
 
       try {
-        sender.send(utf8.encode('one'), InternetAddress.loopbackIPv4, receiver.port);
-        sender.send(utf8.encode('two'), InternetAddress.loopbackIPv4, receiver.port);
-
-        await _waitFor(() => received.length >= 2);
+        // UDP may drop a datagram even on loopback, and the whole suite running
+        // in parallel makes that likelier. Resend while waiting so the test
+        // measures whether listenDatagrams delivers, not whether one packet
+        // happened to survive.
+        await _waitFor(
+          () => received.toSet().containsAll(const ['one', 'two']),
+          onPoll: () {
+            sender.send(utf8.encode('one'), InternetAddress.loopbackIPv4, receiver.port);
+            sender.send(utf8.encode('two'), InternetAddress.loopbackIPv4, receiver.port);
+          },
+        );
 
         expect(received, containsAll(['one', 'two']));
       } finally {
@@ -117,9 +124,10 @@ void main() {
   });
 }
 
-Future<void> _waitFor(bool Function() condition) async {
-  for (var i = 0; i < 50; i++) {
+Future<void> _waitFor(bool Function() condition, {void Function()? onPoll}) async {
+  for (var i = 0; i < 100; i++) {
     if (condition()) return;
+    onPoll?.call();
     await Future<void>.delayed(const Duration(milliseconds: 20));
   }
   fail('Timed out waiting for condition');

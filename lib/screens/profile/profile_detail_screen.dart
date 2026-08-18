@@ -29,6 +29,7 @@ import '../../widgets/settings_section.dart';
 import '../../utils/dialogs.dart';
 import '../settings/add_connection_screen.dart';
 import '../settings/edit_jellyfin_connection_screen.dart';
+import '../settings/edit_plex_endpoints_screen.dart';
 import 'pin_entry_dialog.dart';
 import 'pin_status_row.dart';
 import 'profile_teardown.dart';
@@ -226,10 +227,13 @@ class _ProfileDetailScreenState extends State<ProfileDetailScreen> with Controll
   }
 
   Future<void> _editConnection(Connection conn) async {
-    if (conn is! JellyfinConnection) return;
-    final changed = await Navigator.of(
-      context,
-    ).push<bool>(MaterialPageRoute(builder: (_) => EditJellyfinConnectionScreen(connection: conn)));
+    // A Plex account has no URL of its own — its servers are discovered — so
+    // editing one means pinning addresses plex.tv will not advertise.
+    final route = switch (conn) {
+      JellyfinConnection() => MaterialPageRoute<bool>(builder: (_) => EditJellyfinConnectionScreen(connection: conn)),
+      PlexAccountConnection() => MaterialPageRoute<bool>(builder: (_) => EditPlexEndpointsScreen(connection: conn)),
+    };
+    final changed = await Navigator.of(context).push<bool>(route);
     if (changed != true || !mounted) return;
     setState(() {});
     unawaited(context.read<ActiveProfileBinder>().rebindIfActive(_profile.id));
@@ -493,6 +497,8 @@ class _ConnectionsListState extends State<_ConnectionsList> {
                             itemBuilder: (_) => [
                               if (!pc.isDefault) AppMenuItem(value: 'default', label: t.profiles.makeDefault),
                               if (conn is JellyfinConnection) AppMenuItem(value: 'edit', label: t.common.edit),
+                              if (conn is PlexAccountConnection)
+                                AppMenuItem(value: 'edit', label: t.profiles.plexEndpoints.title),
                               AppMenuItem(value: 'remove', label: t.profiles.removeConnection),
                             ],
                           ),

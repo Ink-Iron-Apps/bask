@@ -347,6 +347,80 @@ class PlexServer {
     this.presence = false,
   });
 
+  /// A copy of this server with user-supplied endpoints folded in.
+  ///
+  /// plex.tv only advertises endpoints it can reach from the public internet,
+  /// so anything reachable solely over a VPN, a split-horizon DNS name or an
+  /// internal reverse proxy never appears in the discovered list — however the
+  /// server itself is configured. A pinned endpoint fills that gap.
+  ///
+  /// The endpoints join the ordinary candidate list rather than jumping the
+  /// queue: classification, ordering and the failover cull all apply, so a
+  /// pinned tailnet address still sorts behind the LAN address it duplicates.
+  /// Whether [raw] is an endpoint [withCustomEndpoints] will accept.
+  ///
+  /// Shared with the settings form so what the field accepts and what the
+  /// candidate list ends up containing cannot drift apart.
+  static bool isValidCustomEndpoint(String raw) => _parseCustomEndpoint(raw) != null;
+
+  static ({String scheme, String host, int port, String uri})? _parseCustomEndpoint(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null) return null;
+    final scheme = uri.scheme.toLowerCase();
+    if (scheme != 'http' && scheme != 'https') return null;
+
+    final host = _normalizedHost(uri.host);
+    if (host.isEmpty) return null;
+
+    final port = uri.hasPort ? uri.port : (scheme == 'https' ? 443 : 80);
+    return (scheme: scheme, host: host, port: port, uri: '$scheme://${uri.host}:$port');
+  }
+
+  PlexServer withCustomEndpoints(List<String> endpoints) {
+    if (endpoints.isEmpty) return this;
+
+    final known = connections.map((c) => c.uri).toSet();
+    final extra = <PlexConnection>[];
+
+    for (final raw in endpoints) {
+      final parsed = _parseCustomEndpoint(raw);
+      if (parsed == null) continue;
+      final host = parsed.host;
+      if (!known.add(parsed.uri)) continue;
+
+      extra.add(
+        PlexConnection(
+          protocol: parsed.scheme,
+          address: host,
+          port: parsed.port,
+          uri: parsed.uri,
+          // Reachability, not topology: a pinned endpoint is one the user says
+          // works, so it belongs with the endpoints tried before remote/relay.
+          local: _isLocalOrPrivateHost(host),
+          relay: false,
+          ipv6: InternetAddress.tryParse(host)?.type == InternetAddressType.IPv6,
+        ),
+      );
+    }
+
+    if (extra.isEmpty) return this;
+
+    return PlexServer(
+      name: name,
+      clientIdentifier: clientIdentifier,
+      accessToken: accessToken,
+      connections: [...connections, ...extra],
+      owned: owned,
+      product: product,
+      platform: platform,
+      lastSeenAt: lastSeenAt,
+      presence: presence,
+    );
+  }
+
   factory PlexServer.fromJson(Map<String, dynamic> json) {
     // Validate required fields first
     if (!_isValidServerJson(json)) {
@@ -658,17 +732,36 @@ class PlexServer {
       }
     }
 
+    // A tailnet address is local, but the LAN address is the direct route when
+    // the client is actually on the LAN — so it sorts behind its LAN siblings
+    // while staying ahead of remote and relay.
+    void lanBeforeVpn(List<_ConnectionCandidate> bucket) {
+      final lan = bucket.where((c) => !isVpnReachableLocalHost(c.connection.address)).toList();
+      final vpn = bucket.where((c) => isVpnReachableLocalHost(c.connection.address)).toList();
+      bucket
+        ..clear()
+        ..addAll(lan)
+        ..addAll(vpn);
+    }
+
+    lanBeforeVpn(httpsLocal);
+    lanBeforeVpn(httpLocal);
+
     final all = [...httpsLocal, ...httpsRemote, ...httpsRelay, ...httpLocal, ...httpRemote, ...httpRelay];
 
     // Failover reachability filter. After discovery, failover should stay within
     // endpoint families plausible for the current session: when a remote or relay
     // endpoint is what's working, LAN-only endpoints are unreachable from off-LAN
     // clients and only pollute the retry chain (see GH #902). Reconnect /
-    // reoptimization widens the search again via _reoptimizeServer. Local is kept
-    // conservative — it may still be reachable over VPN/routed-LAN, but those
-    // setups re-widen on the next connectivity event.
+    // reoptimization widens the search again via _reoptimizeServer. Tailnet
+    // endpoints are exempt: they are advertised local but reachable wherever the
+    // VPN is up, so culling them stranded Tailscale users on relay.
     if (restrictTo == PlexNetworkClass.remote || restrictTo == PlexNetworkClass.relay) {
-      final filtered = all.where((c) => c.connection.networkClass != PlexNetworkClass.local).toList();
+      final filtered = all
+          .where(
+            (c) => c.connection.networkClass != PlexNetworkClass.local || isVpnReachableLocalHost(c.connection.address),
+          )
+          .toList();
       if (filtered.isNotEmpty) return filtered;
     }
     return all;
@@ -865,6 +958,25 @@ class PlexServer {
   static String _normalizedHost(String host) {
     final bare = host.startsWith('[') && host.endsWith(']') ? host.substring(1, host.length - 1) : host;
     return bare.toLowerCase();
+  }
+
+  /// Whether [host] is a local endpoint that stays reachable off-LAN.
+  ///
+  /// Tailscale hands out CGNAT (100.64/10) addresses and `.ts.net` names, and
+  /// plex.tv advertises them as local because the server sees them on a local
+  /// interface. They behave nothing like a LAN address though: a LAN address
+  /// dies the moment the client leaves the network, while a tailnet address
+  /// works anywhere the VPN is up.
+  static bool isVpnReachableLocalHost(String host) {
+    final normalized = _normalizedHost(host);
+    if (normalized.endsWith('.ts.net')) return true;
+
+    final address = InternetAddress.tryParse(normalized);
+    if (address == null || address.type != InternetAddressType.IPv4) return false;
+
+    final bytes = address.rawAddress;
+    if (bytes.length != 4) return false;
+    return bytes.first == 100 && bytes[1] >= 64 && bytes[1] <= 127;
   }
 
   static bool _isLocalOrPrivateHost(String host) {

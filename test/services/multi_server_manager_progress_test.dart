@@ -11,11 +11,16 @@ import 'package:plezy/services/plex_auth_service.dart';
 import 'package:plezy/services/plex_client.dart';
 import 'package:plezy/services/multi_server_manager.dart';
 import '../test_helpers/backend_client_fixtures.dart';
+import '../test_helpers/prefs.dart';
 
 void main() {
   // refreshTokensForProfile starts connectivity monitoring after a successful
   // bind, which touches platform channels.
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // The refresh reads each server's pinned endpoints out of shared preferences
+  // before it connects, so the store has to exist.
+  setUp(resetSharedPreferencesForTest);
 
   test('refreshTokensForProfile emits per-server progress and a single status snapshot', () async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
