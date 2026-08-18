@@ -600,6 +600,18 @@ class Translations$settings$en {
 	/// en: '${heap}MB memory available. A ${size}MB buffer may affect playback.'
 	String bufferSizeWarning({required Object heap, required Object size}) => '${heap}MB memory available. A ${size}MB buffer may affect playback.';
 
+	/// en: 'Buffer to storage'
+	String get diskCache => 'Buffer to storage';
+
+	/// en: 'Memory only'
+	String get diskCacheOff => 'Memory only';
+
+	/// en: '${size} GB on disk'
+	String diskCacheGB({required Object size}) => '${size} GB on disk';
+
+	/// en: 'Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.'
+	String get diskCacheDescription => 'Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.';
+
 	/// en: 'Playback Buffer'
 	String get playbackBuffer => 'Playback Buffer';
 
@@ -4332,6 +4344,24 @@ class Translations$videoSettings$en {
 
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
+
+	/// en: 'Picture'
+	String get pictureAdjustments => 'Picture';
+
+	/// en: 'Brightness'
+	String get pictureBrightness => 'Brightness';
+
+	/// en: 'Contrast'
+	String get pictureContrast => 'Contrast';
+
+	/// en: 'Saturation'
+	String get pictureSaturation => 'Saturation';
+
+	/// en: 'Gamma'
+	String get pictureGamma => 'Gamma';
+
+	/// en: 'Default'
+	String get pictureNeutral => 'Default';
 }
 
 // Path: performanceOverlay
@@ -5313,6 +5343,12 @@ class Translations$hotkeys$actions$en {
 
 	/// en: 'Take Screenshot'
 	String get screenshot => 'Take Screenshot';
+
+	/// en: 'Step Forward One Frame'
+	String get frameStepForward => 'Step Forward One Frame';
+
+	/// en: 'Step Back One Frame'
+	String get frameStepBackward => 'Step Back One Frame';
 }
 
 // Path: videoControls.pipErrors
@@ -6604,6 +6640,10 @@ extension on Translations {
 			'settings.bufferSizeMB' => ({required Object size}) => '${size}MB',
 			'settings.bufferSizeAuto' => 'Auto (Recommended)',
 			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB memory available. A ${size}MB buffer may affect playback.',
+			'settings.diskCache' => 'Buffer to storage',
+			'settings.diskCacheOff' => 'Memory only',
+			'settings.diskCacheGB' => ({required Object size}) => '${size} GB on disk',
+			'settings.diskCacheDescription' => 'Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.',
 			'settings.playbackBuffer' => 'Playback Buffer',
 			'settings.playbackBufferAuto' => 'Auto (Recommended)',
 			'settings.playbackBufferLarge' => 'Large',
@@ -6809,6 +6849,8 @@ extension on Translations {
 			'hotkeys.actions.shaderToggle' => 'Toggle Shaders',
 			'hotkeys.actions.skipMarker' => 'Skip Intro/Credits',
 			'hotkeys.actions.screenshot' => 'Take Screenshot',
+			'hotkeys.actions.frameStepForward' => 'Step Forward One Frame',
+			'hotkeys.actions.frameStepBackward' => 'Step Back One Frame',
 			'fileInfo.title' => 'File Info',
 			'fileInfo.overview' => 'Overview',
 			'fileInfo.video' => 'Video',
@@ -6948,14 +6990,14 @@ extension on Translations {
 			'mediaMenu.confirmDeleteTarget' => ({required Object title}) => 'Permanently delete ${title} from your server?',
 			'mediaMenu.deleteMultipleWarning' => 'This includes all episodes and their files.',
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This deletes all ${n} episode in it, and its file.', other: 'This deletes all ${n} episodes in it, and their files.', ), 
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This item is stored as ${n} file, which will be deleted.', other: 'This item is stored across ${n} files, and all of them will be deleted.', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} other episode is stored in the same file and will be deleted too:', other: '${n} other episodes are stored in the same file and will be deleted too:', ), 
 			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.',
 			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Your server did not provide file details for this item, so Plexy cannot check which files this will remove. It may delete more than the item named above.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Media item deleted successfully',
 			'mediaMenu.mediaFailedToDelete' => 'Failed to delete media item',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.rate' => 'Rate',
 			'mediaMenu.playFromBeginning' => 'Play from Beginning',
 			'mediaMenu.playVersion' => 'Play Version...',
@@ -7462,14 +7504,14 @@ extension on Translations {
 			'explore.rows.trending' => 'Trending',
 			'explore.rows.upcomingMovies' => 'Upcoming Movies',
 			'explore.rows.upcomingShows' => 'Upcoming Shows',
+			_ => null,
+		} ?? switch (path) {
 			'explore.status.airing' => 'Airing',
 			'explore.status.ended' => 'Ended',
 			'explore.status.canceled' => 'Canceled',
 			'explore.status.upcoming' => 'Upcoming',
 			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} episode', other: '${n} episodes', ), 
 			'explore.cast' => 'Cast',
-			_ => null,
-		} ?? switch (path) {
 			'explore.characters' => 'Characters',
 			'explore.addToWatchlist' => 'Add to Watchlist',
 			'explore.removeFromWatchlist' => 'Remove from Watchlist',
@@ -7976,14 +8018,14 @@ extension on Translations {
 			'companionRemote.remote.previous' => 'Previous',
 			'companionRemote.remote.playPause' => 'Play/Pause',
 			'companionRemote.remote.next' => 'Next',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.seekBack' => 'Seek Back',
 			'companionRemote.remote.stop' => 'Stop',
 			'companionRemote.remote.seekForward' => 'Seek Fwd',
 			'companionRemote.remote.volume' => 'Volume',
 			'companionRemote.remote.volumeDown' => 'Down',
 			'companionRemote.remote.volumeUp' => 'Up',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.remote.fullscreen' => 'Fullscreen',
 			'companionRemote.remote.subtitles' => 'Subtitles',
 			'companionRemote.remote.audio' => 'Audio',
@@ -8021,6 +8063,12 @@ extension on Translations {
 			'videoSettings.audioOutputStereo' => 'Stereo',
 			'videoSettings.audioNormalization' => 'Normalize Loudness',
 			'videoSettings.audioDownmix' => 'Downmix to Stereo',
+			'videoSettings.pictureAdjustments' => 'Picture',
+			'videoSettings.pictureBrightness' => 'Brightness',
+			'videoSettings.pictureContrast' => 'Contrast',
+			'videoSettings.pictureSaturation' => 'Saturation',
+			'videoSettings.pictureGamma' => 'Gamma',
+			'videoSettings.pictureNeutral' => 'Default',
 			'performanceOverlay.color' => 'Color',
 			'performanceOverlay.performance' => 'Performance',
 			'performanceOverlay.buffer' => 'Buffer',

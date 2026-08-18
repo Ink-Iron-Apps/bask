@@ -347,6 +347,10 @@ class KeyboardShortcutsService extends ChangeNotifier {
             onToggleShader?.call();
           case ShortcutAction.skipMarker:
             onSkipMarker?.call();
+          case ShortcutAction.frameStepForward:
+            unawaited(player.command(['frame-step']));
+          case ShortcutAction.frameStepBackward:
+            unawaited(player.command(['frame-back-step']));
           case ShortcutAction.screenshot:
             unawaited(player.command(['screenshot', 'subtitles']).then((_) => onScreenshot?.call()));
           case ShortcutAction.zoomIn:

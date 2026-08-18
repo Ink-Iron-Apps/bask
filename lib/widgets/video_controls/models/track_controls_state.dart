@@ -1,3 +1,4 @@
+import '../../../services/video_equalizer.dart';
 import 'package:flutter/material.dart';
 
 import '../../../media/media_item.dart';
@@ -32,6 +33,9 @@ class TrackControlsState {
   final int? sourceDurationMs;
   final int boxFitMode;
   final double videoZoomScale;
+
+  /// Picture adjustments currently applied, and the sink for changes.
+  final VideoEqualizer videoEqualizer;
   final int audioSyncOffset;
   final int subtitleSyncOffset;
   final bool isRotationLocked;
@@ -40,6 +44,7 @@ class TrackControlsState {
   final VoidCallback? onTogglePIPMode;
   final VoidCallback? onCycleBoxFitMode;
   final ValueChanged<double>? onVideoZoomChanged;
+  final ValueChanged<VideoEqualizer>? onVideoEqualizerChanged;
   final VoidCallback? onResetVideoZoom;
   final VoidCallback? onToggleRotationLock;
   final VoidCallback? onToggleScreenLock;
@@ -93,6 +98,7 @@ class TrackControlsState {
     this.sourceDurationMs,
     this.boxFitMode = 0,
     this.videoZoomScale = 1.0,
+    this.videoEqualizer = VideoEqualizer.neutral,
     this.audioSyncOffset = 0,
     this.subtitleSyncOffset = 0,
     this.isRotationLocked = false,
@@ -101,6 +107,7 @@ class TrackControlsState {
     this.onTogglePIPMode,
     this.onCycleBoxFitMode,
     this.onVideoZoomChanged,
+    this.onVideoEqualizerChanged,
     this.onResetVideoZoom,
     this.onToggleRotationLock,
     this.onToggleScreenLock,
