@@ -355,6 +355,159 @@ void main() {
     expect(client.fetchPlayableDescendantsCalls, ['show-1']);
   });
 
+  test('show sync rule with downloadFilter=all keeps watched episodes downloaded', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final manager = MultiServerManager();
+    addTearDown(() async {
+      manager.dispose();
+      await db.close();
+    });
+
+    final client = _PlayableDescendantsClient([
+      testMediaItem(
+        id: 's1e1',
+        backend: MediaBackend.plex,
+        kind: MediaKind.episode,
+        title: 's1e1',
+        parentIndex: 1,
+        index: 1,
+        viewCount: 3,
+      ),
+      testMediaItem(
+        id: 's1e2',
+        backend: MediaBackend.plex,
+        kind: MediaKind.episode,
+        title: 's1e2',
+        parentIndex: 1,
+        index: 2,
+      ),
+    ]);
+    manager.debugRegisterClientForTesting(client);
+
+    const ruleKey = 'profile-a|plex-machine:show-1';
+    final show = testMediaItem(id: 'show-1', backend: MediaBackend.plex, kind: MediaKind.show, title: 'Show');
+    await db.insertSyncRule(
+      profileId: 'profile-a',
+      serverId: ServerId('plex-machine'),
+      ratingKey: 'show-1',
+      globalKey: ruleKey,
+      targetType: 'show',
+      episodeCount: 0,
+      downloadFilter: 'all',
+    );
+
+    final queued = <MediaItem>[];
+    final executor = SyncRuleExecutor(database: db);
+    final results = await executor.executeSyncRules(
+      profileId: 'profile-a',
+      serverManager: manager,
+      downloads: const {},
+      metadata: {ruleKey: show},
+      associateDownload: (_, _) async {},
+      queueSingleDownload: (item, client, {int mediaIndex = 0}) async {
+        queued.add(item);
+        return true;
+      },
+      isOffline: false,
+      force: true,
+    );
+
+    expect(results.single.queuedCount, 2);
+    expect(queued.map((item) => item.id), ['s1e1', 's1e2']);
+  });
+
+  test('show sync rule with the unwatched filter skips already-watched episodes', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final manager = MultiServerManager();
+    addTearDown(() async {
+      manager.dispose();
+      await db.close();
+    });
+
+    final client = _PlayableDescendantsClient([
+      testMediaItem(
+        id: 's1e1',
+        backend: MediaBackend.plex,
+        kind: MediaKind.episode,
+        title: 's1e1',
+        parentIndex: 1,
+        index: 1,
+        viewCount: 3,
+      ),
+      testMediaItem(
+        id: 's1e2',
+        backend: MediaBackend.plex,
+        kind: MediaKind.episode,
+        title: 's1e2',
+        parentIndex: 1,
+        index: 2,
+      ),
+    ]);
+    manager.debugRegisterClientForTesting(client);
+
+    const ruleKey = 'profile-a|plex-machine:show-1';
+    final show = testMediaItem(id: 'show-1', backend: MediaBackend.plex, kind: MediaKind.show, title: 'Show');
+    await db.insertSyncRule(
+      profileId: 'profile-a',
+      serverId: ServerId('plex-machine'),
+      ratingKey: 'show-1',
+      globalKey: ruleKey,
+      targetType: 'show',
+      episodeCount: 0,
+    );
+
+    final queued = <MediaItem>[];
+    final executor = SyncRuleExecutor(database: db);
+    final results = await executor.executeSyncRules(
+      profileId: 'profile-a',
+      serverManager: manager,
+      downloads: const {},
+      metadata: {ruleKey: show},
+      associateDownload: (_, _) async {},
+      queueSingleDownload: (item, client, {int mediaIndex = 0}) async {
+        queued.add(item);
+        return true;
+      },
+      isOffline: false,
+      force: true,
+    );
+
+    expect(results.single.queuedCount, 1);
+    expect(queued.map((item) => item.id), ['s1e2']);
+  });
+
+  test('sync rule keeps its stored title when re-created without metadata', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+
+    const ruleKey = 'profile-a|plex-machine:playlist-1';
+    await db.insertSyncRule(
+      profileId: 'profile-a',
+      serverId: ServerId('plex-machine'),
+      ratingKey: '155192',
+      globalKey: ruleKey,
+      targetType: 'playlist',
+      episodeCount: 0,
+      title: 'Need to Watch',
+    );
+    expect((await db.getSyncRule(ruleKey))!.title, 'Need to Watch');
+
+    // Re-creating the rule without metadata must not wipe the stored name —
+    // the sync rules screen would fall back to the raw ratingKey.
+    await db.insertSyncRule(
+      profileId: 'profile-a',
+      serverId: ServerId('plex-machine'),
+      ratingKey: '155192',
+      globalKey: ruleKey,
+      targetType: 'playlist',
+      episodeCount: 0,
+    );
+    expect((await db.getSyncRule(ruleKey))!.title, 'Need to Watch');
+
+    await db.updateSyncRuleTitle(ruleKey, 'Renamed On Server');
+    expect((await db.getSyncRule(ruleKey))!.title, 'Renamed On Server');
+  });
+
   test('Jellyfin playlist sync associates an already-downloaded member', () async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final manager = MultiServerManager();

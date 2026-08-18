@@ -2674,6 +2674,15 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _episodeCountMeta = const VerificationMeta('episodeCount');
   @override
   late final GeneratedColumn<int> episodeCount = GeneratedColumn<int>(
@@ -2762,6 +2771,7 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
     ratingKey,
     globalKey,
     targetType,
+    title,
     episodeCount,
     enabled,
     createdAt,
@@ -2805,6 +2815,9 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
       context.handle(_targetTypeMeta, targetType.isAcceptableOrUnknown(data['target_type']!, _targetTypeMeta));
     } else if (isInserting) {
       context.missing(_targetTypeMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     }
     if (data.containsKey('episode_count')) {
       context.handle(_episodeCountMeta, episodeCount.isAcceptableOrUnknown(data['episode_count']!, _episodeCountMeta));
@@ -2864,6 +2877,7 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
       ratingKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}rating_key'])!,
       globalKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}global_key'])!,
       targetType: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}target_type'])!,
+      title: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}title']),
       episodeCount: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}episode_count'])!,
       enabled: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}enabled'])!,
       createdAt: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
@@ -2897,6 +2911,14 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
   final String ratingKey;
   final String globalKey;
   final String targetType;
+
+  /// Display name of the rule target, captured at creation time.
+  ///
+  /// [DownloadProvider.refreshMetadataFromCache] only rehydrates metadata for
+  /// keys in `_downloads`, and a rule target (a show, playlist or collection)
+  /// is not itself a download. Without a persisted copy the sync rules screen
+  /// falls back to the raw ratingKey after a restart.
+  final String? title;
   final int episodeCount;
   final bool enabled;
   final int createdAt;
@@ -2916,6 +2938,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     required this.ratingKey,
     required this.globalKey,
     required this.targetType,
+    this.title,
     required this.episodeCount,
     required this.enabled,
     required this.createdAt,
@@ -2934,6 +2957,9 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     map['rating_key'] = Variable<String>(ratingKey);
     map['global_key'] = Variable<String>(globalKey);
     map['target_type'] = Variable<String>(targetType);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
     map['episode_count'] = Variable<int>(episodeCount);
     map['enabled'] = Variable<bool>(enabled);
     map['created_at'] = Variable<int>(createdAt);
@@ -2955,6 +2981,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       ratingKey: Value(ratingKey),
       globalKey: Value(globalKey),
       targetType: Value(targetType),
+      title: title == null && nullToAbsent ? const Value.absent() : Value(title),
       episodeCount: Value(episodeCount),
       enabled: Value(enabled),
       createdAt: Value(createdAt),
@@ -2975,6 +3002,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       ratingKey: serializer.fromJson<String>(json['ratingKey']),
       globalKey: serializer.fromJson<String>(json['globalKey']),
       targetType: serializer.fromJson<String>(json['targetType']),
+      title: serializer.fromJson<String?>(json['title']),
       episodeCount: serializer.fromJson<int>(json['episodeCount']),
       enabled: serializer.fromJson<bool>(json['enabled']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
@@ -2995,6 +3023,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       'ratingKey': serializer.toJson<String>(ratingKey),
       'globalKey': serializer.toJson<String>(globalKey),
       'targetType': serializer.toJson<String>(targetType),
+      'title': serializer.toJson<String?>(title),
       'episodeCount': serializer.toJson<int>(episodeCount),
       'enabled': serializer.toJson<bool>(enabled),
       'createdAt': serializer.toJson<int>(createdAt),
@@ -3013,6 +3042,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     String? ratingKey,
     String? globalKey,
     String? targetType,
+    Value<String?> title = const Value.absent(),
     int? episodeCount,
     bool? enabled,
     int? createdAt,
@@ -3028,6 +3058,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     ratingKey: ratingKey ?? this.ratingKey,
     globalKey: globalKey ?? this.globalKey,
     targetType: targetType ?? this.targetType,
+    title: title.present ? title.value : this.title,
     episodeCount: episodeCount ?? this.episodeCount,
     enabled: enabled ?? this.enabled,
     createdAt: createdAt ?? this.createdAt,
@@ -3045,6 +3076,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       ratingKey: data.ratingKey.present ? data.ratingKey.value : this.ratingKey,
       globalKey: data.globalKey.present ? data.globalKey.value : this.globalKey,
       targetType: data.targetType.present ? data.targetType.value : this.targetType,
+      title: data.title.present ? data.title.value : this.title,
       episodeCount: data.episodeCount.present ? data.episodeCount.value : this.episodeCount,
       enabled: data.enabled.present ? data.enabled.value : this.enabled,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -3067,6 +3099,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
           ..write('ratingKey: $ratingKey, ')
           ..write('globalKey: $globalKey, ')
           ..write('targetType: $targetType, ')
+          ..write('title: $title, ')
           ..write('episodeCount: $episodeCount, ')
           ..write('enabled: $enabled, ')
           ..write('createdAt: $createdAt, ')
@@ -3087,6 +3120,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     ratingKey,
     globalKey,
     targetType,
+    title,
     episodeCount,
     enabled,
     createdAt,
@@ -3106,6 +3140,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
           other.ratingKey == this.ratingKey &&
           other.globalKey == this.globalKey &&
           other.targetType == this.targetType &&
+          other.title == this.title &&
           other.episodeCount == this.episodeCount &&
           other.enabled == this.enabled &&
           other.createdAt == this.createdAt &&
@@ -3123,6 +3158,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
   final Value<String> ratingKey;
   final Value<String> globalKey;
   final Value<String> targetType;
+  final Value<String?> title;
   final Value<int> episodeCount;
   final Value<bool> enabled;
   final Value<int> createdAt;
@@ -3138,6 +3174,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     this.ratingKey = const Value.absent(),
     this.globalKey = const Value.absent(),
     this.targetType = const Value.absent(),
+    this.title = const Value.absent(),
     this.episodeCount = const Value.absent(),
     this.enabled = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -3154,6 +3191,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     required String ratingKey,
     required String globalKey,
     required String targetType,
+    this.title = const Value.absent(),
     required int episodeCount,
     this.enabled = const Value.absent(),
     required int createdAt,
@@ -3175,6 +3213,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     Expression<String>? ratingKey,
     Expression<String>? globalKey,
     Expression<String>? targetType,
+    Expression<String>? title,
     Expression<int>? episodeCount,
     Expression<bool>? enabled,
     Expression<int>? createdAt,
@@ -3191,6 +3230,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
       if (ratingKey != null) 'rating_key': ratingKey,
       if (globalKey != null) 'global_key': globalKey,
       if (targetType != null) 'target_type': targetType,
+      if (title != null) 'title': title,
       if (episodeCount != null) 'episode_count': episodeCount,
       if (enabled != null) 'enabled': enabled,
       if (createdAt != null) 'created_at': createdAt,
@@ -3209,6 +3249,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     Value<String>? ratingKey,
     Value<String>? globalKey,
     Value<String>? targetType,
+    Value<String?>? title,
     Value<int>? episodeCount,
     Value<bool>? enabled,
     Value<int>? createdAt,
@@ -3225,6 +3266,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
       ratingKey: ratingKey ?? this.ratingKey,
       globalKey: globalKey ?? this.globalKey,
       targetType: targetType ?? this.targetType,
+      title: title ?? this.title,
       episodeCount: episodeCount ?? this.episodeCount,
       enabled: enabled ?? this.enabled,
       createdAt: createdAt ?? this.createdAt,
@@ -3256,6 +3298,9 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     }
     if (targetType.present) {
       map['target_type'] = Variable<String>(targetType.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
     }
     if (episodeCount.present) {
       map['episode_count'] = Variable<int>(episodeCount.value);
@@ -3293,6 +3338,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
           ..write('ratingKey: $ratingKey, ')
           ..write('globalKey: $globalKey, ')
           ..write('targetType: $targetType, ')
+          ..write('title: $title, ')
           ..write('episodeCount: $episodeCount, ')
           ..write('enabled: $enabled, ')
           ..write('createdAt: $createdAt, ')
@@ -6065,6 +6111,7 @@ typedef $$SyncRulesTableCreateCompanionBuilder =
       required String ratingKey,
       required String globalKey,
       required String targetType,
+      Value<String?> title,
       required int episodeCount,
       Value<bool> enabled,
       required int createdAt,
@@ -6082,6 +6129,7 @@ typedef $$SyncRulesTableUpdateCompanionBuilder =
       Value<String> ratingKey,
       Value<String> globalKey,
       Value<String> targetType,
+      Value<String?> title,
       Value<int> episodeCount,
       Value<bool> enabled,
       Value<int> createdAt,
@@ -6137,6 +6185,9 @@ class $$SyncRulesTableFilterComposer extends Composer<_$AppDatabase, $SyncRulesT
 
   ColumnFilters<String> get targetType =>
       $composableBuilder(column: $table.targetType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get episodeCount =>
       $composableBuilder(column: $table.episodeCount, builder: (column) => ColumnFilters(column));
@@ -6206,6 +6257,9 @@ class $$SyncRulesTableOrderingComposer extends Composer<_$AppDatabase, $SyncRule
   ColumnOrderings<String> get targetType =>
       $composableBuilder(column: $table.targetType, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get episodeCount =>
       $composableBuilder(column: $table.episodeCount, builder: (column) => ColumnOrderings(column));
 
@@ -6250,6 +6304,8 @@ class $$SyncRulesTableAnnotationComposer extends Composer<_$AppDatabase, $SyncRu
   GeneratedColumn<String> get globalKey => $composableBuilder(column: $table.globalKey, builder: (column) => column);
 
   GeneratedColumn<String> get targetType => $composableBuilder(column: $table.targetType, builder: (column) => column);
+
+  GeneratedColumn<String> get title => $composableBuilder(column: $table.title, builder: (column) => column);
 
   GeneratedColumn<int> get episodeCount => $composableBuilder(column: $table.episodeCount, builder: (column) => column);
 
@@ -6323,6 +6379,7 @@ class $$SyncRulesTableTableManager
                 Value<String> ratingKey = const Value.absent(),
                 Value<String> globalKey = const Value.absent(),
                 Value<String> targetType = const Value.absent(),
+                Value<String?> title = const Value.absent(),
                 Value<int> episodeCount = const Value.absent(),
                 Value<bool> enabled = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
@@ -6338,6 +6395,7 @@ class $$SyncRulesTableTableManager
                 ratingKey: ratingKey,
                 globalKey: globalKey,
                 targetType: targetType,
+                title: title,
                 episodeCount: episodeCount,
                 enabled: enabled,
                 createdAt: createdAt,
@@ -6355,6 +6413,7 @@ class $$SyncRulesTableTableManager
                 required String ratingKey,
                 required String globalKey,
                 required String targetType,
+                Value<String?> title = const Value.absent(),
                 required int episodeCount,
                 Value<bool> enabled = const Value.absent(),
                 required int createdAt,
@@ -6370,6 +6429,7 @@ class $$SyncRulesTableTableManager
                 ratingKey: ratingKey,
                 globalKey: globalKey,
                 targetType: targetType,
+                title: title,
                 episodeCount: episodeCount,
                 enabled: enabled,
                 createdAt: createdAt,
