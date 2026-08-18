@@ -46,6 +46,13 @@ class DownloadTreeNode {
 /// Type of node in the download tree
 enum DownloadNodeType { show, season, episode, movie, album, track }
 
+extension DownloadTreeNodeActivity on DownloadTreeNode {
+  /// Whether this node still has work outstanding, and so belongs at the top of
+  /// the manage list. Failed and cancelled rows are finished, not outstanding.
+  bool get isActive =>
+      status == DownloadStatus.downloading || status == DownloadStatus.queued || status == DownloadStatus.paused;
+}
+
 /// Hierarchical tree view for downloads
 /// Groups TV shows by show -> season -> episode and music by album -> track
 /// Movies appear at top level
@@ -103,7 +110,7 @@ class _DownloadTreeViewState extends State<DownloadTreeView> {
 
   @override
   Widget build(BuildContext context) {
-    final tree = _buildTree();
+    final tree = buildDownloadTree(downloads: widget.downloads, metadata: widget.metadata);
     final flattenedNodes = _flattenTree(tree);
 
     if (flattenedNodes.isEmpty) {
@@ -120,248 +127,7 @@ class _DownloadTreeViewState extends State<DownloadTreeView> {
     );
   }
 
-  List<DownloadTreeNode> _buildTree() {
-    final Map<String, List<MapEntry<String, DownloadProgress>>> showGroups = {};
-    final Map<String, List<MapEntry<String, DownloadProgress>>> albumGroups = {};
-    final List<DownloadTreeNode> movies = [];
-
-    for (final entry in widget.downloads.entries) {
-      final globalKey = entry.key;
-      final download = entry.value;
-      final meta = widget.metadata[globalKey];
-
-      if (meta == null) continue;
-
-      if (meta.isEpisode) {
-        final showKey = meta.grandparentId ?? 'unknown';
-        showGroups.putIfAbsent(showKey, () => []);
-        showGroups[showKey]!.add(entry);
-      } else if (meta.kind == MediaKind.track) {
-        final albumKey = meta.parentId ?? 'unknown';
-        albumGroups.putIfAbsent(albumKey, () => []);
-        albumGroups[albumKey]!.add(entry);
-      } else if (meta.isMovie) {
-        movies.add(
-          DownloadTreeNode(
-            key: globalKey,
-            title: meta.displayTitle,
-            type: DownloadNodeType.movie,
-            progress: download.progressPercent,
-            status: download.status,
-            metadata: meta,
-            downloadProgress: download,
-          ),
-        );
-      }
-    }
-
-    final List<DownloadTreeNode> shows = [];
-    for (final showEntry in showGroups.entries) {
-      final showKey = showEntry.key;
-      final episodes = showEntry.value;
-
-      if (episodes.isEmpty) continue;
-
-      final firstEpisode = widget.metadata[episodes.first.key];
-      final showTitle = firstEpisode?.grandparentTitle ?? t.downloads.unknownShow;
-
-      final Map<String, List<MapEntry<String, DownloadProgress>>> seasonGroups = {};
-      for (final episode in episodes) {
-        final meta = widget.metadata[episode.key];
-        if (meta == null) continue;
-
-        final seasonKey = meta.parentId ?? 'unknown';
-        seasonGroups.putIfAbsent(seasonKey, () => []);
-        seasonGroups[seasonKey]!.add(episode);
-      }
-
-      final List<DownloadTreeNode> seasons = [];
-      for (final seasonEntry in seasonGroups.entries) {
-        final seasonKey = seasonEntry.key;
-        final seasonEpisodes = seasonEntry.value;
-
-        if (seasonEpisodes.isEmpty) continue;
-
-        final firstEpisode = widget.metadata[seasonEpisodes.first.key];
-        final seasonNumber = firstEpisode?.parentIndex;
-        final seasonTitle = firstEpisode?.parentTitle?.isNotEmpty == true
-            ? firstEpisode!.parentTitle!
-            : seasonNumber != null
-            ? t.common.seasonNumber(number: seasonNumber)
-            : t.downloads.unknownSeason;
-
-        final List<DownloadTreeNode> episodeNodes = [];
-        for (final episodeEntry in seasonEpisodes) {
-          final globalKey = episodeEntry.key;
-          final download = episodeEntry.value;
-          final meta = widget.metadata[globalKey];
-
-          if (meta == null) continue;
-
-          final episodeNumber = meta.index;
-          final episodeTitle = episodeNumber != null
-              ? t.common.episodeNumberTitle(number: episodeNumber, title: meta.title!)
-              : meta.title!;
-
-          episodeNodes.add(
-            DownloadTreeNode(
-              key: globalKey,
-              title: episodeTitle,
-              type: DownloadNodeType.episode,
-              progress: download.progressPercent,
-              status: download.status,
-              metadata: meta,
-              downloadProgress: download,
-            ),
-          );
-        }
-
-        episodeNodes.sort((a, b) {
-          final aIndex = a.metadata?.index ?? 0;
-          final bIndex = b.metadata?.index ?? 0;
-          return aIndex.compareTo(bIndex);
-        });
-
-        final seasonProgress = episodeNodes.isEmpty
-            ? 0.0
-            : episodeNodes.map((e) => e.progress).reduce((a, b) => a + b) / episodeNodes.length;
-        final seasonStatus = _determineAggregateStatus(episodeNodes.map((e) => e.status).toList());
-
-        seasons.add(
-          DownloadTreeNode(
-            key: '$showKey:$seasonKey',
-            title: seasonTitle,
-            type: DownloadNodeType.season,
-            progress: seasonProgress,
-            status: seasonStatus,
-            children: episodeNodes,
-          ),
-        );
-      }
-
-      seasons.removeWhere((s) => s.children.isEmpty);
-
-      seasons.sort((a, b) {
-        final aSeasonNum = widget.metadata[a.children.first.key]?.parentIndex ?? 0;
-        final bSeasonNum = widget.metadata[b.children.first.key]?.parentIndex ?? 0;
-        return aSeasonNum.compareTo(bSeasonNum);
-      });
-
-      final showProgress = seasons.isEmpty
-          ? 0.0
-          : seasons.map((s) => s.progress).reduce((a, b) => a + b) / seasons.length;
-      final showStatus = _determineAggregateStatus(seasons.map((s) => s.status).toList());
-
-      shows.add(
-        DownloadTreeNode(
-          key: showKey,
-          title: showTitle,
-          type: DownloadNodeType.show,
-          progress: showProgress,
-          status: showStatus,
-          children: seasons,
-        ),
-      );
-    }
-
-    final List<DownloadTreeNode> albums = [];
-    for (final albumEntry in albumGroups.entries) {
-      final albumKey = albumEntry.key;
-      final tracks = albumEntry.value;
-      if (tracks.isEmpty) continue;
-
-      final firstTrack = widget.metadata[tracks.first.key];
-      final albumTitle = firstTrack?.albumTitle ?? t.downloads.unknownAlbum;
-      final artistTitle = firstTrack?.albumArtistTitle;
-      final albumNodeTitle = artistTitle != null && artistTitle.isNotEmpty ? '$artistTitle - $albumTitle' : albumTitle;
-
-      final List<DownloadTreeNode> trackNodes = [];
-      for (final trackEntry in tracks) {
-        final globalKey = trackEntry.key;
-        final download = trackEntry.value;
-        final meta = widget.metadata[globalKey];
-        if (meta == null) continue;
-
-        trackNodes.add(
-          DownloadTreeNode(
-            key: globalKey,
-            title: meta.title ?? globalKey,
-            type: DownloadNodeType.track,
-            progress: download.progressPercent,
-            status: download.status,
-            metadata: meta,
-            downloadProgress: download,
-          ),
-        );
-      }
-      if (trackNodes.isEmpty) continue;
-
-      trackNodes.sort((a, b) {
-        final byDisc = (a.metadata?.discNumber ?? 1).compareTo(b.metadata?.discNumber ?? 1);
-        if (byDisc != 0) return byDisc;
-        return (a.metadata?.trackNumber ?? 0).compareTo(b.metadata?.trackNumber ?? 0);
-      });
-
-      final albumProgress = trackNodes.map((e) => e.progress).reduce((a, b) => a + b) / trackNodes.length;
-      final albumStatus = _determineAggregateStatus(trackNodes.map((e) => e.status).toList());
-
-      albums.add(
-        DownloadTreeNode(
-          key: albumKey,
-          title: albumNodeTitle,
-          type: DownloadNodeType.album,
-          progress: albumProgress,
-          status: albumStatus,
-          children: trackNodes,
-        ),
-      );
-    }
-
-    _sortNodesByStatusAndTitle(shows);
-    _sortNodesByStatusAndTitle(albums);
-    _sortNodesByStatusAndTitle(movies);
-
-    return [...movies, ...shows, ...albums];
-  }
-
-  DownloadStatus _determineAggregateStatus(List<DownloadStatus> statuses) {
-    if (statuses.isEmpty) return DownloadStatus.queued;
-
-    if (statuses.any((s) => s == DownloadStatus.downloading)) {
-      return DownloadStatus.downloading;
-    }
-    if (statuses.any((s) => s == DownloadStatus.queued)) {
-      return DownloadStatus.queued;
-    }
-    if (statuses.any((s) => s == DownloadStatus.paused)) {
-      return DownloadStatus.paused;
-    }
-    if (statuses.any((s) => s == DownloadStatus.failed)) {
-      return DownloadStatus.failed;
-    }
-    return DownloadStatus.completed;
-  }
-
-  int _compareByStatus(DownloadStatus a, DownloadStatus b) {
-    const statusOrder = {
-      DownloadStatus.downloading: 0,
-      DownloadStatus.queued: 1,
-      DownloadStatus.paused: 2,
-      DownloadStatus.completed: 3,
-      DownloadStatus.failed: 4,
-      DownloadStatus.cancelled: 5,
-    };
-    return (statusOrder[a] ?? 99).compareTo(statusOrder[b] ?? 99);
-  }
-
-  void _sortNodesByStatusAndTitle(List<DownloadTreeNode> nodes) {
-    nodes.sort((a, b) {
-      final statusCompare = _compareByStatus(a.status, b.status);
-      if (statusCompare != 0) return statusCompare;
-      return a.title.compareTo(b.title);
-    });
-  }
-
+  // tree building lives at the bottom of this file as a pure function
   /// Flatten the tree into a list of visible nodes with their depths
   List<_FlatNode> _flattenTree(List<DownloadTreeNode> nodes, [int depth = 0]) {
     final List<_FlatNode> result = [];
@@ -874,4 +640,258 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
       ),
     );
   }
+}
+
+/// Builds the manage-tab tree: shows -> seasons -> episodes, albums -> tracks,
+/// movies at the top level.
+///
+/// Pulled out of the widget so the ordering rules can be tested directly.
+List<DownloadTreeNode> buildDownloadTree({
+  required Map<String, DownloadProgress> downloads,
+  required Map<String, MediaItem> metadata,
+}) {
+  final Map<String, List<MapEntry<String, DownloadProgress>>> showGroups = {};
+  final Map<String, List<MapEntry<String, DownloadProgress>>> albumGroups = {};
+  final List<DownloadTreeNode> movies = [];
+
+  for (final entry in downloads.entries) {
+    final globalKey = entry.key;
+    final download = entry.value;
+    final meta = metadata[globalKey];
+
+    if (meta == null) continue;
+
+    if (meta.isEpisode) {
+      final showKey = meta.grandparentId ?? 'unknown';
+      showGroups.putIfAbsent(showKey, () => []);
+      showGroups[showKey]!.add(entry);
+    } else if (meta.kind == MediaKind.track) {
+      final albumKey = meta.parentId ?? 'unknown';
+      albumGroups.putIfAbsent(albumKey, () => []);
+      albumGroups[albumKey]!.add(entry);
+    } else if (meta.isMovie) {
+      movies.add(
+        DownloadTreeNode(
+          key: globalKey,
+          title: meta.displayTitle,
+          type: DownloadNodeType.movie,
+          progress: download.progressPercent,
+          status: download.status,
+          metadata: meta,
+          downloadProgress: download,
+        ),
+      );
+    }
+  }
+
+  final List<DownloadTreeNode> shows = [];
+  for (final showEntry in showGroups.entries) {
+    final showKey = showEntry.key;
+    final episodes = showEntry.value;
+
+    if (episodes.isEmpty) continue;
+
+    final firstEpisode = metadata[episodes.first.key];
+    final showTitle = firstEpisode?.grandparentTitle ?? t.downloads.unknownShow;
+
+    final Map<String, List<MapEntry<String, DownloadProgress>>> seasonGroups = {};
+    for (final episode in episodes) {
+      final meta = metadata[episode.key];
+      if (meta == null) continue;
+
+      final seasonKey = meta.parentId ?? 'unknown';
+      seasonGroups.putIfAbsent(seasonKey, () => []);
+      seasonGroups[seasonKey]!.add(episode);
+    }
+
+    final List<DownloadTreeNode> seasons = [];
+    for (final seasonEntry in seasonGroups.entries) {
+      final seasonKey = seasonEntry.key;
+      final seasonEpisodes = seasonEntry.value;
+
+      if (seasonEpisodes.isEmpty) continue;
+
+      final firstEpisode = metadata[seasonEpisodes.first.key];
+      final seasonNumber = firstEpisode?.parentIndex;
+      final seasonTitle = firstEpisode?.parentTitle?.isNotEmpty == true
+          ? firstEpisode!.parentTitle!
+          : seasonNumber != null
+          ? t.common.seasonNumber(number: seasonNumber)
+          : t.downloads.unknownSeason;
+
+      final List<DownloadTreeNode> episodeNodes = [];
+      for (final episodeEntry in seasonEpisodes) {
+        final globalKey = episodeEntry.key;
+        final download = episodeEntry.value;
+        final meta = metadata[globalKey];
+
+        if (meta == null) continue;
+
+        final episodeNumber = meta.index;
+        final episodeTitle = episodeNumber != null
+            ? t.common.episodeNumberTitle(number: episodeNumber, title: meta.title!)
+            : meta.title!;
+
+        episodeNodes.add(
+          DownloadTreeNode(
+            key: globalKey,
+            title: episodeTitle,
+            type: DownloadNodeType.episode,
+            progress: download.progressPercent,
+            status: download.status,
+            metadata: meta,
+            downloadProgress: download,
+          ),
+        );
+      }
+
+      episodeNodes.sort((a, b) {
+        final aIndex = a.metadata?.index ?? 0;
+        final bIndex = b.metadata?.index ?? 0;
+        return aIndex.compareTo(bIndex);
+      });
+
+      final seasonProgress = episodeNodes.isEmpty
+          ? 0.0
+          : episodeNodes.map((e) => e.progress).reduce((a, b) => a + b) / episodeNodes.length;
+      final seasonStatus = _determineAggregateStatus(episodeNodes.map((e) => e.status).toList());
+
+      seasons.add(
+        DownloadTreeNode(
+          key: '$showKey:$seasonKey',
+          title: seasonTitle,
+          type: DownloadNodeType.season,
+          progress: seasonProgress,
+          status: seasonStatus,
+          children: episodeNodes,
+        ),
+      );
+    }
+
+    seasons.removeWhere((s) => s.children.isEmpty);
+
+    seasons.sort((a, b) {
+      final aSeasonNum = metadata[a.children.first.key]?.parentIndex ?? 0;
+      final bSeasonNum = metadata[b.children.first.key]?.parentIndex ?? 0;
+      return aSeasonNum.compareTo(bSeasonNum);
+    });
+
+    final showProgress = seasons.isEmpty
+        ? 0.0
+        : seasons.map((s) => s.progress).reduce((a, b) => a + b) / seasons.length;
+    final showStatus = _determineAggregateStatus(seasons.map((s) => s.status).toList());
+
+    shows.add(
+      DownloadTreeNode(
+        key: showKey,
+        title: showTitle,
+        type: DownloadNodeType.show,
+        progress: showProgress,
+        status: showStatus,
+        children: seasons,
+      ),
+    );
+  }
+
+  final List<DownloadTreeNode> albums = [];
+  for (final albumEntry in albumGroups.entries) {
+    final albumKey = albumEntry.key;
+    final tracks = albumEntry.value;
+    if (tracks.isEmpty) continue;
+
+    final firstTrack = metadata[tracks.first.key];
+    final albumTitle = firstTrack?.albumTitle ?? t.downloads.unknownAlbum;
+    final artistTitle = firstTrack?.albumArtistTitle;
+    final albumNodeTitle = artistTitle != null && artistTitle.isNotEmpty ? '$artistTitle - $albumTitle' : albumTitle;
+
+    final List<DownloadTreeNode> trackNodes = [];
+    for (final trackEntry in tracks) {
+      final globalKey = trackEntry.key;
+      final download = trackEntry.value;
+      final meta = metadata[globalKey];
+      if (meta == null) continue;
+
+      trackNodes.add(
+        DownloadTreeNode(
+          key: globalKey,
+          title: meta.title ?? globalKey,
+          type: DownloadNodeType.track,
+          progress: download.progressPercent,
+          status: download.status,
+          metadata: meta,
+          downloadProgress: download,
+        ),
+      );
+    }
+    if (trackNodes.isEmpty) continue;
+
+    trackNodes.sort((a, b) {
+      final byDisc = (a.metadata?.discNumber ?? 1).compareTo(b.metadata?.discNumber ?? 1);
+      if (byDisc != 0) return byDisc;
+      return (a.metadata?.trackNumber ?? 0).compareTo(b.metadata?.trackNumber ?? 0);
+    });
+
+    final albumProgress = trackNodes.map((e) => e.progress).reduce((a, b) => a + b) / trackNodes.length;
+    final albumStatus = _determineAggregateStatus(trackNodes.map((e) => e.status).toList());
+
+    albums.add(
+      DownloadTreeNode(
+        key: albumKey,
+        title: albumNodeTitle,
+        type: DownloadNodeType.album,
+        progress: albumProgress,
+        status: albumStatus,
+        children: trackNodes,
+      ),
+    );
+  }
+
+  _sortNodesByStatusAndTitle(shows);
+  _sortNodesByStatusAndTitle(albums);
+  _sortNodesByStatusAndTitle(movies);
+
+  // Work in progress comes first whatever kind of thing it is. Sorting inside
+  // each kind is not enough: concatenating movies, then shows, then albums
+  // buried a downloading show under every finished movie. Partitioning rather
+  // than sorting keeps the ordering already established within each kind.
+  final ordered = [...movies, ...shows, ...albums];
+  return [...ordered.where((node) => node.isActive), ...ordered.where((node) => !node.isActive)];
+}
+
+DownloadStatus _determineAggregateStatus(List<DownloadStatus> statuses) {
+  if (statuses.isEmpty) return DownloadStatus.queued;
+
+  if (statuses.any((s) => s == DownloadStatus.downloading)) {
+    return DownloadStatus.downloading;
+  }
+  if (statuses.any((s) => s == DownloadStatus.queued)) {
+    return DownloadStatus.queued;
+  }
+  if (statuses.any((s) => s == DownloadStatus.paused)) {
+    return DownloadStatus.paused;
+  }
+  if (statuses.any((s) => s == DownloadStatus.failed)) {
+    return DownloadStatus.failed;
+  }
+  return DownloadStatus.completed;
+}
+
+int _compareByStatus(DownloadStatus a, DownloadStatus b) {
+  const statusOrder = {
+    DownloadStatus.downloading: 0,
+    DownloadStatus.queued: 1,
+    DownloadStatus.paused: 2,
+    DownloadStatus.completed: 3,
+    DownloadStatus.failed: 4,
+    DownloadStatus.cancelled: 5,
+  };
+  return (statusOrder[a] ?? 99).compareTo(statusOrder[b] ?? 99);
+}
+
+void _sortNodesByStatusAndTitle(List<DownloadTreeNode> nodes) {
+  nodes.sort((a, b) {
+    final statusCompare = _compareByStatus(a.status, b.status);
+    if (statusCompare != 0) return statusCompare;
+    return a.title.compareTo(b.title);
+  });
 }
