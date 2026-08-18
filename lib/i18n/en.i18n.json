@@ -1602,6 +1602,7 @@
     "unknownShow": "Unknown Show",
     "unknownSeason": "Unknown Season",
     "unknownAlbum": "Unknown Album",
+    "unknownPlaylist": "Unknown playlist",
     "completedOfTotal": "${completed}/${total} completed",
     "errorFileNotFound": "File not found (404)",
     "errorDownloadFailed": "Download failed",

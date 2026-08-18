@@ -44,7 +44,21 @@ class DownloadTreeNode {
 }
 
 /// Type of node in the download tree
-enum DownloadNodeType { show, season, episode, movie, album, track }
+enum DownloadNodeType { playlist, show, season, episode, movie, album, track }
+
+/// A playlist whose downloaded contents should group under it.
+///
+/// A playlist's items are ordinary movies, episodes and tracks, so nothing on
+/// the download itself says which list pulled it in. The membership comes from
+/// the sync rule that queued them.
+class DownloadPlaylistGroup {
+  /// The rule's global key, used as the tree node key.
+  final String key;
+  final String title;
+  final Set<String> memberKeys;
+
+  const DownloadPlaylistGroup({required this.key, required this.title, required this.memberKeys});
+}
 
 extension DownloadTreeNodeActivity on DownloadTreeNode {
   /// Whether this node still has work outstanding, and so belongs at the top of
@@ -59,6 +73,9 @@ extension DownloadTreeNodeActivity on DownloadTreeNode {
 class DownloadTreeView extends StatefulWidget {
   final Map<String, DownloadProgress> downloads;
   final Map<String, MediaItem> metadata;
+
+  /// Playlists whose downloaded contents should group under their title.
+  final List<DownloadPlaylistGroup> playlists;
   final void Function(String globalKey)? onPause;
   final void Function(String globalKey)? onResume;
   final void Function(String globalKey)? onRetry;
@@ -72,6 +89,7 @@ class DownloadTreeView extends StatefulWidget {
     super.key,
     required this.downloads,
     required this.metadata,
+    this.playlists = const [],
     this.onPause,
     this.onResume,
     this.onRetry,
@@ -110,7 +128,7 @@ class _DownloadTreeViewState extends State<DownloadTreeView> {
 
   @override
   Widget build(BuildContext context) {
-    final tree = buildDownloadTree(downloads: widget.downloads, metadata: widget.metadata);
+    final tree = buildDownloadTree(downloads: widget.downloads, metadata: widget.metadata, playlists: widget.playlists);
     final flattenedNodes = _flattenTree(tree);
 
     if (flattenedNodes.isEmpty) {
@@ -235,6 +253,10 @@ String? resolveDownloadContainerGlobalKey(DownloadTreeNode node, Map<String, Med
   final serverId = firstLeafMeta?.serverId;
   if (serverId == null) return null;
   switch (node.type) {
+    // A playlist is not a server-side parent of its items — its key is the sync
+    // rule's own global key, which is already the container key.
+    case DownloadNodeType.playlist:
+      return node.key;
     case DownloadNodeType.show:
       final showRatingKey = firstLeafMeta!.grandparentId;
       if (showRatingKey == null) return null;
@@ -522,6 +544,7 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
   List<_RowAction> _actions() {
     final status = widget.node.status;
     final isContainer =
+        widget.node.type == DownloadNodeType.playlist ||
         widget.node.type == DownloadNodeType.show ||
         widget.node.type == DownloadNodeType.season ||
         widget.node.type == DownloadNodeType.album;
@@ -649,10 +672,21 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
 List<DownloadTreeNode> buildDownloadTree({
   required Map<String, DownloadProgress> downloads,
   required Map<String, MediaItem> metadata,
+  List<DownloadPlaylistGroup> playlists = const [],
 }) {
   final Map<String, List<MapEntry<String, DownloadProgress>>> showGroups = {};
   final Map<String, List<MapEntry<String, DownloadProgress>>> albumGroups = {};
   final List<DownloadTreeNode> movies = [];
+
+  // Which playlist owns each download. A download in two playlists lands in the
+  // first, so it appears once rather than being duplicated down the list.
+  final playlistByDownloadKey = <String, DownloadPlaylistGroup>{};
+  for (final playlist in playlists) {
+    for (final memberKey in playlist.memberKeys) {
+      playlistByDownloadKey.putIfAbsent(memberKey, () => playlist);
+    }
+  }
+  final playlistMembers = <String, List<MapEntry<String, DownloadProgress>>>{};
 
   for (final entry in downloads.entries) {
     final globalKey = entry.key;
@@ -660,6 +694,12 @@ List<DownloadTreeNode> buildDownloadTree({
     final meta = metadata[globalKey];
 
     if (meta == null) continue;
+
+    final owningPlaylist = playlistByDownloadKey[globalKey];
+    if (owningPlaylist != null) {
+      playlistMembers.putIfAbsent(owningPlaylist.key, () => []).add(entry);
+      continue;
+    }
 
     if (meta.isEpisode) {
       final showKey = meta.grandparentId ?? 'unknown';
@@ -846,6 +886,45 @@ List<DownloadTreeNode> buildDownloadTree({
     );
   }
 
+  final List<DownloadTreeNode> playlistNodes = [];
+  for (final playlist in playlists) {
+    final members = playlistMembers[playlist.key];
+    if (members == null || members.isEmpty) continue;
+
+    final children = <DownloadTreeNode>[];
+    for (final entry in members) {
+      final meta = metadata[entry.key];
+      if (meta == null) continue;
+      children.add(
+        DownloadTreeNode(
+          key: entry.key,
+          title: meta.displayTitle,
+          type: meta.isEpisode
+              ? DownloadNodeType.episode
+              : (meta.kind == MediaKind.track ? DownloadNodeType.track : DownloadNodeType.movie),
+          progress: entry.value.progressPercent,
+          status: entry.value.status,
+          metadata: meta,
+          downloadProgress: entry.value,
+        ),
+      );
+    }
+    if (children.isEmpty) continue;
+
+    _sortNodesByStatusAndTitle(children);
+    playlistNodes.add(
+      DownloadTreeNode(
+        key: playlist.key,
+        title: playlist.title,
+        type: DownloadNodeType.playlist,
+        progress: children.map((c) => c.progress).reduce((a, b) => a + b) / children.length,
+        status: _determineAggregateStatus(children.map((c) => c.status).toList()),
+        children: children,
+      ),
+    );
+  }
+
+  _sortNodesByStatusAndTitle(playlistNodes);
   _sortNodesByStatusAndTitle(shows);
   _sortNodesByStatusAndTitle(albums);
   _sortNodesByStatusAndTitle(movies);
@@ -854,7 +933,7 @@ List<DownloadTreeNode> buildDownloadTree({
   // each kind is not enough: concatenating movies, then shows, then albums
   // buried a downloading show under every finished movie. Partitioning rather
   // than sorting keeps the ordering already established within each kind.
-  final ordered = [...movies, ...shows, ...albums];
+  final ordered = [...playlistNodes, ...movies, ...shows, ...albums];
   return [...ordered.where((node) => node.isActive), ...ordered.where((node) => !node.isActive)];
 }
 
