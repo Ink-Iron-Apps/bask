@@ -12,6 +12,7 @@ import '../../services/music/music_playback_service.dart';
 import '../../theme/mono_tokens.dart';
 import '../../utils/music_navigation.dart';
 import '../../models/download_models.dart';
+import '../../utils/content_utils.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/background_download_warning_banner.dart';
 import '../../widgets/focusable_tab_chip.dart';
@@ -210,6 +211,7 @@ class DownloadsScreenState extends State<DownloadsScreen>
                           return DownloadTreeView(
                             downloads: downloadProvider.downloads,
                             metadata: downloadProvider.metadata,
+                            playlists: _playlistGroups(downloadProvider),
                             onPause: downloadProvider.pauseDownload,
                             onResume: (globalKey) {
                               final client = getClient(globalKey);
@@ -252,6 +254,29 @@ class DownloadsScreenState extends State<DownloadsScreen>
       ),
     );
   }
+}
+
+/// Playlist sync rules paired with the downloads they pulled in, so the manage
+/// tree can group a playlist's contents under its title.
+///
+/// A playlist's items are ordinary movies, episodes and tracks; only the rule
+/// records which list queued them.
+List<DownloadPlaylistGroup> _playlistGroups(DownloadProvider provider) {
+  final membership = provider.syncRuleDownloadKeys;
+  final groups = <DownloadPlaylistGroup>[];
+  for (final rule in provider.syncRules.values) {
+    if (rule.targetType != ContentTypes.playlist) continue;
+    final memberKeys = membership[rule.globalKey];
+    if (memberKeys == null || memberKeys.isEmpty) continue;
+    groups.add(
+      DownloadPlaylistGroup(
+        key: rule.globalKey,
+        title: rule.title ?? t.downloads.unknownPlaylist,
+        memberKeys: memberKeys,
+      ),
+    );
+  }
+  return groups;
 }
 
 enum DownloadType { manage, tvShows, movies }

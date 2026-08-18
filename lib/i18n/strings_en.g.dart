@@ -4142,6 +4142,9 @@ class Translations$downloads$en {
 	/// en: 'Unknown Album'
 	String get unknownAlbum => 'Unknown Album';
 
+	/// en: 'Unknown playlist'
+	String get unknownPlaylist => 'Unknown playlist';
+
 	/// en: '${completed}/${total} completed'
 	String completedOfTotal({required Object completed, required Object total}) => '${completed}/${total} completed';
 
@@ -7896,6 +7899,7 @@ extension on Translations {
 			'downloads.unknownShow' => 'Unknown Show',
 			'downloads.unknownSeason' => 'Unknown Season',
 			'downloads.unknownAlbum' => 'Unknown Album',
+			'downloads.unknownPlaylist' => 'Unknown playlist',
 			'downloads.completedOfTotal' => ({required Object completed, required Object total}) => '${completed}/${total} completed',
 			'downloads.errorFileNotFound' => 'File not found (404)',
 			'downloads.errorDownloadFailed' => 'Download failed',
@@ -7972,9 +7976,9 @@ extension on Translations {
 			'companionRemote.remote.volumeUp' => 'Up',
 			'companionRemote.remote.fullscreen' => 'Fullscreen',
 			'companionRemote.remote.subtitles' => 'Subtitles',
-			'companionRemote.remote.audio' => 'Audio',
 			_ => null,
 		} ?? switch (path) {
+			'companionRemote.remote.audio' => 'Audio',
 			'companionRemote.remote.searchHint' => 'Search on desktop...',
 			'companionRemote.errors.noNetworkInterface' => 'No network interface found',
 			'companionRemote.errors.authenticationFailed' => 'Authentication failed',

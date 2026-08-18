@@ -117,6 +117,93 @@ void main() {
     });
   });
 
+  group('buildDownloadTree playlist grouping', () {
+    MediaItem movieMeta(String id, String title) => testMediaItem(
+      id: id,
+      backend: MediaBackend.plex,
+      kind: MediaKind.movie,
+      title: title,
+      serverId: ServerId('plex1'),
+    );
+
+    DownloadProgress progress(String globalKey, DownloadStatus status) =>
+        DownloadProgress(globalKey: globalKey, status: status);
+
+    test('a playlist collects its members under one collapsible node', () {
+      final downloads = {
+        'plex1:m1': progress('plex1:m1', DownloadStatus.completed),
+        'plex1:m2': progress('plex1:m2', DownloadStatus.completed),
+      };
+      final metadata = {'plex1:m1': movieMeta('m1', 'First'), 'plex1:m2': movieMeta('m2', 'Second')};
+
+      final tree = buildDownloadTree(
+        downloads: downloads,
+        metadata: metadata,
+        playlists: [
+          DownloadPlaylistGroup(key: 'plex1:pl9', title: 'Road Trip', memberKeys: {'plex1:m1', 'plex1:m2'}),
+        ],
+      );
+
+      expect(tree, hasLength(1));
+      expect(tree.single.type, DownloadNodeType.playlist);
+      expect(tree.single.title, 'Road Trip');
+      expect(tree.single.children.map((c) => c.key), containsAll(['plex1:m1', 'plex1:m2']));
+    });
+
+    test('items outside the playlist keep their own grouping', () {
+      final downloads = {
+        'plex1:m1': progress('plex1:m1', DownloadStatus.completed),
+        'plex1:m2': progress('plex1:m2', DownloadStatus.completed),
+      };
+      final metadata = {'plex1:m1': movieMeta('m1', 'In List'), 'plex1:m2': movieMeta('m2', 'Standalone')};
+
+      final tree = buildDownloadTree(
+        downloads: downloads,
+        metadata: metadata,
+        playlists: [
+          DownloadPlaylistGroup(key: 'plex1:pl9', title: 'Road Trip', memberKeys: {'plex1:m1'}),
+        ],
+      );
+
+      expect(tree.where((n) => n.type == DownloadNodeType.playlist), hasLength(1));
+      expect(tree.where((n) => n.type == DownloadNodeType.movie).map((n) => n.title), ['Standalone']);
+    });
+
+    test('an empty playlist contributes no node', () {
+      final downloads = {'plex1:m1': progress('plex1:m1', DownloadStatus.completed)};
+      final metadata = {'plex1:m1': movieMeta('m1', 'Standalone')};
+
+      final tree = buildDownloadTree(
+        downloads: downloads,
+        metadata: metadata,
+        playlists: [
+          DownloadPlaylistGroup(key: 'plex1:pl9', title: 'Empty', memberKeys: {'plex1:missing'}),
+        ],
+      );
+
+      expect(tree.where((n) => n.type == DownloadNodeType.playlist), isEmpty);
+    });
+
+    test('a downloading playlist floats above completed work', () {
+      final downloads = {
+        'plex1:m1': progress('plex1:m1', DownloadStatus.completed),
+        'plex1:m2': progress('plex1:m2', DownloadStatus.downloading),
+      };
+      final metadata = {'plex1:m1': movieMeta('m1', 'Done'), 'plex1:m2': movieMeta('m2', 'Busy')};
+
+      final tree = buildDownloadTree(
+        downloads: downloads,
+        metadata: metadata,
+        playlists: [
+          DownloadPlaylistGroup(key: 'plex1:pl9', title: 'Road Trip', memberKeys: {'plex1:m2'}),
+        ],
+      );
+
+      expect(tree.first.type, DownloadNodeType.playlist);
+      expect(tree.first.status, DownloadStatus.downloading);
+    });
+  });
+
   group('resolveDownloadContainerGlobalKey', () {
     test('show node: builds globalKey from leaf serverId + grandparentId', () {
       final ep = _episodeNode('plex1:ep100');
