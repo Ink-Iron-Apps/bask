@@ -892,10 +892,7 @@ class DownloadManagerService {
           progressBar: true,
         );
 
-    await FileDownloader().configure(
-      globalConfig: globalDownloaderConfig,
-      androidConfig: androidDownloaderConfig,
-    );
+    await FileDownloader().configure(globalConfig: globalDownloaderConfig, androidConfig: androidDownloaderConfig);
 
     await FileDownloader().trackTasks();
     // Deliver status updates from iOS background-to-foreground transitions
