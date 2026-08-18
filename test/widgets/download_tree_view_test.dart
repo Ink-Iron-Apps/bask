@@ -204,6 +204,39 @@ void main() {
     });
   });
 
+  group('container retry-all visibility', () {
+    DownloadTreeNode leaf(String key, DownloadStatus status) =>
+        DownloadTreeNode(key: key, title: key, type: DownloadNodeType.episode, status: status);
+
+    test('a container reports a failed leaf even while it is still downloading', () {
+      // The aggregate status shows the most pressing state, so a container that
+      // is still working reports "downloading" and would hide its failures if
+      // the retry-all button keyed off status.
+      final season = _seasonNode(
+        key: 'show42:season7',
+        children: [leaf('ep1', DownloadStatus.downloading), leaf('ep2', DownloadStatus.failed)],
+      );
+
+      expect(debugHasFailedLeaf(season), isTrue);
+    });
+
+    test('a container with nothing failed reports none', () {
+      final season = _seasonNode(
+        key: 'show42:season7',
+        children: [leaf('ep1', DownloadStatus.completed), leaf('ep2', DownloadStatus.downloading)],
+      );
+
+      expect(debugHasFailedLeaf(season), isFalse);
+    });
+
+    test('a failure nested two levels down still counts', () {
+      final season = _seasonNode(key: 'show42:season7', children: [leaf('ep1', DownloadStatus.failed)]);
+      final show = _showNode(key: 'show42', children: [season]);
+
+      expect(debugHasFailedLeaf(show), isTrue);
+    });
+  });
+
   group('resolveDownloadContainerGlobalKey', () {
     test('show node: builds globalKey from leaf serverId + grandparentId', () {
       final ep = _episodeNode('plex1:ep100');

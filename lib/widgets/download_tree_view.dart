@@ -190,6 +190,7 @@ class _DownloadTreeViewState extends State<DownloadTreeView> {
       autofocus: isFirst && !widget.suppressAutoFocus,
       pauseAllChildren: _pauseAllChildren,
       resumeAllChildren: _resumeAllChildren,
+      retryAllChildren: _retryAllChildren,
       deleteAllChildren: _deleteAllChildren,
     );
   }
@@ -210,6 +211,14 @@ class _DownloadTreeViewState extends State<DownloadTreeView> {
     final keys = _leafKeys(node, where: (leaf) => leaf.status == DownloadStatus.paused);
     for (final key in keys) {
       widget.onResume?.call(key);
+    }
+  }
+
+  /// Retry every failed child of a container node
+  void _retryAllChildren(DownloadTreeNode node) {
+    final keys = _leafKeys(node, where: (leaf) => leaf.status == DownloadStatus.failed);
+    for (final key in keys) {
+      widget.onRetry?.call(key);
     }
   }
 
@@ -315,6 +324,7 @@ class _DownloadTreeItem extends StatefulWidget {
   final bool autofocus;
   final void Function(DownloadTreeNode) pauseAllChildren;
   final void Function(DownloadTreeNode) resumeAllChildren;
+  final void Function(DownloadTreeNode) retryAllChildren;
   final void Function(DownloadTreeNode) deleteAllChildren;
 
   const _DownloadTreeItem({
@@ -333,6 +343,7 @@ class _DownloadTreeItem extends StatefulWidget {
     this.autofocus = false,
     required this.pauseAllChildren,
     required this.resumeAllChildren,
+    required this.retryAllChildren,
     required this.deleteAllChildren,
   });
 
@@ -569,6 +580,17 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
         ));
       }
 
+      // Retry all button. Driven by whether any leaf actually failed rather
+      // than by the container's aggregate status, which reports the most
+      // pressing state — a container still downloading hides its failures.
+      if (widget.onRetry != null && _hasFailedLeaf(widget.node)) {
+        actions.add((
+          icon: Symbols.refresh_rounded,
+          tooltip: t.downloads.retryAll,
+          onPressed: () => widget.retryAllChildren(widget.node),
+        ));
+      }
+
       // Delete all button
       if (widget.onDelete != null) {
         actions.add((
@@ -663,6 +685,15 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
       ),
     );
   }
+}
+
+@visibleForTesting
+bool debugHasFailedLeaf(DownloadTreeNode node) => _hasFailedLeaf(node);
+
+/// Whether any leaf below [node] failed, at any depth.
+bool _hasFailedLeaf(DownloadTreeNode node) {
+  if (!node.hasChildren) return node.status == DownloadStatus.failed;
+  return node.children.any(_hasFailedLeaf);
 }
 
 /// Builds the manage-tab tree: shows -> seasons -> episodes, albums -> tracks,
