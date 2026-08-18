@@ -31,6 +31,7 @@ import '../../../utils/snackbar_helper.dart';
 import '../../../theme/mono_tokens.dart';
 import '../../../widgets/focusable_list_tile.dart';
 import '../../../widgets/overlay_sheet.dart';
+import '../../../services/video_equalizer.dart';
 import '../models/track_controls_state.dart';
 import '../widgets/sync_offset_control.dart';
 import '../widgets/sleep_timer_content.dart';
@@ -50,6 +51,8 @@ enum _SettingsView {
   shader,
   dvConversion,
   hdrToneMapping,
+  picture,
+  pictureChannel,
 }
 
 class _SettingsMenuItem extends StatelessWidget {
@@ -340,6 +343,8 @@ class VideoSettingsSheet extends StatefulWidget {
 
 class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   _SettingsView _currentView = _SettingsView.menu;
+  VideoEqualizerChannel _pictureChannel = VideoEqualizerChannel.brightness;
+  late VideoEqualizer _equalizer = _state.videoEqualizer;
   late int _audioSyncOffset;
   late int _subtitleSyncOffset;
   late double _zoomScale;
@@ -605,6 +610,10 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return t.settings.dvConversionMode;
       case _SettingsView.hdrToneMapping:
         return t.videoSettings.hdrToneMapping;
+      case _SettingsView.picture:
+        return t.videoSettings.pictureAdjustments;
+      case _SettingsView.pictureChannel:
+        return _pictureChannelLabel(_pictureChannel);
     }
   }
 
@@ -632,6 +641,9 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return Symbols.hdr_strong_rounded;
       case _SettingsView.hdrToneMapping:
         return Symbols.tonality_rounded;
+      case _SettingsView.picture:
+      case _SettingsView.pictureChannel:
+        return Symbols.exposure_rounded;
     }
   }
 
@@ -744,6 +756,15 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             valueText: _formatZoomScale(_zoomScale),
             isHighlighted: (_zoomScale - 1.0).abs() > 0.0001,
             onTap: () => _navigateTo(_SettingsView.zoom),
+          ),
+
+        if (_state.onVideoEqualizerChanged != null)
+          _SettingsMenuItem(
+            icon: Symbols.exposure_rounded,
+            title: t.videoSettings.pictureAdjustments,
+            valueText: _equalizer.isNeutral ? t.videoSettings.pictureNeutral : _pictureSummary(),
+            isHighlighted: !_equalizer.isNeutral,
+            onTap: () => _navigateTo(_SettingsView.picture),
           ),
 
         if (_hasVersionQuality)
@@ -1068,6 +1089,75 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     );
   }
 
+  String _pictureChannelLabel(VideoEqualizerChannel channel) => switch (channel) {
+    VideoEqualizerChannel.brightness => t.videoSettings.pictureBrightness,
+    VideoEqualizerChannel.contrast => t.videoSettings.pictureContrast,
+    VideoEqualizerChannel.saturation => t.videoSettings.pictureSaturation,
+    VideoEqualizerChannel.gamma => t.videoSettings.pictureGamma,
+  };
+
+  String _formatPictureValue(int value) => value > 0 ? '+$value' : '$value';
+
+  /// Only the channels that have been moved, so the menu row stays short.
+  String _pictureSummary() => VideoEqualizerChannel.values
+      .where((channel) => _equalizer.channel(channel) != 0)
+      .map((channel) => '${_pictureChannelLabel(channel)[0]}${_formatPictureValue(_equalizer.channel(channel))}')
+      .join(' ');
+
+  void _setEqualizer(VideoEqualizer next) {
+    setState(() => _equalizer = next);
+    _state.onVideoEqualizerChanged?.call(next);
+  }
+
+  Widget _buildPictureView() {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        FocusableListTile(
+          leading: AppIcon(Symbols.restart_alt_rounded, fill: 1, color: tokens(context).textMuted),
+          title: Text(t.common.reset),
+          onTap: () => _setEqualizer(VideoEqualizer.neutral),
+        ),
+        for (final channel in VideoEqualizerChannel.values)
+          FocusableListTile(
+            title: Text(_pictureChannelLabel(channel)),
+            trailing: Text(
+              _equalizer.channel(channel) == 0
+                  ? t.videoSettings.pictureNeutral
+                  : _formatPictureValue(_equalizer.channel(channel)),
+              style: TextStyle(color: _equalizer.channel(channel) == 0 ? null : primary),
+            ),
+            onTap: () {
+              setState(() => _pictureChannel = channel);
+              _navigateTo(_SettingsView.pictureChannel);
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPictureChannelView() {
+    final primary = Theme.of(context).colorScheme.primary;
+    final current = _equalizer.channel(_pictureChannel);
+
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        for (final preset in VideoEqualizer.presets)
+          FocusableListTile(
+            title: Text(
+              preset == 0 ? t.videoSettings.pictureNeutral : _formatPictureValue(preset),
+              style: TextStyle(color: preset == current ? primary : null),
+            ),
+            trailing: preset == current ? AppIcon(Symbols.check_rounded, fill: 1, color: primary) : null,
+            onTap: () => _setEqualizer(_equalizer.withChannel(_pictureChannel, preset)),
+          ),
+      ],
+    );
+  }
+
   Widget _buildSleepView() {
     final sleepTimer = SleepTimerService();
 
@@ -1372,6 +1462,10 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             return _buildSpeedView();
           case _SettingsView.zoom:
             return _buildZoomView();
+          case _SettingsView.picture:
+            return _buildPictureView();
+          case _SettingsView.pictureChannel:
+            return _buildPictureChannelView();
           case _SettingsView.versionQuality:
             return _buildVersionQualityView();
           case _SettingsView.sleep:

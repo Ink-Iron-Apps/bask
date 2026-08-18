@@ -70,7 +70,10 @@ enum ShortcutAction {
   ),
   shaderToggle('shader_toggle', HotKey(key: PhysicalKeyboardKey.keyG), requiresShaderSupport: true),
   skipMarker('skip_marker', HotKey(key: PhysicalKeyboardKey.enter), requiresPlayback: true),
-  screenshot('screenshot', HotKey(key: PhysicalKeyboardKey.keyS, modifiers: [HotKeyModifier.control]));
+  screenshot('screenshot', HotKey(key: PhysicalKeyboardKey.keyS, modifiers: [HotKeyModifier.control])),
+  // mpv's own bindings, and what anyone stepping through a frame will reach for.
+  frameStepForward('frame_step_forward', HotKey(key: PhysicalKeyboardKey.period), requiresPlayback: true),
+  frameStepBackward('frame_step_backward', HotKey(key: PhysicalKeyboardKey.comma), requiresPlayback: true);
 
   const ShortcutAction(
     this.id,
@@ -136,5 +139,7 @@ enum ShortcutAction {
     ShortcutAction.shaderToggle => t.hotkeys.actions.shaderToggle,
     ShortcutAction.skipMarker => t.hotkeys.actions.skipMarker,
     ShortcutAction.screenshot => t.hotkeys.actions.screenshot,
+    ShortcutAction.frameStepForward => t.hotkeys.actions.frameStepForward,
+    ShortcutAction.frameStepBackward => t.hotkeys.actions.frameStepBackward,
   };
 }

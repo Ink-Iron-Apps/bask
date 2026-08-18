@@ -174,6 +174,10 @@
     "bufferSizeMB": "${size}MB",
     "bufferSizeAuto": "Auto (Recommended)",
     "bufferSizeWarning": "${heap}MB memory available. A ${size}MB buffer may affect playback.",
+    "diskCache": "Buffer to storage",
+    "diskCacheOff": "Memory only",
+    "diskCacheGB": "${size} GB on disk",
+    "diskCacheDescription": "Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.",
     "playbackBuffer": "Playback Buffer",
     "playbackBufferAuto": "Auto (Recommended)",
     "playbackBufferLarge": "Large",
@@ -383,7 +387,9 @@
       "subSeekPrev": "Seek to Previous Subtitle",
       "shaderToggle": "Toggle Shaders",
       "skipMarker": "Skip Intro/Credits",
-      "screenshot": "Take Screenshot"
+      "screenshot": "Take Screenshot",
+      "frameStepForward": "Step Forward One Frame",
+      "frameStepBackward": "Step Back One Frame"
     }
   },
   "fileInfo": {
@@ -1729,7 +1735,13 @@
     "audioOutputSpatial": "Spatial Audio",
     "audioOutputStereo": "Stereo",
     "audioNormalization": "Normalize Loudness",
-    "audioDownmix": "Downmix to Stereo"
+    "audioDownmix": "Downmix to Stereo",
+    "pictureAdjustments": "Picture",
+    "pictureBrightness": "Brightness",
+    "pictureContrast": "Contrast",
+    "pictureSaturation": "Saturation",
+    "pictureGamma": "Gamma",
+    "pictureNeutral": "Default"
   },
   "performanceOverlay": {
     "color": "Color",

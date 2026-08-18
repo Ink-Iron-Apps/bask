@@ -542,6 +542,19 @@ class SettingsService extends BaseSharedPreferencesService {
   static const exitFullscreenOnPlayerClose = BoolPref('exit_fullscreen_on_player_close');
 
   static const bufferSize = _BufferSizePref();
+
+  /// Picture adjustments, mpv's -100..100 scale with 0 meaning untouched.
+  static const videoBrightness = IntPref('video_brightness');
+  static const videoContrast = IntPref('video_contrast');
+  static const videoSaturation = IntPref('video_saturation');
+  static const videoGamma = IntPref('video_gamma');
+
+  /// Gigabytes of read-ahead to keep on disk, or 0 to buffer in memory only.
+  ///
+  /// The in-memory buffer is bounded by the device heap, which on a phone is a
+  /// minute or two of a high-bitrate stream — pausing to get ahead of a weak
+  /// connection barely helps. Buffering to storage lifts that ceiling.
+  static const diskCacheSizeGB = IntPref('disk_cache_size_gb', defaultValue: 4);
   static const playbackBufferTier = EnumPref<PlaybackBufferTier>(
     'playback_buffer_tier',
     values: PlaybackBufferTier.values,
@@ -979,6 +992,11 @@ class SettingsService extends BaseSharedPreferencesService {
     themeMode,
     videoPlayerNavigationEnabled,
     bufferSize,
+    diskCacheSizeGB,
+    videoBrightness,
+    videoContrast,
+    videoSaturation,
+    videoGamma,
     playbackBufferTier,
     libraryDensity,
     automotiveUiScale,
