@@ -188,22 +188,12 @@ class _SyncRuleTileState extends State<_SyncRuleTile> {
   }
 
   Future<void> _onTap(BuildContext context) async {
-    if (rule.isListRule) {
-      await editSyncRuleFilter(
-        context,
-        downloadProvider: downloadProvider,
-        globalKey: rule.globalKey,
-        currentFilter: rule.downloadFilter,
-      );
-    } else {
-      await editSyncRuleCount(
-        context,
-        downloadProvider: downloadProvider,
-        globalKey: rule.globalKey,
-        currentCount: rule.episodeCount,
-        displayTitle: _title(),
-      );
-    }
+    await manageSyncRule(
+      context,
+      downloadProvider: downloadProvider,
+      globalKey: rule.globalKey,
+      displayTitle: _title(),
+    );
   }
 
   String _title() {

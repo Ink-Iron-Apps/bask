@@ -336,21 +336,51 @@ Future<bool> editSyncRuleCount(
   );
   if (count == null || !context.mounted) return false;
 
-  if (count == 0) {
-    final removed = await confirmAndRemoveSyncRule(
-      context,
-      downloadProvider: downloadProvider,
-      globalKey: globalKey,
-      displayTitle: displayTitle ?? globalKey,
-    );
-    if (removed != null && context.mounted) {
-      showSuccessSnackBar(context, syncRuleRemovalMessage(removed));
-    }
-    return false;
-  }
-
+  // 0 means "no cap — every episode matching the filter", which is what
+  // "Download all" stores. Removing a rule is its own explicit action; a
+  // count of 0 must not delete the rule out from under the user.
   await downloadProvider.updateSyncRuleCount(globalKey, count);
   return true;
+}
+
+enum _ShowRuleEdit { filter, count }
+
+/// Lets a show/season rule change either knob. Shows created with
+/// "Download all" carry a filter too, so the count dialog alone would strand
+/// them — there would be no way back to unwatched-only.
+Future<bool> _editShowSyncRule(
+  BuildContext context, {
+  required DownloadProvider downloadProvider,
+  required SyncRuleItem rule,
+  String? displayTitle,
+}) async {
+  final selected = await showOptionPickerDialog<_ShowRuleEdit>(
+    context,
+    title: displayTitle ?? rule.ratingKey,
+    options: [
+      (icon: Symbols.filter_alt_rounded, label: t.downloads.editSyncFilter, value: _ShowRuleEdit.filter),
+      (icon: Symbols.tune_rounded, label: t.downloads.editEpisodeCount, value: _ShowRuleEdit.count),
+    ],
+  );
+  if (selected == null || !context.mounted) return false;
+
+  switch (selected) {
+    case _ShowRuleEdit.filter:
+      return editSyncRuleFilter(
+        context,
+        downloadProvider: downloadProvider,
+        globalKey: rule.globalKey,
+        currentFilter: rule.downloadFilter,
+      );
+    case _ShowRuleEdit.count:
+      return editSyncRuleCount(
+        context,
+        downloadProvider: downloadProvider,
+        globalKey: rule.globalKey,
+        currentCount: rule.episodeCount,
+        displayTitle: displayTitle,
+      );
+  }
 }
 
 /// Shows a dialog to edit a collection/playlist sync rule's filter. Returns
@@ -491,6 +521,8 @@ Future<void> manageSyncRule(
 
   final bool updated;
   if (rule.isListRule) {
+    // A list rule mirrors its list, so the episode count is meaningless —
+    // the filter is the only thing to change.
     updated = await editSyncRuleFilter(
       context,
       downloadProvider: downloadProvider,
@@ -498,11 +530,10 @@ Future<void> manageSyncRule(
       currentFilter: rule.downloadFilter,
     );
   } else {
-    updated = await editSyncRuleCount(
+    updated = await _editShowSyncRule(
       context,
       downloadProvider: downloadProvider,
-      globalKey: globalKey,
-      currentCount: rule.episodeCount,
+      rule: rule,
       displayTitle: displayTitle ?? rule.ratingKey,
     );
   }
