@@ -2,10 +2,14 @@ name: Auto-merge claude/dev
 
 # Lands work pushed to claude/dev on main and starts the release build.
 #
+# Nothing merges before it is verified: the same analysis and tests the release
+# runs happen here first, so a broken commit fails on claude/dev instead of
+# landing on main and failing the release afterwards.
+#
 # The merge is made with GITHUB_TOKEN, and GitHub deliberately does not fire
 # workflows for pushes made with that token — otherwise a workflow could
 # trigger itself forever. So the release is started explicitly with a
-# workflow_dispatch at the end of this job (hence `actions: write`) rather
+# workflow_dispatch at the end of the merge job (hence `actions: write`) rather
 # than left to the `push: branches: [main]` trigger in the release workflow.
 
 on:
@@ -22,8 +26,37 @@ concurrency:
   group: auto-merge-claude-dev
   cancel-in-progress: false
 
+env:
+  FLUTTER_VERSION: "3.47.0"
+
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Check for unused files and code
+        run: |
+          dart run dart_code_linter:metrics check-unused-files lib --fatal-unused
+          dart run dart_code_linter:metrics check-unused-code lib --fatal-unused
+
+      - name: Run tests
+        run: flutter test
+
   merge:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
