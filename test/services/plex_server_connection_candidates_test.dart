@@ -22,6 +22,99 @@ Map<String, dynamic> _connectionJson({
 
 void main() {
   group('PlexServer connection candidates', () {
+    test('adds a user-supplied endpoint plex.tv never advertised', () {
+      // plex.tv only advertises endpoints it can reach from the internet, so a
+      // tailnet address is never in the list no matter what the server is
+      // configured to publish. The user pins it by hand instead.
+      final server = PlexServer.fromJson(
+        _serverJson(
+          _connectionJson(
+            protocol: 'http',
+            address: '10.71.1.209',
+            port: 32400,
+            uri: 'http://10.71.1.209:32400',
+            local: true,
+          ),
+        ),
+      ).withCustomEndpoints(const ['http://100.100.1.10:32400']);
+
+      final urls = server.prioritizedEndpointUrls();
+
+      expect(urls, contains('http://100.100.1.10:32400'));
+      // Still behind the LAN address: on Wi-Fi the direct route wins.
+      expect(urls.indexOf('http://10.71.1.209:32400'), lessThan(urls.indexOf('http://100.100.1.10:32400')));
+    });
+
+    test('keeps a user-supplied tailnet endpoint through remote failover', () {
+      final server = PlexServer.fromJson(
+        _serverJsonWithConnections([
+          _connectionJson(
+            protocol: 'http',
+            address: '10.71.1.209',
+            port: 32400,
+            uri: 'http://10.71.1.209:32400',
+            local: true,
+          ),
+          _connectionJson(protocol: 'https', address: 'plex.example.com', port: 443, uri: 'https://plex.example.com'),
+        ]),
+      ).withCustomEndpoints(const ['http://100.100.1.10:32400']);
+
+      final urls = server.prioritizedEndpointUrls(preferredFirst: 'https://plex.example.com');
+
+      expect(urls, contains('http://100.100.1.10:32400'));
+      expect(urls, isNot(contains('http://10.71.1.209:32400')));
+    });
+
+    test('a custom MagicDNS endpoint is treated as tailnet-local', () {
+      final server = PlexServer.fromJson(
+        _serverJson(
+          _connectionJson(
+            protocol: 'http',
+            address: '10.71.1.209',
+            port: 32400,
+            uri: 'http://10.71.1.209:32400',
+            local: true,
+          ),
+        ),
+      ).withCustomEndpoints(const ['http://desktop.tail66425b.ts.net:32400']);
+
+      expect(
+        server.networkClassForUrl('http://desktop.tail66425b.ts.net:32400'),
+        PlexNetworkClass.local,
+      );
+    });
+
+    test('ignores blank and unparseable custom endpoints', () {
+      final base = _serverJson(
+        _connectionJson(
+          protocol: 'http',
+          address: '10.71.1.209',
+          port: 32400,
+          uri: 'http://10.71.1.209:32400',
+          local: true,
+        ),
+      );
+      final server = PlexServer.fromJson(base).withCustomEndpoints(const ['', '   ', 'not a url', 'ftp://x:1']);
+
+      expect(server.prioritizedEndpointUrls(), ['http://10.71.1.209:32400']);
+    });
+
+    test('does not duplicate a custom endpoint plex.tv already advertises', () {
+      final server = PlexServer.fromJson(
+        _serverJson(
+          _connectionJson(
+            protocol: 'http',
+            address: '10.71.1.209',
+            port: 32400,
+            uri: 'http://10.71.1.209:32400',
+            local: true,
+          ),
+        ),
+      ).withCustomEndpoints(const ['http://10.71.1.209:32400']);
+
+      expect(server.prioritizedEndpointUrls().where((u) => u == 'http://10.71.1.209:32400'), hasLength(1));
+    });
+
     test('prefers the LAN address over a tailnet address', () {
       // Both are advertised local. On Wi-Fi the LAN address is the direct route;
       // the tailnet address goes through the VPN even when the server is a hop
