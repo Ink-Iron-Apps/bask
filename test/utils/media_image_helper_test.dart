@@ -62,10 +62,7 @@ void main() {
       const one = 'http://s:32400/photo/:/transcode?width=300&url=%2Flibrary%2Fmetadata%2F1%2Fthumb%2F9';
       const two = 'http://s:32400/photo/:/transcode?width=300&url=%2Flibrary%2Fmetadata%2F2%2Fthumb%2F9';
 
-      expect(
-        MediaImageHelper.debugServerArtworkCacheKey(one),
-        isNot(MediaImageHelper.debugServerArtworkCacheKey(two)),
-      );
+      expect(MediaImageHelper.debugServerArtworkCacheKey(one), isNot(MediaImageHelper.debugServerArtworkCacheKey(two)));
     });
   });
   group('MediaImageHelper.getOptimizedImageUrl', () {
