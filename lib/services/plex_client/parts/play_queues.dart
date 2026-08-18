@@ -120,7 +120,7 @@ mixin _PlexPlayQueueMethods on _PlexClientInternals {
       // `/allLeaves` preserves Plex's aired episode order and interleaves
       // specials; `/children` groups specials into a separate season.
       final uri = '${await buildMetadataUri(showRatingKey)}/allLeaves';
-      return createPlayQueue(
+      return await createPlayQueue(
         uri: uri,
         type: 'video',
         shuffle: shuffle,
