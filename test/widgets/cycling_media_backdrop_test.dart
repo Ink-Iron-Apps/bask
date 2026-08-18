@@ -41,7 +41,17 @@ void main() {
   });
 
   tearDown(() {
-    directory.deleteSync(recursive: true);
+    // `FileImage` loads through `ui.ImmutableBuffer.fromFilePath`, which memory-
+    // maps the file in the engine and only releases it when the buffer is
+    // collected. Windows refuses to delete a mapped file, so the temp cleanup is
+    // best effort — these are 68-byte PNGs and the OS reclaims the temp dir.
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    try {
+      directory.deleteSync(recursive: true);
+    } on FileSystemException {
+      // Still mapped by a decode from this test; leave it to the OS.
+    }
   });
 
   Widget buildBackdrop(
