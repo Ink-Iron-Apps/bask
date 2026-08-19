@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Plexy"
+    "title": "Plezy"
   },
   "auth": {
     "signInWithPlex": "Inloggen met Plex",
@@ -17,7 +17,7 @@
     "quickConnectWaiting": "Wachten op goedkeuring…",
     "quickConnectCancel": "Annuleren",
     "quickConnectExpired": "Quick Connect is verlopen. Probeer opnieuw.",
-    "localDataRecoveryRequired": "Plexy kon lokale aanmeldings- en openstaande afspeelgegevens niet veilig herstellen. Meld je opnieuw aan.",
+    "localDataRecoveryRequired": "Plezy kon lokale aanmeldings- en openstaande afspeelgegevens niet veilig herstellen. Meld je opnieuw aan.",
     "pinCheckRejected": "De controle van de Plex-pincode is geweigerd"
   },
   "common": {
@@ -101,7 +101,7 @@
   },
   "settings": {
     "title": "Instellingen",
-    "supportDeveloper": "Steun Plexy",
+    "supportDeveloper": "Steun Plezy",
     "supportDeveloperDescription": "Doneer via Liberapay om de ontwikkeling te steunen",
     "language": "Taal",
     "theme": "Thema",
@@ -195,6 +195,11 @@
     "followServerTrackSelectionsDescription": "Pas bij het wisselen van aflevering de op de server geselecteerde audio en ondertitels toe in plaats van de huidige keuze over te nemen",
     "showChapterMarkersOnTimeline": "Hoofdstukmarkeringen op tijdlijn tonen",
     "showChapterMarkersOnTimelineDescription": "Verdeel de tijdlijn bij hoofdstukgrenzen",
+    "specialsOrdering": "Specials in afleveringsvolgorde",
+    "specialsOrderingDescription": "Waar specials worden afgespeeld in de kijkvolgorde van een serie",
+    "specialsOrderingServer": "Servervolgorde volgen",
+    "specialsOrderingAirDate": "Op uitzenddatum invoegen",
+    "specialsOrderingLast": "Na reguliere seizoenen",
     "clickVideoTogglesPlayback": "Klik op de video om afspelen of pauzeren te wisselen",
     "clickVideoTogglesPlaybackDescription": "Klik op de video om af te spelen of te pauzeren in plaats van de bediening te tonen.",
     "videoPlayerControls": "Videospelerbediening",
@@ -226,7 +231,7 @@
     "importSettingsDescription": "Voorkeuren herstellen vanuit een bestand",
     "importSettingsConfirm": "Hiermee worden je huidige instellingen vervangen. Doorgaan?",
     "importSettingsSuccess": "Instellingen geïmporteerd",
-    "importSettingsInvalidFile": "Dit bestand is geen geldige Plexy-export",
+    "importSettingsInvalidFile": "Dit bestand is geen geldige Plezy-export",
     "importSettingsNoUser": "Meld je aan voordat je instellingen importeert",
     "shortcutsReset": "Sneltoetsen gereset naar standaard",
     "about": "Over",
@@ -319,7 +324,7 @@
     "forceTvMode": "Tv-modus afdwingen",
     "forceTvModeDescription": "Dwing de tv-indeling af op apparaten zonder automatische detectie. Herstart vereist.",
     "startInFullscreen": "Starten in volledig scherm",
-    "startInFullscreenDescription": "Open Plexy bij het starten in volledig scherm",
+    "startInFullscreenDescription": "Open Plezy bij het starten in volledig scherm",
     "exitFullscreenOnPlayerClose": "Volledig scherm verlaten bij sluiten van speler",
     "exitFullscreenOnPlayerCloseDescription": "Verlaat automatisch de volledigschermmodus wanneer de videospeler wordt gesloten",
     "autoHidePerformanceOverlay": "Prestatie-overlay automatisch verbergen",
@@ -340,7 +345,17 @@
     "subtitlesAndConfig": "Ondertitels en instellingen",
     "seekAndTiming": "Spoelen en timing",
     "behavior": "Gedrag",
-    "exportDialogTitle": "Plexy-instellingen exporteren"
+    "rememberPlayerChanges": "Spelerwijzigingen onthouden",
+    "rememberPlayerChangesDescription": "Waar een wijziging tijdens het afspelen wordt opgeslagen en opnieuw toegepast",
+    "scopePlaybackSpeed": "Afspeelsnelheid",
+    "scopeShaderPreset": "Shadervoorinstelling",
+    "scopeAspectRatio": "Beeldverhouding",
+    "scopeSyncOffsets": "Audio- en ondertitelsynchronisatie",
+    "playerScopeOff": "Niet opslaan",
+    "playerScopeGlobal": "Overal",
+    "playerScopeLibrary": "Per bibliotheek",
+    "playerScopeTitle": "Per serie of film",
+    "exportDialogTitle": "Plezy-instellingen exporteren"
   },
   "search": {
     "hint": "Zoek films, series, muziek...",
@@ -536,8 +551,8 @@
       "one": "${n} andere aflevering staat in hetzelfde bestand en wordt ook verwijderd:",
       "other": "${n} andere afleveringen staan in hetzelfde bestand en worden ook verwijderd:"
     },
-    "deleteScopeUnverifiedProbeFailed": "Plexy kon niet controleren welke bestanden hiermee worden verwijderd, dus het kan meer verwijderen dan het hierboven genoemde item. Annuleer en probeer het opnieuw, of verwijder toch.",
-    "deleteScopeUnverifiedNoFileInfo": "Je server heeft geen bestandsgegevens voor dit item verstrekt, dus Plexy kan niet controleren welke bestanden hiermee worden verwijderd. Het kan meer verwijderen dan het hierboven genoemde item.",
+    "deleteScopeUnverifiedProbeFailed": "Plezy kon niet controleren welke bestanden hiermee worden verwijderd, dus het kan meer verwijderen dan het hierboven genoemde item. Annuleer en probeer het opnieuw, of verwijder toch.",
+    "deleteScopeUnverifiedNoFileInfo": "Je server heeft geen bestandsgegevens voor dit item verstrekt, dus Plezy kan niet controleren welke bestanden hiermee worden verwijderd. Het kan meer verwijderen dan het hierboven genoemde item.",
     "mediaDeletedSuccessfully": "Media-item succesvol verwijderd",
     "mediaFailedToDelete": "Verwijderen van media-item mislukt",
     "rate": "Beoordelen",
@@ -594,12 +609,7 @@
   "videoControls": {
     "audioLabel": "Audio",
     "subtitlesLabel": "Ondertitels",
-    "resetToZero": "Terugzetten naar 0 ms",
     "addTime": "+${amount}${unit}",
-    "minusTime": "-${amount}${unit}",
-    "playsLater": "${label} speelt later af",
-    "playsEarlier": "${label} speelt eerder af",
-    "noOffset": "Geen offset",
     "letterbox": "Letterbox",
     "fillScreen": "Scherm vullen",
     "stretch": "Uitrekken",
@@ -687,7 +697,12 @@
     "forcedTrack": "${label} (Geforceerd)",
     "osdSubtitlesOff": "Ondertitels: uit",
     "osdSubtitles": "Ondertitels: ${track}",
-    "osdAudio": "Audio: ${track}"
+    "osdAudio": "Audio: ${track}",
+    "resetToZero": "Terugzetten naar 0 ms",
+    "minusTime": "-${amount}${unit}",
+    "playsLater": "${label} speelt later af",
+    "playsEarlier": "${label} speelt eerder af",
+    "noOffset": "Geen offset"
   },
   "userStatus": {},
   "messages": {
@@ -802,7 +817,7 @@
     "confirmAction": "Bevestig actie"
   },
   "profiles": {
-    "addPlezyProfile": "Plexy-profiel toevoegen",
+    "addPlezyProfile": "Plezy-profiel toevoegen",
     "switchingProfile": "Profiel wisselen…",
     "deleteThisProfileTitle": "Dit profiel verwijderen?",
     "deleteThisProfileMessage": "Verwijder ${displayName}. Verbindingen blijven ongewijzigd.",
@@ -875,7 +890,7 @@
     "sessionExpiredMany": "Sessie verlopen voor ${count} servers",
     "signInAgain": "Opnieuw aanmelden",
     "editMediaBrowserTitle": "${product}-verbinding bewerken",
-    "editMediaBrowserIntro": "Voeg URL's toe aan ${serverName} of verwijder ze. Plexy gebruikt de bereikbare URL met de laagste latentie."
+    "editMediaBrowserIntro": "Voeg URL's toe aan ${serverName} of verwijder ze. Plezy gebruikt de bereikbare URL met de laagste latentie."
   },
   "discover": {
     "title": "Ontdekken",
@@ -1037,9 +1052,9 @@
     "uploadLogs": "Logbestanden uploaden"
   },
   "startup": {
-    "failedTitle": "Plexy kon niet starten",
+    "failedTitle": "Plezy kon niet starten",
     "failedBody": "Er is iets misgegaan tijdens het opstarten. De onderstaande details laten zien wat er misging.",
-    "failedBodyRepairable": "Het opgeslagen instellingenbestand van Plexy is beschadigd en moet opnieuw worden opgebouwd voordat Plexy kan starten. Opnieuw proberen helpt niet — kies 'Opslag repareren'.",
+    "failedBodyRepairable": "Het opgeslagen instellingenbestand van Plezy is beschadigd en moet opnieuw worden opgebouwd voordat Plezy kan starten. Opnieuw proberen helpt niet — kies 'Opslag repareren'.",
     "phaseLabel": "Stap",
     "showDetails": "Details tonen",
     "hideDetails": "Details verbergen",
@@ -1048,16 +1063,16 @@
     "uploadDetails": "Details uploaden",
     "repairStorage": "Opslag repareren",
     "repairTitle": "Opgeslagen gegevens repareren?",
-    "repairBodyCommon": "Het instellingenbestand van Plexy is beschadigd en kan niet worden gelezen. Door te repareren worden alle instellingen teruggezet naar hun standaardwaarde.",
+    "repairBodyCommon": "Het instellingenbestand van Plezy is beschadigd en kan niet worden gelezen. Door te repareren worden alle instellingen teruggezet naar hun standaardwaarde.",
     "repairBodyOneCredential": "Eén opgeslagen aanmelding is beschadigd en kan niet worden gelezen. Door te repareren wordt alleen die ene verwijderd; je andere instellingen blijven onaangetast.",
     "repairBodySignInsKept": "Je servers en profielen blijven naar verwachting aangemeld.",
     "repairBodySignInsLost": "De sleutel die je opgeslagen aanmeldingen beschermt, kan niet uit dit bestand worden hersteld. Je moet je daarom opnieuw aanmelden bij elke server en elk profiel. Er wordt niets op je mediaserver gewijzigd.",
-    "repairBodySessionsUncertain": "Trackers (MAL, AniList, Simkl, Trakt) en Seerr worden apart opgeslagen en blijven mogelijk wel of niet bewaard. Plexy vertelt je precies wat het heeft bewaard.",
+    "repairBodySessionsUncertain": "Trackers (MAL, AniList, Simkl, Trakt) en Seerr worden apart opgeslagen en blijven mogelijk wel of niet bewaard. Plezy vertelt je precies wat het heeft bewaard.",
     "repairConfirm": "Repareren",
     "repairSucceeded": "Opslag gerepareerd",
     "repairNeedsRestart": "Opslag gerepareerd — herstart vereist",
-    "restartRequiredBody": "Je gegevens zijn gerepareerd, maar Plexy moet opnieuw starten voordat het ze kan gebruiken. Sluit Plexy en open het opnieuw.",
-    "quitPlezy": "Plexy afsluiten",
+    "restartRequiredBody": "Je gegevens zijn gerepareerd, maar Plezy moet opnieuw starten voordat het ze kan gebruiken. Sluit Plezy en open het opnieuw.",
+    "quitPlezy": "Plezy afsluiten",
     "repairFailed": "Repareren mislukt",
     "repairKeptSignIns": "Je servers en profielen zijn nog steeds aangemeld.",
     "repairLostSignIns": "De sleutel die je opgeslagen aanmeldingen beschermt, kon niet worden hersteld. Je moet je opnieuw aanmelden bij elke server en elk profiel.",
@@ -1066,7 +1081,7 @@
     "backupWarning": "Het bevat je aanmeldgegevens. Upload of deel het niet.",
     "deleteBackup": "Kopie verwijderen",
     "backupDeleted": "Kopie verwijderd.",
-    "previousFailureTitle": "Plexy kon de vorige keer niet starten"
+    "previousFailureTitle": "Plezy kon de vorige keer niet starten"
   },
   "licenses": {
     "relatedPackages": "Gerelateerde pakketten",
@@ -1130,7 +1145,6 @@
       "rankPopular": "#${n} populair",
       "rankAiring": "#${n} nu op tv",
       "rankRated": "#${n} beoordeeld",
-      "rankFavorited": "#${n} favoriet",
       "rankTrending": "#${n} trending",
       "rankSeasonal": "#${n} in ${season}",
       "watchingNow": "${n} kijken",
@@ -1148,7 +1162,8 @@
       "nextAiringIn": "Volgende over ${duration}",
       "episodesShort": "${n} afl.",
       "minutesPerEpisode": "${n} min/afl.",
-      "adult": "18+"
+      "adult": "18+",
+      "rankFavorited": "#${n} favoriet"
     },
     "stats": {
       "listed": "${n} op de lijst",
@@ -1411,7 +1426,12 @@
     "repeatAll": "Alles herhalen",
     "repeatOne": "Eén herhalen",
     "instantMixNoServer": "Er is geen server beschikbaar voor een instantmix",
-    "noAudioUrl": "Er is geen audio-URL beschikbaar voor ${track}"
+    "noAudioUrl": "Er is geen audio-URL beschikbaar voor ${track}",
+    "discography": {
+      "singlesAndEps": "Singles en EP's",
+      "live": "Live",
+      "compilations": "Compilaties"
+    }
   },
   "watchTogether": {
     "title": "Samen kijken",
@@ -1562,14 +1582,14 @@
       "bannerAction": "Details",
       "sheetTitle": "Downloads op de achtergrond zijn geblokkeerd",
       "sheetTitleDegraded": "Downloads op de achtergrond kunnen beperkt zijn",
-      "sheetIntro": "Android verhindert dat Plexy betrouwbaar op de achtergrond downloadt.",
-      "sheetIntroDegraded": "Je apparaat beperkt wanneer Plexy op de achtergrond kan downloaden.",
-      "reasonBackgroundRestricted": "Het achtergrondgebruik van Plexy is beperkt. Stel het batterij- of achtergrondgebruik in op \"Onbeperkt\".",
-      "reasonStandbyRestricted": "Android heeft Plexy in een beperkte stand-bymodus geplaatst. Stel het batterijgebruik in op \"Onbeperkt\".",
+      "sheetIntro": "Android verhindert dat Plezy betrouwbaar op de achtergrond downloadt.",
+      "sheetIntroDegraded": "Je apparaat beperkt wanneer Plezy op de achtergrond kan downloaden.",
+      "reasonBackgroundRestricted": "Het achtergrondgebruik van Plezy is beperkt. Stel het batterij- of achtergrondgebruik in op \"Onbeperkt\".",
+      "reasonStandbyRestricted": "Android heeft Plezy in een beperkte stand-bymodus geplaatst. Stel het batterijgebruik in op \"Onbeperkt\".",
       "reasonDownloadChannelBlocked": "Downloadmeldingen zijn uitgeschakeld, waardoor voortgang en bediening mogelijk niet beschikbaar zijn.",
       "reasonNotificationsDisabled": "Meldingen zijn uitgeschakeld. Op Android 13 of nieuwer zijn ze vereist voor langdurige downloads op de achtergrond.",
       "reasonDataSaver": "Databesparing is ingeschakeld en blokkeert downloads op de achtergrond via mobiele data. Via Wi-Fi zouden downloads nog wel moeten werken.",
-      "reasonOemUnknown": "Downloads zijn herhaaldelijk gestopt terwijl Plexy op de achtergrond draaide. Controleer de instellingen voor het batterij- of achtergrondgebruik van Plexy.",
+      "reasonOemUnknown": "Downloads zijn herhaaldelijk gestopt terwijl Plezy op de achtergrond draaide. Controleer de instellingen voor het batterij- of achtergrondgebruik van Plezy.",
       "openSettings": "Instellingen openen",
       "stillNotWorking": "Apparaatspecifieke hulp",
       "stillNotWorkingDescription": "Bekijk de stappen voor je apparaat of stuur een logbestand vanuit Instellingen › Logbestanden bekijken als het probleem aanhoudt.",
@@ -1630,19 +1650,19 @@
       "minimize": "Minimaliseren"
     },
     "pairing": {
-      "discoveryDescription": "Plexy-apparaten met hetzelfde Plex-account verschijnen hier",
+      "discoveryDescription": "Plezy-apparaten met hetzelfde Plex-account verschijnen hier",
       "hostAddressHint": "192.168.1.100:48632",
       "connecting": "Verbinden...",
       "searchingForDevices": "Apparaten zoeken...",
       "noDevicesFound": "Geen apparaten gevonden op je netwerk",
-      "noDevicesHint": "Open Plexy op je desktop en gebruik op beide apparaten dezelfde wifi",
+      "noDevicesHint": "Open Plezy op je desktop en gebruik op beide apparaten dezelfde wifi",
       "availableDevices": "Beschikbare apparaten",
       "manualConnection": "Handmatige verbinding",
       "cryptoInitFailed": "Kon beveiligde verbinding niet starten. Log eerst in bij Plex.",
       "validationHostRequired": "Voer het hostadres in",
       "validationHostFormat": "Formaat moet IP:poort zijn (bijv. 192.168.1.100:48632)",
       "connectionTimedOut": "Er is een time-out opgetreden. Gebruik op beide apparaten hetzelfde netwerk.",
-      "sessionNotFound": "Apparaat niet gevonden. Zorg dat Plexy op de host draait.",
+      "sessionNotFound": "Apparaat niet gevonden. Zorg dat Plezy op de host draait.",
       "authFailed": "Authenticatie mislukt. Beide apparaten hebben hetzelfde Plex-account nodig.",
       "failedToConnect": "Kan niet verbinden: ${error}"
     },
@@ -1880,11 +1900,11 @@
     "connected": "Verbonden",
     "connectedAs": "Verbonden als @${username}",
     "disconnectConfirm": "Trakt-account loskoppelen?",
-    "disconnectConfirmBody": "Plexy stuurt geen gebeurtenissen meer naar Trakt. Je kunt op elk moment opnieuw verbinding maken.",
+    "disconnectConfirmBody": "Plezy stuurt geen gebeurtenissen meer naar Trakt. Je kunt op elk moment opnieuw verbinding maken.",
     "scrobble": "Realtime scrobblen",
     "scrobbleDescription": "Stuur tijdens het afspelen gebeurtenissen voor afspelen, pauzeren en stoppen naar Trakt.",
     "watchedSync": "Kijkstatus synchroniseren",
-    "watchedSyncDescription": "Wanneer je items in Plexy als bekeken markeert, worden ze op Trakt ook als bekeken gemarkeerd."
+    "watchedSyncDescription": "Wanneer je items in Plezy als bekeken markeert, worden ze op Trakt ook als bekeken gemarkeerd."
   },
   "seerr": {
     "title": "Seerr",
@@ -1896,10 +1916,10 @@
     "signInWithEmby": "Inloggen met Emby",
     "signInWithLocal": "Een lokaal account gebruiken",
     "email": "E-mail",
-    "noSignInMethods": "Deze Seerr-instantie biedt geen inlogmethode die Plexy ondersteunt.",
+    "noSignInMethods": "Deze Seerr-instantie biedt geen inlogmethode die Plezy ondersteunt.",
     "instance": "Instantie",
     "disconnectConfirm": "Seerr loskoppelen?",
-    "disconnectConfirmBody": "Plexy vergeet deze Seerr-instantie. Je kunt altijd opnieuw verbinden.",
+    "disconnectConfirmBody": "Plezy vergeet deze Seerr-instantie. Je kunt altijd opnieuw verbinden.",
     "request": "Aanvragen",
     "request4k": "Aanvragen in 4K",
     "seasons": "Seizoenen",
@@ -1936,7 +1956,7 @@
     "scrobble": "Voortgang automatisch volgen",
     "scrobbleDescription": "Werk je lijst bij wanneer je een aflevering of film afrondt.",
     "disconnectConfirm": "${service} loskoppelen?",
-    "disconnectConfirmBody": "Plexy werkt ${service} niet meer bij. Je kunt op elk moment opnieuw verbinding maken.",
+    "disconnectConfirmBody": "Plezy werkt ${service} niet meer bij. Je kunt op elk moment opnieuw verbinding maken.",
     "connectFailed": "Verbinding maken met ${service} is mislukt. Probeer het opnieuw.",
     "names": {
       "mal": "MyAnimeList",
@@ -1946,7 +1966,7 @@
       "mdblist": "MDBList"
     },
     "deviceCode": {
-      "title": "Plexy activeren op ${service}",
+      "title": "Plezy activeren op ${service}",
       "instructions": "Scan de QR-code of ga naar het onderstaande adres en voer deze code in:",
       "openToActivate": "Open ${service} om te activeren",
       "copyCode": "Activeringscode kopiëren",

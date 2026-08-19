@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Plexy"
+    "title": "Plezy"
   },
   "auth": {
     "signInWithPlex": "Plex ilə daxil ol",
@@ -17,7 +17,7 @@
     "quickConnectWaiting": "Təsdiq gözlənilir…",
     "quickConnectCancel": "Ləğv et",
     "quickConnectExpired": "Sürətli Qoşulmanın vaxtı bitdi. Təzədən cəhd edin.",
-    "localDataRecoveryRequired": "Plexy yerli daxil olma və gözləyən oxutma məlumatlarını təhlükəsiz bərpa edə bilmədi. Lütfən təzədən daxil olun.",
+    "localDataRecoveryRequired": "Plezy yerli daxil olma və gözləyən oxutma məlumatlarını təhlükəsiz bərpa edə bilmədi. Lütfən təzədən daxil olun.",
     "pinCheckRejected": "Plex PIN yoxlaması rədd edildi"
   },
   "common": {
@@ -101,7 +101,7 @@
   },
   "settings": {
     "title": "Tənzimləmələr",
-    "supportDeveloper": "Plexy-yə dəstək ol",
+    "supportDeveloper": "Plezy-yə dəstək ol",
     "supportDeveloperDescription": "İnkişafı maliyyələşdirmək üçün Liberapay vasitəsilə iyanə edin",
     "language": "Dil",
     "theme": "Mövzu",
@@ -195,6 +195,11 @@
     "followServerTrackSelectionsDescription": "Epizod dəyişəndə cari seçimi köçürmək əvəzinə serverdə seçilmiş səs və altyazını tətbiq et",
     "showChapterMarkersOnTimeline": "Zaman çubuğunda hissə işarələrini göstər",
     "showChapterMarkersOnTimelineDescription": "Zaman çubuğunu hissə sərhədlərinə böl",
+    "specialsOrdering": "Xüsusi bölmələr epizod sırasına görə",
+    "specialsOrderingDescription": "Xüsusi bölmələrin serialın izləmə sırasındakı yeri",
+    "specialsOrderingServer": "Server sırasını izlə",
+    "specialsOrderingAirDate": "Yayım tarixinə görə qarışdır",
+    "specialsOrderingLast": "Adi mövsümlərdən sonra",
     "clickVideoTogglesPlayback": "Oynat/fasilə üçün videoya toxun",
     "clickVideoTogglesPlaybackDescription": "İdarəetməni göstərmək əvəzinə oynatmaq/fasilə etmək üçün videoya toxun.",
     "videoPlayerControls": "Video oynadıcı idarəetmələri",
@@ -226,7 +231,7 @@
     "importSettingsDescription": "Seçimləri fayldan bərpa edin",
     "importSettingsConfirm": "Bu cari tənzimləmələrinizin üzərinə yazacaq. Davam edilsin?",
     "importSettingsSuccess": "Tənzimləmələr idxal edildi",
-    "importSettingsInvalidFile": "Bu fayl düzgün Plexy tənzimləmələr faylı deyil",
+    "importSettingsInvalidFile": "Bu fayl düzgün Plezy tənzimləmələr faylı deyil",
     "importSettingsNoUser": "Tənzimləmələri idxal etməzdən əvvəl daxil olun",
     "shortcutsReset": "Qısayollar defolt vəziyyətə sıfırlandı",
     "about": "Haqqında",
@@ -319,7 +324,7 @@
     "forceTvMode": "TV rejimini məcburi et",
     "forceTvModeDescription": "TV interfeysini məcburi et. Avtomatik təyin etməyən cihazlar üçündür.",
     "startInFullscreen": "Tam ekranda başlat",
-    "startInFullscreenDescription": "Plexy-ni açılışda tam ekran rejimində aç",
+    "startInFullscreenDescription": "Plezy-ni açılışda tam ekran rejimində aç",
     "exitFullscreenOnPlayerClose": "Oynadıcı bağlandıqda tam ekrandan çıx",
     "exitFullscreenOnPlayerCloseDescription": "Video oynadıcını bağlayarkən avtomatik tam ekrandan çıx",
     "autoHidePerformanceOverlay": "Məhsuldarlıq paneli avtomatik gizlənsin",
@@ -340,7 +345,17 @@
     "subtitlesAndConfig": "Altyazılar və konfiqurasiya",
     "seekAndTiming": "Sarğı və vaxt tənzimləməsi",
     "behavior": "Davranış",
-    "exportDialogTitle": "Plexy tənzimləmələrini ixrac et"
+    "rememberPlayerChanges": "Pleyer dəyişikliklərini yadda saxla",
+    "rememberPlayerChangesDescription": "Oxutma zamanı edilən dəyişikliklərin harada saxlanacağı və yenidən tətbiq ediləcəyi",
+    "scopePlaybackSpeed": "Oxutma sürəti",
+    "scopeShaderPreset": "Şader ön ayarı",
+    "scopeAspectRatio": "Tərəf nisbəti",
+    "scopeSyncOffsets": "Audio və subtitr sinxronizasiyası",
+    "playerScopeOff": "Saxlama",
+    "playerScopeGlobal": "Hər yerdə",
+    "playerScopeLibrary": "Kitabxana üzrə",
+    "playerScopeTitle": "Serial və ya film üzrə",
+    "exportDialogTitle": "Plezy tənzimləmələrini ixrac et"
   },
   "search": {
     "hint": "Kino, serial, musiqi axtar...",
@@ -536,8 +551,8 @@
       "one": "Eyni faylda saxlanılan ${n} başqa seriya da silinəcək:",
       "other": "Eyni faylda saxlanılan ${n} başqa seriya da silinəcək:"
     },
-    "deleteScopeUnverifiedProbeFailed": "Plexy bunun hansı faylları siləcəyini yoxlaya bilmədi, ona görə də yuxarıda adı çəkilən elementdən daha çoxunu silə bilər. Ləğv edib təzədən cəhd edin və ya yenə də silin.",
-    "deleteScopeUnverifiedNoFileInfo": "Serveriniz bu element üçün fayl təfərrüatlarını təqdim etmədi, ona görə Plexy bunun hansı faylları siləcəyini yoxlaya bilmir. Yuxarıda adı çəkilən elementdən daha çoxunu silə bilər.",
+    "deleteScopeUnverifiedProbeFailed": "Plezy bunun hansı faylları siləcəyini yoxlaya bilmədi, ona görə də yuxarıda adı çəkilən elementdən daha çoxunu silə bilər. Ləğv edib təzədən cəhd edin və ya yenə də silin.",
+    "deleteScopeUnverifiedNoFileInfo": "Serveriniz bu element üçün fayl təfərrüatlarını təqdim etmədi, ona görə Plezy bunun hansı faylları siləcəyini yoxlaya bilmir. Yuxarıda adı çəkilən elementdən daha çoxunu silə bilər.",
     "mediaDeletedSuccessfully": "Media elementi uğurla silindi",
     "mediaFailedToDelete": "Media elementi silinə bilmədi",
     "rate": "Qiymətləndir",
@@ -594,12 +609,7 @@
   "videoControls": {
     "audioLabel": "Səs",
     "subtitlesLabel": "Altyazı",
-    "resetToZero": "0ms-yə sıfırla",
     "addTime": "+${amount}${unit}",
-    "minusTime": "-${amount}${unit}",
-    "playsLater": "${label} sonra oynadılır",
-    "playsEarlier": "${label} əvvəl oynadılır",
-    "noOffset": "Ofset yoxdur",
     "letterbox": "Geniş ekran (Letterbox)",
     "fillScreen": "Ekrana doldur",
     "stretch": "Gərmək",
@@ -687,7 +697,12 @@
     "forcedTrack": "${label} (Məcburi)",
     "osdSubtitlesOff": "Altyazı: Söndürülüb",
     "osdSubtitles": "Altyazı: ${track}",
-    "osdAudio": "Səs: ${track}"
+    "osdAudio": "Səs: ${track}",
+    "resetToZero": "0ms-yə sıfırla",
+    "minusTime": "-${amount}${unit}",
+    "playsLater": "${label} sonra oynadılır",
+    "playsEarlier": "${label} əvvəl oynadılır",
+    "noOffset": "Ofset yoxdur"
   },
   "userStatus": {},
   "messages": {
@@ -802,7 +817,7 @@
     "confirmAction": "Əməliyyatı təsdiqlə"
   },
   "profiles": {
-    "addPlezyProfile": "Plexy profili əlavə et",
+    "addPlezyProfile": "Plezy profili əlavə et",
     "switchingProfile": "Profil dəyişdirilir…",
     "deleteThisProfileTitle": "Bu profil silinsin?",
     "deleteThisProfileMessage": "${displayName} silinəcək. Qoşulmalar təsirlənmir.",
@@ -875,7 +890,7 @@
     "sessionExpiredMany": "${count} server üçün seansın vaxtı bitdi",
     "signInAgain": "Yenidən daxil ol",
     "editMediaBrowserTitle": "${product} qoşulmasını düzəliş et",
-    "editMediaBrowserIntro": "${serverName} üçün URL-lər əlavə edin və ya silin. Plexy əlçatan olan ən aşağı gecikməli URL-i istifadə edəcək."
+    "editMediaBrowserIntro": "${serverName} üçün URL-lər əlavə edin və ya silin. Plezy əlçatan olan ən aşağı gecikməli URL-i istifadə edəcək."
   },
   "discover": {
     "title": "Kəşf et",
@@ -1037,9 +1052,9 @@
     "uploadLogs": "Jurnalları yüklə"
   },
   "startup": {
-    "failedTitle": "Plexy başlaya bilmədi",
+    "failedTitle": "Plezy başlaya bilmədi",
     "failedBody": "Başlatma zamanı nəsə səhv getdi. Aşağıdakı təfərrüatlar nəyin uğursuz olduğunu göstərir.",
-    "failedBodyRepairable": "Plexy-nin saxlanmış tənzimləmə faylı zədələnib və Plexy başlamazdan əvvəl yenidən qurulmalıdır. Təzədən cəhd etmək kömək etməyəcək — Yaddaşı təmir et seçin.",
+    "failedBodyRepairable": "Plezy-nin saxlanmış tənzimləmə faylı zədələnib və Plezy başlamazdan əvvəl yenidən qurulmalıdır. Təzədən cəhd etmək kömək etməyəcək — Yaddaşı təmir et seçin.",
     "phaseLabel": "Addım",
     "showDetails": "Təfərrüatları göstər",
     "hideDetails": "Təfərrüatları gizlət",
@@ -1048,16 +1063,16 @@
     "uploadDetails": "Təfərrüatları yüklə",
     "repairStorage": "Yaddaşı təmir et",
     "repairTitle": "Saxlanmış məlumatlar təmir edilsin?",
-    "repairBodyCommon": "Plexy-nin tənzimləmə faylı zədələnib və oxuna bilmir. Təmir bütün tənzimləmələri defolt vəziyyətinə sıfırlayır.",
+    "repairBodyCommon": "Plezy-nin tənzimləmə faylı zədələnib və oxuna bilmir. Təmir bütün tənzimləmələri defolt vəziyyətinə sıfırlayır.",
     "repairBodyOneCredential": "Bir saxlanmış daxil olma məlumatı zədələnib və oxuna bilmir. Təmir yalnız onu silir; digər tənzimləmələrinizə toxunulmur.",
     "repairBodySignInsKept": "Serverləriniz və profilləriniz daxil olmuş vəziyyətdə qalmalıdır.",
     "repairBodySignInsLost": "Saxlanmış daxil olmalarınızı qoruyan açar bu fayldan bərpa edilə bilmir, ona görə də hər serverə və profilə yenidən daxil olmalı olacaqsınız. Media serverinizdə heç nəyə təsir olunmur.",
-    "repairBodySessionsUncertain": "İzləyicilər (MAL, AniList, Simkl, Trakt) və Seerr ayrıca saxlanılır və qalıb-qalmayacaqları bəlli deyil. Plexy sizə nəyi saxladığını dəqiq bildirəcək.",
+    "repairBodySessionsUncertain": "İzləyicilər (MAL, AniList, Simkl, Trakt) və Seerr ayrıca saxlanılır və qalıb-qalmayacaqları bəlli deyil. Plezy sizə nəyi saxladığını dəqiq bildirəcək.",
     "repairConfirm": "Təmir et",
     "repairSucceeded": "Yaddaş təmir edildi",
     "repairNeedsRestart": "Yaddaş təmir edildi — yenidən başlatma tələb olunur",
-    "restartRequiredBody": "Məlumatlarınız təmir edildi, lakin Plexy ondan istifadə etmək üçün yenidən başlamalıdır. Plexy-ni bağlayın və yenidən açın.",
-    "quitPlezy": "Plexy-dən çıx",
+    "restartRequiredBody": "Məlumatlarınız təmir edildi, lakin Plezy ondan istifadə etmək üçün yenidən başlamalıdır. Plezy-ni bağlayın və yenidən açın.",
+    "quitPlezy": "Plezy-dən çıx",
     "repairFailed": "Təmir uğursuz oldu",
     "repairKeptSignIns": "Serverləriniz və profilləriniz hələ də daxil olub.",
     "repairLostSignIns": "Saxlanmış daxil olmalarınızı qoruyan açar bərpa edilə bilmədi. Hər serverə və profilə yenidən daxil olmalı olacaqsınız.",
@@ -1066,7 +1081,7 @@
     "backupWarning": "O, daxil olma məlumatlarınızı ehtiva edir. Onu yükləməyin və ya paylaşmayın.",
     "deleteBackup": "Nüsxəni sil",
     "backupDeleted": "Nüsxə silindi.",
-    "previousFailureTitle": "Plexy son dəfə başlaya bilmədi"
+    "previousFailureTitle": "Plezy son dəfə başlaya bilmədi"
   },
   "licenses": {
     "relatedPackages": "Əlaqəli paketlər",
@@ -1130,7 +1145,6 @@
       "rankPopular": "#${n} populyar",
       "rankAiring": "#${n} yayımlanır",
       "rankRated": "#${n} qiymətləndirilib",
-      "rankFavorited": "#${n} favorit",
       "rankTrending": "#${n} trenddə",
       "rankSeasonal": "${season} üçün #${n}",
       "watchingNow": "${n} izləyir",
@@ -1148,7 +1162,8 @@
       "nextAiringIn": "Növbəti ${duration} sonra",
       "episodesShort": "${n} ep",
       "minutesPerEpisode": "${n} dəq/ep",
-      "adult": "18+"
+      "adult": "18+",
+      "rankFavorited": "#${n} favorit"
     },
     "stats": {
       "listed": "${n} siyahıya alınıb",
@@ -1411,7 +1426,12 @@
     "repeatAll": "Hamısını təkrarla",
     "repeatOne": "Birini təkrarla",
     "instantMixNoServer": "Ani miks üçün heç bir server mövcud deyil",
-    "noAudioUrl": "${track} üçün səs URL-i mövcud deyil"
+    "noAudioUrl": "${track} üçün səs URL-i mövcud deyil",
+    "discography": {
+      "singlesAndEps": "Single-lar və EP-lər",
+      "live": "Canlı",
+      "compilations": "Kompilyasiyalar"
+    }
   },
   "watchTogether": {
     "title": "Birlikdə İzlə",
@@ -1562,14 +1582,14 @@
       "bannerAction": "Ətraflı",
       "sheetTitle": "Arxa fonda yükləmələr bloklanıb",
       "sheetTitleDegraded": "Arxa fonda yükləmələr məhdudlaşdırıla bilər",
-      "sheetIntro": "Android Plexy-nin arxa fonda etibarlı şəkildə yükləməsinə mane olur.",
-      "sheetIntroDegraded": "Cihazınız Plexy-nin arxa fonda nə vaxt yükləyə biləcəyini məhdudlaşdırır.",
-      "reasonBackgroundRestricted": "Plexy-nin arxa fon istifadəsi məhdudlaşdırılıb. Batareya və ya arxa fon istifadəsini \"Məhdudiyyətsiz\" edin.",
-      "reasonStandbyRestricted": "Android Plexy-ni məhdud gözləmə rejiminə salıb. Batareya istifadəsini \"Məhdudiyyətsiz\" edin.",
+      "sheetIntro": "Android Plezy-nin arxa fonda etibarlı şəkildə yükləməsinə mane olur.",
+      "sheetIntroDegraded": "Cihazınız Plezy-nin arxa fonda nə vaxt yükləyə biləcəyini məhdudlaşdırır.",
+      "reasonBackgroundRestricted": "Plezy-nin arxa fon istifadəsi məhdudlaşdırılıb. Batareya və ya arxa fon istifadəsini \"Məhdudiyyətsiz\" edin.",
+      "reasonStandbyRestricted": "Android Plezy-ni məhdud gözləmə rejiminə salıb. Batareya istifadəsini \"Məhdudiyyətsiz\" edin.",
       "reasonDownloadChannelBlocked": "Yükləmə bildirişləri söndürülüb, ona görə gedişat və idarəetmələr əlçatan olmaya bilər.",
       "reasonNotificationsDisabled": "Bildirişlər söndürülüb. Android 13 və daha yeni versiyalarda uzun arxa fon yükləmələri üçün onlar tələb olunur.",
       "reasonDataSaver": "Data Saver aktivdir və bu, mobil internetdə arxa fon yükləmələrini bloklayır. Wi-Fi ilə yükləmələr işləməlidir.",
-      "reasonOemUnknown": "Plexy arxa fonda olarkən yükləmələr dəfələrlə dayandı. Plexy-nin batareya və ya arxa fon istifadəsi tənzimləmələrini yoxlayın.",
+      "reasonOemUnknown": "Plezy arxa fonda olarkən yükləmələr dəfələrlə dayandı. Plezy-nin batareya və ya arxa fon istifadəsi tənzimləmələrini yoxlayın.",
       "openSettings": "Tənzimləmələri aç",
       "stillNotWorking": "Cihaza özəl kömək",
       "stillNotWorkingDescription": "Cihazınız üçün addımlara baxın və ya problem davam edərsə Tənzimləmələr › Jurnallara bax bölməsindən jurnal göndərin.",
@@ -1630,12 +1650,12 @@
       "minimize": "Yığ"
     },
     "pairing": {
-      "discoveryDescription": "Eyni Plex hesabına sahib Plexy cihazları burada görünür",
+      "discoveryDescription": "Eyni Plex hesabına sahib Plezy cihazları burada görünür",
       "hostAddressHint": "192.168.1.100:48632",
       "connecting": "Qoşulunur...",
       "searchingForDevices": "Cihazlar axtarılır...",
       "noDevicesFound": "Şəbəkənizdə cihaz tapılmadı",
-      "noDevicesHint": "Masaüstündə Plexy-ni açın və eyni Wi-Fi-dan istifadə edin",
+      "noDevicesHint": "Masaüstündə Plezy-ni açın və eyni Wi-Fi-dan istifadə edin",
       "availableDevices": "Əlçatan cihazlar",
       "manualConnection": "Əl ilə qoşulma",
       "cryptoInitFailed": "Təhlükəsiz qoşulma başladılarkən xəta. Əvvəlcə Plex-ə daxil olun.",
@@ -1880,11 +1900,11 @@
     "connected": "Qoşuldu",
     "connectedAs": "@${username} olaraq qoşuldu",
     "disconnectConfirm": "Trakt hesabı ayırılsın?",
-    "disconnectConfirmBody": "Plexy Trakt-a məlumat göndərməyi dayandıracaq.",
+    "disconnectConfirmBody": "Plezy Trakt-a məlumat göndərməyi dayandıracaq.",
     "scrobble": "Real vaxt rejimində izləmə",
     "scrobbleDescription": "Oynatma zamanı Trakt-a məlumat göndər.",
     "watchedSync": "Baxış statusunu eyniləşdir",
-    "watchedSyncDescription": "Plexy-də baxıldı işarələdikdə Trakt-da da işarələnsin."
+    "watchedSyncDescription": "Plezy-də baxıldı işarələdikdə Trakt-da da işarələnsin."
   },
   "seerr": {
     "title": "Seerr",
@@ -1899,7 +1919,7 @@
     "noSignInMethods": "Bu Seerr dəstəklənən daxil olma üsulu təklif etmir.",
     "instance": "Nüsxə",
     "disconnectConfirm": "Seerr ayırılsın?",
-    "disconnectConfirmBody": "Plexy bu Seerr ünvanını unudacaq.",
+    "disconnectConfirmBody": "Plezy bu Seerr ünvanını unudacaq.",
     "request": "Sorğu göndər",
     "request4k": "4K sorğu göndər",
     "seasons": "Mövsümlər",
@@ -1936,7 +1956,7 @@
     "scrobble": "Tərəqqini avtomatik izlə",
     "scrobbleDescription": "Siyahınızı avtomatik yeniləyin.",
     "disconnectConfirm": "${service} ayırılsın?",
-    "disconnectConfirmBody": "Plexy ${service} yeniləməyi dayandıracaq.",
+    "disconnectConfirmBody": "Plezy ${service} yeniləməyi dayandıracaq.",
     "connectFailed": "${service} qoşula bilmədi. Təzədən cəhd edin.",
     "names": {
       "mal": "MyAnimeList",
@@ -1946,7 +1966,7 @@
       "mdblist": "MDBList"
     },
     "deviceCode": {
-      "title": "Plexy-ni ${service} üzərində aktivləşdirin",
+      "title": "Plezy-ni ${service} üzərində aktivləşdirin",
       "instructions": "QR kodunu skan edin və ya aşağıdakı ünvana keçib bu kodu daxil edin:",
       "openToActivate": "Aktivləşdirmək üçün ${service} açın",
       "copyCode": "Aktivləşdirmə kodunu kopyala",

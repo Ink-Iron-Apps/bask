@@ -102,6 +102,5 @@ PlexServer _server(String id) {
       ),
     ],
     owned: true,
-    presence: true,
   );
 }

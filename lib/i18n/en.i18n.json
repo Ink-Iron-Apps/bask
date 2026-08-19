@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Plexy"
+    "title": "Plezy"
   },
   "auth": {
     "signInWithPlex": "Sign in with Plex",
@@ -17,7 +17,7 @@
     "quickConnectWaiting": "Waiting for approval…",
     "quickConnectCancel": "Cancel",
     "quickConnectExpired": "Quick Connect expired. Try again.",
-    "localDataRecoveryRequired": "Plexy could not safely recover local sign-in and pending playback data. Please sign in again.",
+    "localDataRecoveryRequired": "Plezy could not safely recover local sign-in and pending playback data. Please sign in again.",
     "pinCheckRejected": "The Plex PIN check was rejected"
   },
   "common": {
@@ -101,7 +101,7 @@
   },
   "settings": {
     "title": "Settings",
-    "supportDeveloper": "Support Plexy",
+    "supportDeveloper": "Support Plezy",
     "supportDeveloperDescription": "Donate via Liberapay to fund development",
     "language": "Language",
     "theme": "Theme",
@@ -174,10 +174,6 @@
     "bufferSizeMB": "${size}MB",
     "bufferSizeAuto": "Auto (Recommended)",
     "bufferSizeWarning": "${heap}MB memory available. A ${size}MB buffer may affect playback.",
-    "diskCache": "Buffer to storage",
-    "diskCacheOff": "Memory only",
-    "diskCacheGB": "${size} GB on disk",
-    "diskCacheDescription": "Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.",
     "playbackBuffer": "Playback Buffer",
     "playbackBufferAuto": "Auto (Recommended)",
     "playbackBufferLarge": "Large",
@@ -199,6 +195,11 @@
     "followServerTrackSelectionsDescription": "On episode change, apply the audio and subtitles selected on the server instead of carrying over the current choice",
     "showChapterMarkersOnTimeline": "Show chapter markers on seek bar",
     "showChapterMarkersOnTimelineDescription": "Segment the seek bar at chapter boundaries",
+    "specialsOrdering": "Specials in episode order",
+    "specialsOrderingDescription": "Where specials play in a show's watch order",
+    "specialsOrderingServer": "Follow server order",
+    "specialsOrderingAirDate": "Interleave by air date",
+    "specialsOrderingLast": "After regular seasons",
     "clickVideoTogglesPlayback": "Click on video to toggle play/pause",
     "clickVideoTogglesPlaybackDescription": "Click video to play/pause instead of showing controls.",
     "videoPlayerControls": "Video Player Controls",
@@ -230,16 +231,13 @@
     "importSettingsDescription": "Restore preferences from a file",
     "importSettingsConfirm": "This will replace your current settings. Continue?",
     "importSettingsSuccess": "Settings imported",
-    "importSettingsInvalidFile": "This file isn't a valid Plexy settings export",
+    "importSettingsInvalidFile": "This file isn't a valid Plezy settings export",
     "importSettingsNoUser": "Sign in before importing settings",
     "shortcutsReset": "Shortcuts reset to defaults",
     "about": "About",
     "aboutDescription": "App information and licenses",
     "updates": "Updates",
     "updateAvailable": "Update Available",
-    "installUpdate": "Install update",
-    "downloadingUpdate": "Downloading… ${percent}%",
-    "upToDate": "You are on the latest version",
     "checkForUpdates": "Check for Updates",
     "autoCheckUpdatesOnStartup": "Automatically check for updates on startup",
     "autoCheckUpdatesOnStartupDescription": "Notify when an update is available at launch",
@@ -326,7 +324,7 @@
     "forceTvMode": "Force TV mode",
     "forceTvModeDescription": "Force TV layout. For devices that don't auto-detect. Requires restart.",
     "startInFullscreen": "Start in fullscreen",
-    "startInFullscreenDescription": "Open Plexy in fullscreen mode at launch",
+    "startInFullscreenDescription": "Open Plezy in fullscreen mode at launch",
     "exitFullscreenOnPlayerClose": "Exit fullscreen on player close",
     "exitFullscreenOnPlayerCloseDescription": "Automatically exit fullscreen when closing the video player",
     "autoHidePerformanceOverlay": "Auto-Hide Performance Overlay",
@@ -347,7 +345,24 @@
     "subtitlesAndConfig": "Subtitles & Configuration",
     "seekAndTiming": "Seek & Timing",
     "behavior": "Behavior",
-    "exportDialogTitle": "Export Plexy settings"
+    "rememberPlayerChanges": "Remember Player Changes",
+    "rememberPlayerChangesDescription": "Where a change made during playback is saved and reapplied from",
+    "scopePlaybackSpeed": "Playback Speed",
+    "scopeShaderPreset": "Shader Preset",
+    "scopeAspectRatio": "Aspect Ratio",
+    "scopeSyncOffsets": "Audio & Subtitle Sync",
+    "playerScopeOff": "Don't save",
+    "playerScopeGlobal": "Everywhere",
+    "playerScopeLibrary": "Per library",
+    "playerScopeTitle": "Per show or movie",
+    "exportDialogTitle": "Export Plezy settings",
+    "diskCache": "Buffer to storage",
+    "diskCacheOff": "Memory only",
+    "diskCacheGB": "${size} GB on disk",
+    "diskCacheDescription": "Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.",
+    "installUpdate": "Install update",
+    "downloadingUpdate": "Downloading… ${percent}%",
+    "upToDate": "You are on the latest version"
   },
   "search": {
     "hint": "Search movies, shows, music...",
@@ -545,8 +560,8 @@
       "one": "${n} other episode is stored in the same file and will be deleted too:",
       "other": "${n} other episodes are stored in the same file and will be deleted too:"
     },
-    "deleteScopeUnverifiedProbeFailed": "Plexy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.",
-    "deleteScopeUnverifiedNoFileInfo": "Your server did not provide file details for this item, so Plexy cannot check which files this will remove. It may delete more than the item named above.",
+    "deleteScopeUnverifiedProbeFailed": "Plezy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.",
+    "deleteScopeUnverifiedNoFileInfo": "Your server did not provide file details for this item, so Plezy cannot check which files this will remove. It may delete more than the item named above.",
     "mediaDeletedSuccessfully": "Media item deleted successfully",
     "mediaFailedToDelete": "Failed to delete media item",
     "rate": "Rate",
@@ -603,12 +618,7 @@
   "videoControls": {
     "audioLabel": "Audio",
     "subtitlesLabel": "Subtitles",
-    "resetToZero": "Reset to 0ms",
     "addTime": "+${amount}${unit}",
-    "minusTime": "-${amount}${unit}",
-    "playsLater": "${label} plays later",
-    "playsEarlier": "${label} plays earlier",
-    "noOffset": "No offset",
     "letterbox": "Letterbox",
     "fillScreen": "Fill screen",
     "stretch": "Stretch",
@@ -696,7 +706,12 @@
     "forcedTrack": "${label} (Forced)",
     "osdSubtitlesOff": "Subtitles: Off",
     "osdSubtitles": "Subtitles: ${track}",
-    "osdAudio": "Audio: ${track}"
+    "osdAudio": "Audio: ${track}",
+    "resetToZero": "Reset to 0ms",
+    "minusTime": "-${amount}${unit}",
+    "playsLater": "${label} plays later",
+    "playsEarlier": "${label} plays earlier",
+    "noOffset": "No offset"
   },
   "userStatus": {},
   "messages": {
@@ -811,7 +826,7 @@
     "confirmAction": "Confirm Action"
   },
   "profiles": {
-    "addPlezyProfile": "Add Plexy profile",
+    "addPlezyProfile": "Add Plezy profile",
     "switchingProfile": "Switching profile…",
     "deleteThisProfileTitle": "Delete this profile?",
     "deleteThisProfileMessage": "Remove ${displayName}. Connections aren't affected.",
@@ -896,7 +911,7 @@
     "sessionExpiredMany": "Session expired for ${count} servers",
     "signInAgain": "Sign in again",
     "editMediaBrowserTitle": "Edit ${product} connection",
-    "editMediaBrowserIntro": "Add or remove URLs for ${serverName}. Plexy will use the reachable URL with the lowest latency."
+    "editMediaBrowserIntro": "Add or remove URLs for ${serverName}. Plezy will use the reachable URL with the lowest latency."
   },
   "discover": {
     "title": "Discover",
@@ -1058,9 +1073,9 @@
     "uploadLogs": "Upload Logs"
   },
   "startup": {
-    "failedTitle": "Plexy could not start",
+    "failedTitle": "Plezy could not start",
     "failedBody": "Something went wrong during startup. The details below identify what failed.",
-    "failedBodyRepairable": "Plexy's saved settings file is damaged and has to be rebuilt before Plexy can start. Retrying will not help — choose Repair storage.",
+    "failedBodyRepairable": "Plezy's saved settings file is damaged and has to be rebuilt before Plezy can start. Retrying will not help — choose Repair storage.",
     "phaseLabel": "Step",
     "showDetails": "Show details",
     "hideDetails": "Hide details",
@@ -1069,16 +1084,16 @@
     "uploadDetails": "Upload details",
     "repairStorage": "Repair storage",
     "repairTitle": "Repair stored data?",
-    "repairBodyCommon": "Plexy's settings file is damaged and cannot be read. Repairing resets every setting to its default.",
+    "repairBodyCommon": "Plezy's settings file is damaged and cannot be read. Repairing resets every setting to its default.",
     "repairBodyOneCredential": "One saved sign-in is damaged and cannot be read. Repairing removes just that one; your other settings are left alone.",
     "repairBodySignInsKept": "Your servers and profiles should stay signed in.",
     "repairBodySignInsLost": "The key protecting your saved sign-ins cannot be recovered from this file, so you will have to sign in to every server and profile again. Nothing on your media server is affected.",
-    "repairBodySessionsUncertain": "Trackers (MAL, AniList, Simkl, Trakt) and Seerr are stored separately and may or may not survive. Plexy will tell you exactly what it kept.",
+    "repairBodySessionsUncertain": "Trackers (MAL, AniList, Simkl, Trakt) and Seerr are stored separately and may or may not survive. Plezy will tell you exactly what it kept.",
     "repairConfirm": "Repair",
     "repairSucceeded": "Storage repaired",
     "repairNeedsRestart": "Storage repaired — restart required",
-    "restartRequiredBody": "Your data was repaired, but Plexy has to start fresh before it can use it. Close Plexy and open it again.",
-    "quitPlezy": "Quit Plexy",
+    "restartRequiredBody": "Your data was repaired, but Plezy has to start fresh before it can use it. Close Plezy and open it again.",
+    "quitPlezy": "Quit Plezy",
     "repairFailed": "Repair failed",
     "repairKeptSignIns": "Your servers and profiles are still signed in.",
     "repairLostSignIns": "The key protecting your saved sign-ins could not be recovered. You will have to sign in to every server and profile again.",
@@ -1087,7 +1102,7 @@
     "backupWarning": "It contains your sign-in credentials. Do not upload or share it.",
     "deleteBackup": "Delete copy",
     "backupDeleted": "Copy deleted.",
-    "previousFailureTitle": "Plexy failed to start last time"
+    "previousFailureTitle": "Plezy failed to start last time"
   },
   "licenses": {
     "relatedPackages": "Related Packages",
@@ -1151,7 +1166,6 @@
       "rankPopular": "#${n} popular",
       "rankAiring": "#${n} airing",
       "rankRated": "#${n} rated",
-      "rankFavorited": "#${n} favorited",
       "rankTrending": "#${n} trending",
       "rankSeasonal": "#${n} in ${season}",
       "watchingNow": "${n} watching",
@@ -1169,7 +1183,8 @@
       "nextAiringIn": "Next in ${duration}",
       "episodesShort": "${n} eps",
       "minutesPerEpisode": "${n} min/ep",
-      "adult": "18+"
+      "adult": "18+",
+      "rankFavorited": "#${n} favorited"
     },
     "stats": {
       "listed": "${n} listed",
@@ -1432,7 +1447,12 @@
     "repeatAll": "Repeat all",
     "repeatOne": "Repeat one",
     "instantMixNoServer": "No server is available for an instant mix",
-    "noAudioUrl": "No audio URL is available for ${track}"
+    "noAudioUrl": "No audio URL is available for ${track}",
+    "discography": {
+      "singlesAndEps": "Singles & EPs",
+      "live": "Live",
+      "compilations": "Compilations"
+    }
   },
   "watchTogether": {
     "title": "Watch Together",
@@ -1539,8 +1559,6 @@
     "pauseAll": "Pause all",
     "resumeAll": "Resume all",
     "deleteAll": "Delete all",
-    "retryAll": "Retry all failed",
-    "retryAllFailed": "Retry ${count} failed downloads",
     "selectVersion": "Select Version",
     "allEpisodes": "All episodes",
     "unwatchedOnly": "Unwatched only",
@@ -1585,14 +1603,14 @@
       "bannerAction": "Details",
       "sheetTitle": "Background downloads are blocked",
       "sheetTitleDegraded": "Background downloads may be limited",
-      "sheetIntro": "Android is preventing Plexy from downloading reliably in the background.",
-      "sheetIntroDegraded": "Your device is limiting when Plexy can download in the background.",
-      "reasonBackgroundRestricted": "Plexy's background usage is restricted. Set its battery or background usage to \"Unrestricted\".",
-      "reasonStandbyRestricted": "Android has put Plexy in a restricted standby state. Set its battery usage to \"Unrestricted\".",
+      "sheetIntro": "Android is preventing Plezy from downloading reliably in the background.",
+      "sheetIntroDegraded": "Your device is limiting when Plezy can download in the background.",
+      "reasonBackgroundRestricted": "Plezy's background usage is restricted. Set its battery or background usage to \"Unrestricted\".",
+      "reasonStandbyRestricted": "Android has put Plezy in a restricted standby state. Set its battery usage to \"Unrestricted\".",
       "reasonDownloadChannelBlocked": "Download notifications are turned off, so progress and controls may be unavailable.",
       "reasonNotificationsDisabled": "Notifications are turned off. On Android 13 or newer, they are required for long background downloads.",
       "reasonDataSaver": "Data Saver is on, which blocks background downloads on mobile data. Downloads should still run on Wi-Fi.",
-      "reasonOemUnknown": "Downloads repeatedly stopped while Plexy was in the background. Check Plexy's battery or background usage settings.",
+      "reasonOemUnknown": "Downloads repeatedly stopped while Plezy was in the background. Check Plezy's battery or background usage settings.",
       "openSettings": "Open settings",
       "stillNotWorking": "Device-specific help",
       "stillNotWorkingDescription": "See steps for your device, or send a log from Settings › View Logs if the issue continues.",
@@ -1610,14 +1628,16 @@
     "unknownShow": "Unknown Show",
     "unknownSeason": "Unknown Season",
     "unknownAlbum": "Unknown Album",
-    "unknownPlaylist": "Unknown playlist",
     "completedOfTotal": "${completed}/${total} completed",
     "errorFileNotFound": "File not found (404)",
     "errorDownloadFailed": "Download failed",
     "errorPostProcessing": "Post-processing failed: ${error}",
     "notificationDownloading": "Downloading...",
     "notificationComplete": "Download complete",
-    "notificationPaused": "Download paused"
+    "notificationPaused": "Download paused",
+    "retryAll": "Retry all failed",
+    "retryAllFailed": "Retry ${count} failed downloads",
+    "unknownPlaylist": "Unknown playlist"
   },
   "shaders": {
     "title": "Shaders",
@@ -1654,19 +1674,19 @@
       "minimize": "Minimize"
     },
     "pairing": {
-      "discoveryDescription": "Plexy devices with the same Plex account appear here",
+      "discoveryDescription": "Plezy devices with the same Plex account appear here",
       "hostAddressHint": "192.168.1.100:48632",
       "connecting": "Connecting...",
       "searchingForDevices": "Looking for devices...",
       "noDevicesFound": "No devices found on your network",
-      "noDevicesHint": "Open Plexy on desktop and use the same Wi-Fi",
+      "noDevicesHint": "Open Plezy on desktop and use the same Wi-Fi",
       "availableDevices": "Available Devices",
       "manualConnection": "Manual Connection",
       "cryptoInitFailed": "Couldn't start secure connection. Sign in to Plex first.",
       "validationHostRequired": "Please enter host address",
       "validationHostFormat": "Format must be IP:port (e.g., 192.168.1.100:48632)",
       "connectionTimedOut": "Connection timed out. Use the same network on both devices.",
-      "sessionNotFound": "Device not found. Make sure Plexy is running on the host.",
+      "sessionNotFound": "Device not found. Make sure Plezy is running on the host.",
       "authFailed": "Authentication failed. Both devices need the same Plex account.",
       "failedToConnect": "Failed to connect: ${error}"
     },
@@ -1910,11 +1930,11 @@
     "connected": "Connected",
     "connectedAs": "Connected as @${username}",
     "disconnectConfirm": "Disconnect Trakt account?",
-    "disconnectConfirmBody": "Plexy will stop sending events to Trakt. You can reconnect any time.",
+    "disconnectConfirmBody": "Plezy will stop sending events to Trakt. You can reconnect any time.",
     "scrobble": "Real-time scrobbling",
     "scrobbleDescription": "Send play, pause, and stop events to Trakt during playback.",
     "watchedSync": "Sync watched status",
-    "watchedSyncDescription": "When you mark items as watched in Plexy, they are also marked as watched on Trakt."
+    "watchedSyncDescription": "When you mark items as watched in Plezy, they are also marked as watched on Trakt."
   },
   "seerr": {
     "title": "Seerr",
@@ -1926,10 +1946,10 @@
     "signInWithEmby": "Sign in with Emby",
     "signInWithLocal": "Use a local account",
     "email": "Email",
-    "noSignInMethods": "This Seerr instance offers no sign-in method Plexy supports.",
+    "noSignInMethods": "This Seerr instance offers no sign-in method Plezy supports.",
     "instance": "Instance",
     "disconnectConfirm": "Disconnect Seerr?",
-    "disconnectConfirmBody": "Plexy will forget this Seerr instance. Reconnect any time.",
+    "disconnectConfirmBody": "Plezy will forget this Seerr instance. Reconnect any time.",
     "request": "Request",
     "request4k": "Request in 4K",
     "seasons": "Seasons",
@@ -1966,7 +1986,7 @@
     "scrobble": "Track progress automatically",
     "scrobbleDescription": "Update your list when you finish an episode or movie.",
     "disconnectConfirm": "Disconnect ${service}?",
-    "disconnectConfirmBody": "Plexy will stop updating ${service}. Reconnect any time.",
+    "disconnectConfirmBody": "Plezy will stop updating ${service}. Reconnect any time.",
     "connectFailed": "Couldn't connect to ${service}. Try again.",
     "names": {
       "mal": "MyAnimeList",
@@ -1976,7 +1996,7 @@
       "mdblist": "MDBList"
     },
     "deviceCode": {
-      "title": "Activate Plexy on ${service}",
+      "title": "Activate Plezy on ${service}",
       "instructions": "Scan the QR code, or visit the address below and enter this code:",
       "openToActivate": "Open ${service} to activate",
       "copyCode": "Copy activation code",

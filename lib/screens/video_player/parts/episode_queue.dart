@@ -78,8 +78,8 @@ extension _VideoPlayerEpisodeQueueMethods on VideoPlayerScreenState {
     }
   }
 
-  Future<AdjacentEpisodes> _loadAdjacentEpisodes({MediaItem? metadata, _PlaybackAttempt? attempt}) async {
-    if (!mounted || widget.isLive) return const AdjacentEpisodes.unavailable();
+  Future<void> _loadAdjacentEpisodes({MediaItem? metadata, _PlaybackAttempt? attempt}) async {
+    if (!mounted || widget.isLive) return;
 
     final targetMetadata = metadata ?? _currentMetadata;
     try {
@@ -94,12 +94,9 @@ extension _VideoPlayerEpisodeQueueMethods on VideoPlayerScreenState {
               playedPartId: _currentMediaInfo?.partId?.toString(),
             );
       _commitAdjacentEpisodes(targetMetadata, adjacentEpisodes, attempt);
-      return adjacentEpisodes;
     } catch (e, st) {
       appLogger.w('Could not load adjacent episodes', error: e, stackTrace: st);
-      const failed = AdjacentEpisodes.failed();
-      _commitAdjacentEpisodes(targetMetadata, failed, attempt);
-      return failed;
+      _commitAdjacentEpisodes(targetMetadata, const AdjacentEpisodes.failed(), attempt);
     }
   }
 
@@ -115,11 +112,13 @@ extension _VideoPlayerEpisodeQueueMethods on VideoPlayerScreenState {
       final episodes = downloadProvider.getDownloadedEpisodesForShow(showKey);
       if (episodes.isEmpty) return const AdjacentEpisodes.failed();
 
-      // Aired watch order (Specials interleaved by air date) — the shared
-      // episode order, so offline next/prev matches streaming, what "download
-      // next N" selects, and the offline OnDeck list (#1416/#1414). Copy first
-      // so the provider's cached list isn't reordered.
-      final sorted = List<MediaItem>.from(episodes)..sort(compareEpisodesByWatchOrder);
+      // The shared client-side watch order (Specials placed per the
+      // specialsOrdering preference; no server order exists offline), so
+      // offline next/prev matches what "download next N" selects and the
+      // offline OnDeck list (#1416/#1414/#1952). Copy first so the provider's
+      // cached list isn't reordered.
+      final sorted = List<MediaItem>.from(episodes);
+      sortEpisodesByWatchOrder(sorted);
       final currentIdx = sorted.indexWhere((ep) => ep.id == metadata.id);
       if (currentIdx == -1) return const AdjacentEpisodes.failed();
 

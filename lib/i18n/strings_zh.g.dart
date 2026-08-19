@@ -98,7 +98,7 @@ class Translations$app$zh extends Translations$app$en {
 	final TranslationsZh _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Plexy';
+	@override String get title => 'Plezy';
 }
 
 // Path: auth
@@ -122,7 +122,7 @@ class Translations$auth$zh extends Translations$auth$en {
 	@override String get quickConnectWaiting => '等待批准…';
 	@override String get quickConnectCancel => '取消';
 	@override String get quickConnectExpired => 'Quick Connect 已过期。请重试。';
-	@override String get localDataRecoveryRequired => 'Plexy 无法安全恢复本地登录状态和待处理的播放数据。请重新登录。';
+	@override String get localDataRecoveryRequired => 'Plezy 无法安全恢复本地登录状态和待处理的播放数据。请重新登录。';
 	@override String get pinCheckRejected => 'Plex PIN 检查被拒绝';
 }
 
@@ -222,7 +222,7 @@ class Translations$settings$zh extends Translations$settings$en {
 
 	// Translations
 	@override String get title => '设置';
-	@override String get supportDeveloper => '支持 Plexy';
+	@override String get supportDeveloper => '支持 Plezy';
 	@override String get supportDeveloperDescription => '通过 Liberapay 捐赠支持开发';
 	@override String get language => '语言';
 	@override String get theme => '主题';
@@ -316,6 +316,11 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get followServerTrackSelectionsDescription => '切换剧集时，应用服务器上为该集选择的音频和字幕，而不是沿用当前选择';
 	@override String get showChapterMarkersOnTimeline => '在进度条上显示章节标记';
 	@override String get showChapterMarkersOnTimelineDescription => '按章节边界分段显示进度条';
+	@override String get specialsOrdering => '特别篇按剧集顺序';
+	@override String get specialsOrderingDescription => '特别篇在剧集观看顺序中的播放位置';
+	@override String get specialsOrderingServer => '遵循服务器顺序';
+	@override String get specialsOrderingAirDate => '按播出日期穿插';
+	@override String get specialsOrderingLast => '常规季之后';
 	@override String get clickVideoTogglesPlayback => '点击视频可切换播放/暂停';
 	@override String get clickVideoTogglesPlaybackDescription => '点击视频即可播放或暂停，而不是显示控制项。';
 	@override String get videoPlayerControls => '视频播放器控制';
@@ -347,7 +352,7 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get importSettingsDescription => '从文件恢复偏好设置';
 	@override String get importSettingsConfirm => '这将替换您当前的设置。继续吗？';
 	@override String get importSettingsSuccess => '设置已导入';
-	@override String get importSettingsInvalidFile => '此文件不是有效的 Plexy 设置导出';
+	@override String get importSettingsInvalidFile => '此文件不是有效的 Plezy 设置导出';
 	@override String get importSettingsNoUser => '导入设置前请先登录';
 	@override String get shortcutsReset => '快捷键已重置为默认值';
 	@override String get about => '关于';
@@ -440,7 +445,7 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get forceTvMode => '强制 TV 模式';
 	@override String get forceTvModeDescription => '强制 TV 布局。适用于无法自动检测的设备。需要重启。';
 	@override String get startInFullscreen => '以全屏模式启动';
-	@override String get startInFullscreenDescription => '启动时以全屏模式打开 Plexy';
+	@override String get startInFullscreenDescription => '启动时以全屏模式打开 Plezy';
 	@override String get exitFullscreenOnPlayerClose => '关闭播放器时退出全屏';
 	@override String get exitFullscreenOnPlayerCloseDescription => '关闭视频播放器时自动退出全屏模式';
 	@override String get autoHidePerformanceOverlay => '自动隐藏性能叠加层';
@@ -461,7 +466,17 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get subtitlesAndConfig => '字幕与配置';
 	@override String get seekAndTiming => '跳转与计时';
 	@override String get behavior => '行为';
-	@override String get exportDialogTitle => '导出 Plexy 设置';
+	@override String get rememberPlayerChanges => '记住播放器更改';
+	@override String get rememberPlayerChangesDescription => '播放期间所做的更改保存并重新应用的位置';
+	@override String get scopePlaybackSpeed => '播放速度';
+	@override String get scopeShaderPreset => '着色器预设';
+	@override String get scopeAspectRatio => '宽高比';
+	@override String get scopeSyncOffsets => '音频和字幕同步';
+	@override String get playerScopeOff => '不保存';
+	@override String get playerScopeGlobal => '所有位置';
+	@override String get playerScopeLibrary => '按媒体库';
+	@override String get playerScopeTitle => '按剧集或电影';
+	@override String get exportDialogTitle => '导出 Plezy 设置';
 }
 
 // Path: search
@@ -656,8 +671,8 @@ class Translations$mediaMenu$zh extends Translations$mediaMenu$en {
 	@override String deleteSharedFileHeading({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n,
 		other: '另外 ${n} 集存储在同一个文件中，也会一并删除：',
 	);
-	@override String get deleteScopeUnverifiedProbeFailed => 'Plexy 无法确认此操作会删除哪些文件，因此删除范围可能超出上面提到的项目。请取消后重试，或仍然删除。';
-	@override String get deleteScopeUnverifiedNoFileInfo => '你的服务器没有提供此项目的文件详情，因此 Plexy 无法确认此操作会删除哪些文件。删除范围可能超出上面提到的项目。';
+	@override String get deleteScopeUnverifiedProbeFailed => 'Plezy 无法确认此操作会删除哪些文件，因此删除范围可能超出上面提到的项目。请取消后重试，或仍然删除。';
+	@override String get deleteScopeUnverifiedNoFileInfo => '你的服务器没有提供此项目的文件详情，因此 Plezy 无法确认此操作会删除哪些文件。删除范围可能超出上面提到的项目。';
 	@override String get mediaDeletedSuccessfully => '媒体项已成功删除';
 	@override String get mediaFailedToDelete => '删除媒体项失败';
 	@override String get rate => '评分';
@@ -749,12 +764,7 @@ class Translations$videoControls$zh extends Translations$videoControls$en {
 	// Translations
 	@override String get audioLabel => '音频';
 	@override String get subtitlesLabel => '字幕';
-	@override String get resetToZero => '重置为 0ms';
 	@override String addTime({required Object amount, required Object unit}) => '+${amount}${unit}';
-	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
-	@override String playsLater({required Object label}) => '${label}延后播放';
-	@override String playsEarlier({required Object label}) => '${label}提前播放';
-	@override String get noOffset => '无偏移';
 	@override String get letterbox => '黑边模式';
 	@override String get fillScreen => '填充屏幕';
 	@override String get stretch => '拉伸';
@@ -835,6 +845,11 @@ class Translations$videoControls$zh extends Translations$videoControls$en {
 	@override String get osdSubtitlesOff => '字幕：关闭';
 	@override String osdSubtitles({required Object track}) => '字幕：${track}';
 	@override String osdAudio({required Object track}) => '音频：${track}';
+	@override String get resetToZero => '重置为 0ms';
+	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
+	@override String playsLater({required Object label}) => '${label}延后播放';
+	@override String playsEarlier({required Object label}) => '${label}提前播放';
+	@override String get noOffset => '无偏移';
 }
 
 // Path: messages
@@ -982,7 +997,7 @@ class Translations$profiles$zh extends Translations$profiles$en {
 	final TranslationsZh _root; // ignore: unused_field
 
 	// Translations
-	@override String get addPlezyProfile => '添加 Plexy 用户资料';
+	@override String get addPlezyProfile => '添加 Plezy 用户资料';
 	@override String get switchingProfile => '正在切换用户资料…';
 	@override String get deleteThisProfileTitle => '删除此用户资料？';
 	@override String deleteThisProfileMessage({required Object displayName}) => '移除 ${displayName}。连接不会受影响。';
@@ -1062,7 +1077,7 @@ class Translations$connections$zh extends Translations$connections$en {
 	@override String sessionExpiredMany({required Object count}) => '${count} 个服务器的会话已过期';
 	@override String get signInAgain => '重新登录';
 	@override String editMediaBrowserTitle({required Object product}) => '编辑 ${product} 连接';
-	@override String editMediaBrowserIntro({required Object serverName}) => '为 ${serverName} 添加或移除 URL。Plexy 会使用延迟最低且可访问的 URL。';
+	@override String editMediaBrowserIntro({required Object serverName}) => '为 ${serverName} 添加或移除 URL。Plezy 会使用延迟最低且可访问的 URL。';
 }
 
 // Path: discover
@@ -1234,9 +1249,9 @@ class Translations$startup$zh extends Translations$startup$en {
 	final TranslationsZh _root; // ignore: unused_field
 
 	// Translations
-	@override String get failedTitle => 'Plexy 无法启动';
+	@override String get failedTitle => 'Plezy 无法启动';
 	@override String get failedBody => '启动过程中出现问题。以下详情指出了失败的原因。';
-	@override String get failedBodyRepairable => 'Plexy 的已保存设置文件已损坏，必须先重建才能启动。重试没有用——请选择“修复存储”。';
+	@override String get failedBodyRepairable => 'Plezy 的已保存设置文件已损坏，必须先重建才能启动。重试没有用——请选择“修复存储”。';
 	@override String get phaseLabel => '步骤';
 	@override String get showDetails => '显示详情';
 	@override String get hideDetails => '隐藏详情';
@@ -1245,16 +1260,16 @@ class Translations$startup$zh extends Translations$startup$en {
 	@override String get uploadDetails => '上传详情';
 	@override String get repairStorage => '修复存储';
 	@override String get repairTitle => '修复已存储的数据？';
-	@override String get repairBodyCommon => 'Plexy 的设置文件已损坏且无法读取。修复会将所有设置重置为默认值。';
+	@override String get repairBodyCommon => 'Plezy 的设置文件已损坏且无法读取。修复会将所有设置重置为默认值。';
 	@override String get repairBodyOneCredential => '有一项已保存的登录信息已损坏且无法读取。修复只会移除这一项，其他设置保持不变。';
 	@override String get repairBodySignInsKept => '你的服务器和个人资料应保持登录状态。';
 	@override String get repairBodySignInsLost => '保护已保存登录信息的密钥无法从此文件中恢复，因此你需要重新登录每个服务器和个人资料。媒体服务器上的内容不受影响。';
-	@override String get repairBodySessionsUncertain => '追踪服务（MAL、AniList、Simkl、Trakt）和 Seerr 是分开存储的，可能保留也可能无法保留。Plexy 会明确告诉你保留了哪些。';
+	@override String get repairBodySessionsUncertain => '追踪服务（MAL、AniList、Simkl、Trakt）和 Seerr 是分开存储的，可能保留也可能无法保留。Plezy 会明确告诉你保留了哪些。';
 	@override String get repairConfirm => '修复';
 	@override String get repairSucceeded => '存储已修复';
 	@override String get repairNeedsRestart => '存储已修复 — 需要重启';
-	@override String get restartRequiredBody => '你的数据已修复，但 Plexy 需要重新启动后才能使用。请关闭 Plexy 并重新打开。';
-	@override String get quitPlezy => '退出 Plexy';
+	@override String get restartRequiredBody => '你的数据已修复，但 Plezy 需要重新启动后才能使用。请关闭 Plezy 并重新打开。';
+	@override String get quitPlezy => '退出 Plezy';
 	@override String get repairFailed => '修复失败';
 	@override String get repairKeptSignIns => '你的服务器和个人资料仍然保持登录状态。';
 	@override String get repairLostSignIns => '保护已保存登录信息的密钥无法恢复。你需要重新登录每个服务器和个人资料。';
@@ -1263,7 +1278,7 @@ class Translations$startup$zh extends Translations$startup$en {
 	@override String get backupWarning => '其中包含你的登录凭据。请勿上传或分享。';
 	@override String get deleteBackup => '删除副本';
 	@override String get backupDeleted => '副本已删除。';
-	@override String get previousFailureTitle => 'Plexy 上次启动失败';
+	@override String get previousFailureTitle => 'Plezy 上次启动失败';
 }
 
 // Path: licenses
@@ -1519,6 +1534,7 @@ class Translations$music$zh extends Translations$music$en {
 	@override String get repeatOne => '单曲循环';
 	@override String get instantMixNoServer => '没有可用于即时混合的服务器';
 	@override String noAudioUrl({required Object track}) => '没有可供 ${track} 使用的音频 URL';
+	@override late final Translations$music$discography$zh discography = Translations$music$discography$zh.internal(_root);
 }
 
 // Path: watchTogether
@@ -1972,11 +1988,11 @@ class Translations$trakt$zh extends Translations$trakt$en {
 	@override String get connected => '已连接';
 	@override String connectedAs({required Object username}) => '已以 @${username} 身份连接';
 	@override String get disconnectConfirm => '断开 Trakt 账户？';
-	@override String get disconnectConfirmBody => 'Plexy 将停止向 Trakt 发送事件。你可随时重新连接。';
+	@override String get disconnectConfirmBody => 'Plezy 将停止向 Trakt 发送事件。你可随时重新连接。';
 	@override String get scrobble => '实时同步播放状态';
 	@override String get scrobbleDescription => '播放期间将播放、暂停和停止事件发送到 Trakt。';
 	@override String get watchedSync => '同步已观看状态';
-	@override String get watchedSyncDescription => '在 Plexy 中将内容标记为已观看时，也会在 Trakt 上标记为已观看。';
+	@override String get watchedSyncDescription => '在 Plezy 中将内容标记为已观看时，也会在 Trakt 上标记为已观看。';
 }
 
 // Path: seerr
@@ -1995,10 +2011,10 @@ class Translations$seerr$zh extends Translations$seerr$en {
 	@override String get signInWithEmby => '使用 Emby 登录';
 	@override String get signInWithLocal => '使用本地账户';
 	@override String get email => '邮箱';
-	@override String get noSignInMethods => '此 Seerr 实例未提供 Plexy 支持的登录方式。';
+	@override String get noSignInMethods => '此 Seerr 实例未提供 Plezy 支持的登录方式。';
 	@override String get instance => '实例';
 	@override String get disconnectConfirm => '断开 Seerr 连接？';
-	@override String get disconnectConfirmBody => 'Plexy 将忘记此 Seerr 实例。可随时重新连接。';
+	@override String get disconnectConfirmBody => 'Plezy 将忘记此 Seerr 实例。可随时重新连接。';
 	@override String get request => '请求';
 	@override String get request4k => '请求 4K';
 	@override String get seasons => '季';
@@ -2042,7 +2058,7 @@ class Translations$services$zh extends Translations$services$en {
 	@override String get scrobble => '自动记录进度';
 	@override String get scrobbleDescription => '观看完一集或一部电影后更新你的列表。';
 	@override String disconnectConfirm({required Object service}) => '断开 ${service} 连接？';
-	@override String disconnectConfirmBody({required Object service}) => 'Plexy 将停止更新 ${service}。可随时重新连接。';
+	@override String disconnectConfirmBody({required Object service}) => 'Plezy 将停止更新 ${service}。可随时重新连接。';
 	@override String connectFailed({required Object service}) => '无法连接到 ${service}。请重试。';
 	@override late final Translations$services$names$zh names = Translations$services$names$zh.internal(_root);
 	@override late final Translations$services$deviceCode$zh deviceCode = Translations$services$deviceCode$zh.internal(_root);
@@ -2080,7 +2096,7 @@ class Translations$addServer$zh extends Translations$addServer$en {
 	@override String addConnectionTitleScoped({required Object name}) => '添加到 ${name}';
 	@override String get signInWithPlexCard => '使用 Plex 登录';
 	@override String get signInWithPlexCardSubtitle => '授权此设备。共享服务器会被添加。';
-	@override String get signInWithPlexCardSubtitleScoped => '授权一个 Plex 账户。Plex Home 用户将成为 Plexy 用户资料。';
+	@override String get signInWithPlexCardSubtitleScoped => '授权一个 Plex 账户。Plex Home 用户将成为 Plezy 用户资料。';
 	@override String connectToMediaBrowserCard({required Object product}) => '连接到 ${product}';
 	@override String get connectToMediaBrowserCardSubtitle => '输入你的服务器 URL、用户名和密码。';
 	@override String connectToMediaBrowserCardSubtitleScoped({required Object product, required Object name}) => '登录你的 ${product} 服务器。将绑定到 ${name}。';
@@ -2299,7 +2315,6 @@ class Translations$explore$badge$zh extends Translations$explore$badge$en {
 	@override String rankPopular({required Object n}) => '热门榜第 #${n} 名';
 	@override String rankAiring({required Object n}) => '在播榜第 #${n} 名';
 	@override String rankRated({required Object n}) => '评分榜第 #${n} 名';
-	@override String rankFavorited({required Object n}) => '收藏榜第 #${n} 名';
 	@override String rankTrending({required Object n}) => '趋势榜第 #${n} 名';
 	@override String rankSeasonal({required Object season, required Object n}) => '${season}榜第 #${n} 名';
 	@override String watchingNow({required Object n}) => '${n} 人正在观看';
@@ -2318,6 +2333,7 @@ class Translations$explore$badge$zh extends Translations$explore$badge$en {
 	@override String episodesShort({required Object n}) => '${n} 集';
 	@override String minutesPerEpisode({required Object n}) => '${n} 分钟/集';
 	@override String get adult => '18+';
+	@override String rankFavorited({required Object n}) => '收藏榜第 #${n} 名';
 }
 
 // Path: explore.stats
@@ -2467,6 +2483,18 @@ class Translations$explore$detail$zh extends Translations$explore$detail$en {
 	@override String get background => '背景';
 }
 
+// Path: music.discography
+class Translations$music$discography$zh extends Translations$music$discography$en {
+	Translations$music$discography$zh.internal(TranslationsZh root) : this._root = root, super.internal(root);
+
+	final TranslationsZh _root; // ignore: unused_field
+
+	// Translations
+	@override String get singlesAndEps => '单曲和 EP';
+	@override String get live => '现场';
+	@override String get compilations => '合集';
+}
+
 // Path: downloads.backgroundWarning
 class Translations$downloads$backgroundWarning$zh extends Translations$downloads$backgroundWarning$en {
 	Translations$downloads$backgroundWarning$zh.internal(TranslationsZh root) : this._root = root, super.internal(root);
@@ -2479,14 +2507,14 @@ class Translations$downloads$backgroundWarning$zh extends Translations$downloads
 	@override String get bannerAction => '详情';
 	@override String get sheetTitle => '后台下载已被阻止';
 	@override String get sheetTitleDegraded => '后台下载可能受限';
-	@override String get sheetIntro => 'Android 正在阻止 Plexy 在后台稳定下载。';
-	@override String get sheetIntroDegraded => '你的设备限制了 Plexy 在后台下载的时机。';
-	@override String get reasonBackgroundRestricted => 'Plexy 的后台使用受到限制。请将其电池用量或后台使用设置为“不受限制”。';
-	@override String get reasonStandbyRestricted => 'Android 已将 Plexy 置于受限待机状态。请将其电池用量设为“不受限制”。';
+	@override String get sheetIntro => 'Android 正在阻止 Plezy 在后台稳定下载。';
+	@override String get sheetIntroDegraded => '你的设备限制了 Plezy 在后台下载的时机。';
+	@override String get reasonBackgroundRestricted => 'Plezy 的后台使用受到限制。请将其电池用量或后台使用设置为“不受限制”。';
+	@override String get reasonStandbyRestricted => 'Android 已将 Plezy 置于受限待机状态。请将其电池用量设为“不受限制”。';
 	@override String get reasonDownloadChannelBlocked => '下载通知已关闭，因此可能无法查看进度或进行控制。';
 	@override String get reasonNotificationsDisabled => '通知已关闭。在 Android 13 或更高版本中，长时间后台下载需要开启通知。';
 	@override String get reasonDataSaver => '流量节省程序已开启，会阻止使用移动数据进行后台下载。使用 Wi-Fi 时下载应仍可进行。';
-	@override String get reasonOemUnknown => 'Plexy 在后台时，下载曾多次停止。请检查 Plexy 的电池用量或后台使用设置。';
+	@override String get reasonOemUnknown => 'Plezy 在后台时，下载曾多次停止。请检查 Plezy 的电池用量或后台使用设置。';
 	@override String get openSettings => '打开设置';
 	@override String get stillNotWorking => '设备专属帮助';
 	@override String get stillNotWorkingDescription => '查看适用于你设备的操作步骤；如果问题仍然存在，请通过设置 › 查看日志发送日志。';
@@ -2529,19 +2557,19 @@ class Translations$companionRemote$pairing$zh extends Translations$companionRemo
 	final TranslationsZh _root; // ignore: unused_field
 
 	// Translations
-	@override String get discoveryDescription => '使用同一 Plex 账号的 Plexy 设备会显示在这里';
+	@override String get discoveryDescription => '使用同一 Plex 账号的 Plezy 设备会显示在这里';
 	@override String get hostAddressHint => '192.168.1.100:48632';
 	@override String get connecting => '正在连接…';
 	@override String get searchingForDevices => '正在搜索设备…';
 	@override String get noDevicesFound => '未在网络中找到设备';
-	@override String get noDevicesHint => '请在桌面端打开 Plexy，并确保设备连接到同一 Wi-Fi 网络';
+	@override String get noDevicesHint => '请在桌面端打开 Plezy，并确保设备连接到同一 Wi-Fi 网络';
 	@override String get availableDevices => '可用设备';
 	@override String get manualConnection => '手动连接';
 	@override String get cryptoInitFailed => '无法启动安全连接。请先登录 Plex。';
 	@override String get validationHostRequired => '请输入主机地址';
 	@override String get validationHostFormat => '格式必须为 IP:端口（例如 192.168.1.100:48632）';
 	@override String get connectionTimedOut => '连接超时。请在两台设备上使用同一网络。';
-	@override String get sessionNotFound => '未找到设备。请确认 Plexy 正在主机上运行。';
+	@override String get sessionNotFound => '未找到设备。请确认 Plezy 正在主机上运行。';
 	@override String get authFailed => '认证失败。两台设备需要使用同一 Plex 账号。';
 	@override String failedToConnect({required Object error}) => '连接失败：${error}';
 }
@@ -2620,7 +2648,7 @@ class Translations$services$deviceCode$zh extends Translations$services$deviceCo
 	final TranslationsZh _root; // ignore: unused_field
 
 	// Translations
-	@override String title({required Object service}) => '在 ${service} 上激活 Plexy';
+	@override String title({required Object service}) => '在 ${service} 上激活 Plezy';
 	@override String get instructions => '扫描二维码，或访问下方地址并输入此代码：';
 	@override String openToActivate({required Object service}) => '打开 ${service} 以激活';
 	@override String get copyCode => '复制激活代码';
@@ -2680,7 +2708,7 @@ class Translations$services$libraryFilter$zh extends Translations$services$libra
 extension on TranslationsZh {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.title' => 'Plexy',
+			'app.title' => 'Plezy',
 			'auth.signInWithPlex' => '使用 Plex 登录',
 			'auth.showQRCode' => '显示二维码',
 			'auth.authenticate' => '验证',
@@ -2695,7 +2723,7 @@ extension on TranslationsZh {
 			'auth.quickConnectWaiting' => '等待批准…',
 			'auth.quickConnectCancel' => '取消',
 			'auth.quickConnectExpired' => 'Quick Connect 已过期。请重试。',
-			'auth.localDataRecoveryRequired' => 'Plexy 无法安全恢复本地登录状态和待处理的播放数据。请重新登录。',
+			'auth.localDataRecoveryRequired' => 'Plezy 无法安全恢复本地登录状态和待处理的播放数据。请重新登录。',
 			'auth.pinCheckRejected' => 'Plex PIN 检查被拒绝',
 			'common.cancel' => '取消',
 			'common.save' => '保存',
@@ -2769,7 +2797,7 @@ extension on TranslationsZh {
 			'update.latestVersion' => '当前已是最新版本',
 			'update.checkFailed' => '无法检查更新',
 			'settings.title' => '设置',
-			'settings.supportDeveloper' => '支持 Plexy',
+			'settings.supportDeveloper' => '支持 Plezy',
 			'settings.supportDeveloperDescription' => '通过 Liberapay 捐赠支持开发',
 			'settings.language' => '语言',
 			'settings.theme' => '主题',
@@ -2863,6 +2891,11 @@ extension on TranslationsZh {
 			'settings.followServerTrackSelectionsDescription' => '切换剧集时，应用服务器上为该集选择的音频和字幕，而不是沿用当前选择',
 			'settings.showChapterMarkersOnTimeline' => '在进度条上显示章节标记',
 			'settings.showChapterMarkersOnTimelineDescription' => '按章节边界分段显示进度条',
+			'settings.specialsOrdering' => '特别篇按剧集顺序',
+			'settings.specialsOrderingDescription' => '特别篇在剧集观看顺序中的播放位置',
+			'settings.specialsOrderingServer' => '遵循服务器顺序',
+			'settings.specialsOrderingAirDate' => '按播出日期穿插',
+			'settings.specialsOrderingLast' => '常规季之后',
 			'settings.clickVideoTogglesPlayback' => '点击视频可切换播放/暂停',
 			'settings.clickVideoTogglesPlaybackDescription' => '点击视频即可播放或暂停，而不是显示控制项。',
 			'settings.videoPlayerControls' => '视频播放器控制',
@@ -2894,7 +2927,7 @@ extension on TranslationsZh {
 			'settings.importSettingsDescription' => '从文件恢复偏好设置',
 			'settings.importSettingsConfirm' => '这将替换您当前的设置。继续吗？',
 			'settings.importSettingsSuccess' => '设置已导入',
-			'settings.importSettingsInvalidFile' => '此文件不是有效的 Plexy 设置导出',
+			'settings.importSettingsInvalidFile' => '此文件不是有效的 Plezy 设置导出',
 			'settings.importSettingsNoUser' => '导入设置前请先登录',
 			'settings.shortcutsReset' => '快捷键已重置为默认值',
 			'settings.about' => '关于',
@@ -2987,7 +3020,7 @@ extension on TranslationsZh {
 			'settings.forceTvMode' => '强制 TV 模式',
 			'settings.forceTvModeDescription' => '强制 TV 布局。适用于无法自动检测的设备。需要重启。',
 			'settings.startInFullscreen' => '以全屏模式启动',
-			'settings.startInFullscreenDescription' => '启动时以全屏模式打开 Plexy',
+			'settings.startInFullscreenDescription' => '启动时以全屏模式打开 Plezy',
 			'settings.exitFullscreenOnPlayerClose' => '关闭播放器时退出全屏',
 			'settings.exitFullscreenOnPlayerCloseDescription' => '关闭视频播放器时自动退出全屏模式',
 			'settings.autoHidePerformanceOverlay' => '自动隐藏性能叠加层',
@@ -3008,7 +3041,17 @@ extension on TranslationsZh {
 			'settings.subtitlesAndConfig' => '字幕与配置',
 			'settings.seekAndTiming' => '跳转与计时',
 			'settings.behavior' => '行为',
-			'settings.exportDialogTitle' => '导出 Plexy 设置',
+			'settings.rememberPlayerChanges' => '记住播放器更改',
+			'settings.rememberPlayerChangesDescription' => '播放期间所做的更改保存并重新应用的位置',
+			'settings.scopePlaybackSpeed' => '播放速度',
+			'settings.scopeShaderPreset' => '着色器预设',
+			'settings.scopeAspectRatio' => '宽高比',
+			'settings.scopeSyncOffsets' => '音频和字幕同步',
+			'settings.playerScopeOff' => '不保存',
+			'settings.playerScopeGlobal' => '所有位置',
+			'settings.playerScopeLibrary' => '按媒体库',
+			'settings.playerScopeTitle' => '按剧集或电影',
+			'settings.exportDialogTitle' => '导出 Plezy 设置',
 			'search.hint' => '搜索电影、剧集、音乐…',
 			'search.tryDifferentTerm' => '尝试不同的搜索词',
 			'search.searchYourMedia' => '搜索媒体',
@@ -3177,6 +3220,8 @@ extension on TranslationsZh {
 			'mediaMenu.deleteMovieTitle' => '删除这部电影？',
 			'mediaMenu.deleteEpisodeConfirm' => '删除单集',
 			'mediaMenu.deleteSeasonConfirm' => '删除季度',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteShowConfirm' => '删除剧集',
 			'mediaMenu.deleteMovieConfirm' => '删除电影',
 			'mediaMenu.deleteAnyway' => '仍然删除',
@@ -3185,15 +3230,13 @@ extension on TranslationsZh {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '这将删除其中全部 ${n} 集以及它们的文件。', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '此项目存储在 ${n} 个文件中，所有这些文件都会被删除。', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '另外 ${n} 集存储在同一个文件中，也会一并删除：', ), 
-			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexy 无法确认此操作会删除哪些文件，因此删除范围可能超出上面提到的项目。请取消后重试，或仍然删除。',
-			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => '你的服务器没有提供此项目的文件详情，因此 Plexy 无法确认此操作会删除哪些文件。删除范围可能超出上面提到的项目。',
+			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plezy 无法确认此操作会删除哪些文件，因此删除范围可能超出上面提到的项目。请取消后重试，或仍然删除。',
+			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => '你的服务器没有提供此项目的文件详情，因此 Plezy 无法确认此操作会删除哪些文件。删除范围可能超出上面提到的项目。',
 			'mediaMenu.mediaDeletedSuccessfully' => '媒体项已成功删除',
 			'mediaMenu.mediaFailedToDelete' => '删除媒体项失败',
 			'mediaMenu.rate' => '评分',
 			'mediaMenu.playFromBeginning' => '从头播放',
 			'mediaMenu.playVersion' => '播放版本…',
-			_ => null,
-		} ?? switch (path) {
 			'rateSheet.title' => '评分',
 			'rateSheet.server' => '服务器',
 			'rateSheet.favorite' => '收藏',
@@ -3235,12 +3278,7 @@ extension on TranslationsZh {
 			'audioTracks.track' => ({required Object n}) => '音轨 ${n}',
 			'videoControls.audioLabel' => '音频',
 			'videoControls.subtitlesLabel' => '字幕',
-			'videoControls.resetToZero' => '重置为 0ms',
 			'videoControls.addTime' => ({required Object amount, required Object unit}) => '+${amount}${unit}',
-			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
-			'videoControls.playsLater' => ({required Object label}) => '${label}延后播放',
-			'videoControls.playsEarlier' => ({required Object label}) => '${label}提前播放',
-			'videoControls.noOffset' => '无偏移',
 			'videoControls.letterbox' => '黑边模式',
 			'videoControls.fillScreen' => '填充屏幕',
 			'videoControls.stretch' => '拉伸',
@@ -3327,6 +3365,11 @@ extension on TranslationsZh {
 			'videoControls.osdSubtitlesOff' => '字幕：关闭',
 			'videoControls.osdSubtitles' => ({required Object track}) => '字幕：${track}',
 			'videoControls.osdAudio' => ({required Object track}) => '音频：${track}',
+			'videoControls.resetToZero' => '重置为 0ms',
+			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
+			'videoControls.playsLater' => ({required Object label}) => '${label}延后播放',
+			'videoControls.playsEarlier' => ({required Object label}) => '${label}提前播放',
+			'videoControls.noOffset' => '无偏移',
 			'messages.markedAsWatched' => '已标记为已观看',
 			'messages.markedAsUnwatched' => '已标记为未观看',
 			'messages.markedAsWatchedOffline' => '已标记为已观看（将在联网时同步）',
@@ -3427,7 +3470,7 @@ extension on TranslationsZh {
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# comment',
 			'mpvConfig.embeddedVoHint' => 'Linux 上会忽略 vo、gpu-context 和 gpu-api：嵌入式视频始终通过视频平面上的 vo=libmpv 渲染，而 gpu-next（ArtCNN 等计算着色器需要它）无法以嵌入式方式运行。',
 			'dialog.confirmAction' => '确认操作',
-			'profiles.addPlezyProfile' => '添加 Plexy 用户资料',
+			'profiles.addPlezyProfile' => '添加 Plezy 用户资料',
 			'profiles.switchingProfile' => '正在切换用户资料…',
 			'profiles.deleteThisProfileTitle' => '删除此用户资料？',
 			'profiles.deleteThisProfileMessage' => ({required Object displayName}) => '移除 ${displayName}。连接不会受影响。',
@@ -3498,7 +3541,7 @@ extension on TranslationsZh {
 			'connections.sessionExpiredMany' => ({required Object count}) => '${count} 个服务器的会话已过期',
 			'connections.signInAgain' => '重新登录',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => '编辑 ${product} 连接',
-			'connections.editMediaBrowserIntro' => ({required Object serverName}) => '为 ${serverName} 添加或移除 URL。Plexy 会使用延迟最低且可访问的 URL。',
+			'connections.editMediaBrowserIntro' => ({required Object serverName}) => '为 ${serverName} 添加或移除 URL。Plezy 会使用延迟最低且可访问的 URL。',
 			'discover.title' => '发现',
 			'discover.noContentAvailable' => '没有可用内容',
 			'discover.addMediaToLibraries' => '请向你的媒体库添加一些媒体',
@@ -3633,9 +3676,9 @@ extension on TranslationsZh {
 			'logs.clearLogs' => '清除日志',
 			'logs.copyLogs' => '复制日志',
 			'logs.uploadLogs' => '上传日志',
-			'startup.failedTitle' => 'Plexy 无法启动',
+			'startup.failedTitle' => 'Plezy 无法启动',
 			'startup.failedBody' => '启动过程中出现问题。以下详情指出了失败的原因。',
-			'startup.failedBodyRepairable' => 'Plexy 的已保存设置文件已损坏，必须先重建才能启动。重试没有用——请选择“修复存储”。',
+			'startup.failedBodyRepairable' => 'Plezy 的已保存设置文件已损坏，必须先重建才能启动。重试没有用——请选择“修复存储”。',
 			'startup.phaseLabel' => '步骤',
 			'startup.showDetails' => '显示详情',
 			'startup.hideDetails' => '隐藏详情',
@@ -3644,16 +3687,16 @@ extension on TranslationsZh {
 			'startup.uploadDetails' => '上传详情',
 			'startup.repairStorage' => '修复存储',
 			'startup.repairTitle' => '修复已存储的数据？',
-			'startup.repairBodyCommon' => 'Plexy 的设置文件已损坏且无法读取。修复会将所有设置重置为默认值。',
+			'startup.repairBodyCommon' => 'Plezy 的设置文件已损坏且无法读取。修复会将所有设置重置为默认值。',
 			'startup.repairBodyOneCredential' => '有一项已保存的登录信息已损坏且无法读取。修复只会移除这一项，其他设置保持不变。',
 			'startup.repairBodySignInsKept' => '你的服务器和个人资料应保持登录状态。',
 			'startup.repairBodySignInsLost' => '保护已保存登录信息的密钥无法从此文件中恢复，因此你需要重新登录每个服务器和个人资料。媒体服务器上的内容不受影响。',
-			'startup.repairBodySessionsUncertain' => '追踪服务（MAL、AniList、Simkl、Trakt）和 Seerr 是分开存储的，可能保留也可能无法保留。Plexy 会明确告诉你保留了哪些。',
+			'startup.repairBodySessionsUncertain' => '追踪服务（MAL、AniList、Simkl、Trakt）和 Seerr 是分开存储的，可能保留也可能无法保留。Plezy 会明确告诉你保留了哪些。',
 			'startup.repairConfirm' => '修复',
 			'startup.repairSucceeded' => '存储已修复',
 			'startup.repairNeedsRestart' => '存储已修复 — 需要重启',
-			'startup.restartRequiredBody' => '你的数据已修复，但 Plexy 需要重新启动后才能使用。请关闭 Plexy 并重新打开。',
-			'startup.quitPlezy' => '退出 Plexy',
+			'startup.restartRequiredBody' => '你的数据已修复，但 Plezy 需要重新启动后才能使用。请关闭 Plezy 并重新打开。',
+			'startup.quitPlezy' => '退出 Plezy',
 			'startup.repairFailed' => '修复失败',
 			'startup.repairKeptSignIns' => '你的服务器和个人资料仍然保持登录状态。',
 			'startup.repairLostSignIns' => '保护已保存登录信息的密钥无法恢复。你需要重新登录每个服务器和个人资料。',
@@ -3662,7 +3705,7 @@ extension on TranslationsZh {
 			'startup.backupWarning' => '其中包含你的登录凭据。请勿上传或分享。',
 			'startup.deleteBackup' => '删除副本',
 			'startup.backupDeleted' => '副本已删除。',
-			'startup.previousFailureTitle' => 'Plexy 上次启动失败',
+			'startup.previousFailureTitle' => 'Plezy 上次启动失败',
 			'licenses.relatedPackages' => '相关软件包',
 			'licenses.license' => '许可证',
 			'licenses.licenseNumber' => ({required Object number}) => '许可证 ${number}',
@@ -3691,6 +3734,8 @@ extension on TranslationsZh {
 			'explore.status.ended' => '已完结',
 			'explore.status.canceled' => '已取消',
 			'explore.status.upcoming' => '即将上线',
+			_ => null,
+		} ?? switch (path) {
 			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(n, other: '${n} 集', ), 
 			'explore.cast' => '演员表',
 			'explore.characters' => '角色',
@@ -3706,15 +3751,12 @@ extension on TranslationsZh {
 			'explore.emptyTitle' => '这里还什么都没有',
 			'explore.emptyMessage' => ({required Object source}) => '当 ${source} 有内容时，相关内容将显示在这里。',
 			'explore.searchHint' => ({required Object source}) => '搜索 ${source}',
-			_ => null,
-		} ?? switch (path) {
 			'explore.searchEmpty' => ({required Object query}) => '没有“${query}”的结果',
 			'explore.searchPrompt' => ({required Object source}) => '在 ${source} 上搜索电影和剧集。',
 			'explore.searchFailed' => '搜索失败。请检查网络连接后重试。',
 			'explore.badge.rankPopular' => ({required Object n}) => '热门榜第 #${n} 名',
 			'explore.badge.rankAiring' => ({required Object n}) => '在播榜第 #${n} 名',
 			'explore.badge.rankRated' => ({required Object n}) => '评分榜第 #${n} 名',
-			'explore.badge.rankFavorited' => ({required Object n}) => '收藏榜第 #${n} 名',
 			'explore.badge.rankTrending' => ({required Object n}) => '趋势榜第 #${n} 名',
 			'explore.badge.rankSeasonal' => ({required Object season, required Object n}) => '${season}榜第 #${n} 名',
 			'explore.badge.watchingNow' => ({required Object n}) => '${n} 人正在观看',
@@ -3733,6 +3775,7 @@ extension on TranslationsZh {
 			'explore.badge.episodesShort' => ({required Object n}) => '${n} 集',
 			'explore.badge.minutesPerEpisode' => ({required Object n}) => '${n} 分钟/集',
 			'explore.badge.adult' => '18+',
+			'explore.badge.rankFavorited' => ({required Object n}) => '收藏榜第 #${n} 名',
 			'explore.stats.listed' => ({required Object n}) => '${n} 人已标记',
 			'explore.stats.viewersDay' => ({required Object n}) => '今日 ${n} 人观看',
 			'explore.stats.viewersWeek' => ({required Object n}) => '本周 ${n} 人观看',
@@ -3961,6 +4004,9 @@ extension on TranslationsZh {
 			'music.repeatOne' => '单曲循环',
 			'music.instantMixNoServer' => '没有可用于即时混合的服务器',
 			'music.noAudioUrl' => ({required Object track}) => '没有可供 ${track} 使用的音频 URL',
+			'music.discography.singlesAndEps' => '单曲和 EP',
+			'music.discography.live' => '现场',
+			'music.discography.compilations' => '合集',
 			'watchTogether.title' => '一起看',
 			'watchTogether.description' => '与朋友和家人同步观看内容',
 			'watchTogether.createSession' => '创建会话',
@@ -4106,14 +4152,14 @@ extension on TranslationsZh {
 			'downloads.backgroundWarning.bannerAction' => '详情',
 			'downloads.backgroundWarning.sheetTitle' => '后台下载已被阻止',
 			'downloads.backgroundWarning.sheetTitleDegraded' => '后台下载可能受限',
-			'downloads.backgroundWarning.sheetIntro' => 'Android 正在阻止 Plexy 在后台稳定下载。',
-			'downloads.backgroundWarning.sheetIntroDegraded' => '你的设备限制了 Plexy 在后台下载的时机。',
-			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plexy 的后台使用受到限制。请将其电池用量或后台使用设置为“不受限制”。',
-			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android 已将 Plexy 置于受限待机状态。请将其电池用量设为“不受限制”。',
+			'downloads.backgroundWarning.sheetIntro' => 'Android 正在阻止 Plezy 在后台稳定下载。',
+			'downloads.backgroundWarning.sheetIntroDegraded' => '你的设备限制了 Plezy 在后台下载的时机。',
+			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plezy 的后台使用受到限制。请将其电池用量或后台使用设置为“不受限制”。',
+			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android 已将 Plezy 置于受限待机状态。请将其电池用量设为“不受限制”。',
 			'downloads.backgroundWarning.reasonDownloadChannelBlocked' => '下载通知已关闭，因此可能无法查看进度或进行控制。',
 			'downloads.backgroundWarning.reasonNotificationsDisabled' => '通知已关闭。在 Android 13 或更高版本中，长时间后台下载需要开启通知。',
 			'downloads.backgroundWarning.reasonDataSaver' => '流量节省程序已开启，会阻止使用移动数据进行后台下载。使用 Wi-Fi 时下载应仍可进行。',
-			'downloads.backgroundWarning.reasonOemUnknown' => 'Plexy 在后台时，下载曾多次停止。请检查 Plexy 的电池用量或后台使用设置。',
+			'downloads.backgroundWarning.reasonOemUnknown' => 'Plezy 在后台时，下载曾多次停止。请检查 Plezy 的电池用量或后台使用设置。',
 			'downloads.backgroundWarning.openSettings' => '打开设置',
 			'downloads.backgroundWarning.stillNotWorking' => '设备专属帮助',
 			'downloads.backgroundWarning.stillNotWorkingDescription' => '查看适用于你设备的操作步骤；如果问题仍然存在，请通过设置 › 查看日志发送日志。',
@@ -4166,19 +4212,19 @@ extension on TranslationsZh {
 			'companionRemote.session.startServer' => '启动服务器',
 			'companionRemote.session.stopServer' => '停止服务器',
 			'companionRemote.session.minimize' => '最小化',
-			'companionRemote.pairing.discoveryDescription' => '使用同一 Plex 账号的 Plexy 设备会显示在这里',
+			'companionRemote.pairing.discoveryDescription' => '使用同一 Plex 账号的 Plezy 设备会显示在这里',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => '正在连接…',
 			'companionRemote.pairing.searchingForDevices' => '正在搜索设备…',
 			'companionRemote.pairing.noDevicesFound' => '未在网络中找到设备',
-			'companionRemote.pairing.noDevicesHint' => '请在桌面端打开 Plexy，并确保设备连接到同一 Wi-Fi 网络',
+			'companionRemote.pairing.noDevicesHint' => '请在桌面端打开 Plezy，并确保设备连接到同一 Wi-Fi 网络',
 			'companionRemote.pairing.availableDevices' => '可用设备',
 			'companionRemote.pairing.manualConnection' => '手动连接',
 			'companionRemote.pairing.cryptoInitFailed' => '无法启动安全连接。请先登录 Plex。',
 			'companionRemote.pairing.validationHostRequired' => '请输入主机地址',
 			'companionRemote.pairing.validationHostFormat' => '格式必须为 IP:端口（例如 192.168.1.100:48632）',
 			'companionRemote.pairing.connectionTimedOut' => '连接超时。请在两台设备上使用同一网络。',
-			'companionRemote.pairing.sessionNotFound' => '未找到设备。请确认 Plexy 正在主机上运行。',
+			'companionRemote.pairing.sessionNotFound' => '未找到设备。请确认 Plezy 正在主机上运行。',
 			'companionRemote.pairing.authFailed' => '认证失败。两台设备需要使用同一 Plex 账号。',
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => '连接失败：${error}',
 			'companionRemote.remote.disconnectConfirm' => '确定要断开遥控会话吗？',
@@ -4202,6 +4248,8 @@ extension on TranslationsZh {
 			'companionRemote.remote.stop' => '停止',
 			'companionRemote.remote.seekForward' => '快进',
 			'companionRemote.remote.volume' => '音量',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.volumeDown' => '降低音量',
 			'companionRemote.remote.volumeUp' => '提高音量',
 			'companionRemote.remote.fullscreen' => '全屏',
@@ -4220,8 +4268,6 @@ extension on TranslationsZh {
 			'videoSettings.playbackSpeed' => '播放速度',
 			'videoSettings.normalSpeed' => '正常',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => '运行中（${duration}）',
-			_ => null,
-		} ?? switch (path) {
 			'videoSettings.zoom' => '缩放',
 			'videoSettings.sleepTimer' => '睡眠定时器',
 			'videoSettings.audioSync' => '音频同步',
@@ -4399,11 +4445,11 @@ extension on TranslationsZh {
 			'trakt.connected' => '已连接',
 			'trakt.connectedAs' => ({required Object username}) => '已以 @${username} 身份连接',
 			'trakt.disconnectConfirm' => '断开 Trakt 账户？',
-			'trakt.disconnectConfirmBody' => 'Plexy 将停止向 Trakt 发送事件。你可随时重新连接。',
+			'trakt.disconnectConfirmBody' => 'Plezy 将停止向 Trakt 发送事件。你可随时重新连接。',
 			'trakt.scrobble' => '实时同步播放状态',
 			'trakt.scrobbleDescription' => '播放期间将播放、暂停和停止事件发送到 Trakt。',
 			'trakt.watchedSync' => '同步已观看状态',
-			'trakt.watchedSyncDescription' => '在 Plexy 中将内容标记为已观看时，也会在 Trakt 上标记为已观看。',
+			'trakt.watchedSyncDescription' => '在 Plezy 中将内容标记为已观看时，也会在 Trakt 上标记为已观看。',
 			'seerr.title' => 'Seerr',
 			'seerr.connectTitle' => '连接 Seerr',
 			'seerr.serverUrl' => '服务器 URL',
@@ -4413,10 +4459,10 @@ extension on TranslationsZh {
 			'seerr.signInWithEmby' => '使用 Emby 登录',
 			'seerr.signInWithLocal' => '使用本地账户',
 			'seerr.email' => '邮箱',
-			'seerr.noSignInMethods' => '此 Seerr 实例未提供 Plexy 支持的登录方式。',
+			'seerr.noSignInMethods' => '此 Seerr 实例未提供 Plezy 支持的登录方式。',
 			'seerr.instance' => '实例',
 			'seerr.disconnectConfirm' => '断开 Seerr 连接？',
-			'seerr.disconnectConfirmBody' => 'Plexy 将忘记此 Seerr 实例。可随时重新连接。',
+			'seerr.disconnectConfirmBody' => 'Plezy 将忘记此 Seerr 实例。可随时重新连接。',
 			'seerr.request' => '请求',
 			'seerr.request4k' => '请求 4K',
 			'seerr.seasons' => '季',
@@ -4451,14 +4497,14 @@ extension on TranslationsZh {
 			'services.scrobble' => '自动记录进度',
 			'services.scrobbleDescription' => '观看完一集或一部电影后更新你的列表。',
 			'services.disconnectConfirm' => ({required Object service}) => '断开 ${service} 连接？',
-			'services.disconnectConfirmBody' => ({required Object service}) => 'Plexy 将停止更新 ${service}。可随时重新连接。',
+			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezy 将停止更新 ${service}。可随时重新连接。',
 			'services.connectFailed' => ({required Object service}) => '无法连接到 ${service}。请重试。',
 			'services.names.mal' => 'MyAnimeList',
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
-			'services.deviceCode.title' => ({required Object service}) => '在 ${service} 上激活 Plexy',
+			'services.deviceCode.title' => ({required Object service}) => '在 ${service} 上激活 Plezy',
 			'services.deviceCode.instructions' => '扫描二维码，或访问下方地址并输入此代码：',
 			'services.deviceCode.openToActivate' => ({required Object service}) => '打开 ${service} 以激活',
 			'services.deviceCode.copyCode' => '复制激活代码',
@@ -4503,7 +4549,7 @@ extension on TranslationsZh {
 			'addServer.addConnectionTitleScoped' => ({required Object name}) => '添加到 ${name}',
 			'addServer.signInWithPlexCard' => '使用 Plex 登录',
 			'addServer.signInWithPlexCardSubtitle' => '授权此设备。共享服务器会被添加。',
-			'addServer.signInWithPlexCardSubtitleScoped' => '授权一个 Plex 账户。Plex Home 用户将成为 Plexy 用户资料。',
+			'addServer.signInWithPlexCardSubtitleScoped' => '授权一个 Plex 账户。Plex Home 用户将成为 Plezy 用户资料。',
 			'addServer.connectToMediaBrowserCard' => ({required Object product}) => '连接到 ${product}',
 			'addServer.connectToMediaBrowserCardSubtitle' => '输入你的服务器 URL、用户名和密码。',
 			'addServer.connectToMediaBrowserCardSubtitleScoped' => ({required Object product, required Object name}) => '登录你的 ${product} 服务器。将绑定到 ${name}。',
