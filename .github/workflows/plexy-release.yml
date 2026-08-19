@@ -231,9 +231,46 @@ jobs:
         # left main claiming a version no release had, so the next run bumped from
         # a version that was never published. [skip ci] keeps this commit from
         # triggering a release of itself.
+        #
+        # The commit is rebuilt on whatever main currently points at, rather than
+        # on the commit this build started from. A build takes ~30 minutes, and a
+        # merge landing in that window used to reject this push and fail the run
+        # after the release had already published — leaving main claiming an
+        # older version than the newest release.
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pubspec.yaml
-          git commit -m "chore(release): ${{ steps.version.outputs.tag }} [skip ci]" || exit 0
-          git push origin HEAD:main
+
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin main
+
+            # Never walk a concurrent release's version backwards: if main already
+            # records this version or a later one, there is nothing to record.
+            current=$(git show origin/main:pubspec.yaml | grep '^version:' | sed 's/version: *//' | cut -d'+' -f1)
+            highest=$(printf '%s\n%s\n' "$VERSION" "$current" | sort -V | tail -n1)
+            if [ "$current" = "$VERSION" ] || { [ "$highest" = "$current" ] && [ "$current" != "$VERSION" ]; }; then
+              echo "main already records $current; nothing to do"
+              exit 0
+            fi
+
+            # Rebuild the one-line change on top of current main. The build tree is
+            # finished with by now, so moving it is safe — and starting from main
+            # keeps this commit from reverting anything that landed meanwhile.
+            git checkout -B record-version origin/main
+            sed -i "s/^version: .*/version: ${VERSION}+${{ github.run_number }}/" pubspec.yaml
+            git add pubspec.yaml
+            git commit -m "chore(release): ${TAG} [skip ci]" || exit 0
+
+            if git push origin HEAD:main; then
+              echo "recorded $VERSION on main"
+              exit 0
+            fi
+            echo "main moved while pushing; retrying ($attempt)"
+            sleep $((attempt * 5))
+          done
+
+          echo "::error::Could not record $VERSION on main"
+          exit 1
