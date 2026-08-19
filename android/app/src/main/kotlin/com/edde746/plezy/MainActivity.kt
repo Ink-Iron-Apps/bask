@@ -747,6 +747,21 @@ class MainActivity : FlutterActivity() {
           val target = BackgroundSettingsTarget.fromId(call.arguments as? String)
           result.success(target != null && BackgroundWorkDiagnostics.openSettings(this, target))
         }
+        // Flutter's setPreferredOrientations maps "all four" to
+        // SCREEN_ORIENTATION_FULL_USER, which honours the system rotation lock,
+        // so a phone with auto-rotate off keeps the player fixed however the
+        // device is held. FULL_SENSOR follows the sensor regardless, which is
+        // what a video player wants; the caller restores UNSPECIFIED on exit so
+        // the rest of the app goes back to obeying the lock.
+        "setFollowSensorOrientation" -> {
+          val follow = call.arguments as? Boolean ?: false
+          requestedOrientation = if (follow) {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+          } else {
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+          }
+          result.success(true)
+        }
         "getPreviousExit" -> handlePreviousExit(result)
         "setStartupPhase" -> queueStartupPhase(call.arguments as? String, result)
         "setRuntimeUiState" -> {
