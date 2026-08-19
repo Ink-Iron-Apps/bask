@@ -1836,6 +1836,56 @@ void main() {
       p.dispose();
     });
 
+    test('startup does not wait on the server for metadata the caches lack', () async {
+      // Every miss used to be fetched inside the awaited loop, one round trip
+      // at a time, holding the splash up after the servers had all connected.
+      await insertJellyfinConnection('user-a');
+      await db.insertDownload(
+        serverId: ServerId('jf-machine'),
+        clientScopeId: 'jf-machine/user-a',
+        ratingKey: 'ep-missing',
+        globalKey: 'jf-machine:ep-missing',
+        type: 'episode',
+        status: DownloadStatus.completed.index,
+      );
+      await db.addDownloadOwner(profileId: 'test-profile', globalKey: 'jf-machine:ep-missing');
+
+      final fetchGate = Completer<void>();
+      var fetchStarted = false;
+      testClientResolver = (serverId, {clientScopeId}) => serverId == 'jf-machine'
+          ? _ScopedTestClient(
+              serverId: ServerId('jf-machine'),
+              scopedServerId: 'jf-machine/user-a',
+              fetchItemHandler: (id) async {
+                fetchStarted = true;
+                await fetchGate.future;
+                return null;
+              },
+            )
+          : null;
+
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      await p.ensureInitialized();
+      p.debugSeedState(
+        downloads: {
+          'jf-machine:ep-missing': const DownloadProgress(
+            globalKey: 'jf-machine:ep-missing',
+            status: DownloadStatus.completed,
+          ),
+        },
+      );
+
+      // Returns while the server call is still outstanding, rather than after.
+      await p.refreshMetadataFromCache();
+      expect(fetchGate.isCompleted, isFalse, reason: 'startup waited for the server fetch');
+
+      fetchGate.complete();
+      await pumpEventQueue();
+      expect(fetchStarted, isTrue, reason: 'the miss should still be fetched, just not inline');
+
+      p.dispose();
+    });
+
     test('refreshMetadataFromCache prefers the active Jellyfin user scope', () async {
       await insertJellyfinConnection('user-a');
       await insertJellyfinConnection('user-b');
