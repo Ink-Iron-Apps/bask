@@ -1381,7 +1381,17 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
       // keep mpv from being OOM-killed; once the payload lives on disk that
       // ceiling no longer applies, so the read-ahead can be large enough that
       // pausing on a weak connection actually builds a lead.
-      final diskCacheGB = settingsService.read(SettingsService.diskCacheSizeGB);
+      //
+      // mpv only. ExoPlayer has no demuxer cache, and its plugin accepts any
+      // property without applying it — `setMpvProperty` reports success as
+      // queue acceptance, so a refused write is indistinguishable from an
+      // applied one. Worse, `demuxer-max-bytes` is what sizes ExoPlayer's own
+      // sample allocator, so letting this path run there would hand it a
+      // multi-gigabyte target and reintroduce the OOM the heap tiers below
+      // exist to prevent (#1618).
+      final diskCacheGB = (Platform.isAndroid && useExoPlayer)
+          ? 0
+          : settingsService.read(SettingsService.diskCacheSizeGB);
       var diskCacheActive = false;
       if (diskCacheGB > 0) {
         final cacheDirectory = await PlaybackDiskCache.ensureDirectory();
@@ -1394,9 +1404,10 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
             await currentPlayer.setProperty('demuxer-max-bytes', '${diskCacheGB * 1024 * 1024 * 1024}');
             diskCacheActive = true;
           } catch (e) {
-            // A build without on-disk cache support: fall back to the memory
-            // tiers rather than leaving the player unconfigured.
-            appLogger.w('On-disk playback cache unavailable; using memory buffer', error: e);
+            // Only a transport failure lands here: mpv accepts an unknown
+            // property without complaint, so a build lacking on-disk cache
+            // support simply ignores these and keeps its own default buffer.
+            appLogger.w('On-disk playback cache could not be configured', error: e);
           }
           unawaited(PlaybackDiskCache.prune(cacheDirectory));
         }
