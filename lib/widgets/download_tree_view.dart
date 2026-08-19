@@ -837,6 +837,9 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
     );
   }
 
+  /// Edge of the square a row action answers taps within.
+  static const double _actionButtonTarget = 48.0;
+
   Widget _buildActionButton(_RowAction action, int buttonIndex) {
     final isFirst = buttonIndex == 0;
     final isLast = buttonIndex == _buttonFocusNodes.length - 1;
@@ -854,8 +857,18 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
       child: Tooltip(
         message: action.tooltip,
         child: GestureDetector(
+          // Without an opaque behaviour the gesture defers to the child, so only
+          // the glyph itself answered a tap and the padding around it did
+          // nothing — a 20dp target on a row of three adjacent buttons.
+          behavior: HitTestBehavior.opaque,
           onTap: action.onPressed,
-          child: Padding(padding: const EdgeInsets.all(8.0), child: AppIcon(action.icon, fill: 1, size: 20)),
+          child: SizedBox(
+            // Material's minimum comfortable target. These sit in a row at the
+            // end of a dense list, where a miss hits the neighbouring action.
+            width: _actionButtonTarget,
+            height: _actionButtonTarget,
+            child: Center(child: AppIcon(action.icon, fill: 1, size: 22)),
+          ),
         ),
       ),
     );
