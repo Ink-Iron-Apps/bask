@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../media/ids.dart';
 import 'package:plezy/widgets/app_icon.dart';
@@ -8,6 +9,7 @@ import '../media/media_item.dart';
 import '../media/media_item_types.dart';
 import '../media/media_kind.dart';
 import '../models/download_models.dart';
+import 'download_selection.dart';
 import '../utils/dialogs.dart';
 import '../utils/global_key_utils.dart';
 import '../mixins/unsuppress_focus_mixin.dart';
@@ -121,6 +123,8 @@ class DownloadTreeView extends StatefulWidget {
 
 class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocusFirstMixin<DownloadTreeView> {
   final Set<String> _expandedNodes = {};
+  DownloadSelection _selection = const DownloadSelection();
+  bool _selecting = false;
 
   @override
   String get firstItemFocusDebugLabel => 'DownloadTreeView_firstItem';
@@ -137,13 +141,82 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
       return Center(child: Text(t.downloads.noDownloadsTree));
     }
 
-    return ListView.builder(
+    final list = ListView.builder(
       padding: .zero,
       itemCount: flattenedNodes.length,
       itemBuilder: (context, index) {
         final item = flattenedNodes[index];
         return _buildTreeItem(item.node, item.depth, isFirst: index == 0);
       },
+    );
+
+    if (!_selecting) return list;
+
+    // Back leaves selection rather than the screen: the list is inside a tab,
+    // so popping would take the whole tab with it.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _exitSelecting();
+      },
+      child: Column(
+        children: [
+          _buildSelectionBar(tree),
+          Expanded(child: list),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionBar(List<DownloadTreeNode> tree) {
+    final theme = Theme.of(context);
+    final statuses = _leafStatuses(tree);
+    final available = _selection.availableActions(statuses);
+
+    ({IconData icon, String tooltip}) describe(DownloadBulkAction action) => switch (action) {
+      DownloadBulkAction.pause => (icon: Symbols.pause_rounded, tooltip: t.downloads.pauseSelected),
+      DownloadBulkAction.resume => (icon: Symbols.play_arrow_rounded, tooltip: t.downloads.resumeSelected),
+      DownloadBulkAction.retry => (icon: Symbols.refresh_rounded, tooltip: t.downloads.retrySelected),
+      DownloadBulkAction.delete => (icon: Symbols.delete_rounded, tooltip: t.downloads.deleteSelected),
+    };
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const AppIcon(Symbols.close_rounded, fill: 1),
+                tooltip: t.common.cancel,
+                onPressed: _exitSelecting,
+              ),
+              Expanded(
+                child: Text(
+                  t.downloads.selectedCount(count: _selection.count),
+                  style: theme.textTheme.titleMedium,
+                  overflow: .ellipsis,
+                ),
+              ),
+              IconButton(
+                icon: const AppIcon(Symbols.select_all_rounded, fill: 1),
+                tooltip: t.downloads.selectAll,
+                onPressed: () => setState(() => _selection = _selection.selectAll(tree)),
+              ),
+              for (final action in DownloadBulkAction.values)
+                if (available.contains(action))
+                  IconButton(
+                    icon: AppIcon(describe(action).icon, fill: 1),
+                    tooltip: describe(action).tooltip,
+                    color: action == DownloadBulkAction.delete ? theme.colorScheme.error : null,
+                    onPressed: () => unawaited(_applyBulkAction(action, statuses)),
+                  ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -190,6 +263,11 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
       onBack: widget.onBack,
       rowFocusNode: isFirst ? firstItemFocusNode : null,
       autofocus: isFirst && !widget.suppressAutoFocus,
+      selecting: _selecting,
+      isSelected: _selection.containsAllOf(node),
+      isPartiallySelected: _selection.containsSomeOf(node),
+      onToggleSelected: () => _toggleSelected(node),
+      onStartSelecting: () => _startSelecting(node),
       pauseAllChildren: _pauseAllChildren,
       resumeAllChildren: _resumeAllChildren,
       retryAllChildren: _retryAllChildren,
@@ -214,6 +292,79 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
     for (final key in keys) {
       widget.onResume?.call(key);
     }
+  }
+
+  void _startSelecting(DownloadTreeNode node) {
+    setState(() {
+      _selecting = true;
+      _selection = _selection.toggle(node);
+    });
+  }
+
+  void _toggleSelected(DownloadTreeNode node) {
+    setState(() {
+      _selection = _selection.toggle(node);
+      // Clearing the last item leaves selection mode, so the list never sits in
+      // a mode with nothing to act on.
+      if (_selection.isEmpty) _selecting = false;
+    });
+  }
+
+  void _exitSelecting() {
+    setState(() {
+      _selecting = false;
+      _selection = const DownloadSelection();
+    });
+  }
+
+  /// Status of every download in the tree, keyed the way the selection is.
+  Map<String, DownloadStatus> _leafStatuses(List<DownloadTreeNode> nodes) {
+    final statuses = <String, DownloadStatus>{};
+    void walk(DownloadTreeNode node) {
+      if (!node.hasChildren) {
+        statuses[node.key] = node.status;
+        return;
+      }
+      node.children.forEach(walk);
+    }
+
+    nodes.forEach(walk);
+    return statuses;
+  }
+
+  Future<void> _applyBulkAction(DownloadBulkAction action, Map<String, DownloadStatus> statuses) async {
+    final keys = _selection.keysFor(action, statuses);
+    if (keys.isEmpty) return;
+    if (action == DownloadBulkAction.delete && !await _confirmBulkDelete(keys.length)) return;
+
+    for (final key in keys) {
+      switch (action) {
+        case DownloadBulkAction.pause:
+          widget.onPause?.call(key);
+        case DownloadBulkAction.resume:
+          widget.onResume?.call(key);
+        case DownloadBulkAction.retry:
+          widget.onRetry?.call(key);
+        case DownloadBulkAction.delete:
+          widget.onDelete?.call(key);
+      }
+    }
+    if (mounted) _exitSelecting();
+  }
+
+  Future<bool> _confirmBulkDelete(int count) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.downloads.deleteDownload),
+        content: Text(t.downloads.deleteSelectedConfirm(count: count)),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(t.common.cancel)),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text(t.common.delete)),
+        ],
+      ),
+    );
+    return confirmed ?? false;
   }
 
   /// Retry every failed child of a container node
@@ -328,6 +479,11 @@ class _DownloadTreeItem extends StatefulWidget {
   final void Function(DownloadTreeNode) resumeAllChildren;
   final void Function(DownloadTreeNode) retryAllChildren;
   final void Function(DownloadTreeNode) deleteAllChildren;
+  final bool selecting;
+  final bool isSelected;
+  final bool isPartiallySelected;
+  final VoidCallback onToggleSelected;
+  final VoidCallback onStartSelecting;
 
   const _DownloadTreeItem({
     required this.node,
@@ -347,6 +503,11 @@ class _DownloadTreeItem extends StatefulWidget {
     required this.resumeAllChildren,
     required this.retryAllChildren,
     required this.deleteAllChildren,
+    required this.selecting,
+    required this.isSelected,
+    required this.isPartiallySelected,
+    required this.onToggleSelected,
+    required this.onStartSelecting,
   });
 
   @override
@@ -444,14 +605,26 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
         useBackgroundFocus: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: canExpand ? widget.onToggleExpansion : null,
+          onTap: widget.selecting ? widget.onToggleSelected : (canExpand ? widget.onToggleExpansion : null),
+          onLongPress: widget.selecting ? null : widget.onStartSelecting,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
+                if (widget.selecting)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Checkbox(
+                      value: widget.isSelected ? true : (widget.isPartiallySelected ? null : false),
+                      tristate: true,
+                      onChanged: (_) => widget.onToggleSelected(),
+                    ),
+                  ),
                 Expanded(child: _buildRowContent(theme, canExpand)),
 
-                if (actions.isNotEmpty)
+                // Per-row actions would compete with the bulk bar for the same
+                // gestures, so they step aside while selecting.
+                if (actions.isNotEmpty && !widget.selecting)
                   Row(
                     mainAxisSize: .min,
                     children: [for (int i = 0; i < actions.length; i++) _buildActionButton(actions[i], i)],
