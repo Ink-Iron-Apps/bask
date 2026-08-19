@@ -36,6 +36,7 @@ import '../utils/active_client_scope.dart';
 import '../utils/codec_utils.dart';
 import '../utils/global_key_utils.dart';
 import '../utils/network_failure.dart';
+import 'download_stall_watchdog.dart';
 import '../utils/storage_failure.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -233,6 +234,8 @@ class DownloadManagerService {
   // Keyed by globalKey; each timer fires a fresh re-enqueue after a delay.
   final Map<String, Timer> _autoRetryTimers = {};
   final Duration _autoRetryDelay;
+
+  late final DownloadStallWatchdog _stallWatchdog = DownloadStallWatchdog(onStalled: _onDownloadStalled);
 
   // Circuit breaker: consecutive instant failures in _processQueue.
   // Stops the queue when all items fail with the same error (e.g. DNS).
@@ -1571,9 +1574,39 @@ class DownloadManagerService {
 
   /// Cancel any per-download timers (progress debounce + auto-retry) for [key].
   /// Idempotent; safe to call from any terminal/pause path.
+  /// Restarts a download whose transfer went silent while its socket stayed
+  /// open. See [DownloadStallWatchdog] for why the platform cannot report this.
+  Future<void> _onDownloadStalled(String globalKey) async {
+    if (_disposed) return;
+    final row = await _database.getDownloadedMedia(globalKey);
+    if (row == null || row.status != DownloadStatus.downloading.index) {
+      _stallWatchdog.forget(globalKey);
+      return;
+    }
+
+    appLogger.w('Download $globalKey stopped reporting progress; restarting the transfer');
+    await _cancelNativeTasksForGlobalKey(globalKey, reason: 'no progress reported');
+
+    final client = await _getClientForDownloadKey(globalKey);
+    if (client == null) {
+      appLogger.w('Cannot restart stalled $globalKey: no client available');
+      return;
+    }
+    // Reuse the ordinary retry path so the attempt is counted and the queue is
+    // driven the same way a reported failure would drive it.
+    await _scheduleDownloadRetry(
+      globalKey,
+      client,
+      row.retryCount,
+      'Download stopped responding',
+      processQueueAfterProgress: row.downloadedBytes > 0,
+    );
+  }
+
   void _cancelDownloadTimers(String key) {
     _progressDebounceTimers.remove(key)?.cancel();
     _autoRetryTimers.remove(key)?.cancel();
+    _stallWatchdog.forget(key);
   }
 
   /// Delete a file if it exists and log the deletion
@@ -1913,6 +1946,7 @@ class DownloadManagerService {
       }
       if (_queueBlockedByStorageFailure) return true;
       await _transitionStatus(globalKey, DownloadStatus.downloading);
+      _stallWatchdog.markAlive(globalKey);
 
       final parsed = parseGlobalKey(globalKey);
       if (parsed == null) throw Exception('Invalid globalKey: $globalKey');
@@ -2166,6 +2200,8 @@ class DownloadManagerService {
         currentFile: 'video',
       ),
     );
+
+    _stallWatchdog.markAlive(globalKey);
 
     // Debounce DB writes — only the latest progress value is persisted after
     // a 2-second settle period. The stream above provides real-time UI updates;
@@ -2977,6 +3013,7 @@ class DownloadManagerService {
       }
 
       await _transitionStatus(globalKey, DownloadStatus.downloading);
+      _stallWatchdog.markAlive(globalKey);
       appLogger.i('Resumed download via background_downloader for $globalKey');
       return true;
     } catch (e) {
@@ -3796,6 +3833,7 @@ class DownloadManagerService {
 
   void dispose() {
     _disposed = true;
+    _stallWatchdog.dispose();
     for (final timer in _progressDebounceTimers.values) {
       timer.cancel();
     }
