@@ -446,6 +446,21 @@ extension _MediaDetailActionButtons on _MediaDetailScreenState {
     if (downloadProvider.isQueueing(globalKey) ||
         progress?.status == DownloadStatus.queued ||
         progress?.status == DownloadStatus.downloading) {
+      // A download in flight has nothing to start, but its sync rule is still
+      // worth reaching: a show can download for hours, and the rule was
+      // otherwise unreachable for that whole time — leaving deleting it and
+      // starting over as the only way to change it.
+      if (canManageRuleWhileBusy(
+        isQueueing: downloadProvider.isQueueing(globalKey),
+        hasSyncRule: downloadProvider.hasSyncRule(ruleKey),
+      )) {
+        await manageSyncRule(
+          context,
+          downloadProvider: downloadProvider,
+          globalKey: ruleKey,
+          displayTitle: metadata.displayTitle,
+        );
+      }
       return;
     }
 
@@ -627,9 +642,13 @@ extension _MediaDetailActionButtons on _MediaDetailScreenState {
               ? t.downloads.queuedFilesTooltip(files: currentFile)
               : t.downloads.queuedTooltip;
 
+          final canManageRule = canManageRuleWhileBusy(
+            isQueueing: isQueueing,
+            hasSyncRule: downloadProvider.hasSyncRule(ruleKey),
+          );
           return IconButton.filledTonal(
-            onPressed: null,
-            tooltip: tooltip,
+            onPressed: canManageRule ? () => unawaited(_handleDownloadButtonPressed(metadata)) : null,
+            tooltip: canManageRule ? '$tooltip · ${t.downloads.manageSyncRule}' : tooltip,
             icon: const AppIcon(Symbols.schedule_rounded, fill: 1),
             iconSize: iconSize,
             style: actionButtonStyle(showFocus: showFocus),
@@ -644,9 +663,13 @@ extension _MediaDetailActionButtons on _MediaDetailScreenState {
               ? t.downloads.downloadingFilesTooltip(files: currentFile)
               : t.downloads.downloadingTooltip;
 
+          final canManageRule = canManageRuleWhileBusy(
+            isQueueing: isQueueing,
+            hasSyncRule: downloadProvider.hasSyncRule(ruleKey),
+          );
           return IconButton.filledTonal(
-            onPressed: null,
-            tooltip: tooltip,
+            onPressed: canManageRule ? () => unawaited(_handleDownloadButtonPressed(metadata)) : null,
+            tooltip: canManageRule ? '$tooltip · ${t.downloads.manageSyncRule}' : tooltip,
             icon: _buildRadialProgress(progress?.progressPercent),
             iconSize: iconSize,
             style: actionButtonStyle(showFocus: showFocus),
