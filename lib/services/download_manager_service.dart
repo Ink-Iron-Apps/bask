@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:background_downloader/background_downloader.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:path/path.dart' as path;
 import 'package:plezy/utils/media_server_http_client.dart';
 import '../exceptions/media_server_exceptions.dart';
@@ -237,6 +238,14 @@ class DownloadManagerService {
   final Duration _autoRetryDelay;
 
   late final DownloadStallWatchdog _stallWatchdog = DownloadStallWatchdog(onStalled: _onDownloadStalled);
+
+  /// Keeps the stall watchdog from judging silence it could not have heard: the
+  /// progress callbacks and its own timer both stop while the process is
+  /// backgrounded, though the transfer usually does not.
+  late final AppLifecycleListener _lifecycleListener = AppLifecycleListener(
+    onShow: () => _stallWatchdog.observing = true,
+    onHide: () => _stallWatchdog.observing = false,
+  );
 
   // Circuit breaker: consecutive instant failures in _processQueue.
   // Stops the queue when all items fail with the same error (e.g. DNS).
@@ -891,6 +900,8 @@ class DownloadManagerService {
         );
 
     await FileDownloader().configure(globalConfig: globalDownloaderConfig, androidConfig: androidDownloaderConfig);
+    // Touching the field builds the listener, which is what starts it observing.
+    _lifecycleListener;
 
     await FileDownloader().trackTasks();
     // Deliver status updates from iOS background-to-foreground transitions
@@ -3828,6 +3839,7 @@ class DownloadManagerService {
   void dispose() {
     _disposed = true;
     _stallWatchdog.dispose();
+    _lifecycleListener.dispose();
     for (final timer in _progressDebounceTimers.values) {
       timer.cancel();
     }

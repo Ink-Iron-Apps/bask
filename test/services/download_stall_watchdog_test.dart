@@ -117,4 +117,48 @@ void main() {
 
     expect(restarted, ['srv:2']);
   });
+
+  group('while the app cannot observe', () {
+    test('time spent backgrounded is not counted as silence', () async {
+      // The progress callbacks and the sweep both stop with the process, so a
+      // long gap says nothing — the transfer usually kept running natively.
+      // Judging it would cancel healthy downloads on every return.
+      final watchdog = build()..markAlive('srv:1');
+      addTearDown(watchdog.dispose);
+
+      watchdog.observing = false;
+      now = now.add(const Duration(minutes: 30));
+      watchdog.observing = true;
+
+      await watchdog.checkNow();
+
+      expect(restarted, isEmpty);
+    });
+
+    test('no sweep runs while backgrounded', () async {
+      final watchdog = build()..markAlive('srv:1');
+      addTearDown(watchdog.dispose);
+
+      watchdog.observing = false;
+      now = now.add(const Duration(minutes: 30));
+      await watchdog.checkNow();
+
+      expect(restarted, isEmpty);
+    });
+
+    test('a download that goes quiet after returning is still caught', () async {
+      final watchdog = build()..markAlive('srv:1');
+      addTearDown(watchdog.dispose);
+
+      watchdog.observing = false;
+      now = now.add(const Duration(minutes: 30));
+      watchdog.observing = true;
+
+      // Silence that accrues while watching is real silence.
+      now = now.add(const Duration(minutes: 3));
+      await watchdog.checkNow();
+
+      expect(restarted, ['srv:1']);
+    });
+  });
 }

@@ -13,6 +13,14 @@ import 'dart:async';
 /// Progress events are the heartbeat. When one stops arriving for [threshold],
 /// the download is treated as stalled and handed back to the retry path, which
 /// cancels the dead task and enqueues a fresh one.
+///
+/// Only while the app can actually observe. Dart timers and the progress
+/// callbacks both stop while the process is backgrounded, so silence there says
+/// nothing about the transfer — the download usually continues natively. Judging
+/// it anyway would cancel healthy downloads on every return to the app, so the
+/// sweep pauses with the process and every watched download is given a fresh
+/// start when it resumes. Background stalls are the transport's job: the fork
+/// bounds Android reads, which is what makes them fail on their own.
 class DownloadStallWatchdog {
   /// How long a running download may report nothing before it is considered
   /// stalled.
@@ -44,6 +52,7 @@ class DownloadStallWatchdog {
   final Map<String, DateTime> _lastProgressAt = {};
   final Set<String> _reported = {};
   Timer? _timer;
+  bool _observing = true;
 
   /// Downloads currently being watched.
   Iterable<String> get watchedKeys => _lastProgressAt.keys;
@@ -86,8 +95,29 @@ class DownloadStallWatchdog {
     return stalled;
   }
 
+  /// Whether the app is in a position to notice progress at all.
+  ///
+  /// Set false when the process is backgrounded: no sweep runs, and on the way
+  /// back every watched download restarts its clock, so time spent away is
+  /// never counted as silence.
+  set observing(bool value) {
+    if (_observing == value) return;
+    _observing = value;
+    if (value) {
+      final now = clock();
+      for (final key in _lastProgressAt.keys) {
+        _lastProgressAt[key] = now;
+      }
+      _reported.clear();
+      if (_lastProgressAt.isNotEmpty) _ensureTimer();
+    } else {
+      _stopTimer();
+    }
+  }
+
   /// Runs one sweep, handing every newly stalled download to the callback.
   Future<void> checkNow() async {
+    if (!_observing) return;
     for (final globalKey in stalledKeys()) {
       _reported.add(globalKey);
       await onStalled(globalKey);
@@ -95,6 +125,7 @@ class DownloadStallWatchdog {
   }
 
   void _ensureTimer() {
+    if (!_observing) return;
     _timer ??= Timer.periodic(checkInterval, (_) => unawaited(checkNow()));
   }
 
