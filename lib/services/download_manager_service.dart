@@ -35,6 +35,7 @@ import '../utils/serial_future_queue.dart';
 import '../utils/active_client_scope.dart';
 import '../utils/codec_utils.dart';
 import '../utils/global_key_utils.dart';
+import '../utils/network_failure.dart';
 import '../utils/storage_failure.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -2360,25 +2361,25 @@ class DownloadManagerService {
     final errorMessage = exception?.description ?? t.downloads.errorDownloadFailed;
     final retryCount = existing.retryCount;
 
-    // DNS/connection errors fail instantly and exhaust native retries in milliseconds,
-    // creating a retry storm. Treat them as permanent failures.
-    final isNetworkError =
-        errorMessage.contains('Unable to resolve host') ||
-        errorMessage.contains('No address associated with hostname') ||
-        errorMessage.contains('Network is unreachable') ||
-        errorMessage.contains('Connection refused');
+    // The native downloader burns its own retries in milliseconds on a network
+    // failure, which is why these are kept away from that path. The app-level
+    // retry is a different mechanism — it waits before trying again — and that
+    // is exactly what a moment of unreachable DNS needs. Failing permanently
+    // instead meant a backgrounded download died for good the first time the
+    // resolver blinked, with the device still online.
+    final isNetworkError = isNetworkFailureMessage(errorMessage);
     final isServerError = errorMessage.contains('500 Internal Server Error');
 
     final client = await _getClientForDownloadKey(globalKey);
     final hadProgress = existing.downloadedBytes > 0;
 
-    if (!isNetworkError && !isServerError && retryCount < _maxAppRetries && client != null) {
+    if (!isServerError && retryCount < _maxAppRetries && client != null) {
       // App-level auto-retry: schedule a fresh download after a delay.
       // Each new task gets 5 native retries with Range-based resume.
       await _scheduleDownloadRetry(globalKey, client, retryCount, errorMessage, processQueueAfterProgress: hadProgress);
     } else {
       if (isNetworkError) {
-        appLogger.w('Network error for $globalKey, failing permanently (no auto-retry): $errorMessage');
+        appLogger.w('Network error for $globalKey after $retryCount retries: $errorMessage');
       }
       final userMessage = isServerError ? t.downloads.serverErrorBitrate : errorMessage;
       await _onDownloadPermanentlyFailed(globalKey, taskId, userMessage);
