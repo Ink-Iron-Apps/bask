@@ -1660,6 +1660,16 @@ class $ApiCacheTable extends ApiCache with TableInfo<$ApiCacheTable, ApiCacheDat
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _cachedAtMeta = const VerificationMeta('cachedAt');
+  @override
+  late final GeneratedColumn<DateTime> cachedAt = GeneratedColumn<DateTime>(
+    'cached_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
   static const VerificationMeta _pinnedMeta = const VerificationMeta('pinned');
   @override
   late final GeneratedColumn<bool> pinned = GeneratedColumn<bool>(
@@ -1671,18 +1681,8 @@ class $ApiCacheTable extends ApiCache with TableInfo<$ApiCacheTable, ApiCacheDat
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("pinned" IN (0, 1))'),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _cachedAtMeta = const VerificationMeta('cachedAt');
   @override
-  late final GeneratedColumn<DateTime> cachedAt = GeneratedColumn<DateTime>(
-    'cached_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [cacheKey, data, pinned, cachedAt];
+  List<GeneratedColumn> get $columns => [cacheKey, data, cachedAt, pinned];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1702,11 +1702,11 @@ class $ApiCacheTable extends ApiCache with TableInfo<$ApiCacheTable, ApiCacheDat
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
-    if (data.containsKey('pinned')) {
-      context.handle(_pinnedMeta, pinned.isAcceptableOrUnknown(data['pinned']!, _pinnedMeta));
-    }
     if (data.containsKey('cached_at')) {
       context.handle(_cachedAtMeta, cachedAt.isAcceptableOrUnknown(data['cached_at']!, _cachedAtMeta));
+    }
+    if (data.containsKey('pinned')) {
+      context.handle(_pinnedMeta, pinned.isAcceptableOrUnknown(data['pinned']!, _pinnedMeta));
     }
     return context;
   }
@@ -1719,8 +1719,8 @@ class $ApiCacheTable extends ApiCache with TableInfo<$ApiCacheTable, ApiCacheDat
     return ApiCacheData(
       cacheKey: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}cache_key'])!,
       data: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}data'])!,
-      pinned: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}pinned'])!,
       cachedAt: attachedDatabase.typeMapping.read(DriftSqlType.dateTime, data['${effectivePrefix}cached_at'])!,
+      pinned: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}pinned'])!,
     );
   }
 
@@ -1736,19 +1736,21 @@ class ApiCacheData extends DataClass implements Insertable<ApiCacheData> {
   final String cacheKey;
   final String data;
 
+  /// When the row was last written ([ApiCacheSingleton.put] stamps it on
+  /// every store). Read by the fresh-cache-first playback metadata gate,
+  /// [ApiCacheSingleton.getIfFresh].
+  final DateTime cachedAt;
+
   /// Whether this item is pinned for offline access
   final bool pinned;
-
-  /// Timestamp for cache invalidation (optional future use)
-  final DateTime cachedAt;
-  const ApiCacheData({required this.cacheKey, required this.data, required this.pinned, required this.cachedAt});
+  const ApiCacheData({required this.cacheKey, required this.data, required this.cachedAt, required this.pinned});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['cache_key'] = Variable<String>(cacheKey);
     map['data'] = Variable<String>(data);
-    map['pinned'] = Variable<bool>(pinned);
     map['cached_at'] = Variable<DateTime>(cachedAt);
+    map['pinned'] = Variable<bool>(pinned);
     return map;
   }
 
@@ -1756,8 +1758,8 @@ class ApiCacheData extends DataClass implements Insertable<ApiCacheData> {
     return ApiCacheCompanion(
       cacheKey: Value(cacheKey),
       data: Value(data),
-      pinned: Value(pinned),
       cachedAt: Value(cachedAt),
+      pinned: Value(pinned),
     );
   }
 
@@ -1766,8 +1768,8 @@ class ApiCacheData extends DataClass implements Insertable<ApiCacheData> {
     return ApiCacheData(
       cacheKey: serializer.fromJson<String>(json['cacheKey']),
       data: serializer.fromJson<String>(json['data']),
-      pinned: serializer.fromJson<bool>(json['pinned']),
       cachedAt: serializer.fromJson<DateTime>(json['cachedAt']),
+      pinned: serializer.fromJson<bool>(json['pinned']),
     );
   }
   @override
@@ -1776,23 +1778,23 @@ class ApiCacheData extends DataClass implements Insertable<ApiCacheData> {
     return <String, dynamic>{
       'cacheKey': serializer.toJson<String>(cacheKey),
       'data': serializer.toJson<String>(data),
-      'pinned': serializer.toJson<bool>(pinned),
       'cachedAt': serializer.toJson<DateTime>(cachedAt),
+      'pinned': serializer.toJson<bool>(pinned),
     };
   }
 
-  ApiCacheData copyWith({String? cacheKey, String? data, bool? pinned, DateTime? cachedAt}) => ApiCacheData(
+  ApiCacheData copyWith({String? cacheKey, String? data, DateTime? cachedAt, bool? pinned}) => ApiCacheData(
     cacheKey: cacheKey ?? this.cacheKey,
     data: data ?? this.data,
-    pinned: pinned ?? this.pinned,
     cachedAt: cachedAt ?? this.cachedAt,
+    pinned: pinned ?? this.pinned,
   );
   ApiCacheData copyWithCompanion(ApiCacheCompanion data) {
     return ApiCacheData(
       cacheKey: data.cacheKey.present ? data.cacheKey.value : this.cacheKey,
       data: data.data.present ? data.data.value : this.data,
-      pinned: data.pinned.present ? data.pinned.value : this.pinned,
       cachedAt: data.cachedAt.present ? data.cachedAt.value : this.cachedAt,
+      pinned: data.pinned.present ? data.pinned.value : this.pinned,
     );
   }
 
@@ -1801,57 +1803,57 @@ class ApiCacheData extends DataClass implements Insertable<ApiCacheData> {
     return (StringBuffer('ApiCacheData(')
           ..write('cacheKey: $cacheKey, ')
           ..write('data: $data, ')
-          ..write('pinned: $pinned, ')
-          ..write('cachedAt: $cachedAt')
+          ..write('cachedAt: $cachedAt, ')
+          ..write('pinned: $pinned')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(cacheKey, data, pinned, cachedAt);
+  int get hashCode => Object.hash(cacheKey, data, cachedAt, pinned);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ApiCacheData &&
           other.cacheKey == this.cacheKey &&
           other.data == this.data &&
-          other.pinned == this.pinned &&
-          other.cachedAt == this.cachedAt);
+          other.cachedAt == this.cachedAt &&
+          other.pinned == this.pinned);
 }
 
 class ApiCacheCompanion extends UpdateCompanion<ApiCacheData> {
   final Value<String> cacheKey;
   final Value<String> data;
-  final Value<bool> pinned;
   final Value<DateTime> cachedAt;
+  final Value<bool> pinned;
   final Value<int> rowid;
   const ApiCacheCompanion({
     this.cacheKey = const Value.absent(),
     this.data = const Value.absent(),
-    this.pinned = const Value.absent(),
     this.cachedAt = const Value.absent(),
+    this.pinned = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ApiCacheCompanion.insert({
     required String cacheKey,
     required String data,
-    this.pinned = const Value.absent(),
     this.cachedAt = const Value.absent(),
+    this.pinned = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : cacheKey = Value(cacheKey),
        data = Value(data);
   static Insertable<ApiCacheData> custom({
     Expression<String>? cacheKey,
     Expression<String>? data,
-    Expression<bool>? pinned,
     Expression<DateTime>? cachedAt,
+    Expression<bool>? pinned,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (cacheKey != null) 'cache_key': cacheKey,
       if (data != null) 'data': data,
-      if (pinned != null) 'pinned': pinned,
       if (cachedAt != null) 'cached_at': cachedAt,
+      if (pinned != null) 'pinned': pinned,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1859,15 +1861,15 @@ class ApiCacheCompanion extends UpdateCompanion<ApiCacheData> {
   ApiCacheCompanion copyWith({
     Value<String>? cacheKey,
     Value<String>? data,
-    Value<bool>? pinned,
     Value<DateTime>? cachedAt,
+    Value<bool>? pinned,
     Value<int>? rowid,
   }) {
     return ApiCacheCompanion(
       cacheKey: cacheKey ?? this.cacheKey,
       data: data ?? this.data,
-      pinned: pinned ?? this.pinned,
       cachedAt: cachedAt ?? this.cachedAt,
+      pinned: pinned ?? this.pinned,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1881,11 +1883,11 @@ class ApiCacheCompanion extends UpdateCompanion<ApiCacheData> {
     if (data.present) {
       map['data'] = Variable<String>(data.value);
     }
-    if (pinned.present) {
-      map['pinned'] = Variable<bool>(pinned.value);
-    }
     if (cachedAt.present) {
       map['cached_at'] = Variable<DateTime>(cachedAt.value);
+    }
+    if (pinned.present) {
+      map['pinned'] = Variable<bool>(pinned.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1898,8 +1900,8 @@ class ApiCacheCompanion extends UpdateCompanion<ApiCacheData> {
     return (StringBuffer('ApiCacheCompanion(')
           ..write('cacheKey: $cacheKey, ')
           ..write('data: $data, ')
-          ..write('pinned: $pinned, ')
           ..write('cachedAt: $cachedAt, ')
+          ..write('pinned: $pinned, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3631,17 +3633,6 @@ class $ConnectionsTable extends Connections with TableInfo<$ConnectionsTable, Co
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _isDefaultMeta = const VerificationMeta('isDefault');
-  @override
-  late final GeneratedColumn<bool> isDefault = GeneratedColumn<bool>(
-    'is_default',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("is_default" IN (0, 1))'),
-    defaultValue: const Constant(false),
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
@@ -3661,7 +3652,7 @@ class $ConnectionsTable extends Connections with TableInfo<$ConnectionsTable, Co
     requiredDuringInsert: false,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, kind, displayName, configJson, isDefault, createdAt, lastAuthenticatedAt];
+  List<GeneratedColumn> get $columns => [id, kind, displayName, configJson, createdAt, lastAuthenticatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3691,9 +3682,6 @@ class $ConnectionsTable extends Connections with TableInfo<$ConnectionsTable, Co
     } else if (isInserting) {
       context.missing(_configJsonMeta);
     }
-    if (data.containsKey('is_default')) {
-      context.handle(_isDefaultMeta, isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta));
-    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta, createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
     } else if (isInserting) {
@@ -3718,7 +3706,6 @@ class $ConnectionsTable extends Connections with TableInfo<$ConnectionsTable, Co
       kind: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
       displayName: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
       configJson: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}config_json'])!,
-      isDefault: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}is_default'])!,
       createdAt: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}created_at'])!,
       lastAuthenticatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -3747,10 +3734,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
   /// Backend-specific config payload (token, baseUrl, profile id, …).
   final String configJson;
 
-  /// Whether this is the default connection used at app launch when only
-  /// one connection is present.
-  final bool isDefault;
-
   /// Timestamp this connection was added (milliseconds since epoch).
   final int createdAt;
 
@@ -3762,7 +3745,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
     required this.kind,
     required this.displayName,
     required this.configJson,
-    required this.isDefault,
     required this.createdAt,
     this.lastAuthenticatedAt,
   });
@@ -3773,7 +3755,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
     map['kind'] = Variable<String>(kind);
     map['display_name'] = Variable<String>(displayName);
     map['config_json'] = Variable<String>(configJson);
-    map['is_default'] = Variable<bool>(isDefault);
     map['created_at'] = Variable<int>(createdAt);
     if (!nullToAbsent || lastAuthenticatedAt != null) {
       map['last_authenticated_at'] = Variable<int>(lastAuthenticatedAt);
@@ -3787,7 +3768,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
       kind: Value(kind),
       displayName: Value(displayName),
       configJson: Value(configJson),
-      isDefault: Value(isDefault),
       createdAt: Value(createdAt),
       lastAuthenticatedAt: lastAuthenticatedAt == null && nullToAbsent
           ? const Value.absent()
@@ -3802,7 +3782,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
       kind: serializer.fromJson<String>(json['kind']),
       displayName: serializer.fromJson<String>(json['displayName']),
       configJson: serializer.fromJson<String>(json['configJson']),
-      isDefault: serializer.fromJson<bool>(json['isDefault']),
       createdAt: serializer.fromJson<int>(json['createdAt']),
       lastAuthenticatedAt: serializer.fromJson<int?>(json['lastAuthenticatedAt']),
     );
@@ -3815,7 +3794,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
       'kind': serializer.toJson<String>(kind),
       'displayName': serializer.toJson<String>(displayName),
       'configJson': serializer.toJson<String>(configJson),
-      'isDefault': serializer.toJson<bool>(isDefault),
       'createdAt': serializer.toJson<int>(createdAt),
       'lastAuthenticatedAt': serializer.toJson<int?>(lastAuthenticatedAt),
     };
@@ -3826,7 +3804,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
     String? kind,
     String? displayName,
     String? configJson,
-    bool? isDefault,
     int? createdAt,
     Value<int?> lastAuthenticatedAt = const Value.absent(),
   }) => ConnectionRow(
@@ -3834,7 +3811,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
     kind: kind ?? this.kind,
     displayName: displayName ?? this.displayName,
     configJson: configJson ?? this.configJson,
-    isDefault: isDefault ?? this.isDefault,
     createdAt: createdAt ?? this.createdAt,
     lastAuthenticatedAt: lastAuthenticatedAt.present ? lastAuthenticatedAt.value : this.lastAuthenticatedAt,
   );
@@ -3844,7 +3820,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
       kind: data.kind.present ? data.kind.value : this.kind,
       displayName: data.displayName.present ? data.displayName.value : this.displayName,
       configJson: data.configJson.present ? data.configJson.value : this.configJson,
-      isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastAuthenticatedAt: data.lastAuthenticatedAt.present ? data.lastAuthenticatedAt.value : this.lastAuthenticatedAt,
     );
@@ -3857,7 +3832,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
           ..write('kind: $kind, ')
           ..write('displayName: $displayName, ')
           ..write('configJson: $configJson, ')
-          ..write('isDefault: $isDefault, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastAuthenticatedAt: $lastAuthenticatedAt')
           ..write(')'))
@@ -3865,7 +3839,7 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
   }
 
   @override
-  int get hashCode => Object.hash(id, kind, displayName, configJson, isDefault, createdAt, lastAuthenticatedAt);
+  int get hashCode => Object.hash(id, kind, displayName, configJson, createdAt, lastAuthenticatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3874,7 +3848,6 @@ class ConnectionRow extends DataClass implements Insertable<ConnectionRow> {
           other.kind == this.kind &&
           other.displayName == this.displayName &&
           other.configJson == this.configJson &&
-          other.isDefault == this.isDefault &&
           other.createdAt == this.createdAt &&
           other.lastAuthenticatedAt == this.lastAuthenticatedAt);
 }
@@ -3884,7 +3857,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
   final Value<String> kind;
   final Value<String> displayName;
   final Value<String> configJson;
-  final Value<bool> isDefault;
   final Value<int> createdAt;
   final Value<int?> lastAuthenticatedAt;
   final Value<int> rowid;
@@ -3893,7 +3865,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
     this.kind = const Value.absent(),
     this.displayName = const Value.absent(),
     this.configJson = const Value.absent(),
-    this.isDefault = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastAuthenticatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3903,7 +3874,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
     required String kind,
     required String displayName,
     required String configJson,
-    this.isDefault = const Value.absent(),
     required int createdAt,
     this.lastAuthenticatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3917,7 +3887,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
     Expression<String>? kind,
     Expression<String>? displayName,
     Expression<String>? configJson,
-    Expression<bool>? isDefault,
     Expression<int>? createdAt,
     Expression<int>? lastAuthenticatedAt,
     Expression<int>? rowid,
@@ -3927,7 +3896,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
       if (kind != null) 'kind': kind,
       if (displayName != null) 'display_name': displayName,
       if (configJson != null) 'config_json': configJson,
-      if (isDefault != null) 'is_default': isDefault,
       if (createdAt != null) 'created_at': createdAt,
       if (lastAuthenticatedAt != null) 'last_authenticated_at': lastAuthenticatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -3939,7 +3907,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
     Value<String>? kind,
     Value<String>? displayName,
     Value<String>? configJson,
-    Value<bool>? isDefault,
     Value<int>? createdAt,
     Value<int?>? lastAuthenticatedAt,
     Value<int>? rowid,
@@ -3949,7 +3916,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
       kind: kind ?? this.kind,
       displayName: displayName ?? this.displayName,
       configJson: configJson ?? this.configJson,
-      isDefault: isDefault ?? this.isDefault,
       createdAt: createdAt ?? this.createdAt,
       lastAuthenticatedAt: lastAuthenticatedAt ?? this.lastAuthenticatedAt,
       rowid: rowid ?? this.rowid,
@@ -3971,9 +3937,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
     if (configJson.present) {
       map['config_json'] = Variable<String>(configJson.value);
     }
-    if (isDefault.present) {
-      map['is_default'] = Variable<bool>(isDefault.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
@@ -3993,7 +3956,6 @@ class ConnectionsCompanion extends UpdateCompanion<ConnectionRow> {
           ..write('kind: $kind, ')
           ..write('displayName: $displayName, ')
           ..write('configJson: $configJson, ')
-          ..write('isDefault: $isDefault, ')
           ..write('createdAt: $createdAt, ')
           ..write('lastAuthenticatedAt: $lastAuthenticatedAt, ')
           ..write('rowid: $rowid')
@@ -5683,16 +5645,16 @@ typedef $$ApiCacheTableCreateCompanionBuilder =
     ApiCacheCompanion Function({
       required String cacheKey,
       required String data,
-      Value<bool> pinned,
       Value<DateTime> cachedAt,
+      Value<bool> pinned,
       Value<int> rowid,
     });
 typedef $$ApiCacheTableUpdateCompanionBuilder =
     ApiCacheCompanion Function({
       Value<String> cacheKey,
       Value<String> data,
-      Value<bool> pinned,
       Value<DateTime> cachedAt,
+      Value<bool> pinned,
       Value<int> rowid,
     });
 
@@ -5709,11 +5671,11 @@ class $$ApiCacheTableFilterComposer extends Composer<_$AppDatabase, $ApiCacheTab
 
   ColumnFilters<String> get data => $composableBuilder(column: $table.data, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<bool> get pinned =>
-      $composableBuilder(column: $table.pinned, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<DateTime> get cachedAt =>
       $composableBuilder(column: $table.cachedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get pinned =>
+      $composableBuilder(column: $table.pinned, builder: (column) => ColumnFilters(column));
 }
 
 class $$ApiCacheTableOrderingComposer extends Composer<_$AppDatabase, $ApiCacheTable> {
@@ -5730,11 +5692,11 @@ class $$ApiCacheTableOrderingComposer extends Composer<_$AppDatabase, $ApiCacheT
   ColumnOrderings<String> get data =>
       $composableBuilder(column: $table.data, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<bool> get pinned =>
-      $composableBuilder(column: $table.pinned, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<DateTime> get cachedAt =>
       $composableBuilder(column: $table.cachedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get pinned =>
+      $composableBuilder(column: $table.pinned, builder: (column) => ColumnOrderings(column));
 }
 
 class $$ApiCacheTableAnnotationComposer extends Composer<_$AppDatabase, $ApiCacheTable> {
@@ -5749,9 +5711,9 @@ class $$ApiCacheTableAnnotationComposer extends Composer<_$AppDatabase, $ApiCach
 
   GeneratedColumn<String> get data => $composableBuilder(column: $table.data, builder: (column) => column);
 
-  GeneratedColumn<bool> get pinned => $composableBuilder(column: $table.pinned, builder: (column) => column);
-
   GeneratedColumn<DateTime> get cachedAt => $composableBuilder(column: $table.cachedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get pinned => $composableBuilder(column: $table.pinned, builder: (column) => column);
 }
 
 class $$ApiCacheTableTableManager
@@ -5781,22 +5743,22 @@ class $$ApiCacheTableTableManager
               ({
                 Value<String> cacheKey = const Value.absent(),
                 Value<String> data = const Value.absent(),
-                Value<bool> pinned = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
+                Value<bool> pinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => ApiCacheCompanion(cacheKey: cacheKey, data: data, pinned: pinned, cachedAt: cachedAt, rowid: rowid),
+              }) => ApiCacheCompanion(cacheKey: cacheKey, data: data, cachedAt: cachedAt, pinned: pinned, rowid: rowid),
           createCompanionCallback:
               ({
                 required String cacheKey,
                 required String data,
-                Value<bool> pinned = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
+                Value<bool> pinned = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ApiCacheCompanion.insert(
                 cacheKey: cacheKey,
                 data: data,
-                pinned: pinned,
                 cachedAt: cachedAt,
+                pinned: pinned,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
@@ -6720,7 +6682,6 @@ typedef $$ConnectionsTableCreateCompanionBuilder =
       required String kind,
       required String displayName,
       required String configJson,
-      Value<bool> isDefault,
       required int createdAt,
       Value<int?> lastAuthenticatedAt,
       Value<int> rowid,
@@ -6731,7 +6692,6 @@ typedef $$ConnectionsTableUpdateCompanionBuilder =
       Value<String> kind,
       Value<String> displayName,
       Value<String> configJson,
-      Value<bool> isDefault,
       Value<int> createdAt,
       Value<int?> lastAuthenticatedAt,
       Value<int> rowid,
@@ -6775,9 +6735,6 @@ class $$ConnectionsTableFilterComposer extends Composer<_$AppDatabase, $Connecti
 
   ColumnFilters<String> get configJson =>
       $composableBuilder(column: $table.configJson, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get isDefault =>
-      $composableBuilder(column: $table.isDefault, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -6823,9 +6780,6 @@ class $$ConnectionsTableOrderingComposer extends Composer<_$AppDatabase, $Connec
   ColumnOrderings<String> get configJson =>
       $composableBuilder(column: $table.configJson, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<bool> get isDefault =>
-      $composableBuilder(column: $table.isDefault, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -6849,8 +6803,6 @@ class $$ConnectionsTableAnnotationComposer extends Composer<_$AppDatabase, $Conn
       $composableBuilder(column: $table.displayName, builder: (column) => column);
 
   GeneratedColumn<String> get configJson => $composableBuilder(column: $table.configJson, builder: (column) => column);
-
-  GeneratedColumn<bool> get isDefault => $composableBuilder(column: $table.isDefault, builder: (column) => column);
 
   GeneratedColumn<int> get createdAt => $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -6907,7 +6859,6 @@ class $$ConnectionsTableTableManager
                 Value<String> kind = const Value.absent(),
                 Value<String> displayName = const Value.absent(),
                 Value<String> configJson = const Value.absent(),
-                Value<bool> isDefault = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int?> lastAuthenticatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -6916,7 +6867,6 @@ class $$ConnectionsTableTableManager
                 kind: kind,
                 displayName: displayName,
                 configJson: configJson,
-                isDefault: isDefault,
                 createdAt: createdAt,
                 lastAuthenticatedAt: lastAuthenticatedAt,
                 rowid: rowid,
@@ -6927,7 +6877,6 @@ class $$ConnectionsTableTableManager
                 required String kind,
                 required String displayName,
                 required String configJson,
-                Value<bool> isDefault = const Value.absent(),
                 required int createdAt,
                 Value<int?> lastAuthenticatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -6936,7 +6885,6 @@ class $$ConnectionsTableTableManager
                 kind: kind,
                 displayName: displayName,
                 configJson: configJson,
-                isDefault: isDefault,
                 createdAt: createdAt,
                 lastAuthenticatedAt: lastAuthenticatedAt,
                 rowid: rowid,

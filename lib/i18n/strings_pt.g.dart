@@ -98,7 +98,7 @@ class _Translations$app$pt extends Translations$app$en {
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Plexy';
+	@override String get title => 'Plezy';
 }
 
 // Path: auth
@@ -122,7 +122,7 @@ class _Translations$auth$pt extends Translations$auth$en {
 	@override String get quickConnectWaiting => 'Aguardando aprovação…';
 	@override String get quickConnectCancel => 'Cancelar';
 	@override String get quickConnectExpired => 'Quick Connect expirou. Tente novamente.';
-	@override String get localDataRecoveryRequired => 'O Plexy não conseguiu recuperar com segurança os dados locais de acesso e de reproduções pendentes. Entre novamente.';
+	@override String get localDataRecoveryRequired => 'O Plezy não conseguiu recuperar com segurança os dados locais de acesso e de reproduções pendentes. Entre novamente.';
 	@override String get pinCheckRejected => 'A verificação do PIN do Plex foi rejeitada';
 }
 
@@ -222,7 +222,7 @@ class _Translations$settings$pt extends Translations$settings$en {
 
 	// Translations
 	@override String get title => 'Configurações';
-	@override String get supportDeveloper => 'Apoie o Plexy';
+	@override String get supportDeveloper => 'Apoie o Plezy';
 	@override String get supportDeveloperDescription => 'Doe via Liberapay para financiar o desenvolvimento';
 	@override String get language => 'Idioma';
 	@override String get theme => 'Tema';
@@ -316,6 +316,11 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get followServerTrackSelectionsDescription => 'Ao mudar de episódio, aplicar o áudio e as legendas selecionados no servidor em vez de manter a escolha atual';
 	@override String get showChapterMarkersOnTimeline => 'Mostrar marcadores de capítulos na barra de reprodução';
 	@override String get showChapterMarkersOnTimelineDescription => 'Segmentar a barra de reprodução nos limites dos capítulos';
+	@override String get specialsOrdering => 'Especiais na ordem dos episódios';
+	@override String get specialsOrderingDescription => 'Onde os especiais são reproduzidos na ordem de exibição de uma série';
+	@override String get specialsOrderingServer => 'Seguir a ordem do servidor';
+	@override String get specialsOrderingAirDate => 'Intercalar pela data de exibição';
+	@override String get specialsOrderingLast => 'Após as temporadas regulares';
 	@override String get clickVideoTogglesPlayback => 'Clicar no vídeo para alternar reprodução/pausa';
 	@override String get clickVideoTogglesPlaybackDescription => 'Clicar no vídeo para reproduzir ou pausar em vez de mostrar os controles.';
 	@override String get videoPlayerControls => 'Controles do reprodutor de vídeo';
@@ -347,7 +352,7 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get importSettingsDescription => 'Restaurar preferências a partir de um arquivo';
 	@override String get importSettingsConfirm => 'Isso substituirá suas configurações atuais. Continuar?';
 	@override String get importSettingsSuccess => 'Configurações importadas';
-	@override String get importSettingsInvalidFile => 'Este arquivo não é uma exportação válida do Plexy';
+	@override String get importSettingsInvalidFile => 'Este arquivo não é uma exportação válida do Plezy';
 	@override String get importSettingsNoUser => 'Entre na conta antes de importar as configurações';
 	@override String get shortcutsReset => 'Atalhos redefinidos para o padrão';
 	@override String get about => 'Sobre';
@@ -440,7 +445,7 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get forceTvMode => 'Forçar modo TV';
 	@override String get forceTvModeDescription => 'Forçar o layout de TV em dispositivos sem detecção automática. Requer reiniciar o app.';
 	@override String get startInFullscreen => 'Iniciar em tela cheia';
-	@override String get startInFullscreenDescription => 'Abrir o Plexy em modo de tela cheia ao iniciar';
+	@override String get startInFullscreenDescription => 'Abrir o Plezy em modo de tela cheia ao iniciar';
 	@override String get exitFullscreenOnPlayerClose => 'Sair da tela cheia ao fechar o reprodutor';
 	@override String get exitFullscreenOnPlayerCloseDescription => 'Sair automaticamente da tela cheia ao fechar o reprodutor de vídeo';
 	@override String get autoHidePerformanceOverlay => 'Ocultar automaticamente o painel de desempenho';
@@ -461,7 +466,17 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get subtitlesAndConfig => 'Legendas e configuração';
 	@override String get seekAndTiming => 'Busca e tempo';
 	@override String get behavior => 'Comportamento';
-	@override String get exportDialogTitle => 'Exportar configurações do Plexy';
+	@override String get rememberPlayerChanges => 'Lembrar alterações do reprodutor';
+	@override String get rememberPlayerChangesDescription => 'Onde uma alteração feita durante a reprodução é salva e reaplicada';
+	@override String get scopePlaybackSpeed => 'Velocidade de reprodução';
+	@override String get scopeShaderPreset => 'Predefinição de shader';
+	@override String get scopeAspectRatio => 'Proporção da tela';
+	@override String get scopeSyncOffsets => 'Sincronização de áudio e legendas';
+	@override String get playerScopeOff => 'Não salvar';
+	@override String get playerScopeGlobal => 'Em todos os lugares';
+	@override String get playerScopeLibrary => 'Por biblioteca';
+	@override String get playerScopeTitle => 'Por série ou filme';
+	@override String get exportDialogTitle => 'Exportar configurações do Plezy';
 }
 
 // Path: search
@@ -659,8 +674,8 @@ class _Translations$mediaMenu$pt extends Translations$mediaMenu$en {
 		one: 'Mais ${n} episódio está armazenado no mesmo arquivo e também será excluído:',
 		other: 'Mais ${n} episódios estão armazenados no mesmo arquivo e também serão excluídos:',
 	);
-	@override String get deleteScopeUnverifiedProbeFailed => 'O Plexy não conseguiu verificar quais arquivos serão removidos, então pode excluir mais do que o item acima. Cancele e tente novamente, ou exclua mesmo assim.';
-	@override String get deleteScopeUnverifiedNoFileInfo => 'Seu servidor não forneceu detalhes do arquivo para este item, então o Plexy não pode verificar quais arquivos serão removidos. Pode excluir mais do que o item acima.';
+	@override String get deleteScopeUnverifiedProbeFailed => 'O Plezy não conseguiu verificar quais arquivos serão removidos, então pode excluir mais do que o item acima. Cancele e tente novamente, ou exclua mesmo assim.';
+	@override String get deleteScopeUnverifiedNoFileInfo => 'Seu servidor não forneceu detalhes do arquivo para este item, então o Plezy não pode verificar quais arquivos serão removidos. Pode excluir mais do que o item acima.';
 	@override String get mediaDeletedSuccessfully => 'Item de mídia excluído com sucesso';
 	@override String get mediaFailedToDelete => 'Falha ao excluir item de mídia';
 	@override String get rate => 'Avaliar';
@@ -752,12 +767,7 @@ class _Translations$videoControls$pt extends Translations$videoControls$en {
 	// Translations
 	@override String get audioLabel => 'Áudio';
 	@override String get subtitlesLabel => 'Legendas';
-	@override String get resetToZero => 'Redefinir para 0ms';
 	@override String addTime({required Object amount, required Object unit}) => '+${amount}${unit}';
-	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
-	@override String playsLater({required Object label}) => '${label} reproduz depois';
-	@override String playsEarlier({required Object label}) => '${label} reproduz antes';
-	@override String get noOffset => 'Sem deslocamento';
 	@override String get letterbox => 'Letterbox';
 	@override String get fillScreen => 'Preencher tela';
 	@override String get stretch => 'Esticar';
@@ -838,6 +848,11 @@ class _Translations$videoControls$pt extends Translations$videoControls$en {
 	@override String get osdSubtitlesOff => 'Legendas: desativadas';
 	@override String osdSubtitles({required Object track}) => 'Legendas: ${track}';
 	@override String osdAudio({required Object track}) => 'Áudio: ${track}';
+	@override String get resetToZero => 'Redefinir para 0ms';
+	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
+	@override String playsLater({required Object label}) => '${label} reproduz depois';
+	@override String playsEarlier({required Object label}) => '${label} reproduz antes';
+	@override String get noOffset => 'Sem deslocamento';
 }
 
 // Path: messages
@@ -986,7 +1001,7 @@ class _Translations$profiles$pt extends Translations$profiles$en {
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
-	@override String get addPlezyProfile => 'Adicionar perfil Plexy';
+	@override String get addPlezyProfile => 'Adicionar perfil Plezy';
 	@override String get switchingProfile => 'Mudando perfil…';
 	@override String get deleteThisProfileTitle => 'Excluir este perfil?';
 	@override String deleteThisProfileMessage({required Object displayName}) => 'Remover ${displayName}. As conexões não serão afetadas.';
@@ -1066,7 +1081,7 @@ class _Translations$connections$pt extends Translations$connections$en {
 	@override String sessionExpiredMany({required Object count}) => 'Sessões expiradas em ${count} servidores';
 	@override String get signInAgain => 'Entrar novamente';
 	@override String editMediaBrowserTitle({required Object product}) => 'Editar conexão do ${product}';
-	@override String editMediaBrowserIntro({required Object serverName}) => 'Adicione ou remova URLs para ${serverName}. O Plexy usará a URL acessível com menor latência.';
+	@override String editMediaBrowserIntro({required Object serverName}) => 'Adicione ou remova URLs para ${serverName}. O Plezy usará a URL acessível com menor latência.';
 }
 
 // Path: discover
@@ -1239,9 +1254,9 @@ class _Translations$startup$pt extends Translations$startup$en {
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
-	@override String get failedTitle => 'O Plexy não conseguiu iniciar';
+	@override String get failedTitle => 'O Plezy não conseguiu iniciar';
 	@override String get failedBody => 'Algo deu errado durante a inicialização. Os detalhes abaixo identificam o que falhou.';
-	@override String get failedBodyRepairable => 'O arquivo de configurações salvo do Plexy está danificado e precisa ser reconstruído antes que o Plexy possa iniciar. Tentar novamente não vai ajudar — escolha Reparar armazenamento.';
+	@override String get failedBodyRepairable => 'O arquivo de configurações salvo do Plezy está danificado e precisa ser reconstruído antes que o Plezy possa iniciar. Tentar novamente não vai ajudar — escolha Reparar armazenamento.';
 	@override String get phaseLabel => 'Etapa';
 	@override String get showDetails => 'Mostrar detalhes';
 	@override String get hideDetails => 'Ocultar detalhes';
@@ -1250,16 +1265,16 @@ class _Translations$startup$pt extends Translations$startup$en {
 	@override String get uploadDetails => 'Enviar detalhes';
 	@override String get repairStorage => 'Reparar armazenamento';
 	@override String get repairTitle => 'Reparar dados armazenados?';
-	@override String get repairBodyCommon => 'O arquivo de configurações do Plexy está danificado e não pode ser lido. Reparar redefine todas as configurações para o padrão.';
+	@override String get repairBodyCommon => 'O arquivo de configurações do Plezy está danificado e não pode ser lido. Reparar redefine todas as configurações para o padrão.';
 	@override String get repairBodyOneCredential => 'Um login salvo está danificado e não pode ser lido. Reparar remove apenas ele; suas outras configurações permanecem intactas.';
 	@override String get repairBodySignInsKept => 'Seus servidores e perfis devem permanecer conectados.';
 	@override String get repairBodySignInsLost => 'A chave que protege seus logins salvos não pode ser recuperada deste arquivo, então você terá que entrar novamente em todos os servidores e perfis. Nada no seu servidor de mídia é afetado.';
-	@override String get repairBodySessionsUncertain => 'Os rastreadores (MAL, AniList, Simkl, Trakt) e o Seerr são armazenados separadamente e podem ou não ser preservados. O Plexy informará exatamente o que foi mantido.';
+	@override String get repairBodySessionsUncertain => 'Os rastreadores (MAL, AniList, Simkl, Trakt) e o Seerr são armazenados separadamente e podem ou não ser preservados. O Plezy informará exatamente o que foi mantido.';
 	@override String get repairConfirm => 'Reparar';
 	@override String get repairSucceeded => 'Armazenamento reparado';
 	@override String get repairNeedsRestart => 'Armazenamento reparado — reinício necessário';
-	@override String get restartRequiredBody => 'Seus dados foram reparados, mas o Plexy precisa iniciar do zero antes de usá-los. Feche o Plexy e abra-o novamente.';
-	@override String get quitPlezy => 'Sair do Plexy';
+	@override String get restartRequiredBody => 'Seus dados foram reparados, mas o Plezy precisa iniciar do zero antes de usá-los. Feche o Plezy e abra-o novamente.';
+	@override String get quitPlezy => 'Sair do Plezy';
 	@override String get repairFailed => 'Falha no reparo';
 	@override String get repairKeptSignIns => 'Seus servidores e perfis ainda estão conectados.';
 	@override String get repairLostSignIns => 'A chave que protege seus logins salvos não pôde ser recuperada. Você terá que entrar novamente em todos os servidores e perfis.';
@@ -1268,7 +1283,7 @@ class _Translations$startup$pt extends Translations$startup$en {
 	@override String get backupWarning => 'Ele contém suas credenciais de login. Não envie nem compartilhe.';
 	@override String get deleteBackup => 'Excluir cópia';
 	@override String get backupDeleted => 'Cópia excluída.';
-	@override String get previousFailureTitle => 'O Plexy falhou ao iniciar da última vez';
+	@override String get previousFailureTitle => 'O Plezy falhou ao iniciar da última vez';
 }
 
 // Path: licenses
@@ -1527,6 +1542,7 @@ class _Translations$music$pt extends Translations$music$en {
 	@override String get repeatOne => 'Repetir uma faixa';
 	@override String get instantMixNoServer => 'Nenhum servidor está disponível para uma mistura instantânea';
 	@override String noAudioUrl({required Object track}) => 'Nenhuma URL de áudio está disponível para ${track}';
+	@override late final _Translations$music$discography$pt discography = _Translations$music$discography$pt._(_root);
 }
 
 // Path: watchTogether
@@ -1980,11 +1996,11 @@ class _Translations$trakt$pt extends Translations$trakt$en {
 	@override String get connected => 'Conectado';
 	@override String connectedAs({required Object username}) => 'Conectado como @${username}';
 	@override String get disconnectConfirm => 'Desconectar a conta do Trakt?';
-	@override String get disconnectConfirmBody => 'O Plexy deixará de enviar eventos ao Trakt. Você pode reconectar quando quiser.';
+	@override String get disconnectConfirmBody => 'O Plezy deixará de enviar eventos ao Trakt. Você pode reconectar quando quiser.';
 	@override String get scrobble => 'Scrobbling em tempo real';
 	@override String get scrobbleDescription => 'Envia eventos de reprodução, pausa e parada ao Trakt durante a exibição.';
 	@override String get watchedSync => 'Sincronizar status de assistido';
-	@override String get watchedSyncDescription => 'Ao marcar itens como assistidos no Plexy, eles também serão marcados no Trakt.';
+	@override String get watchedSyncDescription => 'Ao marcar itens como assistidos no Plezy, eles também serão marcados no Trakt.';
 }
 
 // Path: seerr
@@ -2003,10 +2019,10 @@ class _Translations$seerr$pt extends Translations$seerr$en {
 	@override String get signInWithEmby => 'Entrar com Emby';
 	@override String get signInWithLocal => 'Usar uma conta local';
 	@override String get email => 'E-mail';
-	@override String get noSignInMethods => 'Esta instância do Seerr não oferece nenhum método de acesso compatível com o Plexy.';
+	@override String get noSignInMethods => 'Esta instância do Seerr não oferece nenhum método de acesso compatível com o Plezy.';
 	@override String get instance => 'Instância';
 	@override String get disconnectConfirm => 'Desconectar Seerr?';
-	@override String get disconnectConfirmBody => 'O Plexy esquecerá esta instância do Seerr. Reconecte quando quiser.';
+	@override String get disconnectConfirmBody => 'O Plezy esquecerá esta instância do Seerr. Reconecte quando quiser.';
 	@override String get request => 'Solicitar';
 	@override String get request4k => 'Solicitar em 4K';
 	@override String get seasons => 'Temporadas';
@@ -2050,7 +2066,7 @@ class _Translations$services$pt extends Translations$services$en {
 	@override String get scrobble => 'Registrar progresso automaticamente';
 	@override String get scrobbleDescription => 'Atualiza sua lista quando você termina um episódio ou filme.';
 	@override String disconnectConfirm({required Object service}) => 'Desconectar ${service}?';
-	@override String disconnectConfirmBody({required Object service}) => 'O Plexy deixará de atualizar ${service}. Reconecte quando quiser.';
+	@override String disconnectConfirmBody({required Object service}) => 'O Plezy deixará de atualizar ${service}. Reconecte quando quiser.';
 	@override String connectFailed({required Object service}) => 'Não foi possível conectar ao ${service}. Tente novamente.';
 	@override late final _Translations$services$names$pt names = _Translations$services$names$pt._(_root);
 	@override late final _Translations$services$deviceCode$pt deviceCode = _Translations$services$deviceCode$pt._(_root);
@@ -2307,7 +2323,6 @@ class _Translations$explore$badge$pt extends Translations$explore$badge$en {
 	@override String rankPopular({required Object n}) => '#${n} popular';
 	@override String rankAiring({required Object n}) => '#${n} no ar';
 	@override String rankRated({required Object n}) => '#${n} avaliado';
-	@override String rankFavorited({required Object n}) => '#${n} favoritado';
 	@override String rankTrending({required Object n}) => '#${n} em alta';
 	@override String rankSeasonal({required Object n, required Object season}) => '#${n} em ${season}';
 	@override String watchingNow({required Object n}) => '${n} assistindo';
@@ -2326,6 +2341,7 @@ class _Translations$explore$badge$pt extends Translations$explore$badge$en {
 	@override String episodesShort({required Object n}) => '${n} epps';
 	@override String minutesPerEpisode({required Object n}) => '${n} min/ep';
 	@override String get adult => '18+';
+	@override String rankFavorited({required Object n}) => '#${n} favoritado';
 }
 
 // Path: explore.stats
@@ -2477,6 +2493,18 @@ class _Translations$explore$detail$pt extends Translations$explore$detail$en {
 	@override String get background => 'Contexto';
 }
 
+// Path: music.discography
+class _Translations$music$discography$pt extends Translations$music$discography$en {
+	_Translations$music$discography$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get singlesAndEps => 'Singles e EPs';
+	@override String get live => 'Ao vivo';
+	@override String get compilations => 'Compilações';
+}
+
 // Path: downloads.backgroundWarning
 class _Translations$downloads$backgroundWarning$pt extends Translations$downloads$backgroundWarning$en {
 	_Translations$downloads$backgroundWarning$pt._(TranslationsPt root) : this._root = root, super.internal(root);
@@ -2489,14 +2517,14 @@ class _Translations$downloads$backgroundWarning$pt extends Translations$download
 	@override String get bannerAction => 'Detalhes';
 	@override String get sheetTitle => 'Os downloads em segundo plano estão bloqueados';
 	@override String get sheetTitleDegraded => 'Os downloads em segundo plano podem ser limitados';
-	@override String get sheetIntro => 'O Android está impedindo que o Plexy faça downloads de forma confiável em segundo plano.';
-	@override String get sheetIntroDegraded => 'Seu dispositivo está limitando quando o Plexy pode fazer downloads em segundo plano.';
-	@override String get reasonBackgroundRestricted => 'O uso em segundo plano do Plexy está restrito. Defina o uso da bateria ou o uso em segundo plano como "Sem restrições".';
-	@override String get reasonStandbyRestricted => 'O Android colocou o Plexy em um modo de espera restrito. Defina o uso da bateria como "Sem restrições".';
+	@override String get sheetIntro => 'O Android está impedindo que o Plezy faça downloads de forma confiável em segundo plano.';
+	@override String get sheetIntroDegraded => 'Seu dispositivo está limitando quando o Plezy pode fazer downloads em segundo plano.';
+	@override String get reasonBackgroundRestricted => 'O uso em segundo plano do Plezy está restrito. Defina o uso da bateria ou o uso em segundo plano como "Sem restrições".';
+	@override String get reasonStandbyRestricted => 'O Android colocou o Plezy em um modo de espera restrito. Defina o uso da bateria como "Sem restrições".';
 	@override String get reasonDownloadChannelBlocked => 'As notificações de download estão desativadas; por isso, o progresso e os controles podem ficar indisponíveis.';
 	@override String get reasonNotificationsDisabled => 'As notificações estão desativadas. No Android 13 ou mais recente, elas são necessárias para downloads longos em segundo plano.';
 	@override String get reasonDataSaver => 'A Economia de dados está ativada e bloqueia downloads em segundo plano usando dados móveis. Os downloads ainda devem funcionar no Wi-Fi.';
-	@override String get reasonOemUnknown => 'Os downloads foram interrompidos várias vezes enquanto o Plexy estava em segundo plano. Verifique as configurações de bateria ou uso em segundo plano do Plexy.';
+	@override String get reasonOemUnknown => 'Os downloads foram interrompidos várias vezes enquanto o Plezy estava em segundo plano. Verifique as configurações de bateria ou uso em segundo plano do Plezy.';
 	@override String get openSettings => 'Abrir configurações';
 	@override String get stillNotWorking => 'Ajuda específica para o dispositivo';
 	@override String get stillNotWorkingDescription => 'Veja as instruções para seu dispositivo ou, se o problema persistir, envie um log em Configurações › Ver Logs.';
@@ -2539,19 +2567,19 @@ class _Translations$companionRemote$pairing$pt extends Translations$companionRem
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
-	@override String get discoveryDescription => 'Dispositivos Plexy com a mesma conta Plex aparecem aqui';
+	@override String get discoveryDescription => 'Dispositivos Plezy com a mesma conta Plex aparecem aqui';
 	@override String get hostAddressHint => '192.168.1.100:48632';
 	@override String get connecting => 'Conectando...';
 	@override String get searchingForDevices => 'Procurando dispositivos...';
 	@override String get noDevicesFound => 'Nenhum dispositivo encontrado na sua rede';
-	@override String get noDevicesHint => 'Abra o Plexy no desktop e use a mesma rede Wi-Fi';
+	@override String get noDevicesHint => 'Abra o Plezy no desktop e use a mesma rede Wi-Fi';
 	@override String get availableDevices => 'Dispositivos disponíveis';
 	@override String get manualConnection => 'Conexão manual';
 	@override String get cryptoInitFailed => 'Não foi possível iniciar a conexão segura. Entre no Plex primeiro.';
 	@override String get validationHostRequired => 'Insira o endereço do host';
 	@override String get validationHostFormat => 'O formato deve ser IP:porta (ex.: 192.168.1.100:48632)';
 	@override String get connectionTimedOut => 'A conexão atingiu o tempo limite. Use a mesma rede nos dois dispositivos.';
-	@override String get sessionNotFound => 'Dispositivo não encontrado. Verifique se o Plexy está em execução no host.';
+	@override String get sessionNotFound => 'Dispositivo não encontrado. Verifique se o Plezy está em execução no host.';
 	@override String get authFailed => 'Falha na autenticação. Ambos os dispositivos precisam da mesma conta Plex.';
 	@override String failedToConnect({required Object error}) => 'Falha ao conectar: ${error}';
 }
@@ -2630,7 +2658,7 @@ class _Translations$services$deviceCode$pt extends Translations$services$deviceC
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
-	@override String title({required Object service}) => 'Ativar o Plexy no ${service}';
+	@override String title({required Object service}) => 'Ativar o Plezy no ${service}';
 	@override String get instructions => 'Leia o código QR ou acesse o endereço abaixo e insira este código:';
 	@override String openToActivate({required Object service}) => 'Abrir ${service} para ativar';
 	@override String get copyCode => 'Copiar código de ativação';
@@ -2690,7 +2718,7 @@ class _Translations$services$libraryFilter$pt extends Translations$services$libr
 extension on TranslationsPt {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.title' => 'Plexy',
+			'app.title' => 'Plezy',
 			'auth.signInWithPlex' => 'Entrar com Plex',
 			'auth.showQRCode' => 'Mostrar código QR',
 			'auth.authenticate' => 'Autenticar',
@@ -2705,7 +2733,7 @@ extension on TranslationsPt {
 			'auth.quickConnectWaiting' => 'Aguardando aprovação…',
 			'auth.quickConnectCancel' => 'Cancelar',
 			'auth.quickConnectExpired' => 'Quick Connect expirou. Tente novamente.',
-			'auth.localDataRecoveryRequired' => 'O Plexy não conseguiu recuperar com segurança os dados locais de acesso e de reproduções pendentes. Entre novamente.',
+			'auth.localDataRecoveryRequired' => 'O Plezy não conseguiu recuperar com segurança os dados locais de acesso e de reproduções pendentes. Entre novamente.',
 			'auth.pinCheckRejected' => 'A verificação do PIN do Plex foi rejeitada',
 			'common.cancel' => 'Cancelar',
 			'common.save' => 'Salvar',
@@ -2779,7 +2807,7 @@ extension on TranslationsPt {
 			'update.latestVersion' => 'Você está na versão mais recente',
 			'update.checkFailed' => 'Falha ao verificar atualizações',
 			'settings.title' => 'Configurações',
-			'settings.supportDeveloper' => 'Apoie o Plexy',
+			'settings.supportDeveloper' => 'Apoie o Plezy',
 			'settings.supportDeveloperDescription' => 'Doe via Liberapay para financiar o desenvolvimento',
 			'settings.language' => 'Idioma',
 			'settings.theme' => 'Tema',
@@ -2873,6 +2901,11 @@ extension on TranslationsPt {
 			'settings.followServerTrackSelectionsDescription' => 'Ao mudar de episódio, aplicar o áudio e as legendas selecionados no servidor em vez de manter a escolha atual',
 			'settings.showChapterMarkersOnTimeline' => 'Mostrar marcadores de capítulos na barra de reprodução',
 			'settings.showChapterMarkersOnTimelineDescription' => 'Segmentar a barra de reprodução nos limites dos capítulos',
+			'settings.specialsOrdering' => 'Especiais na ordem dos episódios',
+			'settings.specialsOrderingDescription' => 'Onde os especiais são reproduzidos na ordem de exibição de uma série',
+			'settings.specialsOrderingServer' => 'Seguir a ordem do servidor',
+			'settings.specialsOrderingAirDate' => 'Intercalar pela data de exibição',
+			'settings.specialsOrderingLast' => 'Após as temporadas regulares',
 			'settings.clickVideoTogglesPlayback' => 'Clicar no vídeo para alternar reprodução/pausa',
 			'settings.clickVideoTogglesPlaybackDescription' => 'Clicar no vídeo para reproduzir ou pausar em vez de mostrar os controles.',
 			'settings.videoPlayerControls' => 'Controles do reprodutor de vídeo',
@@ -2904,7 +2937,7 @@ extension on TranslationsPt {
 			'settings.importSettingsDescription' => 'Restaurar preferências a partir de um arquivo',
 			'settings.importSettingsConfirm' => 'Isso substituirá suas configurações atuais. Continuar?',
 			'settings.importSettingsSuccess' => 'Configurações importadas',
-			'settings.importSettingsInvalidFile' => 'Este arquivo não é uma exportação válida do Plexy',
+			'settings.importSettingsInvalidFile' => 'Este arquivo não é uma exportação válida do Plezy',
 			'settings.importSettingsNoUser' => 'Entre na conta antes de importar as configurações',
 			'settings.shortcutsReset' => 'Atalhos redefinidos para o padrão',
 			'settings.about' => 'Sobre',
@@ -2997,7 +3030,7 @@ extension on TranslationsPt {
 			'settings.forceTvMode' => 'Forçar modo TV',
 			'settings.forceTvModeDescription' => 'Forçar o layout de TV em dispositivos sem detecção automática. Requer reiniciar o app.',
 			'settings.startInFullscreen' => 'Iniciar em tela cheia',
-			'settings.startInFullscreenDescription' => 'Abrir o Plexy em modo de tela cheia ao iniciar',
+			'settings.startInFullscreenDescription' => 'Abrir o Plezy em modo de tela cheia ao iniciar',
 			'settings.exitFullscreenOnPlayerClose' => 'Sair da tela cheia ao fechar o reprodutor',
 			'settings.exitFullscreenOnPlayerCloseDescription' => 'Sair automaticamente da tela cheia ao fechar o reprodutor de vídeo',
 			'settings.autoHidePerformanceOverlay' => 'Ocultar automaticamente o painel de desempenho',
@@ -3018,7 +3051,17 @@ extension on TranslationsPt {
 			'settings.subtitlesAndConfig' => 'Legendas e configuração',
 			'settings.seekAndTiming' => 'Busca e tempo',
 			'settings.behavior' => 'Comportamento',
-			'settings.exportDialogTitle' => 'Exportar configurações do Plexy',
+			'settings.rememberPlayerChanges' => 'Lembrar alterações do reprodutor',
+			'settings.rememberPlayerChangesDescription' => 'Onde uma alteração feita durante a reprodução é salva e reaplicada',
+			'settings.scopePlaybackSpeed' => 'Velocidade de reprodução',
+			'settings.scopeShaderPreset' => 'Predefinição de shader',
+			'settings.scopeAspectRatio' => 'Proporção da tela',
+			'settings.scopeSyncOffsets' => 'Sincronização de áudio e legendas',
+			'settings.playerScopeOff' => 'Não salvar',
+			'settings.playerScopeGlobal' => 'Em todos os lugares',
+			'settings.playerScopeLibrary' => 'Por biblioteca',
+			'settings.playerScopeTitle' => 'Por série ou filme',
+			'settings.exportDialogTitle' => 'Exportar configurações do Plezy',
 			'search.hint' => 'Buscar filmes, séries, músicas...',
 			'search.tryDifferentTerm' => 'Tente um termo de busca diferente',
 			'search.searchYourMedia' => 'Buscar suas mídias',
@@ -3187,6 +3230,8 @@ extension on TranslationsPt {
 			'mediaMenu.deleteMovieTitle' => 'Excluir este filme?',
 			'mediaMenu.deleteEpisodeConfirm' => 'Excluir episódio',
 			'mediaMenu.deleteSeasonConfirm' => 'Excluir temporada',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteShowConfirm' => 'Excluir série',
 			'mediaMenu.deleteMovieConfirm' => 'Excluir filme',
 			'mediaMenu.deleteAnyway' => 'Excluir mesmo assim',
@@ -3195,15 +3240,13 @@ extension on TranslationsPt {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n, one: 'Isso exclui o ${n} episódio e o arquivo dele.', other: 'Isso exclui todos os ${n} episódios e os arquivos deles.', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n, one: 'Este item está armazenado como ${n} arquivo, que será excluído.', other: 'Este item está armazenado em ${n} arquivos, e todos eles serão excluídos.', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n, one: 'Mais ${n} episódio está armazenado no mesmo arquivo e também será excluído:', other: 'Mais ${n} episódios estão armazenados no mesmo arquivo e também serão excluídos:', ), 
-			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'O Plexy não conseguiu verificar quais arquivos serão removidos, então pode excluir mais do que o item acima. Cancele e tente novamente, ou exclua mesmo assim.',
-			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Seu servidor não forneceu detalhes do arquivo para este item, então o Plexy não pode verificar quais arquivos serão removidos. Pode excluir mais do que o item acima.',
+			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'O Plezy não conseguiu verificar quais arquivos serão removidos, então pode excluir mais do que o item acima. Cancele e tente novamente, ou exclua mesmo assim.',
+			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Seu servidor não forneceu detalhes do arquivo para este item, então o Plezy não pode verificar quais arquivos serão removidos. Pode excluir mais do que o item acima.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Item de mídia excluído com sucesso',
 			'mediaMenu.mediaFailedToDelete' => 'Falha ao excluir item de mídia',
 			'mediaMenu.rate' => 'Avaliar',
 			'mediaMenu.playFromBeginning' => 'Reproduzir do início',
 			'mediaMenu.playVersion' => 'Reproduzir versão...',
-			_ => null,
-		} ?? switch (path) {
 			'rateSheet.title' => 'Avaliar',
 			'rateSheet.server' => 'Servidor',
 			'rateSheet.favorite' => 'Favorito',
@@ -3245,12 +3288,7 @@ extension on TranslationsPt {
 			'audioTracks.track' => ({required Object n}) => 'Faixa de áudio ${n}',
 			'videoControls.audioLabel' => 'Áudio',
 			'videoControls.subtitlesLabel' => 'Legendas',
-			'videoControls.resetToZero' => 'Redefinir para 0ms',
 			'videoControls.addTime' => ({required Object amount, required Object unit}) => '+${amount}${unit}',
-			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
-			'videoControls.playsLater' => ({required Object label}) => '${label} reproduz depois',
-			'videoControls.playsEarlier' => ({required Object label}) => '${label} reproduz antes',
-			'videoControls.noOffset' => 'Sem deslocamento',
 			'videoControls.letterbox' => 'Letterbox',
 			'videoControls.fillScreen' => 'Preencher tela',
 			'videoControls.stretch' => 'Esticar',
@@ -3337,6 +3375,11 @@ extension on TranslationsPt {
 			'videoControls.osdSubtitlesOff' => 'Legendas: desativadas',
 			'videoControls.osdSubtitles' => ({required Object track}) => 'Legendas: ${track}',
 			'videoControls.osdAudio' => ({required Object track}) => 'Áudio: ${track}',
+			'videoControls.resetToZero' => 'Redefinir para 0ms',
+			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
+			'videoControls.playsLater' => ({required Object label}) => '${label} reproduz depois',
+			'videoControls.playsEarlier' => ({required Object label}) => '${label} reproduz antes',
+			'videoControls.noOffset' => 'Sem deslocamento',
 			'messages.markedAsWatched' => 'Marcado como assistido',
 			'messages.markedAsUnwatched' => 'Marcado como não assistido',
 			'messages.markedAsWatchedOffline' => 'Marcado como assistido (será sincronizado quando online)',
@@ -3437,7 +3480,7 @@ extension on TranslationsPt {
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# comment',
 			'mpvConfig.embeddedVoHint' => 'vo, gpu-context e gpu-api são ignorados no Linux: o vídeo incorporado é sempre renderizado via vo=libmpv no plano de vídeo, e gpu-next (necessário para shaders de computação como ArtCNN) não pode ser executado incorporado.',
 			'dialog.confirmAction' => 'Confirmar Ação',
-			'profiles.addPlezyProfile' => 'Adicionar perfil Plexy',
+			'profiles.addPlezyProfile' => 'Adicionar perfil Plezy',
 			'profiles.switchingProfile' => 'Mudando perfil…',
 			'profiles.deleteThisProfileTitle' => 'Excluir este perfil?',
 			'profiles.deleteThisProfileMessage' => ({required Object displayName}) => 'Remover ${displayName}. As conexões não serão afetadas.',
@@ -3508,7 +3551,7 @@ extension on TranslationsPt {
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Sessões expiradas em ${count} servidores',
 			'connections.signInAgain' => 'Entrar novamente',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Editar conexão do ${product}',
-			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Adicione ou remova URLs para ${serverName}. O Plexy usará a URL acessível com menor latência.',
+			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Adicione ou remova URLs para ${serverName}. O Plezy usará a URL acessível com menor latência.',
 			'discover.title' => 'Descobrir',
 			'discover.noContentAvailable' => 'Nenhum conteúdo disponível',
 			'discover.addMediaToLibraries' => 'Adicione mídias às suas bibliotecas',
@@ -3643,9 +3686,9 @@ extension on TranslationsPt {
 			'logs.clearLogs' => 'Limpar Logs',
 			'logs.copyLogs' => 'Copiar Logs',
 			'logs.uploadLogs' => 'Enviar Logs',
-			'startup.failedTitle' => 'O Plexy não conseguiu iniciar',
+			'startup.failedTitle' => 'O Plezy não conseguiu iniciar',
 			'startup.failedBody' => 'Algo deu errado durante a inicialização. Os detalhes abaixo identificam o que falhou.',
-			'startup.failedBodyRepairable' => 'O arquivo de configurações salvo do Plexy está danificado e precisa ser reconstruído antes que o Plexy possa iniciar. Tentar novamente não vai ajudar — escolha Reparar armazenamento.',
+			'startup.failedBodyRepairable' => 'O arquivo de configurações salvo do Plezy está danificado e precisa ser reconstruído antes que o Plezy possa iniciar. Tentar novamente não vai ajudar — escolha Reparar armazenamento.',
 			'startup.phaseLabel' => 'Etapa',
 			'startup.showDetails' => 'Mostrar detalhes',
 			'startup.hideDetails' => 'Ocultar detalhes',
@@ -3654,16 +3697,16 @@ extension on TranslationsPt {
 			'startup.uploadDetails' => 'Enviar detalhes',
 			'startup.repairStorage' => 'Reparar armazenamento',
 			'startup.repairTitle' => 'Reparar dados armazenados?',
-			'startup.repairBodyCommon' => 'O arquivo de configurações do Plexy está danificado e não pode ser lido. Reparar redefine todas as configurações para o padrão.',
+			'startup.repairBodyCommon' => 'O arquivo de configurações do Plezy está danificado e não pode ser lido. Reparar redefine todas as configurações para o padrão.',
 			'startup.repairBodyOneCredential' => 'Um login salvo está danificado e não pode ser lido. Reparar remove apenas ele; suas outras configurações permanecem intactas.',
 			'startup.repairBodySignInsKept' => 'Seus servidores e perfis devem permanecer conectados.',
 			'startup.repairBodySignInsLost' => 'A chave que protege seus logins salvos não pode ser recuperada deste arquivo, então você terá que entrar novamente em todos os servidores e perfis. Nada no seu servidor de mídia é afetado.',
-			'startup.repairBodySessionsUncertain' => 'Os rastreadores (MAL, AniList, Simkl, Trakt) e o Seerr são armazenados separadamente e podem ou não ser preservados. O Plexy informará exatamente o que foi mantido.',
+			'startup.repairBodySessionsUncertain' => 'Os rastreadores (MAL, AniList, Simkl, Trakt) e o Seerr são armazenados separadamente e podem ou não ser preservados. O Plezy informará exatamente o que foi mantido.',
 			'startup.repairConfirm' => 'Reparar',
 			'startup.repairSucceeded' => 'Armazenamento reparado',
 			'startup.repairNeedsRestart' => 'Armazenamento reparado — reinício necessário',
-			'startup.restartRequiredBody' => 'Seus dados foram reparados, mas o Plexy precisa iniciar do zero antes de usá-los. Feche o Plexy e abra-o novamente.',
-			'startup.quitPlezy' => 'Sair do Plexy',
+			'startup.restartRequiredBody' => 'Seus dados foram reparados, mas o Plezy precisa iniciar do zero antes de usá-los. Feche o Plezy e abra-o novamente.',
+			'startup.quitPlezy' => 'Sair do Plezy',
 			'startup.repairFailed' => 'Falha no reparo',
 			'startup.repairKeptSignIns' => 'Seus servidores e perfis ainda estão conectados.',
 			'startup.repairLostSignIns' => 'A chave que protege seus logins salvos não pôde ser recuperada. Você terá que entrar novamente em todos os servidores e perfis.',
@@ -3672,7 +3715,7 @@ extension on TranslationsPt {
 			'startup.backupWarning' => 'Ele contém suas credenciais de login. Não envie nem compartilhe.',
 			'startup.deleteBackup' => 'Excluir cópia',
 			'startup.backupDeleted' => 'Cópia excluída.',
-			'startup.previousFailureTitle' => 'O Plexy falhou ao iniciar da última vez',
+			'startup.previousFailureTitle' => 'O Plezy falhou ao iniciar da última vez',
 			'licenses.relatedPackages' => 'Pacotes Relacionados',
 			'licenses.license' => 'Licença',
 			'licenses.licenseNumber' => ({required Object number}) => 'Licença ${number}',
@@ -3701,6 +3744,8 @@ extension on TranslationsPt {
 			'explore.status.ended' => 'Finalizada',
 			'explore.status.canceled' => 'Cancelada',
 			'explore.status.upcoming' => 'Em breve',
+			_ => null,
+		} ?? switch (path) {
 			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n, one: '${n} episódio', other: '${n} episódios', ), 
 			'explore.cast' => 'Elenco',
 			'explore.characters' => 'Personagens',
@@ -3716,15 +3761,12 @@ extension on TranslationsPt {
 			'explore.emptyTitle' => 'Ainda não há nada aqui',
 			'explore.emptyMessage' => ({required Object source}) => 'As linhas de ${source} aparecerão aqui quando tiverem conteúdo.',
 			'explore.searchHint' => ({required Object source}) => 'Buscar em ${source}',
-			_ => null,
-		} ?? switch (path) {
 			'explore.searchEmpty' => ({required Object query}) => 'Nenhum resultado para "${query}"',
 			'explore.searchPrompt' => ({required Object source}) => 'Busque filmes e séries em ${source}.',
 			'explore.searchFailed' => 'Falha na busca. Verifique sua conexão e tente novamente.',
 			'explore.badge.rankPopular' => ({required Object n}) => '#${n} popular',
 			'explore.badge.rankAiring' => ({required Object n}) => '#${n} no ar',
 			'explore.badge.rankRated' => ({required Object n}) => '#${n} avaliado',
-			'explore.badge.rankFavorited' => ({required Object n}) => '#${n} favoritado',
 			'explore.badge.rankTrending' => ({required Object n}) => '#${n} em alta',
 			'explore.badge.rankSeasonal' => ({required Object n, required Object season}) => '#${n} em ${season}',
 			'explore.badge.watchingNow' => ({required Object n}) => '${n} assistindo',
@@ -3743,6 +3785,7 @@ extension on TranslationsPt {
 			'explore.badge.episodesShort' => ({required Object n}) => '${n} epps',
 			'explore.badge.minutesPerEpisode' => ({required Object n}) => '${n} min/ep',
 			'explore.badge.adult' => '18+',
+			'explore.badge.rankFavorited' => ({required Object n}) => '#${n} favoritado',
 			'explore.stats.listed' => ({required Object n}) => '${n} listados',
 			'explore.stats.viewersDay' => ({required Object n}) => '${n} assistiram hoje',
 			'explore.stats.viewersWeek' => ({required Object n}) => '${n} assistiram esta semana',
@@ -3971,6 +4014,9 @@ extension on TranslationsPt {
 			'music.repeatOne' => 'Repetir uma faixa',
 			'music.instantMixNoServer' => 'Nenhum servidor está disponível para uma mistura instantânea',
 			'music.noAudioUrl' => ({required Object track}) => 'Nenhuma URL de áudio está disponível para ${track}',
+			'music.discography.singlesAndEps' => 'Singles e EPs',
+			'music.discography.live' => 'Ao vivo',
+			'music.discography.compilations' => 'Compilações',
 			'watchTogether.title' => 'Assistir Juntos',
 			'watchTogether.description' => 'Assista a conteúdos sincronizados com amigos e familiares',
 			'watchTogether.createSession' => 'Criar sessão',
@@ -4116,14 +4162,14 @@ extension on TranslationsPt {
 			'downloads.backgroundWarning.bannerAction' => 'Detalhes',
 			'downloads.backgroundWarning.sheetTitle' => 'Os downloads em segundo plano estão bloqueados',
 			'downloads.backgroundWarning.sheetTitleDegraded' => 'Os downloads em segundo plano podem ser limitados',
-			'downloads.backgroundWarning.sheetIntro' => 'O Android está impedindo que o Plexy faça downloads de forma confiável em segundo plano.',
-			'downloads.backgroundWarning.sheetIntroDegraded' => 'Seu dispositivo está limitando quando o Plexy pode fazer downloads em segundo plano.',
-			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'O uso em segundo plano do Plexy está restrito. Defina o uso da bateria ou o uso em segundo plano como "Sem restrições".',
-			'downloads.backgroundWarning.reasonStandbyRestricted' => 'O Android colocou o Plexy em um modo de espera restrito. Defina o uso da bateria como "Sem restrições".',
+			'downloads.backgroundWarning.sheetIntro' => 'O Android está impedindo que o Plezy faça downloads de forma confiável em segundo plano.',
+			'downloads.backgroundWarning.sheetIntroDegraded' => 'Seu dispositivo está limitando quando o Plezy pode fazer downloads em segundo plano.',
+			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'O uso em segundo plano do Plezy está restrito. Defina o uso da bateria ou o uso em segundo plano como "Sem restrições".',
+			'downloads.backgroundWarning.reasonStandbyRestricted' => 'O Android colocou o Plezy em um modo de espera restrito. Defina o uso da bateria como "Sem restrições".',
 			'downloads.backgroundWarning.reasonDownloadChannelBlocked' => 'As notificações de download estão desativadas; por isso, o progresso e os controles podem ficar indisponíveis.',
 			'downloads.backgroundWarning.reasonNotificationsDisabled' => 'As notificações estão desativadas. No Android 13 ou mais recente, elas são necessárias para downloads longos em segundo plano.',
 			'downloads.backgroundWarning.reasonDataSaver' => 'A Economia de dados está ativada e bloqueia downloads em segundo plano usando dados móveis. Os downloads ainda devem funcionar no Wi-Fi.',
-			'downloads.backgroundWarning.reasonOemUnknown' => 'Os downloads foram interrompidos várias vezes enquanto o Plexy estava em segundo plano. Verifique as configurações de bateria ou uso em segundo plano do Plexy.',
+			'downloads.backgroundWarning.reasonOemUnknown' => 'Os downloads foram interrompidos várias vezes enquanto o Plezy estava em segundo plano. Verifique as configurações de bateria ou uso em segundo plano do Plezy.',
 			'downloads.backgroundWarning.openSettings' => 'Abrir configurações',
 			'downloads.backgroundWarning.stillNotWorking' => 'Ajuda específica para o dispositivo',
 			'downloads.backgroundWarning.stillNotWorkingDescription' => 'Veja as instruções para seu dispositivo ou, se o problema persistir, envie um log em Configurações › Ver Logs.',
@@ -4176,19 +4222,19 @@ extension on TranslationsPt {
 			'companionRemote.session.startServer' => 'Iniciar servidor',
 			'companionRemote.session.stopServer' => 'Parar servidor',
 			'companionRemote.session.minimize' => 'Minimizar',
-			'companionRemote.pairing.discoveryDescription' => 'Dispositivos Plexy com a mesma conta Plex aparecem aqui',
+			'companionRemote.pairing.discoveryDescription' => 'Dispositivos Plezy com a mesma conta Plex aparecem aqui',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => 'Conectando...',
 			'companionRemote.pairing.searchingForDevices' => 'Procurando dispositivos...',
 			'companionRemote.pairing.noDevicesFound' => 'Nenhum dispositivo encontrado na sua rede',
-			'companionRemote.pairing.noDevicesHint' => 'Abra o Plexy no desktop e use a mesma rede Wi-Fi',
+			'companionRemote.pairing.noDevicesHint' => 'Abra o Plezy no desktop e use a mesma rede Wi-Fi',
 			'companionRemote.pairing.availableDevices' => 'Dispositivos disponíveis',
 			'companionRemote.pairing.manualConnection' => 'Conexão manual',
 			'companionRemote.pairing.cryptoInitFailed' => 'Não foi possível iniciar a conexão segura. Entre no Plex primeiro.',
 			'companionRemote.pairing.validationHostRequired' => 'Insira o endereço do host',
 			'companionRemote.pairing.validationHostFormat' => 'O formato deve ser IP:porta (ex.: 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'A conexão atingiu o tempo limite. Use a mesma rede nos dois dispositivos.',
-			'companionRemote.pairing.sessionNotFound' => 'Dispositivo não encontrado. Verifique se o Plexy está em execução no host.',
+			'companionRemote.pairing.sessionNotFound' => 'Dispositivo não encontrado. Verifique se o Plezy está em execução no host.',
 			'companionRemote.pairing.authFailed' => 'Falha na autenticação. Ambos os dispositivos precisam da mesma conta Plex.',
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Falha ao conectar: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Deseja desconectar da sessão remota?',
@@ -4212,6 +4258,8 @@ extension on TranslationsPt {
 			'companionRemote.remote.stop' => 'Parar',
 			'companionRemote.remote.seekForward' => 'Avançar',
 			'companionRemote.remote.volume' => 'Volume',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.volumeDown' => 'Diminuir',
 			'companionRemote.remote.volumeUp' => 'Aumentar',
 			'companionRemote.remote.fullscreen' => 'Tela cheia',
@@ -4230,8 +4278,6 @@ extension on TranslationsPt {
 			'videoSettings.playbackSpeed' => 'Velocidade de Reprodução',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Ativo (${duration})',
-			_ => null,
-		} ?? switch (path) {
 			'videoSettings.zoom' => 'Zoom',
 			'videoSettings.sleepTimer' => 'Temporizador de suspensão',
 			'videoSettings.audioSync' => 'Sincronia de áudio',
@@ -4409,11 +4455,11 @@ extension on TranslationsPt {
 			'trakt.connected' => 'Conectado',
 			'trakt.connectedAs' => ({required Object username}) => 'Conectado como @${username}',
 			'trakt.disconnectConfirm' => 'Desconectar a conta do Trakt?',
-			'trakt.disconnectConfirmBody' => 'O Plexy deixará de enviar eventos ao Trakt. Você pode reconectar quando quiser.',
+			'trakt.disconnectConfirmBody' => 'O Plezy deixará de enviar eventos ao Trakt. Você pode reconectar quando quiser.',
 			'trakt.scrobble' => 'Scrobbling em tempo real',
 			'trakt.scrobbleDescription' => 'Envia eventos de reprodução, pausa e parada ao Trakt durante a exibição.',
 			'trakt.watchedSync' => 'Sincronizar status de assistido',
-			'trakt.watchedSyncDescription' => 'Ao marcar itens como assistidos no Plexy, eles também serão marcados no Trakt.',
+			'trakt.watchedSyncDescription' => 'Ao marcar itens como assistidos no Plezy, eles também serão marcados no Trakt.',
 			'seerr.title' => 'Seerr',
 			'seerr.connectTitle' => 'Conectar ao Seerr',
 			'seerr.serverUrl' => 'URL do servidor',
@@ -4423,10 +4469,10 @@ extension on TranslationsPt {
 			'seerr.signInWithEmby' => 'Entrar com Emby',
 			'seerr.signInWithLocal' => 'Usar uma conta local',
 			'seerr.email' => 'E-mail',
-			'seerr.noSignInMethods' => 'Esta instância do Seerr não oferece nenhum método de acesso compatível com o Plexy.',
+			'seerr.noSignInMethods' => 'Esta instância do Seerr não oferece nenhum método de acesso compatível com o Plezy.',
 			'seerr.instance' => 'Instância',
 			'seerr.disconnectConfirm' => 'Desconectar Seerr?',
-			'seerr.disconnectConfirmBody' => 'O Plexy esquecerá esta instância do Seerr. Reconecte quando quiser.',
+			'seerr.disconnectConfirmBody' => 'O Plezy esquecerá esta instância do Seerr. Reconecte quando quiser.',
 			'seerr.request' => 'Solicitar',
 			'seerr.request4k' => 'Solicitar em 4K',
 			'seerr.seasons' => 'Temporadas',
@@ -4461,14 +4507,14 @@ extension on TranslationsPt {
 			'services.scrobble' => 'Registrar progresso automaticamente',
 			'services.scrobbleDescription' => 'Atualiza sua lista quando você termina um episódio ou filme.',
 			'services.disconnectConfirm' => ({required Object service}) => 'Desconectar ${service}?',
-			'services.disconnectConfirmBody' => ({required Object service}) => 'O Plexy deixará de atualizar ${service}. Reconecte quando quiser.',
+			'services.disconnectConfirmBody' => ({required Object service}) => 'O Plezy deixará de atualizar ${service}. Reconecte quando quiser.',
 			'services.connectFailed' => ({required Object service}) => 'Não foi possível conectar ao ${service}. Tente novamente.',
 			'services.names.mal' => 'MyAnimeList',
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
-			'services.deviceCode.title' => ({required Object service}) => 'Ativar o Plexy no ${service}',
+			'services.deviceCode.title' => ({required Object service}) => 'Ativar o Plezy no ${service}',
 			'services.deviceCode.instructions' => 'Leia o código QR ou acesse o endereço abaixo e insira este código:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Abrir ${service} para ativar',
 			'services.deviceCode.copyCode' => 'Copiar código de ativação',

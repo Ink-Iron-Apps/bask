@@ -130,6 +130,8 @@ PlexMetadataDto _$PlexMetadataDtoFromJson(Map<String, dynamic> json) => PlexMeta
   label: _tagListFromJson(json['Label']),
   style: _tagListFromJson(json['Style']),
   mood: _tagListFromJson(json['Mood']),
+  format: _tagListFromJson(json['Format']),
+  subformat: _tagListFromJson(json['Subformat']),
   audioLanguage: json['audioLanguage'] as String?,
   subtitleLanguage: json['subtitleLanguage'] as String?,
   subtitleMode: flexibleInt(json['subtitleMode']),

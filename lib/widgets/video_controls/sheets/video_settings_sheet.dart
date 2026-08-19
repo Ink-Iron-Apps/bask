@@ -17,6 +17,7 @@ import '../../../mpv/mpv.dart';
 import '../../../mpv/player/player_native.dart';
 import '../../../providers/shader_provider.dart';
 import '../../../services/file_picker_service.dart';
+import '../../../services/scoped_player_prefs.dart';
 import '../../../services/settings_service.dart';
 import '../../../services/sleep_timer_service.dart';
 import '../../../services/video_filter_manager.dart';
@@ -45,8 +46,6 @@ enum _SettingsView {
   zoom,
   versionQuality,
   sleep,
-  audioSync,
-  subtitleSync,
   audioDevice,
   shader,
   dvConversion,
@@ -514,22 +513,17 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   }
 
   void _navigateTo(_SettingsView view) {
-    // Sync views open as a compact top bar instead of a sub-view
-    if (view == _SettingsView.audioSync || view == _SettingsView.subtitleSync) {
-      _openSyncBar(view);
-      return;
-    }
     setState(() {
       _currentView = view;
     });
     OverlaySheetController.maybeOf(context)?.refocus();
   }
 
-  void _openSyncBar(_SettingsView view) {
+  // Sync adjustments open as a compact top bar instead of a sub-view.
+  void _openSyncBar({required bool isSubtitle}) {
     final controller = OverlaySheetController.maybeOf(context);
     if (controller == null) return;
 
-    final isSubtitle = view == _SettingsView.subtitleSync;
     final title = isSubtitle ? t.videoSettings.subtitleSync : t.videoSettings.audioSync;
     final icon = isSubtitle ? Symbols.subtitles_rounded : Symbols.sync_rounded;
     final propertyName = isSubtitle ? 'sub-delay' : 'audio-delay';
@@ -555,13 +549,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             initialOffset: initialOffset,
             sliderFocusNode: sliderFocusNode,
             onOffsetChanged: (offset) async {
-              final settings = SettingsService.instance;
-              if (isSubtitle) {
-                await settings.write(SettingsService.subtitleSyncOffset, offset);
-              } else {
-                await settings.write(SettingsService.audioSyncOffset, offset);
-              }
-              _state.onSyncOffsetChanged?.call(propertyName, offset);
+              final pref = isSubtitle ? ScopedPlayerPrefs.subtitleSyncOffset : ScopedPlayerPrefs.audioSyncOffset;
+              await ScopedPlayerPrefs.write(pref, _state.metadata, offset);
             },
           ),
         )
@@ -598,10 +587,6 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return _versionQualityTitle();
       case _SettingsView.sleep:
         return t.videoSettings.sleepTimer;
-      case _SettingsView.audioSync:
-        return t.videoSettings.audioSync;
-      case _SettingsView.subtitleSync:
-        return t.videoSettings.subtitleSync;
       case _SettingsView.audioDevice:
         return t.videoSettings.audioOutput;
       case _SettingsView.shader:
@@ -629,10 +614,6 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return Symbols.art_track_rounded;
       case _SettingsView.sleep:
         return Symbols.bedtime_rounded;
-      case _SettingsView.audioSync:
-        return Symbols.sync_rounded;
-      case _SettingsView.subtitleSync:
-        return Symbols.subtitles_rounded;
       case _SettingsView.audioDevice:
         return Symbols.speaker_rounded;
       case _SettingsView.shader:
@@ -796,7 +777,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           title: t.videoSettings.audioSync,
           valueText: formatSyncOffset(_audioSyncOffset.toDouble()),
           isHighlighted: _audioSyncOffset != 0,
-          onTap: () => _navigateTo(_SettingsView.audioSync),
+          onTap: () => _openSyncBar(isSubtitle: false),
         ),
 
         _SettingsMenuItem(
@@ -804,7 +785,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           title: t.videoSettings.subtitleSync,
           valueText: formatSyncOffset(_subtitleSyncOffset.toDouble()),
           isHighlighted: _subtitleSyncOffset != 0,
-          onTap: () => _navigateTo(_SettingsView.subtitleSync),
+          onTap: () => _openSyncBar(isSubtitle: true),
         ),
 
         if (_supportsHdrControl)
@@ -1049,8 +1030,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
               trailing: isSelected ? AppIcon(Symbols.check_rounded, fill: 1, color: primary) : null,
               onTap: () async {
                 await widget.player.setRate(speed);
-                // Save as default playback speed
-                await SettingsService.instance.write(SettingsService.defaultPlaybackSpeed, speed);
+                // Save at the configured persistence scope (global by default).
+                await ScopedPlayerPrefs.write(ScopedPlayerPrefs.playbackSpeed, _state.metadata, speed);
                 if (context.mounted) {
                   OverlaySheetController.of(context).close(); // Close sheet after selection
                 }
@@ -1349,7 +1330,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
                   _state.onToggleAmbientLighting?.call();
                 }
                 await _state.shaderService!.applyPreset(preset);
-                await shaderProvider.setPreset(preset);
+                await ScopedPlayerPrefs.write(ScopedPlayerPrefs.shaderPreset, _state.metadata, preset.id);
+                shaderProvider.setCurrentPreset(preset);
                 if (!context.mounted) return;
                 _state.onShaderChanged?.call();
                 OverlaySheetController.of(context).close();
@@ -1378,7 +1360,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           _state.onToggleAmbientLighting?.call();
         }
         await _state.shaderService!.applyPreset(preset);
-        await shaderProvider.setPreset(preset);
+        await ScopedPlayerPrefs.write(ScopedPlayerPrefs.shaderPreset, _state.metadata, preset.id);
+        shaderProvider.setCurrentPreset(preset);
         if (!mounted) return;
         _state.onShaderChanged?.call();
       }
@@ -1470,9 +1453,6 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             return _buildVersionQualityView();
           case _SettingsView.sleep:
             return _buildSleepView();
-          case _SettingsView.audioSync:
-          case _SettingsView.subtitleSync:
-            return _buildMenuView(); // Sync views open as top bars, fallback to menu
           case _SettingsView.audioDevice:
             return _buildAudioDeviceView();
           case _SettingsView.shader:
@@ -1535,9 +1515,7 @@ class _CompactSyncBarState extends State<_CompactSyncBar> {
             player: widget.player,
             propertyName: widget.propertyName,
             initialOffset: widget.initialOffset,
-            labelText: widget.title,
             onOffsetChanged: widget.onOffsetChanged,
-            compact: true,
             sliderFocusNode: widget.sliderFocusNode,
             resetFocusNode: _resetFocusNode,
             closeFocusNode: _closeFocusNode,
