@@ -476,7 +476,7 @@ void main() {
         clientResolver: (_, {clientScopeId}) => null,
       );
 
-      final all = await manager.getAllPinnedMetadata(preferActiveScope: true, activeProfileId: 'profile-b');
+      final all = await manager.getAllPinnedMetadata(activeProfileId: 'profile-b');
       final item = await manager.lookupMetadata(
         ServerId('jf-machine'),
         'item-1',
@@ -534,7 +534,7 @@ void main() {
         clientResolver: (_, {clientScopeId}) => null,
       );
 
-      final all = await manager.getAllPinnedMetadata(preferActiveScope: true, activeProfileId: 'profile-b');
+      final all = await manager.getAllPinnedMetadata(activeProfileId: 'profile-b');
       final item = await manager.lookupMetadata(
         serverId,
         'item-1',
@@ -744,7 +744,7 @@ void main() {
       expect(await PlexApiCache.instance.getMetadata(transferScope.cacheServerId, 'item-1'), isNull);
 
       await db.clearAllDownloadOwners();
-      expect(await db.getDownloadOwnerCount(globalKey), 0);
+      expect(await db.getValidDownloadOwnersForKey(globalKey), isEmpty);
       await db.adoptLegacyDownloadsForProfile('profile-b');
       await transferManager.adoptTransferredPlexMetadataForProfile('profile-b');
 

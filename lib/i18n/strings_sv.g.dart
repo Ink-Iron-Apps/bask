@@ -98,7 +98,7 @@ class _Translations$app$sv extends Translations$app$en {
 	final TranslationsSv _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Plexy';
+	@override String get title => 'Plezy';
 }
 
 // Path: auth
@@ -122,7 +122,7 @@ class _Translations$auth$sv extends Translations$auth$en {
 	@override String get quickConnectWaiting => 'Väntar på godkännande…';
 	@override String get quickConnectCancel => 'Avbryt';
 	@override String get quickConnectExpired => 'Quick Connect har gått ut. Försök igen.';
-	@override String get localDataRecoveryRequired => 'Plexy kunde inte återställa lokala inloggningsuppgifter och väntande uppspelningsdata på ett säkert sätt. Logga in igen.';
+	@override String get localDataRecoveryRequired => 'Plezy kunde inte återställa lokala inloggningsuppgifter och väntande uppspelningsdata på ett säkert sätt. Logga in igen.';
 	@override String get pinCheckRejected => 'Plex PIN-kontrollen avvisades';
 }
 
@@ -222,7 +222,7 @@ class _Translations$settings$sv extends Translations$settings$en {
 
 	// Translations
 	@override String get title => 'Inställningar';
-	@override String get supportDeveloper => 'Stöd Plexy';
+	@override String get supportDeveloper => 'Stöd Plezy';
 	@override String get supportDeveloperDescription => 'Donera via Liberapay för att finansiera utvecklingen';
 	@override String get language => 'Språk';
 	@override String get theme => 'Tema';
@@ -316,6 +316,11 @@ class _Translations$settings$sv extends Translations$settings$en {
 	@override String get followServerTrackSelectionsDescription => 'Vid avsnittsbyte används ljudet och undertexterna som valts på servern i stället för att föra över det aktuella valet';
 	@override String get showChapterMarkersOnTimeline => 'Visa kapitelmarkörer på tidslinjen';
 	@override String get showChapterMarkersOnTimelineDescription => 'Dela upp tidslinjen vid kapitelgränser';
+	@override String get specialsOrdering => 'Specialavsnitt i episodordning';
+	@override String get specialsOrderingDescription => 'Var specialavsnitt spelas upp i seriens visningsordning';
+	@override String get specialsOrderingServer => 'Följ serverordningen';
+	@override String get specialsOrderingAirDate => 'Infoga efter sändningsdatum';
+	@override String get specialsOrderingLast => 'Efter vanliga säsonger';
 	@override String get clickVideoTogglesPlayback => 'Klicka på videon för att spela upp eller pausa';
 	@override String get clickVideoTogglesPlaybackDescription => 'Klicka på videon för att spela upp eller pausa i stället för att visa kontrollerna.';
 	@override String get videoPlayerControls => 'Videospelarens kontroller';
@@ -347,7 +352,7 @@ class _Translations$settings$sv extends Translations$settings$en {
 	@override String get importSettingsDescription => 'Återställ inställningar från en fil';
 	@override String get importSettingsConfirm => 'Detta ersätter dina nuvarande inställningar. Fortsätta?';
 	@override String get importSettingsSuccess => 'Inställningar importerade';
-	@override String get importSettingsInvalidFile => 'Filen är inte en giltig export av Plexy-inställningar';
+	@override String get importSettingsInvalidFile => 'Filen är inte en giltig export av Plezy-inställningar';
 	@override String get importSettingsNoUser => 'Logga in innan du importerar inställningar';
 	@override String get shortcutsReset => 'Genvägarna har återställts till standard';
 	@override String get about => 'Om';
@@ -440,7 +445,7 @@ class _Translations$settings$sv extends Translations$settings$en {
 	@override String get forceTvMode => 'Tvinga TV-läge';
 	@override String get forceTvModeDescription => 'Tvinga TV-layout. För enheter som inte upptäcks automatiskt. Kräver omstart.';
 	@override String get startInFullscreen => 'Starta i helskärm';
-	@override String get startInFullscreenDescription => 'Öppna Plexy i helskärm vid start';
+	@override String get startInFullscreenDescription => 'Öppna Plezy i helskärm vid start';
 	@override String get exitFullscreenOnPlayerClose => 'Avsluta helskärm vid stängning av spelare';
 	@override String get exitFullscreenOnPlayerCloseDescription => 'Avslutar automatiskt helskärmsläge när videospelaren stängs';
 	@override String get autoHidePerformanceOverlay => 'Dölj prestandainformation automatiskt';
@@ -461,7 +466,17 @@ class _Translations$settings$sv extends Translations$settings$en {
 	@override String get subtitlesAndConfig => 'Undertexter och konfiguration';
 	@override String get seekAndTiming => 'Spolning och tidsinställningar';
 	@override String get behavior => 'Beteende';
-	@override String get exportDialogTitle => 'Exportera Plexy-inställningar';
+	@override String get rememberPlayerChanges => 'Kom ihåg spelarändringar';
+	@override String get rememberPlayerChangesDescription => 'Var en ändring under uppspelning sparas och tillämpas igen';
+	@override String get scopePlaybackSpeed => 'Uppspelningshastighet';
+	@override String get scopeShaderPreset => 'Förinställning för shader';
+	@override String get scopeAspectRatio => 'Bildförhållande';
+	@override String get scopeSyncOffsets => 'Synkronisering av ljud och undertexter';
+	@override String get playerScopeOff => 'Spara inte';
+	@override String get playerScopeGlobal => 'Överallt';
+	@override String get playerScopeLibrary => 'Per bibliotek';
+	@override String get playerScopeTitle => 'Per serie eller film';
+	@override String get exportDialogTitle => 'Exportera Plezy-inställningar';
 }
 
 // Path: search
@@ -659,8 +674,8 @@ class _Translations$mediaMenu$sv extends Translations$mediaMenu$en {
 		one: '${n} annat avsnitt lagras i samma fil och kommer också att tas bort:',
 		other: '${n} andra avsnitt lagras i samma fil och kommer också att tas bort:',
 	);
-	@override String get deleteScopeUnverifiedProbeFailed => 'Plexy kunde inte kontrollera vilka filer detta tar bort, så det kan ta bort mer än objektet ovan. Avbryt och försök igen, eller ta bort ändå.';
-	@override String get deleteScopeUnverifiedNoFileInfo => 'Din server tillhandahöll inte filinformation för detta objekt, så Plexy kan inte kontrollera vilka filer detta tar bort. Det kan ta bort mer än objektet ovan.';
+	@override String get deleteScopeUnverifiedProbeFailed => 'Plezy kunde inte kontrollera vilka filer detta tar bort, så det kan ta bort mer än objektet ovan. Avbryt och försök igen, eller ta bort ändå.';
+	@override String get deleteScopeUnverifiedNoFileInfo => 'Din server tillhandahöll inte filinformation för detta objekt, så Plezy kan inte kontrollera vilka filer detta tar bort. Det kan ta bort mer än objektet ovan.';
 	@override String get mediaDeletedSuccessfully => 'Medieobjektet har tagits bort';
 	@override String get mediaFailedToDelete => 'Det gick inte att ta bort medieobjektet';
 	@override String get rate => 'Betygsätt';
@@ -752,12 +767,7 @@ class _Translations$videoControls$sv extends Translations$videoControls$en {
 	// Translations
 	@override String get audioLabel => 'Ljud';
 	@override String get subtitlesLabel => 'Undertexter';
-	@override String get resetToZero => 'Återställ till 0 ms';
 	@override String addTime({required Object amount, required Object unit}) => '+${amount}${unit}';
-	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
-	@override String playsLater({required Object label}) => '${label} spelas senare';
-	@override String playsEarlier({required Object label}) => '${label} spelas tidigare';
-	@override String get noOffset => 'Ingen förskjutning';
 	@override String get letterbox => 'Brevlådeformat';
 	@override String get fillScreen => 'Fyll skärmen';
 	@override String get stretch => 'Sträck ut';
@@ -838,6 +848,11 @@ class _Translations$videoControls$sv extends Translations$videoControls$en {
 	@override String get osdSubtitlesOff => 'Undertexter: Av';
 	@override String osdSubtitles({required Object track}) => 'Undertexter: ${track}';
 	@override String osdAudio({required Object track}) => 'Ljud: ${track}';
+	@override String get resetToZero => 'Återställ till 0 ms';
+	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
+	@override String playsLater({required Object label}) => '${label} spelas senare';
+	@override String playsEarlier({required Object label}) => '${label} spelas tidigare';
+	@override String get noOffset => 'Ingen förskjutning';
 }
 
 // Path: messages
@@ -986,7 +1001,7 @@ class _Translations$profiles$sv extends Translations$profiles$en {
 	final TranslationsSv _root; // ignore: unused_field
 
 	// Translations
-	@override String get addPlezyProfile => 'Lägg till Plexy-profil';
+	@override String get addPlezyProfile => 'Lägg till Plezy-profil';
 	@override String get switchingProfile => 'Byter profil…';
 	@override String get deleteThisProfileTitle => 'Ta bort denna profil?';
 	@override String deleteThisProfileMessage({required Object displayName}) => 'Ta bort ${displayName}. Anslutningar påverkas inte.';
@@ -1066,7 +1081,7 @@ class _Translations$connections$sv extends Translations$connections$en {
 	@override String sessionExpiredMany({required Object count}) => 'Sessionen har gått ut för ${count} servrar';
 	@override String get signInAgain => 'Logga in igen';
 	@override String editMediaBrowserTitle({required Object product}) => 'Redigera ${product}-anslutning';
-	@override String editMediaBrowserIntro({required Object serverName}) => 'Lägg till eller ta bort URL:er för ${serverName}. Plexy använder den nåbara URL:en med lägst latens.';
+	@override String editMediaBrowserIntro({required Object serverName}) => 'Lägg till eller ta bort URL:er för ${serverName}. Plezy använder den nåbara URL:en med lägst latens.';
 }
 
 // Path: discover
@@ -1239,9 +1254,9 @@ class _Translations$startup$sv extends Translations$startup$en {
 	final TranslationsSv _root; // ignore: unused_field
 
 	// Translations
-	@override String get failedTitle => 'Plexy kunde inte starta';
+	@override String get failedTitle => 'Plezy kunde inte starta';
 	@override String get failedBody => 'Något gick fel under starten. Detaljerna nedan visar vad som misslyckades.';
-	@override String get failedBodyRepairable => 'Plexys sparade inställningsfil är skadad och måste byggas om innan Plexy kan starta. Att försöka igen hjälper inte — välj Reparera lagring.';
+	@override String get failedBodyRepairable => 'Plezys sparade inställningsfil är skadad och måste byggas om innan Plezy kan starta. Att försöka igen hjälper inte — välj Reparera lagring.';
 	@override String get phaseLabel => 'Steg';
 	@override String get showDetails => 'Visa detaljer';
 	@override String get hideDetails => 'Dölj detaljer';
@@ -1250,16 +1265,16 @@ class _Translations$startup$sv extends Translations$startup$en {
 	@override String get uploadDetails => 'Ladda upp detaljer';
 	@override String get repairStorage => 'Reparera lagring';
 	@override String get repairTitle => 'Reparera lagrade data?';
-	@override String get repairBodyCommon => 'Plexys inställningsfil är skadad och kan inte läsas. Reparationen återställer alla inställningar till standard.';
+	@override String get repairBodyCommon => 'Plezys inställningsfil är skadad och kan inte läsas. Reparationen återställer alla inställningar till standard.';
 	@override String get repairBodyOneCredential => 'En sparad inloggning är skadad och kan inte läsas. Reparationen tar bort endast den; dina andra inställningar lämnas orörda.';
 	@override String get repairBodySignInsKept => 'Dina servrar och profiler bör förbli inloggade.';
 	@override String get repairBodySignInsLost => 'Nyckeln som skyddar dina sparade inloggningar kan inte återställas från den här filen, så du måste logga in på varje server och profil igen. Inget på din medieserver påverkas.';
-	@override String get repairBodySessionsUncertain => 'Trackers (MAL, AniList, Simkl, Trakt) och Seerr lagras separat och kan överleva eller inte. Plexy berättar exakt vad som behållits.';
+	@override String get repairBodySessionsUncertain => 'Trackers (MAL, AniList, Simkl, Trakt) och Seerr lagras separat och kan överleva eller inte. Plezy berättar exakt vad som behållits.';
 	@override String get repairConfirm => 'Reparera';
 	@override String get repairSucceeded => 'Lagringen reparerad';
 	@override String get repairNeedsRestart => 'Lagringen reparerad — omstart krävs';
-	@override String get restartRequiredBody => 'Dina data reparerades, men Plexy måste starta om innan de kan användas. Stäng Plexy och öppna det igen.';
-	@override String get quitPlezy => 'Avsluta Plexy';
+	@override String get restartRequiredBody => 'Dina data reparerades, men Plezy måste starta om innan de kan användas. Stäng Plezy och öppna det igen.';
+	@override String get quitPlezy => 'Avsluta Plezy';
 	@override String get repairFailed => 'Reparationen misslyckades';
 	@override String get repairKeptSignIns => 'Dina servrar och profiler är fortfarande inloggade.';
 	@override String get repairLostSignIns => 'Nyckeln som skyddar dina sparade inloggningar kunde inte återställas. Du måste logga in på varje server och profil igen.';
@@ -1268,7 +1283,7 @@ class _Translations$startup$sv extends Translations$startup$en {
 	@override String get backupWarning => 'Den innehåller dina inloggningsuppgifter. Ladda inte upp eller dela den.';
 	@override String get deleteBackup => 'Ta bort kopia';
 	@override String get backupDeleted => 'Kopian borttagen.';
-	@override String get previousFailureTitle => 'Plexy kunde inte starta förra gången';
+	@override String get previousFailureTitle => 'Plezy kunde inte starta förra gången';
 }
 
 // Path: licenses
@@ -1527,6 +1542,7 @@ class _Translations$music$sv extends Translations$music$en {
 	@override String get repeatOne => 'Upprepa en låt';
 	@override String get instantMixNoServer => 'Ingen server är tillgänglig för en snabbmix';
 	@override String noAudioUrl({required Object track}) => 'Ingen ljud-URL är tillgänglig för ${track}';
+	@override late final _Translations$music$discography$sv discography = _Translations$music$discography$sv._(_root);
 }
 
 // Path: watchTogether
@@ -1980,11 +1996,11 @@ class _Translations$trakt$sv extends Translations$trakt$en {
 	@override String get connected => 'Ansluten';
 	@override String connectedAs({required Object username}) => 'Ansluten som @${username}';
 	@override String get disconnectConfirm => 'Koppla från Trakt-konto?';
-	@override String get disconnectConfirmBody => 'Plexy slutar skicka händelser till Trakt. Du kan återansluta när som helst.';
+	@override String get disconnectConfirmBody => 'Plezy slutar skicka händelser till Trakt. Du kan återansluta när som helst.';
 	@override String get scrobble => 'Realtidsspårning';
 	@override String get scrobbleDescription => 'Skicka händelser för uppspelning, paus och stopp till Trakt under uppspelningen.';
 	@override String get watchedSync => 'Synkronisera seddstatus';
-	@override String get watchedSyncDescription => 'När du markerar objekt som sedda i Plexy markeras de även som sedda på Trakt.';
+	@override String get watchedSyncDescription => 'När du markerar objekt som sedda i Plezy markeras de även som sedda på Trakt.';
 }
 
 // Path: seerr
@@ -2003,10 +2019,10 @@ class _Translations$seerr$sv extends Translations$seerr$en {
 	@override String get signInWithEmby => 'Logga in med Emby';
 	@override String get signInWithLocal => 'Använd ett lokalt konto';
 	@override String get email => 'E-post';
-	@override String get noSignInMethods => 'Den här Seerr-instansen erbjuder ingen inloggningsmetod som Plexy stöder.';
+	@override String get noSignInMethods => 'Den här Seerr-instansen erbjuder ingen inloggningsmetod som Plezy stöder.';
 	@override String get instance => 'Instans';
 	@override String get disconnectConfirm => 'Koppla från Seerr?';
-	@override String get disconnectConfirmBody => 'Plexy glömmer den här Seerr-instansen. Återanslut när som helst.';
+	@override String get disconnectConfirmBody => 'Plezy glömmer den här Seerr-instansen. Återanslut när som helst.';
 	@override String get request => 'Begär';
 	@override String get request4k => 'Begär i 4K';
 	@override String get seasons => 'Säsonger';
@@ -2050,7 +2066,7 @@ class _Translations$services$sv extends Translations$services$en {
 	@override String get scrobble => 'Spåra uppspelningen automatiskt';
 	@override String get scrobbleDescription => 'Uppdatera din lista när du har sett klart ett avsnitt eller en film.';
 	@override String disconnectConfirm({required Object service}) => 'Koppla från ${service}?';
-	@override String disconnectConfirmBody({required Object service}) => 'Plexy slutar uppdatera ${service}. Återanslut när som helst.';
+	@override String disconnectConfirmBody({required Object service}) => 'Plezy slutar uppdatera ${service}. Återanslut när som helst.';
 	@override String connectFailed({required Object service}) => 'Kunde inte ansluta till ${service}. Försök igen.';
 	@override late final _Translations$services$names$sv names = _Translations$services$names$sv._(_root);
 	@override late final _Translations$services$deviceCode$sv deviceCode = _Translations$services$deviceCode$sv._(_root);
@@ -2307,7 +2323,6 @@ class _Translations$explore$badge$sv extends Translations$explore$badge$en {
 	@override String rankPopular({required Object n}) => '#${n} populär';
 	@override String rankAiring({required Object n}) => '#${n} sänds nu';
 	@override String rankRated({required Object n}) => '#${n} bäst betygsatta';
-	@override String rankFavorited({required Object n}) => '#${n} mest favoritmarkerade';
 	@override String rankTrending({required Object n}) => '#${n} trendar';
 	@override String rankSeasonal({required Object n, required Object season}) => '#${n} i ${season}';
 	@override String watchingNow({required Object n}) => '${n} tittar nu';
@@ -2326,6 +2341,7 @@ class _Translations$explore$badge$sv extends Translations$explore$badge$en {
 	@override String episodesShort({required Object n}) => '${n} avsn.';
 	@override String minutesPerEpisode({required Object n}) => '${n} min/avsn';
 	@override String get adult => '18+';
+	@override String rankFavorited({required Object n}) => '#${n} mest favoritmarkerade';
 }
 
 // Path: explore.stats
@@ -2477,6 +2493,18 @@ class _Translations$explore$detail$sv extends Translations$explore$detail$en {
 	@override String get background => 'Bakgrund';
 }
 
+// Path: music.discography
+class _Translations$music$discography$sv extends Translations$music$discography$en {
+	_Translations$music$discography$sv._(TranslationsSv root) : this._root = root, super.internal(root);
+
+	final TranslationsSv _root; // ignore: unused_field
+
+	// Translations
+	@override String get singlesAndEps => 'Singlar och EP';
+	@override String get live => 'Live';
+	@override String get compilations => 'Samlingar';
+}
+
 // Path: downloads.backgroundWarning
 class _Translations$downloads$backgroundWarning$sv extends Translations$downloads$backgroundWarning$en {
 	_Translations$downloads$backgroundWarning$sv._(TranslationsSv root) : this._root = root, super.internal(root);
@@ -2489,14 +2517,14 @@ class _Translations$downloads$backgroundWarning$sv extends Translations$download
 	@override String get bannerAction => 'Detaljer';
 	@override String get sheetTitle => 'Bakgrundsnedladdningar är blockerade';
 	@override String get sheetTitleDegraded => 'Bakgrundsnedladdningar kan begränsas';
-	@override String get sheetIntro => 'Android hindrar Plexy från att ladda ned tillförlitligt i bakgrunden.';
-	@override String get sheetIntroDegraded => 'Din enhet begränsar när Plexy kan ladda ned i bakgrunden.';
-	@override String get reasonBackgroundRestricted => 'Plexys bakgrundsanvändning är begränsad. Ställ in batteri- eller bakgrundsanvändningen på "Obegränsad".';
-	@override String get reasonStandbyRestricted => 'Android har satt Plexy i ett begränsat vänteläge. Ställ in batterianvändningen på "Obegränsad".';
+	@override String get sheetIntro => 'Android hindrar Plezy från att ladda ned tillförlitligt i bakgrunden.';
+	@override String get sheetIntroDegraded => 'Din enhet begränsar när Plezy kan ladda ned i bakgrunden.';
+	@override String get reasonBackgroundRestricted => 'Plezys bakgrundsanvändning är begränsad. Ställ in batteri- eller bakgrundsanvändningen på "Obegränsad".';
+	@override String get reasonStandbyRestricted => 'Android har satt Plezy i ett begränsat vänteläge. Ställ in batterianvändningen på "Obegränsad".';
 	@override String get reasonDownloadChannelBlocked => 'Aviseringar om nedladdningar är avstängda, så förlopp och kontroller kanske inte är tillgängliga.';
 	@override String get reasonNotificationsDisabled => 'Aviseringar är avstängda. På Android 13 eller senare krävs de för långa bakgrundsnedladdningar.';
 	@override String get reasonDataSaver => 'Databesparing är aktiverad, vilket blockerar bakgrundsnedladdningar via mobildata. Nedladdningar bör fortfarande fungera via Wi-Fi.';
-	@override String get reasonOemUnknown => 'Nedladdningar stoppades upprepade gånger när Plexy kördes i bakgrunden. Kontrollera Plexys inställningar för batteri- eller bakgrundsanvändning.';
+	@override String get reasonOemUnknown => 'Nedladdningar stoppades upprepade gånger när Plezy kördes i bakgrunden. Kontrollera Plezys inställningar för batteri- eller bakgrundsanvändning.';
 	@override String get openSettings => 'Öppna inställningar';
 	@override String get stillNotWorking => 'Enhetsspecifik hjälp';
 	@override String get stillNotWorkingDescription => 'Se anvisningar för din enhet eller skicka en logg från Inställningar › Visa loggar om problemet kvarstår.';
@@ -2539,19 +2567,19 @@ class _Translations$companionRemote$pairing$sv extends Translations$companionRem
 	final TranslationsSv _root; // ignore: unused_field
 
 	// Translations
-	@override String get discoveryDescription => 'Plexy-enheter med samma Plex-konto visas här';
+	@override String get discoveryDescription => 'Plezy-enheter med samma Plex-konto visas här';
 	@override String get hostAddressHint => '192.168.1.100:48632';
 	@override String get connecting => 'Ansluter...';
 	@override String get searchingForDevices => 'Söker efter enheter...';
 	@override String get noDevicesFound => 'Inga enheter hittades i ditt nätverk';
-	@override String get noDevicesHint => 'Öppna Plexy på datorn och använd samma wifi';
+	@override String get noDevicesHint => 'Öppna Plezy på datorn och använd samma wifi';
 	@override String get availableDevices => 'Tillgängliga enheter';
 	@override String get manualConnection => 'Manuell anslutning';
 	@override String get cryptoInitFailed => 'Kunde inte starta säker anslutning. Logga in på Plex först.';
 	@override String get validationHostRequired => 'Ange värdadress';
 	@override String get validationHostFormat => 'Formatet måste vara IP:port (t.ex. 192.168.1.100:48632)';
 	@override String get connectionTimedOut => 'Anslutningen tog för lång tid. Använd samma nätverk på båda enheterna.';
-	@override String get sessionNotFound => 'Enheten hittades inte. Kontrollera att Plexy körs på värden.';
+	@override String get sessionNotFound => 'Enheten hittades inte. Kontrollera att Plezy körs på värden.';
 	@override String get authFailed => 'Autentiseringen misslyckades. Båda enheterna måste använda samma Plex-konto.';
 	@override String failedToConnect({required Object error}) => 'Kunde inte ansluta: ${error}';
 }
@@ -2630,7 +2658,7 @@ class _Translations$services$deviceCode$sv extends Translations$services$deviceC
 	final TranslationsSv _root; // ignore: unused_field
 
 	// Translations
-	@override String title({required Object service}) => 'Aktivera Plexy på ${service}';
+	@override String title({required Object service}) => 'Aktivera Plezy på ${service}';
 	@override String get instructions => 'Skanna QR-koden eller gå till adressen nedan och ange den här koden:';
 	@override String openToActivate({required Object service}) => 'Öppna ${service} för att aktivera';
 	@override String get copyCode => 'Kopiera aktiveringskod';
@@ -2690,7 +2718,7 @@ class _Translations$services$libraryFilter$sv extends Translations$services$libr
 extension on TranslationsSv {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.title' => 'Plexy',
+			'app.title' => 'Plezy',
 			'auth.signInWithPlex' => 'Logga in med Plex',
 			'auth.showQRCode' => 'Visa QR-kod',
 			'auth.authenticate' => 'Verifiera',
@@ -2705,7 +2733,7 @@ extension on TranslationsSv {
 			'auth.quickConnectWaiting' => 'Väntar på godkännande…',
 			'auth.quickConnectCancel' => 'Avbryt',
 			'auth.quickConnectExpired' => 'Quick Connect har gått ut. Försök igen.',
-			'auth.localDataRecoveryRequired' => 'Plexy kunde inte återställa lokala inloggningsuppgifter och väntande uppspelningsdata på ett säkert sätt. Logga in igen.',
+			'auth.localDataRecoveryRequired' => 'Plezy kunde inte återställa lokala inloggningsuppgifter och väntande uppspelningsdata på ett säkert sätt. Logga in igen.',
 			'auth.pinCheckRejected' => 'Plex PIN-kontrollen avvisades',
 			'common.cancel' => 'Avbryt',
 			'common.save' => 'Spara',
@@ -2779,7 +2807,7 @@ extension on TranslationsSv {
 			'update.latestVersion' => 'Du har den senaste versionen',
 			'update.checkFailed' => 'Det gick inte att söka efter uppdateringar',
 			'settings.title' => 'Inställningar',
-			'settings.supportDeveloper' => 'Stöd Plexy',
+			'settings.supportDeveloper' => 'Stöd Plezy',
 			'settings.supportDeveloperDescription' => 'Donera via Liberapay för att finansiera utvecklingen',
 			'settings.language' => 'Språk',
 			'settings.theme' => 'Tema',
@@ -2873,6 +2901,11 @@ extension on TranslationsSv {
 			'settings.followServerTrackSelectionsDescription' => 'Vid avsnittsbyte används ljudet och undertexterna som valts på servern i stället för att föra över det aktuella valet',
 			'settings.showChapterMarkersOnTimeline' => 'Visa kapitelmarkörer på tidslinjen',
 			'settings.showChapterMarkersOnTimelineDescription' => 'Dela upp tidslinjen vid kapitelgränser',
+			'settings.specialsOrdering' => 'Specialavsnitt i episodordning',
+			'settings.specialsOrderingDescription' => 'Var specialavsnitt spelas upp i seriens visningsordning',
+			'settings.specialsOrderingServer' => 'Följ serverordningen',
+			'settings.specialsOrderingAirDate' => 'Infoga efter sändningsdatum',
+			'settings.specialsOrderingLast' => 'Efter vanliga säsonger',
 			'settings.clickVideoTogglesPlayback' => 'Klicka på videon för att spela upp eller pausa',
 			'settings.clickVideoTogglesPlaybackDescription' => 'Klicka på videon för att spela upp eller pausa i stället för att visa kontrollerna.',
 			'settings.videoPlayerControls' => 'Videospelarens kontroller',
@@ -2904,7 +2937,7 @@ extension on TranslationsSv {
 			'settings.importSettingsDescription' => 'Återställ inställningar från en fil',
 			'settings.importSettingsConfirm' => 'Detta ersätter dina nuvarande inställningar. Fortsätta?',
 			'settings.importSettingsSuccess' => 'Inställningar importerade',
-			'settings.importSettingsInvalidFile' => 'Filen är inte en giltig export av Plexy-inställningar',
+			'settings.importSettingsInvalidFile' => 'Filen är inte en giltig export av Plezy-inställningar',
 			'settings.importSettingsNoUser' => 'Logga in innan du importerar inställningar',
 			'settings.shortcutsReset' => 'Genvägarna har återställts till standard',
 			'settings.about' => 'Om',
@@ -2997,7 +3030,7 @@ extension on TranslationsSv {
 			'settings.forceTvMode' => 'Tvinga TV-läge',
 			'settings.forceTvModeDescription' => 'Tvinga TV-layout. För enheter som inte upptäcks automatiskt. Kräver omstart.',
 			'settings.startInFullscreen' => 'Starta i helskärm',
-			'settings.startInFullscreenDescription' => 'Öppna Plexy i helskärm vid start',
+			'settings.startInFullscreenDescription' => 'Öppna Plezy i helskärm vid start',
 			'settings.exitFullscreenOnPlayerClose' => 'Avsluta helskärm vid stängning av spelare',
 			'settings.exitFullscreenOnPlayerCloseDescription' => 'Avslutar automatiskt helskärmsläge när videospelaren stängs',
 			'settings.autoHidePerformanceOverlay' => 'Dölj prestandainformation automatiskt',
@@ -3018,7 +3051,17 @@ extension on TranslationsSv {
 			'settings.subtitlesAndConfig' => 'Undertexter och konfiguration',
 			'settings.seekAndTiming' => 'Spolning och tidsinställningar',
 			'settings.behavior' => 'Beteende',
-			'settings.exportDialogTitle' => 'Exportera Plexy-inställningar',
+			'settings.rememberPlayerChanges' => 'Kom ihåg spelarändringar',
+			'settings.rememberPlayerChangesDescription' => 'Var en ändring under uppspelning sparas och tillämpas igen',
+			'settings.scopePlaybackSpeed' => 'Uppspelningshastighet',
+			'settings.scopeShaderPreset' => 'Förinställning för shader',
+			'settings.scopeAspectRatio' => 'Bildförhållande',
+			'settings.scopeSyncOffsets' => 'Synkronisering av ljud och undertexter',
+			'settings.playerScopeOff' => 'Spara inte',
+			'settings.playerScopeGlobal' => 'Överallt',
+			'settings.playerScopeLibrary' => 'Per bibliotek',
+			'settings.playerScopeTitle' => 'Per serie eller film',
+			'settings.exportDialogTitle' => 'Exportera Plezy-inställningar',
 			'search.hint' => 'Sök filmer, serier, musik...',
 			'search.tryDifferentTerm' => 'Prova en annan sökterm',
 			'search.searchYourMedia' => 'Sök i dina media',
@@ -3187,6 +3230,8 @@ extension on TranslationsSv {
 			'mediaMenu.deleteMovieTitle' => 'Ta bort den här filmen?',
 			'mediaMenu.deleteEpisodeConfirm' => 'Ta bort avsnitt',
 			'mediaMenu.deleteSeasonConfirm' => 'Ta bort säsong',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteShowConfirm' => 'Ta bort serie',
 			'mediaMenu.deleteMovieConfirm' => 'Ta bort film',
 			'mediaMenu.deleteAnyway' => 'Ta bort ändå',
@@ -3195,15 +3240,13 @@ extension on TranslationsSv {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sv'))(n, one: 'Detta tar bort ${n} avsnitt i den, och dess fil.', other: 'Detta tar bort alla ${n} avsnitt i den, och deras filer.', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sv'))(n, one: 'Detta objekt lagras som ${n} fil, som kommer att tas bort.', other: 'Detta objekt lagras i ${n} filer, och alla kommer att tas bort.', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sv'))(n, one: '${n} annat avsnitt lagras i samma fil och kommer också att tas bort:', other: '${n} andra avsnitt lagras i samma fil och kommer också att tas bort:', ), 
-			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexy kunde inte kontrollera vilka filer detta tar bort, så det kan ta bort mer än objektet ovan. Avbryt och försök igen, eller ta bort ändå.',
-			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Din server tillhandahöll inte filinformation för detta objekt, så Plexy kan inte kontrollera vilka filer detta tar bort. Det kan ta bort mer än objektet ovan.',
+			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plezy kunde inte kontrollera vilka filer detta tar bort, så det kan ta bort mer än objektet ovan. Avbryt och försök igen, eller ta bort ändå.',
+			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Din server tillhandahöll inte filinformation för detta objekt, så Plezy kan inte kontrollera vilka filer detta tar bort. Det kan ta bort mer än objektet ovan.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Medieobjektet har tagits bort',
 			'mediaMenu.mediaFailedToDelete' => 'Det gick inte att ta bort medieobjektet',
 			'mediaMenu.rate' => 'Betygsätt',
 			'mediaMenu.playFromBeginning' => 'Spela från början',
 			'mediaMenu.playVersion' => 'Spela version...',
-			_ => null,
-		} ?? switch (path) {
 			'rateSheet.title' => 'Betygsätt',
 			'rateSheet.server' => 'Server',
 			'rateSheet.favorite' => 'Favorit',
@@ -3245,12 +3288,7 @@ extension on TranslationsSv {
 			'audioTracks.track' => ({required Object n}) => 'Ljudspår ${n}',
 			'videoControls.audioLabel' => 'Ljud',
 			'videoControls.subtitlesLabel' => 'Undertexter',
-			'videoControls.resetToZero' => 'Återställ till 0 ms',
 			'videoControls.addTime' => ({required Object amount, required Object unit}) => '+${amount}${unit}',
-			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
-			'videoControls.playsLater' => ({required Object label}) => '${label} spelas senare',
-			'videoControls.playsEarlier' => ({required Object label}) => '${label} spelas tidigare',
-			'videoControls.noOffset' => 'Ingen förskjutning',
 			'videoControls.letterbox' => 'Brevlådeformat',
 			'videoControls.fillScreen' => 'Fyll skärmen',
 			'videoControls.stretch' => 'Sträck ut',
@@ -3337,6 +3375,11 @@ extension on TranslationsSv {
 			'videoControls.osdSubtitlesOff' => 'Undertexter: Av',
 			'videoControls.osdSubtitles' => ({required Object track}) => 'Undertexter: ${track}',
 			'videoControls.osdAudio' => ({required Object track}) => 'Ljud: ${track}',
+			'videoControls.resetToZero' => 'Återställ till 0 ms',
+			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
+			'videoControls.playsLater' => ({required Object label}) => '${label} spelas senare',
+			'videoControls.playsEarlier' => ({required Object label}) => '${label} spelas tidigare',
+			'videoControls.noOffset' => 'Ingen förskjutning',
 			'messages.markedAsWatched' => 'Markerad som sedd',
 			'messages.markedAsUnwatched' => 'Markerad som osedd',
 			'messages.markedAsWatchedOffline' => 'Markerad som sedd (synkroniseras när online)',
@@ -3437,7 +3480,7 @@ extension on TranslationsSv {
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# comment',
 			'mpvConfig.embeddedVoHint' => 'vo, gpu-context och gpu-api ignoreras på Linux: inbäddad video renderas alltid via vo=libmpv på videoplanet, och gpu-next (som compute-shaders som ArtCNN behöver) kan inte köras inbäddat.',
 			'dialog.confirmAction' => 'Bekräfta åtgärd',
-			'profiles.addPlezyProfile' => 'Lägg till Plexy-profil',
+			'profiles.addPlezyProfile' => 'Lägg till Plezy-profil',
 			'profiles.switchingProfile' => 'Byter profil…',
 			'profiles.deleteThisProfileTitle' => 'Ta bort denna profil?',
 			'profiles.deleteThisProfileMessage' => ({required Object displayName}) => 'Ta bort ${displayName}. Anslutningar påverkas inte.',
@@ -3508,7 +3551,7 @@ extension on TranslationsSv {
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Sessionen har gått ut för ${count} servrar',
 			'connections.signInAgain' => 'Logga in igen',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Redigera ${product}-anslutning',
-			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Lägg till eller ta bort URL:er för ${serverName}. Plexy använder den nåbara URL:en med lägst latens.',
+			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Lägg till eller ta bort URL:er för ${serverName}. Plezy använder den nåbara URL:en med lägst latens.',
 			'discover.title' => 'Upptäck',
 			'discover.noContentAvailable' => 'Inget innehåll tillgängligt',
 			'discover.addMediaToLibraries' => 'Lägg till medieinnehåll i dina bibliotek',
@@ -3643,9 +3686,9 @@ extension on TranslationsSv {
 			'logs.clearLogs' => 'Rensa loggar',
 			'logs.copyLogs' => 'Kopiera loggar',
 			'logs.uploadLogs' => 'Ladda upp loggar',
-			'startup.failedTitle' => 'Plexy kunde inte starta',
+			'startup.failedTitle' => 'Plezy kunde inte starta',
 			'startup.failedBody' => 'Något gick fel under starten. Detaljerna nedan visar vad som misslyckades.',
-			'startup.failedBodyRepairable' => 'Plexys sparade inställningsfil är skadad och måste byggas om innan Plexy kan starta. Att försöka igen hjälper inte — välj Reparera lagring.',
+			'startup.failedBodyRepairable' => 'Plezys sparade inställningsfil är skadad och måste byggas om innan Plezy kan starta. Att försöka igen hjälper inte — välj Reparera lagring.',
 			'startup.phaseLabel' => 'Steg',
 			'startup.showDetails' => 'Visa detaljer',
 			'startup.hideDetails' => 'Dölj detaljer',
@@ -3654,16 +3697,16 @@ extension on TranslationsSv {
 			'startup.uploadDetails' => 'Ladda upp detaljer',
 			'startup.repairStorage' => 'Reparera lagring',
 			'startup.repairTitle' => 'Reparera lagrade data?',
-			'startup.repairBodyCommon' => 'Plexys inställningsfil är skadad och kan inte läsas. Reparationen återställer alla inställningar till standard.',
+			'startup.repairBodyCommon' => 'Plezys inställningsfil är skadad och kan inte läsas. Reparationen återställer alla inställningar till standard.',
 			'startup.repairBodyOneCredential' => 'En sparad inloggning är skadad och kan inte läsas. Reparationen tar bort endast den; dina andra inställningar lämnas orörda.',
 			'startup.repairBodySignInsKept' => 'Dina servrar och profiler bör förbli inloggade.',
 			'startup.repairBodySignInsLost' => 'Nyckeln som skyddar dina sparade inloggningar kan inte återställas från den här filen, så du måste logga in på varje server och profil igen. Inget på din medieserver påverkas.',
-			'startup.repairBodySessionsUncertain' => 'Trackers (MAL, AniList, Simkl, Trakt) och Seerr lagras separat och kan överleva eller inte. Plexy berättar exakt vad som behållits.',
+			'startup.repairBodySessionsUncertain' => 'Trackers (MAL, AniList, Simkl, Trakt) och Seerr lagras separat och kan överleva eller inte. Plezy berättar exakt vad som behållits.',
 			'startup.repairConfirm' => 'Reparera',
 			'startup.repairSucceeded' => 'Lagringen reparerad',
 			'startup.repairNeedsRestart' => 'Lagringen reparerad — omstart krävs',
-			'startup.restartRequiredBody' => 'Dina data reparerades, men Plexy måste starta om innan de kan användas. Stäng Plexy och öppna det igen.',
-			'startup.quitPlezy' => 'Avsluta Plexy',
+			'startup.restartRequiredBody' => 'Dina data reparerades, men Plezy måste starta om innan de kan användas. Stäng Plezy och öppna det igen.',
+			'startup.quitPlezy' => 'Avsluta Plezy',
 			'startup.repairFailed' => 'Reparationen misslyckades',
 			'startup.repairKeptSignIns' => 'Dina servrar och profiler är fortfarande inloggade.',
 			'startup.repairLostSignIns' => 'Nyckeln som skyddar dina sparade inloggningar kunde inte återställas. Du måste logga in på varje server och profil igen.',
@@ -3672,7 +3715,7 @@ extension on TranslationsSv {
 			'startup.backupWarning' => 'Den innehåller dina inloggningsuppgifter. Ladda inte upp eller dela den.',
 			'startup.deleteBackup' => 'Ta bort kopia',
 			'startup.backupDeleted' => 'Kopian borttagen.',
-			'startup.previousFailureTitle' => 'Plexy kunde inte starta förra gången',
+			'startup.previousFailureTitle' => 'Plezy kunde inte starta förra gången',
 			'licenses.relatedPackages' => 'Relaterade paket',
 			'licenses.license' => 'Licens',
 			'licenses.licenseNumber' => ({required Object number}) => 'Licens ${number}',
@@ -3701,6 +3744,8 @@ extension on TranslationsSv {
 			'explore.status.ended' => 'Avslutad',
 			'explore.status.canceled' => 'Nedlagd',
 			'explore.status.upcoming' => 'Kommande',
+			_ => null,
+		} ?? switch (path) {
 			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sv'))(n, one: '${n} avsnitt', other: '${n} avsnitt', ), 
 			'explore.cast' => 'Rollbesättning',
 			'explore.characters' => 'Karaktärer',
@@ -3716,15 +3761,12 @@ extension on TranslationsSv {
 			'explore.emptyTitle' => 'Inget här ännu',
 			'explore.emptyMessage' => ({required Object source}) => 'Rader från ${source} visas här när de har innehåll.',
 			'explore.searchHint' => ({required Object source}) => 'Sök i ${source}',
-			_ => null,
-		} ?? switch (path) {
 			'explore.searchEmpty' => ({required Object query}) => 'Inga resultat för "${query}"',
 			'explore.searchPrompt' => ({required Object source}) => 'Sök efter filmer och serier på ${source}.',
 			'explore.searchFailed' => 'Sökningen misslyckades. Kontrollera din anslutning och försök igen.',
 			'explore.badge.rankPopular' => ({required Object n}) => '#${n} populär',
 			'explore.badge.rankAiring' => ({required Object n}) => '#${n} sänds nu',
 			'explore.badge.rankRated' => ({required Object n}) => '#${n} bäst betygsatta',
-			'explore.badge.rankFavorited' => ({required Object n}) => '#${n} mest favoritmarkerade',
 			'explore.badge.rankTrending' => ({required Object n}) => '#${n} trendar',
 			'explore.badge.rankSeasonal' => ({required Object n, required Object season}) => '#${n} i ${season}',
 			'explore.badge.watchingNow' => ({required Object n}) => '${n} tittar nu',
@@ -3743,6 +3785,7 @@ extension on TranslationsSv {
 			'explore.badge.episodesShort' => ({required Object n}) => '${n} avsn.',
 			'explore.badge.minutesPerEpisode' => ({required Object n}) => '${n} min/avsn',
 			'explore.badge.adult' => '18+',
+			'explore.badge.rankFavorited' => ({required Object n}) => '#${n} mest favoritmarkerade',
 			'explore.stats.listed' => ({required Object n}) => '${n} listade',
 			'explore.stats.viewersDay' => ({required Object n}) => '${n} tittade idag',
 			'explore.stats.viewersWeek' => ({required Object n}) => '${n} tittade denna vecka',
@@ -3971,6 +4014,9 @@ extension on TranslationsSv {
 			'music.repeatOne' => 'Upprepa en låt',
 			'music.instantMixNoServer' => 'Ingen server är tillgänglig för en snabbmix',
 			'music.noAudioUrl' => ({required Object track}) => 'Ingen ljud-URL är tillgänglig för ${track}',
+			'music.discography.singlesAndEps' => 'Singlar och EP',
+			'music.discography.live' => 'Live',
+			'music.discography.compilations' => 'Samlingar',
 			'watchTogether.title' => 'Titta tillsammans',
 			'watchTogether.description' => 'Titta på innehåll synkroniserat med vänner och familj',
 			'watchTogether.createSession' => 'Skapa session',
@@ -4116,14 +4162,14 @@ extension on TranslationsSv {
 			'downloads.backgroundWarning.bannerAction' => 'Detaljer',
 			'downloads.backgroundWarning.sheetTitle' => 'Bakgrundsnedladdningar är blockerade',
 			'downloads.backgroundWarning.sheetTitleDegraded' => 'Bakgrundsnedladdningar kan begränsas',
-			'downloads.backgroundWarning.sheetIntro' => 'Android hindrar Plexy från att ladda ned tillförlitligt i bakgrunden.',
-			'downloads.backgroundWarning.sheetIntroDegraded' => 'Din enhet begränsar när Plexy kan ladda ned i bakgrunden.',
-			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plexys bakgrundsanvändning är begränsad. Ställ in batteri- eller bakgrundsanvändningen på "Obegränsad".',
-			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android har satt Plexy i ett begränsat vänteläge. Ställ in batterianvändningen på "Obegränsad".',
+			'downloads.backgroundWarning.sheetIntro' => 'Android hindrar Plezy från att ladda ned tillförlitligt i bakgrunden.',
+			'downloads.backgroundWarning.sheetIntroDegraded' => 'Din enhet begränsar när Plezy kan ladda ned i bakgrunden.',
+			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plezys bakgrundsanvändning är begränsad. Ställ in batteri- eller bakgrundsanvändningen på "Obegränsad".',
+			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android har satt Plezy i ett begränsat vänteläge. Ställ in batterianvändningen på "Obegränsad".',
 			'downloads.backgroundWarning.reasonDownloadChannelBlocked' => 'Aviseringar om nedladdningar är avstängda, så förlopp och kontroller kanske inte är tillgängliga.',
 			'downloads.backgroundWarning.reasonNotificationsDisabled' => 'Aviseringar är avstängda. På Android 13 eller senare krävs de för långa bakgrundsnedladdningar.',
 			'downloads.backgroundWarning.reasonDataSaver' => 'Databesparing är aktiverad, vilket blockerar bakgrundsnedladdningar via mobildata. Nedladdningar bör fortfarande fungera via Wi-Fi.',
-			'downloads.backgroundWarning.reasonOemUnknown' => 'Nedladdningar stoppades upprepade gånger när Plexy kördes i bakgrunden. Kontrollera Plexys inställningar för batteri- eller bakgrundsanvändning.',
+			'downloads.backgroundWarning.reasonOemUnknown' => 'Nedladdningar stoppades upprepade gånger när Plezy kördes i bakgrunden. Kontrollera Plezys inställningar för batteri- eller bakgrundsanvändning.',
 			'downloads.backgroundWarning.openSettings' => 'Öppna inställningar',
 			'downloads.backgroundWarning.stillNotWorking' => 'Enhetsspecifik hjälp',
 			'downloads.backgroundWarning.stillNotWorkingDescription' => 'Se anvisningar för din enhet eller skicka en logg från Inställningar › Visa loggar om problemet kvarstår.',
@@ -4176,19 +4222,19 @@ extension on TranslationsSv {
 			'companionRemote.session.startServer' => 'Starta server',
 			'companionRemote.session.stopServer' => 'Stoppa server',
 			'companionRemote.session.minimize' => 'Minimera',
-			'companionRemote.pairing.discoveryDescription' => 'Plexy-enheter med samma Plex-konto visas här',
+			'companionRemote.pairing.discoveryDescription' => 'Plezy-enheter med samma Plex-konto visas här',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => 'Ansluter...',
 			'companionRemote.pairing.searchingForDevices' => 'Söker efter enheter...',
 			'companionRemote.pairing.noDevicesFound' => 'Inga enheter hittades i ditt nätverk',
-			'companionRemote.pairing.noDevicesHint' => 'Öppna Plexy på datorn och använd samma wifi',
+			'companionRemote.pairing.noDevicesHint' => 'Öppna Plezy på datorn och använd samma wifi',
 			'companionRemote.pairing.availableDevices' => 'Tillgängliga enheter',
 			'companionRemote.pairing.manualConnection' => 'Manuell anslutning',
 			'companionRemote.pairing.cryptoInitFailed' => 'Kunde inte starta säker anslutning. Logga in på Plex först.',
 			'companionRemote.pairing.validationHostRequired' => 'Ange värdadress',
 			'companionRemote.pairing.validationHostFormat' => 'Formatet måste vara IP:port (t.ex. 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Anslutningen tog för lång tid. Använd samma nätverk på båda enheterna.',
-			'companionRemote.pairing.sessionNotFound' => 'Enheten hittades inte. Kontrollera att Plexy körs på värden.',
+			'companionRemote.pairing.sessionNotFound' => 'Enheten hittades inte. Kontrollera att Plezy körs på värden.',
 			'companionRemote.pairing.authFailed' => 'Autentiseringen misslyckades. Båda enheterna måste använda samma Plex-konto.',
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Kunde inte ansluta: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Vill du koppla från fjärrsessionen?',
@@ -4212,6 +4258,8 @@ extension on TranslationsSv {
 			'companionRemote.remote.stop' => 'Stopp',
 			'companionRemote.remote.seekForward' => 'Spola framåt',
 			'companionRemote.remote.volume' => 'Volym',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.volumeDown' => 'Ner',
 			'companionRemote.remote.volumeUp' => 'Upp',
 			'companionRemote.remote.fullscreen' => 'Helskärm',
@@ -4230,8 +4278,6 @@ extension on TranslationsSv {
 			'videoSettings.playbackSpeed' => 'Uppspelningshastighet',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Aktiv (${duration})',
-			_ => null,
-		} ?? switch (path) {
 			'videoSettings.zoom' => 'Zoom',
 			'videoSettings.sleepTimer' => 'Sovtimer',
 			'videoSettings.audioSync' => 'Ljudsynkronisering',
@@ -4409,11 +4455,11 @@ extension on TranslationsSv {
 			'trakt.connected' => 'Ansluten',
 			'trakt.connectedAs' => ({required Object username}) => 'Ansluten som @${username}',
 			'trakt.disconnectConfirm' => 'Koppla från Trakt-konto?',
-			'trakt.disconnectConfirmBody' => 'Plexy slutar skicka händelser till Trakt. Du kan återansluta när som helst.',
+			'trakt.disconnectConfirmBody' => 'Plezy slutar skicka händelser till Trakt. Du kan återansluta när som helst.',
 			'trakt.scrobble' => 'Realtidsspårning',
 			'trakt.scrobbleDescription' => 'Skicka händelser för uppspelning, paus och stopp till Trakt under uppspelningen.',
 			'trakt.watchedSync' => 'Synkronisera seddstatus',
-			'trakt.watchedSyncDescription' => 'När du markerar objekt som sedda i Plexy markeras de även som sedda på Trakt.',
+			'trakt.watchedSyncDescription' => 'När du markerar objekt som sedda i Plezy markeras de även som sedda på Trakt.',
 			'seerr.title' => 'Seerr',
 			'seerr.connectTitle' => 'Anslut Seerr',
 			'seerr.serverUrl' => 'Server-URL',
@@ -4423,10 +4469,10 @@ extension on TranslationsSv {
 			'seerr.signInWithEmby' => 'Logga in med Emby',
 			'seerr.signInWithLocal' => 'Använd ett lokalt konto',
 			'seerr.email' => 'E-post',
-			'seerr.noSignInMethods' => 'Den här Seerr-instansen erbjuder ingen inloggningsmetod som Plexy stöder.',
+			'seerr.noSignInMethods' => 'Den här Seerr-instansen erbjuder ingen inloggningsmetod som Plezy stöder.',
 			'seerr.instance' => 'Instans',
 			'seerr.disconnectConfirm' => 'Koppla från Seerr?',
-			'seerr.disconnectConfirmBody' => 'Plexy glömmer den här Seerr-instansen. Återanslut när som helst.',
+			'seerr.disconnectConfirmBody' => 'Plezy glömmer den här Seerr-instansen. Återanslut när som helst.',
 			'seerr.request' => 'Begär',
 			'seerr.request4k' => 'Begär i 4K',
 			'seerr.seasons' => 'Säsonger',
@@ -4461,14 +4507,14 @@ extension on TranslationsSv {
 			'services.scrobble' => 'Spåra uppspelningen automatiskt',
 			'services.scrobbleDescription' => 'Uppdatera din lista när du har sett klart ett avsnitt eller en film.',
 			'services.disconnectConfirm' => ({required Object service}) => 'Koppla från ${service}?',
-			'services.disconnectConfirmBody' => ({required Object service}) => 'Plexy slutar uppdatera ${service}. Återanslut när som helst.',
+			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezy slutar uppdatera ${service}. Återanslut när som helst.',
 			'services.connectFailed' => ({required Object service}) => 'Kunde inte ansluta till ${service}. Försök igen.',
 			'services.names.mal' => 'MyAnimeList',
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
-			'services.deviceCode.title' => ({required Object service}) => 'Aktivera Plexy på ${service}',
+			'services.deviceCode.title' => ({required Object service}) => 'Aktivera Plezy på ${service}',
 			'services.deviceCode.instructions' => 'Skanna QR-koden eller gå till adressen nedan och ange den här koden:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Öppna ${service} för att aktivera',
 			'services.deviceCode.copyCode' => 'Kopiera aktiveringskod',

@@ -14,7 +14,6 @@ SimklSearchResult _$SimklSearchResultFromJson(Map<String, dynamic> json) => Simk
   url: json['url'] as String?,
   year: flexibleInt(json['year']),
   type: json['type'] as String?,
-  endpointType: json['endpoint_type'] as String?,
   poster: json['poster'] as String?,
   ids: SimklIds.fromJson(json['ids'] as Map<String, dynamic>),
   episodeCount: flexibleInt(json['ep_count']),

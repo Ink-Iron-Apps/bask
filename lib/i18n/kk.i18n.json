@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Plexy"
+    "title": "Plezy"
   },
   "auth": {
     "signInWithPlex": "Plex арқылы кіру",
@@ -17,7 +17,7 @@
     "quickConnectWaiting": "Растау күтілуде…",
     "quickConnectCancel": "Бас тарту",
     "quickConnectExpired": "Жылдам қосылу мерзімі өтті. Қайтадан байқап көріңіз.",
-    "localDataRecoveryRequired": "Plexy жергілікті кіру мәліметтерін қалпына келтіре алмады. Қайтадан кіріңіз.",
+    "localDataRecoveryRequired": "Plezy жергілікті кіру мәліметтерін қалпына келтіре алмады. Қайтадан кіріңіз.",
     "pinCheckRejected": "Plex PIN кодын тексеру қабылданбады"
   },
   "common": {
@@ -101,7 +101,7 @@
   },
   "settings": {
     "title": "Баптаулар",
-    "supportDeveloper": "Plexy жобасын қолдау",
+    "supportDeveloper": "Plezy жобасын қолдау",
     "supportDeveloperDescription": "Дамытуды қаржыландыру үшін Liberapay арқылы демеушілік жасаңыз",
     "language": "Тіл",
     "theme": "Тақырып",
@@ -195,6 +195,11 @@
     "followServerTrackSelectionsDescription": "Бөлім ауысқанда ағымдағы таңдауды көшірудің орнына серверде таңдалған дыбыс пен субтитрлерді қолдану",
     "showChapterMarkersOnTimeline": "Уақыт шкаласында бөлім белгілерін көрсету",
     "showChapterMarkersOnTimelineDescription": "Уақыт шкаласын бөлімдерге бөлу",
+    "specialsOrdering": "Арнайы бөлімдер эпизодтар ретімен",
+    "specialsOrderingDescription": "Арнайы бөлімдер сериалдың көру ретінің қай жерінде ойнатылады",
+    "specialsOrderingServer": "Сервер ретін сақтау",
+    "specialsOrderingAirDate": "Эфир күні бойынша араластыру",
+    "specialsOrderingLast": "Қалыпты маусымдардан кейін",
     "clickVideoTogglesPlayback": "Ойнату/кідірту үшін видеоны басу",
     "clickVideoTogglesPlaybackDescription": "Басқару элементтерін көрсету орнына ойнату немесе кідірту",
     "videoPlayerControls": "Видео ойнатқыш басқару элементтері",
@@ -226,7 +231,7 @@
     "importSettingsDescription": "Параметрлерді файлдан қалпына келтіріңіз",
     "importSettingsConfirm": "Бұл ағымдағы баптауларыңыздың үстінен жазады. Жалғастырасыз ба?",
     "importSettingsSuccess": "Баптаулар импортталды",
-    "importSettingsInvalidFile": "Бұл файл дұрыс Plexy баптаулар файлы емес",
+    "importSettingsInvalidFile": "Бұл файл дұрыс Plezy баптаулар файлы емес",
     "importSettingsNoUser": "Баптауларды импорттау алдында жүйеге кіріңіз",
     "shortcutsReset": "Пернелер тіркесі әдепкі күйге қайтарылды",
     "about": "Қолданба туралы",
@@ -319,7 +324,7 @@
     "forceTvMode": "TV режимін мәжбүрлеу",
     "forceTvModeDescription": "TV интерфейсін мәжбүрлеу.",
     "startInFullscreen": "Толық экранда бастау",
-    "startInFullscreenDescription": "Plexy-ді ашқанда толық экран режимінде ашу",
+    "startInFullscreenDescription": "Plezy-ді ашқанда толық экран режимінде ашу",
     "exitFullscreenOnPlayerClose": "Ойнатқыш жабылғанда толық экраннан шығу",
     "exitFullscreenOnPlayerCloseDescription": "Видео ойнатқышты жапқанда автоматты түрде толық экраннан шығу",
     "autoHidePerformanceOverlay": "Өнімділік панелін авто-жасыру",
@@ -340,7 +345,17 @@
     "subtitlesAndConfig": "Субтитрлер мен конфигурация",
     "seekAndTiming": "Айналдыру және уақытты реттеу",
     "behavior": "Мінез-құлық",
-    "exportDialogTitle": "Plexy параметрлерін экспорттау"
+    "rememberPlayerChanges": "Ойнатқыш өзгерістерін есте сақтау",
+    "rememberPlayerChangesDescription": "Ойнату кезінде жасалған өзгеріс сақталатын және қайта қолданылатын орын",
+    "scopePlaybackSpeed": "Ойнату жылдамдығы",
+    "scopeShaderPreset": "Шейдер алдын ала орнатымы",
+    "scopeAspectRatio": "Кадр пішімі",
+    "scopeSyncOffsets": "Аудио және субтитр синхрондауы",
+    "playerScopeOff": "Сақтамау",
+    "playerScopeGlobal": "Барлық жерде",
+    "playerScopeLibrary": "Кітапхана бойынша",
+    "playerScopeTitle": "Сериал немесе фильм бойынша",
+    "exportDialogTitle": "Plezy параметрлерін экспорттау"
   },
   "search": {
     "hint": "Фильмдер, сериалдар, музыка іздеу...",
@@ -536,8 +551,8 @@
       "one": "Сол файлда тағы ${n} бөлім сақталған, ол да өшіріледі:",
       "other": "Сол файлда тағы ${n} бөлім сақталған, олар да өшіріледі:"
     },
-    "deleteScopeUnverifiedProbeFailed": "Plexy қандай файлдар өшірілетінін тексере алмады, сондықтан ол жоғарыда аталған элементтен артық өшіруі мүмкін. Бас тартып, қайталап көріңіз немесе бәрібір өшіріңіз.",
-    "deleteScopeUnverifiedNoFileInfo": "Серверіңіз бұл элемент үшін файл мәліметтерін ұсынбады, сондықтан Plexy қандай файлдар өшірілетінін тексере алмайды. Ол жоғарыда аталған элементтен артық өшіруі мүмкін.",
+    "deleteScopeUnverifiedProbeFailed": "Plezy қандай файлдар өшірілетінін тексере алмады, сондықтан ол жоғарыда аталған элементтен артық өшіруі мүмкін. Бас тартып, қайталап көріңіз немесе бәрібір өшіріңіз.",
+    "deleteScopeUnverifiedNoFileInfo": "Серверіңіз бұл элемент үшін файл мәліметтерін ұсынбады, сондықтан Plezy қандай файлдар өшірілетінін тексере алмайды. Ол жоғарыда аталған элементтен артық өшіруі мүмкін.",
     "mediaDeletedSuccessfully": "Медиа элементі сәтті өшірілді",
     "mediaFailedToDelete": "Медиа элементін өшіру мүмкін болмады",
     "rate": "Бағалау",
@@ -594,12 +609,7 @@
   "videoControls": {
     "audioLabel": "Дыбыс",
     "subtitlesLabel": "Субтитр",
-    "resetToZero": "0мс-қа қалпына келтіру",
     "addTime": "+${amount}${unit}",
-    "minusTime": "-${amount}${unit}",
-    "playsLater": "${label} кейін ойнатылады",
-    "playsEarlier": "${label} бұрын ойнатылады",
-    "noOffset": "Ығысусыз",
     "letterbox": "Кең экран (Letterbox)",
     "fillScreen": "Экранды толтыру",
     "stretch": "Созу",
@@ -687,7 +697,12 @@
     "forcedTrack": "${label} (Мәжбүрлі)",
     "osdSubtitlesOff": "Субтитр: өшірулі",
     "osdSubtitles": "Субтитр: ${track}",
-    "osdAudio": "Дыбыс: ${track}"
+    "osdAudio": "Дыбыс: ${track}",
+    "resetToZero": "0мс-қа қалпына келтіру",
+    "minusTime": "-${amount}${unit}",
+    "playsLater": "${label} кейін ойнатылады",
+    "playsEarlier": "${label} бұрын ойнатылады",
+    "noOffset": "Ығысусыз"
   },
   "userStatus": {},
   "messages": {
@@ -802,7 +817,7 @@
     "confirmAction": "Әрекетті растау"
   },
   "profiles": {
-    "addPlezyProfile": "Plexy профилін қосу",
+    "addPlezyProfile": "Plezy профилін қосу",
     "switchingProfile": "Профильді ауыстыру…",
     "deleteThisProfileTitle": "Осы профиль өшірілсін бе?",
     "deleteThisProfileMessage": "${displayName} өшіріледі. Қосылымдарға әсер етпейді.",
@@ -875,7 +890,7 @@
     "sessionExpiredMany": "${count} сервер үшін сеанс мерзімі өтті",
     "signInAgain": "Қайтадан кіру",
     "editMediaBrowserTitle": "${product} қосылымын өңдеу",
-    "editMediaBrowserIntro": "${serverName} үшін URL мекенжайларды қосыңыз немесе өшіріңіз. Plexy ең төмен кідірісі бар қолжетімді URL мекенжайды пайдаланады."
+    "editMediaBrowserIntro": "${serverName} үшін URL мекенжайларды қосыңыз немесе өшіріңіз. Plezy ең төмен кідірісі бар қолжетімді URL мекенжайды пайдаланады."
   },
   "discover": {
     "title": "Шолу",
@@ -1037,9 +1052,9 @@
     "uploadLogs": "Журналдарды жүктеу"
   },
   "startup": {
-    "failedTitle": "Plexy іске қосылмады",
+    "failedTitle": "Plezy іске қосылмады",
     "failedBody": "Іске қосу кезінде қате орын алды. Төмендегі мәліметтер ненің сәтсіз аяқталғанын көрсетеді.",
-    "failedBodyRepairable": "Plexy сақталған баптаулар файлы зақымдалған және Plexy іске қосылмас бұрын оны қайта құру қажет. Қайталау көмектеспейді — «Сақтауды қалпына келтіру» тармағын таңдаңыз.",
+    "failedBodyRepairable": "Plezy сақталған баптаулар файлы зақымдалған және Plezy іске қосылмас бұрын оны қайта құру қажет. Қайталау көмектеспейді — «Сақтауды қалпына келтіру» тармағын таңдаңыз.",
     "phaseLabel": "Қадам",
     "showDetails": "Мәліметтерді көрсету",
     "hideDetails": "Мәліметтерді жасыру",
@@ -1048,16 +1063,16 @@
     "uploadDetails": "Мәліметтерді жүктеп жіберу",
     "repairStorage": "Сақтауды қалпына келтіру",
     "repairTitle": "Сақталған деректер қалпына келтірілсін бе?",
-    "repairBodyCommon": "Plexy баптаулар файлы зақымдалған және оқылмайды. Қалпына келтіру барлық баптауды әдепкі мәнге қайтарады.",
+    "repairBodyCommon": "Plezy баптаулар файлы зақымдалған және оқылмайды. Қалпына келтіру барлық баптауды әдепкі мәнге қайтарады.",
     "repairBodyOneCredential": "Бір сақталған кіру деректері зақымдалған және оқылмайды. Қалпына келтіру тек соны өшіреді; қалған баптауларыңызға тиіспейді.",
     "repairBodySignInsKept": "Серверлеріңіз бен профильдеріңіз кірген күйінде қалады.",
     "repairBodySignInsLost": "Сақталған кіру деректерін қорғайтын кілт осы файлдан қалпына келтірілмейді, сондықтан әрбір сервер мен профильге қайта кіруге тура келеді. Медиа серверіңіздегі ештеңеге әсер етілмейді.",
-    "repairBodySessionsUncertain": "Tracker-лар (MAL, AniList, Simkl, Trakt) және Seerr бөлек сақталады және сақталуы да, сақталмауы да мүмкін. Plexy не сақталғанын нақты айтады.",
+    "repairBodySessionsUncertain": "Tracker-лар (MAL, AniList, Simkl, Trakt) және Seerr бөлек сақталады және сақталуы да, сақталмауы да мүмкін. Plezy не сақталғанын нақты айтады.",
     "repairConfirm": "Қалпына келтіру",
     "repairSucceeded": "Сақтау қалпына келтірілді",
     "repairNeedsRestart": "Сақтау қалпына келтірілді — қайта іске қосу қажет",
-    "restartRequiredBody": "Деректеріңіз қалпына келтірілді, бірақ Plexy оларды пайдаланар алдында жаңадан іске қосылуы керек. Plexy жабыңыз да, қайта ашыңыз.",
-    "quitPlezy": "Plexy бағдарламасынан шығу",
+    "restartRequiredBody": "Деректеріңіз қалпына келтірілді, бірақ Plezy оларды пайдаланар алдында жаңадан іске қосылуы керек. Plezy жабыңыз да, қайта ашыңыз.",
+    "quitPlezy": "Plezy бағдарламасынан шығу",
     "repairFailed": "Қалпына келтіру сәтсіз аяқталды",
     "repairKeptSignIns": "Серверлеріңіз бен профильдеріңіз әлі кірген күйде.",
     "repairLostSignIns": "Сақталған кіру деректерін қорғайтын кілт қалпына келтірілмеді. Әрбір сервер мен профильге қайта кіруге тура келеді.",
@@ -1066,7 +1081,7 @@
     "backupWarning": "Онда сіздің кіру деректеріңіз бар. Оны жүктеп жібермеңіз немесе бөліспеңіз.",
     "deleteBackup": "Көшірмені өшіру",
     "backupDeleted": "Көшірме өшірілді.",
-    "previousFailureTitle": "Plexy соңғы рет іске қосыла алмады"
+    "previousFailureTitle": "Plezy соңғы рет іске қосыла алмады"
   },
   "licenses": {
     "relatedPackages": "Байланысты пакеттер",
@@ -1130,7 +1145,6 @@
       "rankPopular": "#${n} танымал",
       "rankAiring": "#${n} эфирде",
       "rankRated": "#${n} бағаланған",
-      "rankFavorited": "#${n} таңдаулы",
       "rankTrending": "#${n} трендте",
       "rankSeasonal": "#${n} — ${season}",
       "watchingNow": "${n} қарауда",
@@ -1148,7 +1162,8 @@
       "nextAiringIn": "Келесісі ${duration} ішінде",
       "episodesShort": "${n} бөл.",
       "minutesPerEpisode": "${n} мин/бөл.",
-      "adult": "18+"
+      "adult": "18+",
+      "rankFavorited": "#${n} таңдаулы"
     },
     "stats": {
       "listed": "${n} тізімде",
@@ -1411,7 +1426,12 @@
     "repeatAll": "Барлығын қайталау",
     "repeatOne": "Біреуін қайталау",
     "instantMixNoServer": "Жедел микс үшін қолжетімді сервер жоқ",
-    "noAudioUrl": "${track} үшін аудио URL-і қолжетімді емес"
+    "noAudioUrl": "${track} үшін аудио URL-і қолжетімді емес",
+    "discography": {
+      "singlesAndEps": "Синглдер және EP",
+      "live": "Жанды",
+      "compilations": "Жинақтар"
+    }
   },
   "watchTogether": {
     "title": "Бірге көру",
@@ -1562,14 +1582,14 @@
       "bannerAction": "Толығырақ",
       "sheetTitle": "Фондық жүктеулер бұғатталған",
       "sheetTitleDegraded": "Фондық жүктеулер шектелуі мүмкін",
-      "sheetIntro": "Android Plexy-дің фонда сенімді жүктеуіне кедергі келтіруде.",
-      "sheetIntroDegraded": "Құрылғыңыз Plexy-дің фонда қашан жүктей алатынын шектеп отыр.",
-      "reasonBackgroundRestricted": "Plexy-дің фондық жұмысы шектелген. Батарея немесе фондық пайдалануды \"Шектеусіз\" етіп қойыңыз.",
-      "reasonStandbyRestricted": "Android Plexy-ді шектеулі күту режиміне ауыстырды. Батарея пайдалануын \"Шектеусіз\" етіп қойыңыз.",
+      "sheetIntro": "Android Plezy-дің фонда сенімді жүктеуіне кедергі келтіруде.",
+      "sheetIntroDegraded": "Құрылғыңыз Plezy-дің фонда қашан жүктей алатынын шектеп отыр.",
+      "reasonBackgroundRestricted": "Plezy-дің фондық жұмысы шектелген. Батарея немесе фондық пайдалануды \"Шектеусіз\" етіп қойыңыз.",
+      "reasonStandbyRestricted": "Android Plezy-ді шектеулі күту режиміне ауыстырды. Батарея пайдалануын \"Шектеусіз\" етіп қойыңыз.",
       "reasonDownloadChannelBlocked": "Жүктеу хабарландырулары өшірілген, сондықтан жүктеу барысы мен басқару элементтері қолжетімсіз болуы мүмкін.",
       "reasonNotificationsDisabled": "Хабарландырулар өшірілген. Android 13 және одан жаңа нұсқаларда ұзақ фондық жүктеулер үшін олар қажет.",
       "reasonDataSaver": "Трафикті үнемдеу қосулы, бұл мобильді деректер арқылы фондық жүктеулерді бұғаттайды. Wi-Fi арқылы жүктеулер жұмыс істеуі тиіс.",
-      "reasonOemUnknown": "Plexy фонда тұрғанда жүктеулер бірнеше рет тоқтады. Plexy-дің батарея немесе фондық пайдалану баптауларын тексеріңіз.",
+      "reasonOemUnknown": "Plezy фонда тұрғанда жүктеулер бірнеше рет тоқтады. Plezy-дің батарея немесе фондық пайдалану баптауларын тексеріңіз.",
       "openSettings": "Баптауларды ашу",
       "stillNotWorking": "Құрылғыға арналған көмек",
       "stillNotWorkingDescription": "Құрылғыңызға арналған қадамдарды қараңыз немесе мәселе жалғасса Баптаулар › Журналдарды көру бөлімінен журнал жіберіңіз.",
@@ -1630,12 +1650,12 @@
       "minimize": "Жию"
     },
     "pairing": {
-      "discoveryDescription": "Бірдей Plex тіркелгісіндегі Plexy құрылғылары мұнда көрінеді",
+      "discoveryDescription": "Бірдей Plex тіркелгісіндегі Plezy құрылғылары мұнда көрінеді",
       "hostAddressHint": "192.168.1.100:48632",
       "connecting": "Қосылуда...",
       "searchingForDevices": "Құрылғылар ізделуде...",
       "noDevicesFound": "Желіде құрылғылар табылмады",
-      "noDevicesHint": "ПК-де Plexy-ді ашып, бір Wi-Fi-ға қосылыңыз",
+      "noDevicesHint": "ПК-де Plezy-ді ашып, бір Wi-Fi-ға қосылыңыз",
       "availableDevices": "Қолжетімді құрылғылар",
       "manualConnection": "Қолмен қосылу",
       "cryptoInitFailed": "Қауіпсіз қосылым қатесі. Алдымен Plex-ке кіріңіз.",
@@ -1880,11 +1900,11 @@
     "connected": "Қосылды",
     "connectedAs": "@${username} ретінде қосылды",
     "disconnectConfirm": "Trakt ажыратылсын ба?",
-    "disconnectConfirmBody": "Plexy Trakt-қа деректер жіберуді тоқтатады.",
+    "disconnectConfirmBody": "Plezy Trakt-қа деректер жіберуді тоқтатады.",
     "scrobble": "Нақты уақытта бақылау",
     "scrobbleDescription": "Ойнату кезінде Trakt-қа деректер жіберу.",
     "watchedSync": "Көру мәртебесін синхрондау",
-    "watchedSyncDescription": "Plexy-де белгіленгенде Trakt-та да белгіленеді."
+    "watchedSyncDescription": "Plezy-де белгіленгенде Trakt-та да белгіленеді."
   },
   "seerr": {
     "title": "Seerr",
@@ -1899,7 +1919,7 @@
     "noSignInMethods": "Бұл Seerr қолдау көрсетілетін кіру әдісін ұсынбайды.",
     "instance": "Инстанция",
     "disconnectConfirm": "Seerr ажыратылсын ба?",
-    "disconnectConfirmBody": "Plexy бұл Seerr мекенжайын өшіреді.",
+    "disconnectConfirmBody": "Plezy бұл Seerr мекенжайын өшіреді.",
     "request": "Сұрау салу",
     "request4k": "4K сұрау салу",
     "seasons": "Маусымдар",
@@ -1936,7 +1956,7 @@
     "scrobble": "Барысты автоматты бақылау",
     "scrobbleDescription": "Тізіміңізді автоматты түрде жаңартыңыз.",
     "disconnectConfirm": "${service} ажыратылсын ба?",
-    "disconnectConfirmBody": "Plexy ${service} жаңартуды тоқтатады.",
+    "disconnectConfirmBody": "Plezy ${service} жаңартуды тоқтатады.",
     "connectFailed": "${service} қосылу мүмкін болмады. Қайтадан байқап көріңіз.",
     "names": {
       "mal": "MyAnimeList",
@@ -1946,7 +1966,7 @@
       "mdblist": "MDBList"
     },
     "deviceCode": {
-      "title": "Plexy-ді ${service} қызметінде белсендіру",
+      "title": "Plezy-ді ${service} қызметінде белсендіру",
       "instructions": "QR кодын сканерлеңіз немесе төмендегі мекенжайға өтіп, мына кодты енгізіңіз:",
       "openToActivate": "Белсендіру үшін ${service} ашу",
       "copyCode": "Белсендіру кодын көшіру",

@@ -20,7 +20,6 @@ SimklAllItemsMedia _$SimklAllItemsMediaFromJson(Map<String, dynamic> json) => Si
 );
 
 SimklAllItemsEntry _$SimklAllItemsEntryFromJson(Map<String, dynamic> json) => SimklAllItemsEntry(
-  status: json['status'] as String?,
   addedAt: json['added_to_watchlist_at'] as String?,
   userRating: flexibleDouble(json['user_rating']),
   show: json['show'] == null ? null : SimklAllItemsMedia.fromJson(json['show'] as Map<String, dynamic>),
