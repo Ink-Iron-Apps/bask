@@ -1805,8 +1805,12 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
             // Locked: Apply landscape orientation only
             OrientationHelper.setLandscapeOrientation();
           } else {
-            // Unlocked: Allow all orientations immediately
+            // Unlocked: Allow all orientations immediately, and turn with the
+            // device even when the system rotation lock is on — holding the
+            // phone sideways to watch something is the whole gesture, and it
+            // should not depend on a setting outside the app.
             unawaited(SystemChrome.setPreferredOrientations(DeviceOrientation.values));
+            unawaited(OrientationHelper.setFollowSensorOrientation(true));
             unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky));
           }
         } catch (e) {
@@ -1978,6 +1982,9 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
     // Cars are fixed-orientation devices, and a compact head unit can read as a
     // phone below, which would pin it to portrait on player exit.
     if (PlatformDetector.isAutomotive()) return;
+
+    // Hand rotation back to the system lock; only the player overrides it.
+    await OrientationHelper.setFollowSensorOrientation(false);
 
     try {
       if (_isPhone) {
