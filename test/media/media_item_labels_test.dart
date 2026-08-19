@@ -34,4 +34,41 @@ void main() {
     expect(formatQueueItemSubtitle(item(year: 2026)), '2026');
     expect(formatQueueItemSubtitle(item()), 'movie');
   });
+
+  group('formatDownloadNotificationName', () {
+    MediaItem episode({String? title, int? season, int? number}) => MediaItem.plex(
+      id: 'ep',
+      kind: MediaKind.episode,
+      title: title,
+      grandparentTitle: 'Ted Lasso',
+      parentIndex: season,
+      index: number,
+    );
+
+    test('names the show, the season and episode, and the episode title', () {
+      // The notification used to read "Ted Lasso - Ted Lasso": displayTitle
+      // collapses an episode to its show, so it was paired with itself.
+      expect(
+        formatDownloadNotificationName(episode(title: 'Pilot', season: 1, number: 1)),
+        'Ted Lasso · S1 E1 · Pilot',
+      );
+    });
+
+    test('drops the numbers when the row does not carry them', () {
+      expect(formatDownloadNotificationName(episode(title: 'Pilot')), 'Ted Lasso · Pilot');
+    });
+
+    test('a movie keeps its own title', () {
+      expect(formatDownloadNotificationName(MediaItem.plex(id: 'm', kind: MediaKind.movie, title: 'Heat')), 'Heat');
+    });
+
+    test('a track leads with its artist', () {
+      expect(
+        formatDownloadNotificationName(
+          MediaItem.plex(id: 't', kind: MediaKind.track, title: 'Song', originalTitle: 'Artist'),
+        ),
+        'Artist - Song',
+      );
+    });
+  });
 }
