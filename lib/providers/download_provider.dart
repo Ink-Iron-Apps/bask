@@ -1670,18 +1670,21 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
 
     final allMetadata = await _downloadManager.getAllPinnedMetadata(activeProfileId: _activeProfileId);
     if (isStale()) return;
+    final stopwatch = Stopwatch()..start();
     int cacheHits = 0;
-    int networkFills = 0;
     int misses = 0;
+    final needNetwork = <String>[];
 
+    // First pass reads caches only. Startup awaits this, and a cache miss used
+    // to reach the server from inside the loop — one round trip per download,
+    // in series, with the splash still up after every server had reported
+    // connected. Collect the misses and settle them afterwards instead.
     for (final globalKey in keys) {
       try {
-        final result = await _hydrateDownloadMetadata(globalKey, allMetadata, fetchOnMiss: true, isStale: isStale);
+        final result = await _hydrateDownloadMetadata(globalKey, allMetadata, isStale: isStale);
         if (result.stale) return;
         if (result.metadata == null) {
-          misses++;
-        } else if (result.networkFilled) {
-          networkFills++;
+          needNetwork.add(globalKey);
         } else {
           cacheHits++;
         }
@@ -1689,20 +1692,55 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
         appLogger.d('Failed to refresh metadata for $globalKey: $e');
       }
     }
+    misses = needNetwork.length;
 
     // Re-apply offline overlay so locally-queued watch actions aren't clobbered
     // by stale per-backend caches that haven't yet seen the server roundtrip.
     await _applyOfflineWatchOverlay(expectedProfileGeneration: profileGeneration);
     if (isStale()) return;
 
-    final updatedCount = cacheHits + networkFills;
     appLogger.i(
-      'refreshMetadataFromCache: walked ${keys.length} keys → '
-      '$cacheHits cache hits, $networkFills network fills, $misses unresolved',
+      'refreshMetadataFromCache: walked ${keys.length} keys in ${stopwatch.elapsedMilliseconds}ms → '
+      '$cacheHits cache hits, $misses needing the server',
     );
-    if (updatedCount > 0) {
+    if (cacheHits > 0) {
       safeNotifyListeners();
     }
+
+    // Whatever the caches could not answer is fetched off the startup path. The
+    // list is already on screen by then and refreshes as each one lands.
+    if (needNetwork.isNotEmpty) {
+      unawaited(_fillMetadataFromServer(needNetwork, allMetadata, profileGeneration));
+    }
+  }
+
+  /// Fetches metadata the caches could not supply, without blocking startup.
+  Future<void> _fillMetadataFromServer(
+    List<String> globalKeys,
+    Map<String, MediaItem> allMetadata,
+    int profileGeneration,
+  ) async {
+    bool isStale() => isDisposed || profileGeneration != _profileGeneration;
+    final stopwatch = Stopwatch()..start();
+    var filled = 0;
+
+    for (final globalKey in globalKeys) {
+      if (isStale()) return;
+      try {
+        final result = await _hydrateDownloadMetadata(globalKey, allMetadata, fetchOnMiss: true, isStale: isStale);
+        if (result.stale) return;
+        if (result.networkFilled) filled++;
+      } catch (e) {
+        appLogger.d('Failed to fetch metadata for $globalKey: $e');
+      }
+    }
+
+    if (isStale()) return;
+    appLogger.i(
+      'refreshMetadataFromCache: filled $filled of ${globalKeys.length} from the server '
+      'in ${stopwatch.elapsedMilliseconds}ms',
+    );
+    if (filled > 0) safeNotifyListeners();
   }
 
   /// Deletes [globalKey] if it is a completed episode/movie download; returns
