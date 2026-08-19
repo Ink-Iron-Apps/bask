@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.edde746.plezy.exoplayer.supportedMpvSpdifCodecs
 import com.edde746.plezy.shared.PlayerChannelBinding
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -147,7 +148,7 @@ open class MpvPlayerPlugin(
 
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
     when (call.method) {
-      "initialize" -> handleInitialize(result)
+      "initialize" -> handleInitialize(call, result)
       "dispose" -> handleDispose(result)
       "setProperty" -> handleSetProperty(call, result)
       "getProperty" -> handleGetProperty(call, result)
@@ -159,6 +160,7 @@ open class MpvPlayerPlugin(
       "setVideoFrameRate" -> handleSetVideoFrameRate(call, result)
       "clearVideoFrameRate" -> handleClearVideoFrameRate(result)
       "requestAudioFocus" -> handleRequestAudioFocus(result)
+      "getAudioSpdifCodecs" -> handleGetAudioSpdifCodecs(result)
       "abandonAudioFocus" -> handleAbandonAudioFocus(result)
       "openContentFd" -> handleOpenContentFd(call, result)
       "closeContentFd" -> handleCloseContentFd(call, result)
@@ -168,7 +170,21 @@ open class MpvPlayerPlugin(
     }
   }
 
-  private fun handleInitialize(result: MethodChannel.Result) {
+  /**
+   * Derives the `audio-spdif` value for the current audio route. mpv force-passthroughs
+   * every codec named there with no decode fallback, so with no context to inspect the
+   * route the conservative answer is the empty list — decode everything (#1703, #1991).
+   */
+  private fun handleGetAudioSpdifCodecs(result: MethodChannel.Result) {
+    val context: Context? = activity ?: applicationContext
+    result.success(context?.let(::supportedMpvSpdifCodecs) ?: "")
+  }
+
+  private fun handleInitialize(call: MethodCall, result: MethodChannel.Result) {
+    // Whether the session will hardware-decode; decides the initial vo chain
+    // (MpvPlayerCore.initialVideoOutput). Absent on the audio-only core and
+    // from older callers; hardware decode is the setting's default.
+    val hardwareDecoding = call.argument<Boolean>("hardwareDecoding") ?: true
     // Video cores need the Activity (surface/view hierarchy); the audio-only
     // core is built on the application context so it can outlive it.
     val coreContext: Context? = if (audioOnly) applicationContext else activity
@@ -227,7 +243,7 @@ open class MpvPlayerPlugin(
         }
 
         gen = ++sessionGeneration
-        core = MpvPlayerCore(coreContext, audioOnly).apply {
+        core = MpvPlayerCore(coreContext, audioOnly, hardwareDecoding).apply {
           delegate = this@MpvPlayerPlugin
         }
         playerCore = core

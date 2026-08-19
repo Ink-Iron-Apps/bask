@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Plexy"
+    "title": "Plezy"
   },
   "auth": {
     "signInWithPlex": "Вход с Plex",
@@ -17,7 +17,7 @@
     "quickConnectWaiting": "Изчакване на одобрение…",
     "quickConnectCancel": "Отказ",
     "quickConnectExpired": "Quick Connect изтече. Опитайте отново.",
-    "localDataRecoveryRequired": "Plexy не успя безопасно да възстанови локалните данни за вход и несинхронизираните данни за възпроизвеждане. Моля, влезте отново.",
+    "localDataRecoveryRequired": "Plezy не успя безопасно да възстанови локалните данни за вход и несинхронизираните данни за възпроизвеждане. Моля, влезте отново.",
     "pinCheckRejected": "Проверката на PIN кода на Plex беше отхвърлена"
   },
   "common": {
@@ -101,7 +101,7 @@
   },
   "settings": {
     "title": "Настройки",
-    "supportDeveloper": "Подкрепи Plexy",
+    "supportDeveloper": "Подкрепи Plezy",
     "supportDeveloperDescription": "Дарение чрез Liberapay за финансиране на разработката",
     "language": "Език",
     "theme": "Тема",
@@ -195,6 +195,11 @@
     "followServerTrackSelectionsDescription": "При смяна на епизода прилагай избраните на сървъра аудио и субтитри, вместо да се пренася текущият избор",
     "showChapterMarkersOnTimeline": "Показвай маркери на глави върху времевата линия",
     "showChapterMarkersOnTimelineDescription": "Разделяй времевата линия на сегменти по границите на главите",
+    "specialsOrdering": "Специални епизоди в реда на епизодите",
+    "specialsOrderingDescription": "Къде се възпроизвеждат специалните епизоди в реда за гледане на сериала",
+    "specialsOrderingServer": "Следвай реда на сървъра",
+    "specialsOrderingAirDate": "Подреждай по дата на излъчване",
+    "specialsOrderingLast": "След редовните сезони",
     "clickVideoTogglesPlayback": "Клик върху видеото превключва възпроизвеждане/пауза",
     "clickVideoTogglesPlaybackDescription": "Клик върху видеото пуска/паузира вместо да показва контролите.",
     "videoPlayerControls": "Контроли на видео плейъра",
@@ -226,7 +231,7 @@
     "importSettingsDescription": "Възстанови предпочитания от файл",
     "importSettingsConfirm": "Това ще замени текущите ви настройки. Продължавате ли?",
     "importSettingsSuccess": "Настройките са импортирани",
-    "importSettingsInvalidFile": "Този файл не е валиден експорт на настройки от Plexy",
+    "importSettingsInvalidFile": "Този файл не е валиден експорт на настройки от Plezy",
     "importSettingsNoUser": "Влезте, преди да импортирате настройки",
     "shortcutsReset": "Клавишните комбинации са нулирани до подразбиране",
     "about": "Относно",
@@ -319,7 +324,7 @@
     "forceTvMode": "Принуди TV режим",
     "forceTvModeDescription": "Принуди ТВ оформление. За устройства, които не се разпознават автоматично. Изисква рестарт.",
     "startInFullscreen": "Стартирай на цял екран",
-    "startInFullscreenDescription": "Отваряй Plexy в режим цял екран при стартиране",
+    "startInFullscreenDescription": "Отваряй Plezy в режим цял екран при стартиране",
     "exitFullscreenOnPlayerClose": "Изход от цял екран при затваряне на плейъра",
     "exitFullscreenOnPlayerCloseDescription": "Автоматично излиза от режим цял екран при затваряне на видео плейъра",
     "autoHidePerformanceOverlay": "Автоматично скриване на оверлея за производителност",
@@ -340,7 +345,17 @@
     "subtitlesAndConfig": "Субтитри и конфигурация",
     "seekAndTiming": "Търсене и време",
     "behavior": "Поведение",
-    "exportDialogTitle": "Експортиране на настройките на Plexy"
+    "rememberPlayerChanges": "Запомняне на промените в плейъра",
+    "rememberPlayerChangesDescription": "Къде се записва и откъде се прилага отново промяна, направена по време на възпроизвеждане",
+    "scopePlaybackSpeed": "Скорост на възпроизвеждане",
+    "scopeShaderPreset": "Предварителна настройка на шейдъра",
+    "scopeAspectRatio": "Съотношение на страните",
+    "scopeSyncOffsets": "Синхронизация на аудио и субтитри",
+    "playerScopeOff": "Не запазвай",
+    "playerScopeGlobal": "Навсякъде",
+    "playerScopeLibrary": "По библиотека",
+    "playerScopeTitle": "По сериал или филм",
+    "exportDialogTitle": "Експортиране на настройките на Plezy"
   },
   "search": {
     "hint": "Търсене на филми, сериали, музика...",
@@ -536,8 +551,8 @@
       "one": "${n} друг епизод се съхранява в същия файл и също ще бъде изтрит:",
       "other": "${n} други епизода се съхраняват в същия файл и също ще бъдат изтрити:"
     },
-    "deleteScopeUnverifiedProbeFailed": "Plexy не успя да провери кои файлове ще бъдат премахнати, така че може да изтрие повече от посочения по-горе елемент. Откажете и опитайте отново, или изтрийте въпреки това.",
-    "deleteScopeUnverifiedNoFileInfo": "Сървърът ви не предостави данни за файловете на този елемент, така че Plexy не може да провери кои файлове ще бъдат премахнати. Може да изтрие повече от посочения по-горе елемент.",
+    "deleteScopeUnverifiedProbeFailed": "Plezy не успя да провери кои файлове ще бъдат премахнати, така че може да изтрие повече от посочения по-горе елемент. Откажете и опитайте отново, или изтрийте въпреки това.",
+    "deleteScopeUnverifiedNoFileInfo": "Сървърът ви не предостави данни за файловете на този елемент, така че Plezy не може да провери кои файлове ще бъдат премахнати. Може да изтрие повече от посочения по-горе елемент.",
     "mediaDeletedSuccessfully": "Елементът е изтрит успешно",
     "mediaFailedToDelete": "Неуспешно изтриване на елемента",
     "rate": "Оцени",
@@ -594,12 +609,7 @@
   "videoControls": {
     "audioLabel": "Аудио",
     "subtitlesLabel": "Субтитри",
-    "resetToZero": "Нулирай до 0ms",
     "addTime": "+${amount}${unit}",
-    "minusTime": "-${amount}${unit}",
-    "playsLater": "${label} се възпроизвежда по-късно",
-    "playsEarlier": "${label} се възпроизвежда по-рано",
-    "noOffset": "Без отместване",
     "letterbox": "Черни ленти",
     "fillScreen": "Запълни екрана",
     "stretch": "Разтегни",
@@ -687,7 +697,12 @@
     "forcedTrack": "${label} (Принудителни)",
     "osdSubtitlesOff": "Субтитри: изкл.",
     "osdSubtitles": "Субтитри: ${track}",
-    "osdAudio": "Аудио: ${track}"
+    "osdAudio": "Аудио: ${track}",
+    "resetToZero": "Нулирай до 0ms",
+    "minusTime": "-${amount}${unit}",
+    "playsLater": "${label} се възпроизвежда по-късно",
+    "playsEarlier": "${label} се възпроизвежда по-рано",
+    "noOffset": "Без отместване"
   },
   "userStatus": {},
   "messages": {
@@ -802,7 +817,7 @@
     "confirmAction": "Потвърждение на действие"
   },
   "profiles": {
-    "addPlezyProfile": "Добави Plexy профил",
+    "addPlezyProfile": "Добави Plezy профил",
     "switchingProfile": "Смяна на профил…",
     "deleteThisProfileTitle": "Да се изтрие ли този профил?",
     "deleteThisProfileMessage": "Премахване на ${displayName}. Връзките не се засягат.",
@@ -875,7 +890,7 @@
     "sessionExpiredMany": "Сесиите за ${count} сървъра са изтекли",
     "signInAgain": "Влез отново",
     "editMediaBrowserTitle": "Редактирай връзката с ${product}",
-    "editMediaBrowserIntro": "Добавете или премахнете URL адреси за ${serverName}. Plexy ще използва достъпния URL адрес с най-ниска латентност."
+    "editMediaBrowserIntro": "Добавете или премахнете URL адреси за ${serverName}. Plezy ще използва достъпния URL адрес с най-ниска латентност."
   },
   "discover": {
     "title": "Открий",
@@ -1037,9 +1052,9 @@
     "uploadLogs": "Качи логовете"
   },
   "startup": {
-    "failedTitle": "Plexy не можа да стартира",
+    "failedTitle": "Plezy не можа да стартира",
     "failedBody": "Нещо се обърка по време на стартирането. Детайлите по-долу показват какво е причинило грешката.",
-    "failedBodyRepairable": "Запазеният файл с настройки на Plexy е повреден и трябва да бъде възстановен, преди Plexy да стартира. Повторните опити няма да помогнат — изберете „Ремонт на хранилището“.",
+    "failedBodyRepairable": "Запазеният файл с настройки на Plezy е повреден и трябва да бъде възстановен, преди Plezy да стартира. Повторните опити няма да помогнат — изберете „Ремонт на хранилището“.",
     "phaseLabel": "Стъпка",
     "showDetails": "Покажи детайлите",
     "hideDetails": "Скрий детайлите",
@@ -1048,16 +1063,16 @@
     "uploadDetails": "Качи детайлите",
     "repairStorage": "Ремонт на хранилището",
     "repairTitle": "Да ремонтирам ли съхранените данни?",
-    "repairBodyCommon": "Файлът с настройки на Plexy е повреден и не може да бъде прочетен. Ремонтът връща всяка настройка към стойността ѝ по подразбиране.",
+    "repairBodyCommon": "Файлът с настройки на Plezy е повреден и не може да бъде прочетен. Ремонтът връща всяка настройка към стойността ѝ по подразбиране.",
     "repairBodyOneCredential": "Един запис за вход е повреден и не може да бъде прочетен. Ремонтът премахва само него; останалите ви настройки не се пипат.",
     "repairBodySignInsKept": "Сървърите и профилите ви трябва да останат вписани.",
     "repairBodySignInsLost": "Ключът, защитаващ запазените ви вписвания, не може да бъде възстановен от този файл, така че ще трябва да се впишете отново във всеки сървър и профил. Нищо на медийния ви сървър не се засяга.",
-    "repairBodySessionsUncertain": "Трекърите (MAL, AniList, Simkl, Trakt) и Seerr се съхраняват отделно и може да оцелеят или не. Plexy ще ви каже точно какво е запазил.",
+    "repairBodySessionsUncertain": "Трекърите (MAL, AniList, Simkl, Trakt) и Seerr се съхраняват отделно и може да оцелеят или не. Plezy ще ви каже точно какво е запазил.",
     "repairConfirm": "Ремонтирай",
     "repairSucceeded": "Хранилището е ремонтирано",
     "repairNeedsRestart": "Хранилището е ремонтирано — изисква се рестартиране",
-    "restartRequiredBody": "Данните ви бяха ремонтирани, но Plexy трябва да стартира наново, преди да ги използва. Затворете Plexy и го отворете отново.",
-    "quitPlezy": "Изход от Plexy",
+    "restartRequiredBody": "Данните ви бяха ремонтирани, но Plezy трябва да стартира наново, преди да ги използва. Затворете Plezy и го отворете отново.",
+    "quitPlezy": "Изход от Plezy",
     "repairFailed": "Ремонтът се провали",
     "repairKeptSignIns": "Сървърите и профилите ви са все още вписани.",
     "repairLostSignIns": "Ключът, защитаващ запазените ви вписвания, не можа да бъде възстановен. Ще трябва да се впишете отново във всеки сървър и профил.",
@@ -1066,7 +1081,7 @@
     "backupWarning": "То съдържа вашите данни за вписване. Не го качвайте и не го споделяйте.",
     "deleteBackup": "Изтрий копието",
     "backupDeleted": "Копието е изтрито.",
-    "previousFailureTitle": "Plexy не успя да стартира последния път"
+    "previousFailureTitle": "Plezy не успя да стартира последния път"
   },
   "licenses": {
     "relatedPackages": "Свързани пакети",
@@ -1130,7 +1145,6 @@
       "rankPopular": "#${n} популярен",
       "rankAiring": "#${n} в ефир",
       "rankRated": "#${n} оценен",
-      "rankFavorited": "#${n} най-харесван",
       "rankTrending": "#${n} в тенденция",
       "rankSeasonal": "#${n} през ${season}",
       "watchingNow": "${n} гледат",
@@ -1148,7 +1162,8 @@
       "nextAiringIn": "Следващ след ${duration}",
       "episodesShort": "${n} еп.",
       "minutesPerEpisode": "${n} мин/еп",
-      "adult": "18+"
+      "adult": "18+",
+      "rankFavorited": "#${n} най-харесван"
     },
     "stats": {
       "listed": "${n} в списък",
@@ -1411,7 +1426,12 @@
     "repeatAll": "Повтаряне на всички",
     "repeatOne": "Повтаряне на една",
     "instantMixNoServer": "Няма наличен сървър за незабавен микс",
-    "noAudioUrl": "Няма наличен URL за аудиото на ${track}"
+    "noAudioUrl": "Няма наличен URL за аудиото на ${track}",
+    "discography": {
+      "singlesAndEps": "Сингли и EP",
+      "live": "Концертни",
+      "compilations": "Компилации"
+    }
   },
   "watchTogether": {
     "title": "Гледане заедно",
@@ -1562,14 +1582,14 @@
       "bannerAction": "Подробности",
       "sheetTitle": "Изтеглянията във фонов режим са блокирани",
       "sheetTitleDegraded": "Изтеглянията във фонов режим може да бъдат ограничени",
-      "sheetIntro": "Android не позволява на Plexy да изтегля надеждно във фонов режим.",
-      "sheetIntroDegraded": "Устройството ви ограничава кога Plexy може да изтегля във фонов режим.",
-      "reasonBackgroundRestricted": "Работата на Plexy във фонов режим е ограничена. Задайте използването на батерията или работата във фонов режим на „Без ограничения“.",
-      "reasonStandbyRestricted": "Android е поставил Plexy в ограничено състояние на готовност. Задайте използването на батерията на „Без ограничения“.",
+      "sheetIntro": "Android не позволява на Plezy да изтегля надеждно във фонов режим.",
+      "sheetIntroDegraded": "Устройството ви ограничава кога Plezy може да изтегля във фонов режим.",
+      "reasonBackgroundRestricted": "Работата на Plezy във фонов режим е ограничена. Задайте използването на батерията или работата във фонов режим на „Без ограничения“.",
+      "reasonStandbyRestricted": "Android е поставил Plezy в ограничено състояние на готовност. Задайте използването на батерията на „Без ограничения“.",
       "reasonDownloadChannelBlocked": "Известията за изтегляния са изключени, затова напредъкът и контролите може да не са достъпни.",
       "reasonNotificationsDisabled": "Известията са изключени. В Android 13 или по-нова версия те са необходими за продължителни изтегляния във фонов режим.",
       "reasonDataSaver": "„Икономия на данни“ е включена и блокира изтеглянията във фонов режим през мобилни данни. Изтеглянията би трябвало да продължат през Wi-Fi.",
-      "reasonOemUnknown": "Изтеглянията спираха многократно, докато Plexy беше във фонов режим. Проверете настройките за батерията или работата на Plexy във фонов режим.",
+      "reasonOemUnknown": "Изтеглянията спираха многократно, докато Plezy беше във фонов режим. Проверете настройките за батерията или работата на Plezy във фонов режим.",
       "openSettings": "Отвори настройките",
       "stillNotWorking": "Помощ за конкретното устройство",
       "stillNotWorkingDescription": "Вижте стъпките за устройството си или изпратете лог от Настройки › Виж логовете, ако проблемът продължи.",
@@ -1630,19 +1650,19 @@
       "minimize": "Минимизирай"
     },
     "pairing": {
-      "discoveryDescription": "Plexy устройства със същия Plex акаунт се показват тук",
+      "discoveryDescription": "Plezy устройства със същия Plex акаунт се показват тук",
       "hostAddressHint": "192.168.1.100:48632",
       "connecting": "Свързване...",
       "searchingForDevices": "Търсене на устройства...",
       "noDevicesFound": "Не са намерени устройства във вашата мрежа",
-      "noDevicesHint": "Отворете Plexy на настолен компютър и използвайте същата Wi-Fi мрежа",
+      "noDevicesHint": "Отворете Plezy на настолен компютър и използвайте същата Wi-Fi мрежа",
       "availableDevices": "Налични устройства",
       "manualConnection": "Ръчно свързване",
       "cryptoInitFailed": "Не може да се стартира защитена връзка. Първо влезте в Plex.",
       "validationHostRequired": "Моля, въведете адрес на хоста",
       "validationHostFormat": "Форматът трябва да е IP:port (напр. 192.168.1.100:48632)",
       "connectionTimedOut": "Връзката изтече. Използвайте една и съща мрежа на двете устройства.",
-      "sessionNotFound": "Устройството не е намерено. Уверете се, че Plexy работи на хоста.",
+      "sessionNotFound": "Устройството не е намерено. Уверете се, че Plezy работи на хоста.",
       "authFailed": "Удостоверяването е неуспешно. Двете устройства трябва да използват същия Plex акаунт.",
       "failedToConnect": "Неуспешно свързване: ${error}"
     },
@@ -1880,11 +1900,11 @@
     "connected": "Свързан",
     "connectedAs": "Свързан като @${username}",
     "disconnectConfirm": "Да се прекъсне ли Trakt акаунтът?",
-    "disconnectConfirmBody": "Plexy ще спре да изпраща събития към Trakt. Можете да се свържете отново по всяко време.",
+    "disconnectConfirmBody": "Plezy ще спре да изпраща събития към Trakt. Можете да се свържете отново по всяко време.",
     "scrobble": "Скроблиране в реално време",
     "scrobbleDescription": "Изпращай събития за пускане, пауза и спиране към Trakt по време на възпроизвеждане.",
     "watchedSync": "Синхронизирай статус гледано",
-    "watchedSyncDescription": "Когато маркирате елементи като гледани в Plexy, те се маркират и в Trakt."
+    "watchedSyncDescription": "Когато маркирате елементи като гледани в Plezy, те се маркират и в Trakt."
   },
   "seerr": {
     "title": "Seerr",
@@ -1896,10 +1916,10 @@
     "signInWithEmby": "Вход с Emby",
     "signInWithLocal": "Използвай локален акаунт",
     "email": "Имейл",
-    "noSignInMethods": "Тази Seerr инстанция не предлага метод за вход, който Plexy поддържа.",
+    "noSignInMethods": "Тази Seerr инстанция не предлага метод за вход, който Plezy поддържа.",
     "instance": "Инстанция",
     "disconnectConfirm": "Да се прекъсне ли Seerr?",
-    "disconnectConfirmBody": "Plexy ще забрави тази Seerr инстанция. Можете да се свържете отново по всяко време.",
+    "disconnectConfirmBody": "Plezy ще забрави тази Seerr инстанция. Можете да се свържете отново по всяко време.",
     "request": "Заяви",
     "request4k": "Заяви в 4K",
     "seasons": "Сезони",
@@ -1936,7 +1956,7 @@
     "scrobble": "Проследявай прогреса автоматично",
     "scrobbleDescription": "Обновявай списъка си, когато завършиш епизод или филм.",
     "disconnectConfirm": "Да се прекъсне ли ${service}?",
-    "disconnectConfirmBody": "Plexy ще спре да обновява ${service}. Можете да се свържете отново по всяко време.",
+    "disconnectConfirmBody": "Plezy ще спре да обновява ${service}. Можете да се свържете отново по всяко време.",
     "connectFailed": "Неуспешно свързване с ${service}. Опитайте отново.",
     "names": {
       "mal": "MyAnimeList",
@@ -1946,7 +1966,7 @@
       "mdblist": "MDBList"
     },
     "deviceCode": {
-      "title": "Активиране на Plexy в ${service}",
+      "title": "Активиране на Plezy в ${service}",
       "instructions": "Сканирайте QR кода или посетете адреса по-долу и въведете този код:",
       "openToActivate": "Отворете ${service}, за да активирате",
       "copyCode": "Копирай кода за активиране",

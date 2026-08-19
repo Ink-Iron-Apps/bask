@@ -98,7 +98,7 @@ class _Translations$app$tr extends Translations$app$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Plexy';
+	@override String get title => 'Plezy';
 }
 
 // Path: auth
@@ -122,7 +122,7 @@ class _Translations$auth$tr extends Translations$auth$en {
 	@override String get quickConnectWaiting => 'Onay bekleniyor…';
 	@override String get quickConnectCancel => 'İptal';
 	@override String get quickConnectExpired => 'Hızlı Bağlantı süresi doldu. Tekrar deneyin.';
-	@override String get localDataRecoveryRequired => 'Plexy yerel giriş ve bekleyen oynatma verilerini güvenli bir şekilde kurtaramadı. Lütfen tekrar giriş yapın.';
+	@override String get localDataRecoveryRequired => 'Plezy yerel giriş ve bekleyen oynatma verilerini güvenli bir şekilde kurtaramadı. Lütfen tekrar giriş yapın.';
 	@override String get pinCheckRejected => 'Plex PIN denetimi reddedildi';
 }
 
@@ -222,7 +222,7 @@ class _Translations$settings$tr extends Translations$settings$en {
 
 	// Translations
 	@override String get title => 'Ayarlar';
-	@override String get supportDeveloper => 'Plexy\'yi Destekleyin';
+	@override String get supportDeveloper => 'Plezy\'yi Destekleyin';
 	@override String get supportDeveloperDescription => 'Geliştirmeyi fonlamak için Liberapay üzerinden bağış yapın';
 	@override String get language => 'Dil';
 	@override String get theme => 'Tema';
@@ -316,6 +316,11 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get followServerTrackSelectionsDescription => 'Bölüm değiştiğinde geçerli seçimi taşımak yerine sunucuda seçilen ses ve altyazıyı uygula';
 	@override String get showChapterMarkersOnTimeline => 'Zaman çubuğunda kısım işaretçilerini göster';
 	@override String get showChapterMarkersOnTimelineDescription => 'Zaman çubuğunu kısım sınırlarına göre böl';
+	@override String get specialsOrdering => 'Özel bölümler bölüm sırasına göre';
+	@override String get specialsOrderingDescription => 'Özel bölümlerin dizinin izleme sırasındaki yeri';
+	@override String get specialsOrderingServer => 'Sunucu sırasını izle';
+	@override String get specialsOrderingAirDate => 'Yayın tarihine göre araya ekle';
+	@override String get specialsOrderingLast => 'Normal sezonlardan sonra';
 	@override String get clickVideoTogglesPlayback => 'Oynat/duraklat için videoya tıkla';
 	@override String get clickVideoTogglesPlaybackDescription => 'Kontrolleri göstermek yerine oynatmak/duraklatmak için videoya tıkla.';
 	@override String get videoPlayerControls => 'Video Oynatıcı Kontrolleri';
@@ -347,7 +352,7 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get importSettingsDescription => 'Tercihleri bir dosyadan geri yükleyin';
 	@override String get importSettingsConfirm => 'Bu işlem mevcut ayarlarınızın üzerine yazacak. Devam edilsin mi?';
 	@override String get importSettingsSuccess => 'Ayarlar içe aktarıldı';
-	@override String get importSettingsInvalidFile => 'Bu dosya geçerli bir Plexy ayar dosyası değil';
+	@override String get importSettingsInvalidFile => 'Bu dosya geçerli bir Plezy ayar dosyası değil';
 	@override String get importSettingsNoUser => 'Ayarları içe aktarmadan önce giriş yapın';
 	@override String get shortcutsReset => 'Kısayollar varsayılana sıfırlandı';
 	@override String get about => 'Hakkında';
@@ -440,7 +445,7 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get forceTvMode => 'TV modunu zorla';
 	@override String get forceTvModeDescription => 'TV düzenini zorla. Otomatik algılamayan cihazlar içindir. Yeniden başlatma gerektirir.';
 	@override String get startInFullscreen => 'Tam ekranda başlat';
-	@override String get startInFullscreenDescription => 'Plexy\'yi açılışta tam ekran modunda aç';
+	@override String get startInFullscreenDescription => 'Plezy\'yi açılışta tam ekran modunda aç';
 	@override String get exitFullscreenOnPlayerClose => 'Oynatıcı kapandığında tam ekrandan çık';
 	@override String get exitFullscreenOnPlayerCloseDescription => 'Video oynatıcıyı kapatırken otomatik olarak tam ekrandan çık';
 	@override String get autoHidePerformanceOverlay => 'Performans Katmanını Otomatik Gizle';
@@ -461,7 +466,17 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get subtitlesAndConfig => 'Altyazılar ve Yapılandırma';
 	@override String get seekAndTiming => 'Sarılma ve Zamanlama';
 	@override String get behavior => 'Davranış';
-	@override String get exportDialogTitle => 'Plexy ayarlarını dışa aktar';
+	@override String get rememberPlayerChanges => 'Oynatıcı değişikliklerini hatırla';
+	@override String get rememberPlayerChangesDescription => 'Oynatma sırasında yapılan değişikliklerin kaydedilip yeniden uygulanacağı yer';
+	@override String get scopePlaybackSpeed => 'Oynatma hızı';
+	@override String get scopeShaderPreset => 'Gölgelendirici ön ayarı';
+	@override String get scopeAspectRatio => 'En-boy oranı';
+	@override String get scopeSyncOffsets => 'Ses ve altyazı senkronizasyonu';
+	@override String get playerScopeOff => 'Kaydetme';
+	@override String get playerScopeGlobal => 'Her yerde';
+	@override String get playerScopeLibrary => 'Kitaplık başına';
+	@override String get playerScopeTitle => 'Dizi veya film başına';
+	@override String get exportDialogTitle => 'Plezy ayarlarını dışa aktar';
 }
 
 // Path: search
@@ -659,8 +674,8 @@ class _Translations$mediaMenu$tr extends Translations$mediaMenu$en {
 		one: '${n} başka bölüm aynı dosyada saklanıyor ve o da silinecek:',
 		other: '${n} başka bölüm aynı dosyada saklanıyor ve onlar da silinecek:',
 	);
-	@override String get deleteScopeUnverifiedProbeFailed => 'Plexy bunun hangi dosyaları sileceğini kontrol edemedi, bu yüzden yukarıda adı geçen ögeden daha fazlasını silebilir. İptal edip tekrar deneyin veya yine de silin.';
-	@override String get deleteScopeUnverifiedNoFileInfo => 'Sunucunuz bu öge için dosya ayrıntıları sağlamadı, bu yüzden Plexy bunun hangi dosyaları sileceğini kontrol edemiyor. Yukarıda adı geçen ögeden daha fazlasını silebilir.';
+	@override String get deleteScopeUnverifiedProbeFailed => 'Plezy bunun hangi dosyaları sileceğini kontrol edemedi, bu yüzden yukarıda adı geçen ögeden daha fazlasını silebilir. İptal edip tekrar deneyin veya yine de silin.';
+	@override String get deleteScopeUnverifiedNoFileInfo => 'Sunucunuz bu öge için dosya ayrıntıları sağlamadı, bu yüzden Plezy bunun hangi dosyaları sileceğini kontrol edemiyor. Yukarıda adı geçen ögeden daha fazlasını silebilir.';
 	@override String get mediaDeletedSuccessfully => 'Medya ögesi başarıyla silindi';
 	@override String get mediaFailedToDelete => 'Medya ögesi silinemedi';
 	@override String get rate => 'Oyla';
@@ -752,12 +767,7 @@ class _Translations$videoControls$tr extends Translations$videoControls$en {
 	// Translations
 	@override String get audioLabel => 'Ses';
 	@override String get subtitlesLabel => 'Altyazı';
-	@override String get resetToZero => '0ms\'ye Sıfırla';
 	@override String addTime({required Object amount, required Object unit}) => '+${amount}${unit}';
-	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
-	@override String playsLater({required Object label}) => '${label} daha sonra oynatılır';
-	@override String playsEarlier({required Object label}) => '${label} daha önce oynatılır';
-	@override String get noOffset => 'Ofset yok';
 	@override String get letterbox => 'Geniş Ekran (Letterbox)';
 	@override String get fillScreen => 'Ekrana Doldur';
 	@override String get stretch => 'Uzat';
@@ -838,6 +848,11 @@ class _Translations$videoControls$tr extends Translations$videoControls$en {
 	@override String get osdSubtitlesOff => 'Altyazı: Kapalı';
 	@override String osdSubtitles({required Object track}) => 'Altyazı: ${track}';
 	@override String osdAudio({required Object track}) => 'Ses: ${track}';
+	@override String get resetToZero => '0ms\'ye Sıfırla';
+	@override String minusTime({required Object amount, required Object unit}) => '-${amount}${unit}';
+	@override String playsLater({required Object label}) => '${label} daha sonra oynatılır';
+	@override String playsEarlier({required Object label}) => '${label} daha önce oynatılır';
+	@override String get noOffset => 'Ofset yok';
 }
 
 // Path: messages
@@ -986,7 +1001,7 @@ class _Translations$profiles$tr extends Translations$profiles$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get addPlezyProfile => 'Plexy profili ekle';
+	@override String get addPlezyProfile => 'Plezy profili ekle';
 	@override String get switchingProfile => 'Profil değiştiriliyor…';
 	@override String get deleteThisProfileTitle => 'Bu profil silinsin mi?';
 	@override String deleteThisProfileMessage({required Object displayName}) => '${displayName} kişisi kaldırılacak. Bağlantılar etkilenmez.';
@@ -1066,7 +1081,7 @@ class _Translations$connections$tr extends Translations$connections$en {
 	@override String sessionExpiredMany({required Object count}) => '${count} sunucu için oturum süresi doldu';
 	@override String get signInAgain => 'Tekrar giriş yap';
 	@override String editMediaBrowserTitle({required Object product}) => '${product} bağlantısını düzenle';
-	@override String editMediaBrowserIntro({required Object serverName}) => '${serverName} için URL ekleyin veya kaldırın. Plexy, erişilebilir olan en düşük gecikmeli URL\'yi kullanacak.';
+	@override String editMediaBrowserIntro({required Object serverName}) => '${serverName} için URL ekleyin veya kaldırın. Plezy, erişilebilir olan en düşük gecikmeli URL\'yi kullanacak.';
 }
 
 // Path: discover
@@ -1239,9 +1254,9 @@ class _Translations$startup$tr extends Translations$startup$en {
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get failedTitle => 'Plexy başlatılamadı';
+	@override String get failedTitle => 'Plezy başlatılamadı';
 	@override String get failedBody => 'Başlatma sırasında bir şeyler ters gitti. Aşağıdaki ayrıntılar neyin başarısız olduğunu gösteriyor.';
-	@override String get failedBodyRepairable => 'Plexy\'nin kayıtlı ayar dosyası hasarlı ve Plexy başlamadan önce yeniden oluşturulması gerekiyor. Tekrar denemek işe yaramaz — Depolama Alanını Onar\'ı seçin.';
+	@override String get failedBodyRepairable => 'Plezy\'nin kayıtlı ayar dosyası hasarlı ve Plezy başlamadan önce yeniden oluşturulması gerekiyor. Tekrar denemek işe yaramaz — Depolama Alanını Onar\'ı seçin.';
 	@override String get phaseLabel => 'Adım';
 	@override String get showDetails => 'Ayrıntıları göster';
 	@override String get hideDetails => 'Ayrıntıları gizle';
@@ -1250,16 +1265,16 @@ class _Translations$startup$tr extends Translations$startup$en {
 	@override String get uploadDetails => 'Ayrıntıları yükle';
 	@override String get repairStorage => 'Depolama Alanını Onar';
 	@override String get repairTitle => 'Kayıtlı veriler onarılsın mı?';
-	@override String get repairBodyCommon => 'Plexy\'nin ayar dosyası hasarlı ve okunamıyor. Onarım, her ayarı varsayılanına sıfırlar.';
+	@override String get repairBodyCommon => 'Plezy\'nin ayar dosyası hasarlı ve okunamıyor. Onarım, her ayarı varsayılanına sıfırlar.';
 	@override String get repairBodyOneCredential => 'Kayıtlı bir giriş hasarlı ve okunamıyor. Onarım yalnızca onu kaldırır; diğer ayarlarınıza dokunulmaz.';
 	@override String get repairBodySignInsKept => 'Sunucularınız ve profilleriniz giriş yapılı kalmalı.';
 	@override String get repairBodySignInsLost => 'Kayıtlı girişlerinizi koruyan anahtar bu dosyadan kurtarılamıyor, bu yüzden her sunucuya ve profile yeniden giriş yapmanız gerekecek. Medya sunucunuzdaki hiçbir şey etkilenmez.';
-	@override String get repairBodySessionsUncertain => 'Takip hizmetleri (MAL, AniList, Simkl, Trakt) ve Seerr ayrı olarak saklanır; korunup korunmayacakları belirsizdir. Plexy tam olarak neyi koruduğunu size söyleyecek.';
+	@override String get repairBodySessionsUncertain => 'Takip hizmetleri (MAL, AniList, Simkl, Trakt) ve Seerr ayrı olarak saklanır; korunup korunmayacakları belirsizdir. Plezy tam olarak neyi koruduğunu size söyleyecek.';
 	@override String get repairConfirm => 'Onar';
 	@override String get repairSucceeded => 'Depolama alanı onarıldı';
 	@override String get repairNeedsRestart => 'Depolama alanı onarıldı — yeniden başlatma gerekli';
-	@override String get restartRequiredBody => 'Verileriniz onarıldı, ancak Plexy\'nin bunları kullanabilmesi için temiz bir başlangıç yapması gerekiyor. Plexy\'yi kapatıp yeniden açın.';
-	@override String get quitPlezy => 'Plexy\'den Çık';
+	@override String get restartRequiredBody => 'Verileriniz onarıldı, ancak Plezy\'nin bunları kullanabilmesi için temiz bir başlangıç yapması gerekiyor. Plezy\'yi kapatıp yeniden açın.';
+	@override String get quitPlezy => 'Plezy\'den Çık';
 	@override String get repairFailed => 'Onarım başarısız oldu';
 	@override String get repairKeptSignIns => 'Sunucularınız ve profilleriniz hâlâ giriş yapılı.';
 	@override String get repairLostSignIns => 'Kayıtlı girişlerinizi koruyan anahtar kurtarılamadı. Her sunucuya ve profile yeniden giriş yapmanız gerekecek.';
@@ -1268,7 +1283,7 @@ class _Translations$startup$tr extends Translations$startup$en {
 	@override String get backupWarning => 'Giriş bilgilerinizi içerir. Yüklemeyin veya paylaşmayın.';
 	@override String get deleteBackup => 'Kopyayı Sil';
 	@override String get backupDeleted => 'Kopya silindi.';
-	@override String get previousFailureTitle => 'Plexy geçen sefer başlatılamadı';
+	@override String get previousFailureTitle => 'Plezy geçen sefer başlatılamadı';
 }
 
 // Path: licenses
@@ -1527,6 +1542,7 @@ class _Translations$music$tr extends Translations$music$en {
 	@override String get repeatOne => 'Tekini tekrarla';
 	@override String get instantMixNoServer => 'Anında miks için kullanılabilir sunucu yok';
 	@override String noAudioUrl({required Object track}) => '${track} için kullanılabilir ses URL\'si yok';
+	@override late final _Translations$music$discography$tr discography = _Translations$music$discography$tr._(_root);
 }
 
 // Path: watchTogether
@@ -1980,11 +1996,11 @@ class _Translations$trakt$tr extends Translations$trakt$en {
 	@override String get connected => 'Bağlandı';
 	@override String connectedAs({required Object username}) => '@${username} olarak bağlandı';
 	@override String get disconnectConfirm => 'Trakt hesabının bağlantısı kesilsin mi?';
-	@override String get disconnectConfirmBody => 'Plexy, Trakt\'a olay göndermeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.';
+	@override String get disconnectConfirmBody => 'Plezy, Trakt\'a olay göndermeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.';
 	@override String get scrobble => 'Gerçek zamanlı scrobble';
 	@override String get scrobbleDescription => 'Oynatma sırasında Trakt\'a oynatma, duraklatma ve durdurma olayları gönderin.';
 	@override String get watchedSync => 'İzleme durumunu eşitle';
-	@override String get watchedSyncDescription => 'Plexy\'de ögeleri izlendi olarak işaretlediğinizde, Trakt üzerinde de izlendi olarak işaretlenir.';
+	@override String get watchedSyncDescription => 'Plezy\'de ögeleri izlendi olarak işaretlediğinizde, Trakt üzerinde de izlendi olarak işaretlenir.';
 }
 
 // Path: seerr
@@ -2003,10 +2019,10 @@ class _Translations$seerr$tr extends Translations$seerr$en {
 	@override String get signInWithEmby => 'Emby ile Giriş Yap';
 	@override String get signInWithLocal => 'Yerel hesap kullan';
 	@override String get email => 'E-posta';
-	@override String get noSignInMethods => 'Bu Seerr örneği Plexy\'nin desteklediği bir giriş yöntemi sunmuyor.';
+	@override String get noSignInMethods => 'Bu Seerr örneği Plezy\'nin desteklediği bir giriş yöntemi sunmuyor.';
 	@override String get instance => 'Örnek (Instance)';
 	@override String get disconnectConfirm => 'Seerr bağlantısı kesilsin mi?';
-	@override String get disconnectConfirmBody => 'Plexy bu Seerr örneğini unutacak. İstediğiniz zaman yeniden bağlanabilirsiniz.';
+	@override String get disconnectConfirmBody => 'Plezy bu Seerr örneğini unutacak. İstediğiniz zaman yeniden bağlanabilirsiniz.';
 	@override String get request => 'İstek Gönder';
 	@override String get request4k => '4K İstek Gönder';
 	@override String get seasons => 'Sezonlar';
@@ -2050,7 +2066,7 @@ class _Translations$services$tr extends Translations$services$en {
 	@override String get scrobble => 'İlerlemeyi otomatik takip et';
 	@override String get scrobbleDescription => 'Bir bölümü veya filmi bitirdiğinizde listenizi güncelleyin.';
 	@override String disconnectConfirm({required Object service}) => '${service} bağlantısı kesilsin mi?';
-	@override String disconnectConfirmBody({required Object service}) => 'Plexy, ${service} güncellemeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.';
+	@override String disconnectConfirmBody({required Object service}) => 'Plezy, ${service} güncellemeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.';
 	@override String connectFailed({required Object service}) => '${service} ile bağlantı kurulamadı. Tekrar deneyin.';
 	@override late final _Translations$services$names$tr names = _Translations$services$names$tr._(_root);
 	@override late final _Translations$services$deviceCode$tr deviceCode = _Translations$services$deviceCode$tr._(_root);
@@ -2307,7 +2323,6 @@ class _Translations$explore$badge$tr extends Translations$explore$badge$en {
 	@override String rankPopular({required Object n}) => 'Popülerde #${n}';
 	@override String rankAiring({required Object n}) => 'Yayında #${n}';
 	@override String rankRated({required Object n}) => 'Puanlarda #${n}';
-	@override String rankFavorited({required Object n}) => 'Favorilerde #${n}';
 	@override String rankTrending({required Object n}) => 'Trendde #${n}';
 	@override String rankSeasonal({required Object n, required Object season}) => '#${n} ${season} sezonunda';
 	@override String watchingNow({required Object n}) => '${n} izliyor';
@@ -2326,6 +2341,7 @@ class _Translations$explore$badge$tr extends Translations$explore$badge$en {
 	@override String episodesShort({required Object n}) => '${n} blm';
 	@override String minutesPerEpisode({required Object n}) => '${n} dk/blm';
 	@override String get adult => '18+';
+	@override String rankFavorited({required Object n}) => 'Favorilerde #${n}';
 }
 
 // Path: explore.stats
@@ -2477,6 +2493,18 @@ class _Translations$explore$detail$tr extends Translations$explore$detail$en {
 	@override String get background => 'Arka plan';
 }
 
+// Path: music.discography
+class _Translations$music$discography$tr extends Translations$music$discography$en {
+	_Translations$music$discography$tr._(TranslationsTr root) : this._root = root, super.internal(root);
+
+	final TranslationsTr _root; // ignore: unused_field
+
+	// Translations
+	@override String get singlesAndEps => 'Single ve EP\'ler';
+	@override String get live => 'Canlı';
+	@override String get compilations => 'Derlemeler';
+}
+
 // Path: downloads.backgroundWarning
 class _Translations$downloads$backgroundWarning$tr extends Translations$downloads$backgroundWarning$en {
 	_Translations$downloads$backgroundWarning$tr._(TranslationsTr root) : this._root = root, super.internal(root);
@@ -2489,14 +2517,14 @@ class _Translations$downloads$backgroundWarning$tr extends Translations$download
 	@override String get bannerAction => 'Detaylar';
 	@override String get sheetTitle => 'Arka plan indirmeleri engellendi';
 	@override String get sheetTitleDegraded => 'Arka plan indirmeleri sınırlı olabilir';
-	@override String get sheetIntro => 'Android, Plexy\'nin arka planda güvenilir şekilde indirme yapmasını engelliyor.';
-	@override String get sheetIntroDegraded => 'Cihazınız, Plexy\'nin arka planda ne zaman indirme yapabileceğini sınırlıyor.';
-	@override String get reasonBackgroundRestricted => 'Plexy\'nin arka plan kullanımı kısıtlanmış. Pil veya arka plan kullanımını "Kısıtlanmamış" olarak ayarlayın.';
-	@override String get reasonStandbyRestricted => 'Android, Plexy\'yi kısıtlı bekleme durumuna aldı. Pil kullanımını "Kısıtlanmamış" olarak ayarlayın.';
+	@override String get sheetIntro => 'Android, Plezy\'nin arka planda güvenilir şekilde indirme yapmasını engelliyor.';
+	@override String get sheetIntroDegraded => 'Cihazınız, Plezy\'nin arka planda ne zaman indirme yapabileceğini sınırlıyor.';
+	@override String get reasonBackgroundRestricted => 'Plezy\'nin arka plan kullanımı kısıtlanmış. Pil veya arka plan kullanımını "Kısıtlanmamış" olarak ayarlayın.';
+	@override String get reasonStandbyRestricted => 'Android, Plezy\'yi kısıtlı bekleme durumuna aldı. Pil kullanımını "Kısıtlanmamış" olarak ayarlayın.';
 	@override String get reasonDownloadChannelBlocked => 'İndirme bildirimleri kapalı; bu nedenle ilerleme ve kontroller kullanılamayabilir.';
 	@override String get reasonNotificationsDisabled => 'Bildirimler kapalı. Android 13 ve sonraki sürümlerde uzun arka plan indirmeleri için gereklidir.';
 	@override String get reasonDataSaver => 'Veri Tasarrufu açık; bu, mobil veride arka plan indirmelerini engeller. Wi-Fi üzerinde indirmeler yine de çalışır.';
-	@override String get reasonOemUnknown => 'Plexy arka plandayken indirmeler tekrar tekrar durdu. Plexy\'nin pil veya arka plan kullanım ayarlarını kontrol edin.';
+	@override String get reasonOemUnknown => 'Plezy arka plandayken indirmeler tekrar tekrar durdu. Plezy\'nin pil veya arka plan kullanım ayarlarını kontrol edin.';
 	@override String get openSettings => 'Ayarları aç';
 	@override String get stillNotWorking => 'Cihaza özel yardım';
 	@override String get stillNotWorkingDescription => 'Cihazınıza yönelik adımlara bakın veya sorun sürerse Ayarlar › Günlükleri Görüntüle bölümünden bir günlük gönderin.';
@@ -2539,19 +2567,19 @@ class _Translations$companionRemote$pairing$tr extends Translations$companionRem
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String get discoveryDescription => 'Aynı Plex hesabına sahip Plexy cihazları burada görünür';
+	@override String get discoveryDescription => 'Aynı Plex hesabına sahip Plezy cihazları burada görünür';
 	@override String get hostAddressHint => '192.168.1.100:48632';
 	@override String get connecting => 'Bağlanılıyor...';
 	@override String get searchingForDevices => 'Cihazlar aranıyor...';
 	@override String get noDevicesFound => 'Ağınızda cihaz bulunamadı';
-	@override String get noDevicesHint => 'Masaüstünde Plexy\'yi açın ve aynı Wi-Fi ağını kullanın';
+	@override String get noDevicesHint => 'Masaüstünde Plezy\'yi açın ve aynı Wi-Fi ağını kullanın';
 	@override String get availableDevices => 'Kullanılabilir Cihazlar';
 	@override String get manualConnection => 'Manuel Bağlantı';
 	@override String get cryptoInitFailed => 'Güvenli bağlantı başlatılamadı. Önce Plex\'e giriş yapın.';
 	@override String get validationHostRequired => 'Lütfen ana bilgisayar adresini girin';
 	@override String get validationHostFormat => 'Biçim IP:port şeklinde olmalıdır (ör. 192.168.1.100:48632)';
 	@override String get connectionTimedOut => 'Bağlantı zaman aşımına uğradı. Her iki cihazda da aynı ağı kullanın.';
-	@override String get sessionNotFound => 'Cihaz bulunamadı. Plexy\'nin ana bilgisayarda çalıştığından emin olun.';
+	@override String get sessionNotFound => 'Cihaz bulunamadı. Plezy\'nin ana bilgisayarda çalıştığından emin olun.';
 	@override String get authFailed => 'Kimlik doğrulama başarısız oldu. Her iki cihazın da aynı Plex hesabına ihtiyacı var.';
 	@override String failedToConnect({required Object error}) => 'Bağlantı başarısız: ${error}';
 }
@@ -2630,7 +2658,7 @@ class _Translations$services$deviceCode$tr extends Translations$services$deviceC
 	final TranslationsTr _root; // ignore: unused_field
 
 	// Translations
-	@override String title({required Object service}) => 'Plexy\'yi ${service} üzerinde etkinleştirin';
+	@override String title({required Object service}) => 'Plezy\'yi ${service} üzerinde etkinleştirin';
 	@override String get instructions => 'QR kodunu tarayın veya aşağıdaki adresi ziyaret edip bu kodu girin:';
 	@override String openToActivate({required Object service}) => 'Etkinleştirmek için ${service} servisini açın';
 	@override String get copyCode => 'Etkinleştirme kodunu kopyala';
@@ -2690,7 +2718,7 @@ class _Translations$services$libraryFilter$tr extends Translations$services$libr
 extension on TranslationsTr {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.title' => 'Plexy',
+			'app.title' => 'Plezy',
 			'auth.signInWithPlex' => 'Plex ile Giriş Yap',
 			'auth.showQRCode' => 'QR Kodunu Göster',
 			'auth.authenticate' => 'Doğrula',
@@ -2705,7 +2733,7 @@ extension on TranslationsTr {
 			'auth.quickConnectWaiting' => 'Onay bekleniyor…',
 			'auth.quickConnectCancel' => 'İptal',
 			'auth.quickConnectExpired' => 'Hızlı Bağlantı süresi doldu. Tekrar deneyin.',
-			'auth.localDataRecoveryRequired' => 'Plexy yerel giriş ve bekleyen oynatma verilerini güvenli bir şekilde kurtaramadı. Lütfen tekrar giriş yapın.',
+			'auth.localDataRecoveryRequired' => 'Plezy yerel giriş ve bekleyen oynatma verilerini güvenli bir şekilde kurtaramadı. Lütfen tekrar giriş yapın.',
 			'auth.pinCheckRejected' => 'Plex PIN denetimi reddedildi',
 			'common.cancel' => 'İptal',
 			'common.save' => 'Kaydet',
@@ -2779,7 +2807,7 @@ extension on TranslationsTr {
 			'update.latestVersion' => 'En son sürümü kullanıyorsunuz',
 			'update.checkFailed' => 'Güncellemeler kontrol edilemedi',
 			'settings.title' => 'Ayarlar',
-			'settings.supportDeveloper' => 'Plexy\'yi Destekleyin',
+			'settings.supportDeveloper' => 'Plezy\'yi Destekleyin',
 			'settings.supportDeveloperDescription' => 'Geliştirmeyi fonlamak için Liberapay üzerinden bağış yapın',
 			'settings.language' => 'Dil',
 			'settings.theme' => 'Tema',
@@ -2873,6 +2901,11 @@ extension on TranslationsTr {
 			'settings.followServerTrackSelectionsDescription' => 'Bölüm değiştiğinde geçerli seçimi taşımak yerine sunucuda seçilen ses ve altyazıyı uygula',
 			'settings.showChapterMarkersOnTimeline' => 'Zaman çubuğunda kısım işaretçilerini göster',
 			'settings.showChapterMarkersOnTimelineDescription' => 'Zaman çubuğunu kısım sınırlarına göre böl',
+			'settings.specialsOrdering' => 'Özel bölümler bölüm sırasına göre',
+			'settings.specialsOrderingDescription' => 'Özel bölümlerin dizinin izleme sırasındaki yeri',
+			'settings.specialsOrderingServer' => 'Sunucu sırasını izle',
+			'settings.specialsOrderingAirDate' => 'Yayın tarihine göre araya ekle',
+			'settings.specialsOrderingLast' => 'Normal sezonlardan sonra',
 			'settings.clickVideoTogglesPlayback' => 'Oynat/duraklat için videoya tıkla',
 			'settings.clickVideoTogglesPlaybackDescription' => 'Kontrolleri göstermek yerine oynatmak/duraklatmak için videoya tıkla.',
 			'settings.videoPlayerControls' => 'Video Oynatıcı Kontrolleri',
@@ -2904,7 +2937,7 @@ extension on TranslationsTr {
 			'settings.importSettingsDescription' => 'Tercihleri bir dosyadan geri yükleyin',
 			'settings.importSettingsConfirm' => 'Bu işlem mevcut ayarlarınızın üzerine yazacak. Devam edilsin mi?',
 			'settings.importSettingsSuccess' => 'Ayarlar içe aktarıldı',
-			'settings.importSettingsInvalidFile' => 'Bu dosya geçerli bir Plexy ayar dosyası değil',
+			'settings.importSettingsInvalidFile' => 'Bu dosya geçerli bir Plezy ayar dosyası değil',
 			'settings.importSettingsNoUser' => 'Ayarları içe aktarmadan önce giriş yapın',
 			'settings.shortcutsReset' => 'Kısayollar varsayılana sıfırlandı',
 			'settings.about' => 'Hakkında',
@@ -2997,7 +3030,7 @@ extension on TranslationsTr {
 			'settings.forceTvMode' => 'TV modunu zorla',
 			'settings.forceTvModeDescription' => 'TV düzenini zorla. Otomatik algılamayan cihazlar içindir. Yeniden başlatma gerektirir.',
 			'settings.startInFullscreen' => 'Tam ekranda başlat',
-			'settings.startInFullscreenDescription' => 'Plexy\'yi açılışta tam ekran modunda aç',
+			'settings.startInFullscreenDescription' => 'Plezy\'yi açılışta tam ekran modunda aç',
 			'settings.exitFullscreenOnPlayerClose' => 'Oynatıcı kapandığında tam ekrandan çık',
 			'settings.exitFullscreenOnPlayerCloseDescription' => 'Video oynatıcıyı kapatırken otomatik olarak tam ekrandan çık',
 			'settings.autoHidePerformanceOverlay' => 'Performans Katmanını Otomatik Gizle',
@@ -3018,7 +3051,17 @@ extension on TranslationsTr {
 			'settings.subtitlesAndConfig' => 'Altyazılar ve Yapılandırma',
 			'settings.seekAndTiming' => 'Sarılma ve Zamanlama',
 			'settings.behavior' => 'Davranış',
-			'settings.exportDialogTitle' => 'Plexy ayarlarını dışa aktar',
+			'settings.rememberPlayerChanges' => 'Oynatıcı değişikliklerini hatırla',
+			'settings.rememberPlayerChangesDescription' => 'Oynatma sırasında yapılan değişikliklerin kaydedilip yeniden uygulanacağı yer',
+			'settings.scopePlaybackSpeed' => 'Oynatma hızı',
+			'settings.scopeShaderPreset' => 'Gölgelendirici ön ayarı',
+			'settings.scopeAspectRatio' => 'En-boy oranı',
+			'settings.scopeSyncOffsets' => 'Ses ve altyazı senkronizasyonu',
+			'settings.playerScopeOff' => 'Kaydetme',
+			'settings.playerScopeGlobal' => 'Her yerde',
+			'settings.playerScopeLibrary' => 'Kitaplık başına',
+			'settings.playerScopeTitle' => 'Dizi veya film başına',
+			'settings.exportDialogTitle' => 'Plezy ayarlarını dışa aktar',
 			'search.hint' => 'Film, dizi, müzik ara...',
 			'search.tryDifferentTerm' => 'Farklı bir arama terimi deneyin',
 			'search.searchYourMedia' => 'Medyanızda arayın',
@@ -3187,6 +3230,8 @@ extension on TranslationsTr {
 			'mediaMenu.deleteMovieTitle' => 'Bu film silinsin mi?',
 			'mediaMenu.deleteEpisodeConfirm' => 'Bölümü Sil',
 			'mediaMenu.deleteSeasonConfirm' => 'Sezonu Sil',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteShowConfirm' => 'Diziyi Sil',
 			'mediaMenu.deleteMovieConfirm' => 'Filmi Sil',
 			'mediaMenu.deleteAnyway' => 'Yine de Sil',
@@ -3195,15 +3240,13 @@ extension on TranslationsTr {
 			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(n, one: 'Bu, içindeki ${n} bölümü ve dosyasını siler.', other: 'Bu, içindeki ${n} bölümü ve dosyalarını siler.', ), 
 			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(n, one: 'Bu öge ${n} dosya olarak saklanıyor ve silinecek.', other: 'Bu öge ${n} dosyaya bölünmüş olarak saklanıyor ve hepsi silinecek.', ), 
 			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(n, one: '${n} başka bölüm aynı dosyada saklanıyor ve o da silinecek:', other: '${n} başka bölüm aynı dosyada saklanıyor ve onlar da silinecek:', ), 
-			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plexy bunun hangi dosyaları sileceğini kontrol edemedi, bu yüzden yukarıda adı geçen ögeden daha fazlasını silebilir. İptal edip tekrar deneyin veya yine de silin.',
-			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Sunucunuz bu öge için dosya ayrıntıları sağlamadı, bu yüzden Plexy bunun hangi dosyaları sileceğini kontrol edemiyor. Yukarıda adı geçen ögeden daha fazlasını silebilir.',
+			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plezy bunun hangi dosyaları sileceğini kontrol edemedi, bu yüzden yukarıda adı geçen ögeden daha fazlasını silebilir. İptal edip tekrar deneyin veya yine de silin.',
+			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Sunucunuz bu öge için dosya ayrıntıları sağlamadı, bu yüzden Plezy bunun hangi dosyaları sileceğini kontrol edemiyor. Yukarıda adı geçen ögeden daha fazlasını silebilir.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Medya ögesi başarıyla silindi',
 			'mediaMenu.mediaFailedToDelete' => 'Medya ögesi silinemedi',
 			'mediaMenu.rate' => 'Oyla',
 			'mediaMenu.playFromBeginning' => 'Baştan Oynat',
 			'mediaMenu.playVersion' => 'Sürümü Oynat...',
-			_ => null,
-		} ?? switch (path) {
 			'rateSheet.title' => 'Oyla',
 			'rateSheet.server' => 'Sunucu',
 			'rateSheet.favorite' => 'Favori',
@@ -3245,12 +3288,7 @@ extension on TranslationsTr {
 			'audioTracks.track' => ({required Object n}) => 'Ses Parçası ${n}',
 			'videoControls.audioLabel' => 'Ses',
 			'videoControls.subtitlesLabel' => 'Altyazı',
-			'videoControls.resetToZero' => '0ms\'ye Sıfırla',
 			'videoControls.addTime' => ({required Object amount, required Object unit}) => '+${amount}${unit}',
-			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
-			'videoControls.playsLater' => ({required Object label}) => '${label} daha sonra oynatılır',
-			'videoControls.playsEarlier' => ({required Object label}) => '${label} daha önce oynatılır',
-			'videoControls.noOffset' => 'Ofset yok',
 			'videoControls.letterbox' => 'Geniş Ekran (Letterbox)',
 			'videoControls.fillScreen' => 'Ekrana Doldur',
 			'videoControls.stretch' => 'Uzat',
@@ -3337,6 +3375,11 @@ extension on TranslationsTr {
 			'videoControls.osdSubtitlesOff' => 'Altyazı: Kapalı',
 			'videoControls.osdSubtitles' => ({required Object track}) => 'Altyazı: ${track}',
 			'videoControls.osdAudio' => ({required Object track}) => 'Ses: ${track}',
+			'videoControls.resetToZero' => '0ms\'ye Sıfırla',
+			'videoControls.minusTime' => ({required Object amount, required Object unit}) => '-${amount}${unit}',
+			'videoControls.playsLater' => ({required Object label}) => '${label} daha sonra oynatılır',
+			'videoControls.playsEarlier' => ({required Object label}) => '${label} daha önce oynatılır',
+			'videoControls.noOffset' => 'Ofset yok',
 			'messages.markedAsWatched' => 'İzlendi olarak işaretlendi',
 			'messages.markedAsUnwatched' => 'İzlenmedi olarak işaretlendi',
 			'messages.markedAsWatchedOffline' => 'İzlendi olarak işaretlendi (çevrimiçi olunca senkronize edilecek)',
@@ -3437,7 +3480,7 @@ extension on TranslationsTr {
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# yorum',
 			'mpvConfig.embeddedVoHint' => 'vo, gpu-context ve gpu-api Linux\'ta yok sayılır: gömülü video her zaman video düzleminde vo=libmpv üzerinden işlenir ve gpu-next (ArtCNN gibi compute shader\'ların ihtiyaç duyduğu) gömülü olarak çalışamaz.',
 			'dialog.confirmAction' => 'Eylemi Onayla',
-			'profiles.addPlezyProfile' => 'Plexy profili ekle',
+			'profiles.addPlezyProfile' => 'Plezy profili ekle',
 			'profiles.switchingProfile' => 'Profil değiştiriliyor…',
 			'profiles.deleteThisProfileTitle' => 'Bu profil silinsin mi?',
 			'profiles.deleteThisProfileMessage' => ({required Object displayName}) => '${displayName} kişisi kaldırılacak. Bağlantılar etkilenmez.',
@@ -3508,7 +3551,7 @@ extension on TranslationsTr {
 			'connections.sessionExpiredMany' => ({required Object count}) => '${count} sunucu için oturum süresi doldu',
 			'connections.signInAgain' => 'Tekrar giriş yap',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => '${product} bağlantısını düzenle',
-			'connections.editMediaBrowserIntro' => ({required Object serverName}) => '${serverName} için URL ekleyin veya kaldırın. Plexy, erişilebilir olan en düşük gecikmeli URL\'yi kullanacak.',
+			'connections.editMediaBrowserIntro' => ({required Object serverName}) => '${serverName} için URL ekleyin veya kaldırın. Plezy, erişilebilir olan en düşük gecikmeli URL\'yi kullanacak.',
 			'discover.title' => 'Keşfet',
 			'discover.noContentAvailable' => 'İçerik bulunmuyor',
 			'discover.addMediaToLibraries' => 'Kitaplıklarınıza biraz medya ekleyin',
@@ -3643,9 +3686,9 @@ extension on TranslationsTr {
 			'logs.clearLogs' => 'Günlükleri Temizle',
 			'logs.copyLogs' => 'Günlükleri Kopyala',
 			'logs.uploadLogs' => 'Günlükleri Yükle',
-			'startup.failedTitle' => 'Plexy başlatılamadı',
+			'startup.failedTitle' => 'Plezy başlatılamadı',
 			'startup.failedBody' => 'Başlatma sırasında bir şeyler ters gitti. Aşağıdaki ayrıntılar neyin başarısız olduğunu gösteriyor.',
-			'startup.failedBodyRepairable' => 'Plexy\'nin kayıtlı ayar dosyası hasarlı ve Plexy başlamadan önce yeniden oluşturulması gerekiyor. Tekrar denemek işe yaramaz — Depolama Alanını Onar\'ı seçin.',
+			'startup.failedBodyRepairable' => 'Plezy\'nin kayıtlı ayar dosyası hasarlı ve Plezy başlamadan önce yeniden oluşturulması gerekiyor. Tekrar denemek işe yaramaz — Depolama Alanını Onar\'ı seçin.',
 			'startup.phaseLabel' => 'Adım',
 			'startup.showDetails' => 'Ayrıntıları göster',
 			'startup.hideDetails' => 'Ayrıntıları gizle',
@@ -3654,16 +3697,16 @@ extension on TranslationsTr {
 			'startup.uploadDetails' => 'Ayrıntıları yükle',
 			'startup.repairStorage' => 'Depolama Alanını Onar',
 			'startup.repairTitle' => 'Kayıtlı veriler onarılsın mı?',
-			'startup.repairBodyCommon' => 'Plexy\'nin ayar dosyası hasarlı ve okunamıyor. Onarım, her ayarı varsayılanına sıfırlar.',
+			'startup.repairBodyCommon' => 'Plezy\'nin ayar dosyası hasarlı ve okunamıyor. Onarım, her ayarı varsayılanına sıfırlar.',
 			'startup.repairBodyOneCredential' => 'Kayıtlı bir giriş hasarlı ve okunamıyor. Onarım yalnızca onu kaldırır; diğer ayarlarınıza dokunulmaz.',
 			'startup.repairBodySignInsKept' => 'Sunucularınız ve profilleriniz giriş yapılı kalmalı.',
 			'startup.repairBodySignInsLost' => 'Kayıtlı girişlerinizi koruyan anahtar bu dosyadan kurtarılamıyor, bu yüzden her sunucuya ve profile yeniden giriş yapmanız gerekecek. Medya sunucunuzdaki hiçbir şey etkilenmez.',
-			'startup.repairBodySessionsUncertain' => 'Takip hizmetleri (MAL, AniList, Simkl, Trakt) ve Seerr ayrı olarak saklanır; korunup korunmayacakları belirsizdir. Plexy tam olarak neyi koruduğunu size söyleyecek.',
+			'startup.repairBodySessionsUncertain' => 'Takip hizmetleri (MAL, AniList, Simkl, Trakt) ve Seerr ayrı olarak saklanır; korunup korunmayacakları belirsizdir. Plezy tam olarak neyi koruduğunu size söyleyecek.',
 			'startup.repairConfirm' => 'Onar',
 			'startup.repairSucceeded' => 'Depolama alanı onarıldı',
 			'startup.repairNeedsRestart' => 'Depolama alanı onarıldı — yeniden başlatma gerekli',
-			'startup.restartRequiredBody' => 'Verileriniz onarıldı, ancak Plexy\'nin bunları kullanabilmesi için temiz bir başlangıç yapması gerekiyor. Plexy\'yi kapatıp yeniden açın.',
-			'startup.quitPlezy' => 'Plexy\'den Çık',
+			'startup.restartRequiredBody' => 'Verileriniz onarıldı, ancak Plezy\'nin bunları kullanabilmesi için temiz bir başlangıç yapması gerekiyor. Plezy\'yi kapatıp yeniden açın.',
+			'startup.quitPlezy' => 'Plezy\'den Çık',
 			'startup.repairFailed' => 'Onarım başarısız oldu',
 			'startup.repairKeptSignIns' => 'Sunucularınız ve profilleriniz hâlâ giriş yapılı.',
 			'startup.repairLostSignIns' => 'Kayıtlı girişlerinizi koruyan anahtar kurtarılamadı. Her sunucuya ve profile yeniden giriş yapmanız gerekecek.',
@@ -3672,7 +3715,7 @@ extension on TranslationsTr {
 			'startup.backupWarning' => 'Giriş bilgilerinizi içerir. Yüklemeyin veya paylaşmayın.',
 			'startup.deleteBackup' => 'Kopyayı Sil',
 			'startup.backupDeleted' => 'Kopya silindi.',
-			'startup.previousFailureTitle' => 'Plexy geçen sefer başlatılamadı',
+			'startup.previousFailureTitle' => 'Plezy geçen sefer başlatılamadı',
 			'licenses.relatedPackages' => 'İlgili Paketler',
 			'licenses.license' => 'Lisans',
 			'licenses.licenseNumber' => ({required Object number}) => 'Lisans ${number}',
@@ -3701,6 +3744,8 @@ extension on TranslationsTr {
 			'explore.status.ended' => 'Bitti',
 			'explore.status.canceled' => 'İptal Edildi',
 			'explore.status.upcoming' => 'Gelecek',
+			_ => null,
+		} ?? switch (path) {
 			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(n, one: '${n} bölüm', other: '${n} bölüm', ), 
 			'explore.cast' => 'Oyuncular',
 			'explore.characters' => 'Karakterler',
@@ -3716,15 +3761,12 @@ extension on TranslationsTr {
 			'explore.emptyTitle' => 'Henüz burada bir şey yok',
 			'explore.emptyMessage' => ({required Object source}) => '${source} kaynağındaki satırlar içerik bulunduğunda burada görünecektir.',
 			'explore.searchHint' => ({required Object source}) => '${source} üzerinde ara',
-			_ => null,
-		} ?? switch (path) {
 			'explore.searchEmpty' => ({required Object query}) => '"${query}" için sonuç bulunamadı',
 			'explore.searchPrompt' => ({required Object source}) => '${source} üzerinde film ve dizileri arayın.',
 			'explore.searchFailed' => 'Arama başarısız. Bağlantınızı kontrol edip tekrar deneyin.',
 			'explore.badge.rankPopular' => ({required Object n}) => 'Popülerde #${n}',
 			'explore.badge.rankAiring' => ({required Object n}) => 'Yayında #${n}',
 			'explore.badge.rankRated' => ({required Object n}) => 'Puanlarda #${n}',
-			'explore.badge.rankFavorited' => ({required Object n}) => 'Favorilerde #${n}',
 			'explore.badge.rankTrending' => ({required Object n}) => 'Trendde #${n}',
 			'explore.badge.rankSeasonal' => ({required Object n, required Object season}) => '#${n} ${season} sezonunda',
 			'explore.badge.watchingNow' => ({required Object n}) => '${n} izliyor',
@@ -3743,6 +3785,7 @@ extension on TranslationsTr {
 			'explore.badge.episodesShort' => ({required Object n}) => '${n} blm',
 			'explore.badge.minutesPerEpisode' => ({required Object n}) => '${n} dk/blm',
 			'explore.badge.adult' => '18+',
+			'explore.badge.rankFavorited' => ({required Object n}) => 'Favorilerde #${n}',
 			'explore.stats.listed' => ({required Object n}) => '${n} listede',
 			'explore.stats.viewersDay' => ({required Object n}) => '${n} bugün izledi',
 			'explore.stats.viewersWeek' => ({required Object n}) => '${n} bu hafta izledi',
@@ -3971,6 +4014,9 @@ extension on TranslationsTr {
 			'music.repeatOne' => 'Tekini tekrarla',
 			'music.instantMixNoServer' => 'Anında miks için kullanılabilir sunucu yok',
 			'music.noAudioUrl' => ({required Object track}) => '${track} için kullanılabilir ses URL\'si yok',
+			'music.discography.singlesAndEps' => 'Single ve EP\'ler',
+			'music.discography.live' => 'Canlı',
+			'music.discography.compilations' => 'Derlemeler',
 			'watchTogether.title' => 'Birlikte İzle',
 			'watchTogether.description' => 'Arkadaşlarınızla ve ailenizle eş zamanlı içerik izleyin',
 			'watchTogether.createSession' => 'Oturum Oluştur',
@@ -4116,14 +4162,14 @@ extension on TranslationsTr {
 			'downloads.backgroundWarning.bannerAction' => 'Detaylar',
 			'downloads.backgroundWarning.sheetTitle' => 'Arka plan indirmeleri engellendi',
 			'downloads.backgroundWarning.sheetTitleDegraded' => 'Arka plan indirmeleri sınırlı olabilir',
-			'downloads.backgroundWarning.sheetIntro' => 'Android, Plexy\'nin arka planda güvenilir şekilde indirme yapmasını engelliyor.',
-			'downloads.backgroundWarning.sheetIntroDegraded' => 'Cihazınız, Plexy\'nin arka planda ne zaman indirme yapabileceğini sınırlıyor.',
-			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plexy\'nin arka plan kullanımı kısıtlanmış. Pil veya arka plan kullanımını "Kısıtlanmamış" olarak ayarlayın.',
-			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android, Plexy\'yi kısıtlı bekleme durumuna aldı. Pil kullanımını "Kısıtlanmamış" olarak ayarlayın.',
+			'downloads.backgroundWarning.sheetIntro' => 'Android, Plezy\'nin arka planda güvenilir şekilde indirme yapmasını engelliyor.',
+			'downloads.backgroundWarning.sheetIntroDegraded' => 'Cihazınız, Plezy\'nin arka planda ne zaman indirme yapabileceğini sınırlıyor.',
+			'downloads.backgroundWarning.reasonBackgroundRestricted' => 'Plezy\'nin arka plan kullanımı kısıtlanmış. Pil veya arka plan kullanımını "Kısıtlanmamış" olarak ayarlayın.',
+			'downloads.backgroundWarning.reasonStandbyRestricted' => 'Android, Plezy\'yi kısıtlı bekleme durumuna aldı. Pil kullanımını "Kısıtlanmamış" olarak ayarlayın.',
 			'downloads.backgroundWarning.reasonDownloadChannelBlocked' => 'İndirme bildirimleri kapalı; bu nedenle ilerleme ve kontroller kullanılamayabilir.',
 			'downloads.backgroundWarning.reasonNotificationsDisabled' => 'Bildirimler kapalı. Android 13 ve sonraki sürümlerde uzun arka plan indirmeleri için gereklidir.',
 			'downloads.backgroundWarning.reasonDataSaver' => 'Veri Tasarrufu açık; bu, mobil veride arka plan indirmelerini engeller. Wi-Fi üzerinde indirmeler yine de çalışır.',
-			'downloads.backgroundWarning.reasonOemUnknown' => 'Plexy arka plandayken indirmeler tekrar tekrar durdu. Plexy\'nin pil veya arka plan kullanım ayarlarını kontrol edin.',
+			'downloads.backgroundWarning.reasonOemUnknown' => 'Plezy arka plandayken indirmeler tekrar tekrar durdu. Plezy\'nin pil veya arka plan kullanım ayarlarını kontrol edin.',
 			'downloads.backgroundWarning.openSettings' => 'Ayarları aç',
 			'downloads.backgroundWarning.stillNotWorking' => 'Cihaza özel yardım',
 			'downloads.backgroundWarning.stillNotWorkingDescription' => 'Cihazınıza yönelik adımlara bakın veya sorun sürerse Ayarlar › Günlükleri Görüntüle bölümünden bir günlük gönderin.',
@@ -4176,19 +4222,19 @@ extension on TranslationsTr {
 			'companionRemote.session.startServer' => 'Sunucuyu Başlat',
 			'companionRemote.session.stopServer' => 'Sunucuyu Durdur',
 			'companionRemote.session.minimize' => 'Küçült',
-			'companionRemote.pairing.discoveryDescription' => 'Aynı Plex hesabına sahip Plexy cihazları burada görünür',
+			'companionRemote.pairing.discoveryDescription' => 'Aynı Plex hesabına sahip Plezy cihazları burada görünür',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => 'Bağlanılıyor...',
 			'companionRemote.pairing.searchingForDevices' => 'Cihazlar aranıyor...',
 			'companionRemote.pairing.noDevicesFound' => 'Ağınızda cihaz bulunamadı',
-			'companionRemote.pairing.noDevicesHint' => 'Masaüstünde Plexy\'yi açın ve aynı Wi-Fi ağını kullanın',
+			'companionRemote.pairing.noDevicesHint' => 'Masaüstünde Plezy\'yi açın ve aynı Wi-Fi ağını kullanın',
 			'companionRemote.pairing.availableDevices' => 'Kullanılabilir Cihazlar',
 			'companionRemote.pairing.manualConnection' => 'Manuel Bağlantı',
 			'companionRemote.pairing.cryptoInitFailed' => 'Güvenli bağlantı başlatılamadı. Önce Plex\'e giriş yapın.',
 			'companionRemote.pairing.validationHostRequired' => 'Lütfen ana bilgisayar adresini girin',
 			'companionRemote.pairing.validationHostFormat' => 'Biçim IP:port şeklinde olmalıdır (ör. 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Bağlantı zaman aşımına uğradı. Her iki cihazda da aynı ağı kullanın.',
-			'companionRemote.pairing.sessionNotFound' => 'Cihaz bulunamadı. Plexy\'nin ana bilgisayarda çalıştığından emin olun.',
+			'companionRemote.pairing.sessionNotFound' => 'Cihaz bulunamadı. Plezy\'nin ana bilgisayarda çalıştığından emin olun.',
 			'companionRemote.pairing.authFailed' => 'Kimlik doğrulama başarısız oldu. Her iki cihazın da aynı Plex hesabına ihtiyacı var.',
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Bağlantı başarısız: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Uzaktan kumanda oturumundan ayrılmak istiyor musunuz?',
@@ -4212,6 +4258,8 @@ extension on TranslationsTr {
 			'companionRemote.remote.stop' => 'Durdur',
 			'companionRemote.remote.seekForward' => 'İleri Sar',
 			'companionRemote.remote.volume' => 'Ses',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.volumeDown' => 'Kıs',
 			'companionRemote.remote.volumeUp' => 'Aç',
 			'companionRemote.remote.fullscreen' => 'Tam Ekran',
@@ -4230,8 +4278,6 @@ extension on TranslationsTr {
 			'videoSettings.playbackSpeed' => 'Oynatma Hızı',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Aktif (${duration})',
-			_ => null,
-		} ?? switch (path) {
 			'videoSettings.zoom' => 'Yakınlaştırma',
 			'videoSettings.sleepTimer' => 'Uyku Zamanlayıcısı',
 			'videoSettings.audioSync' => 'Ses Senkronizasyonu',
@@ -4409,11 +4455,11 @@ extension on TranslationsTr {
 			'trakt.connected' => 'Bağlandı',
 			'trakt.connectedAs' => ({required Object username}) => '@${username} olarak bağlandı',
 			'trakt.disconnectConfirm' => 'Trakt hesabının bağlantısı kesilsin mi?',
-			'trakt.disconnectConfirmBody' => 'Plexy, Trakt\'a olay göndermeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.',
+			'trakt.disconnectConfirmBody' => 'Plezy, Trakt\'a olay göndermeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.',
 			'trakt.scrobble' => 'Gerçek zamanlı scrobble',
 			'trakt.scrobbleDescription' => 'Oynatma sırasında Trakt\'a oynatma, duraklatma ve durdurma olayları gönderin.',
 			'trakt.watchedSync' => 'İzleme durumunu eşitle',
-			'trakt.watchedSyncDescription' => 'Plexy\'de ögeleri izlendi olarak işaretlediğinizde, Trakt üzerinde de izlendi olarak işaretlenir.',
+			'trakt.watchedSyncDescription' => 'Plezy\'de ögeleri izlendi olarak işaretlediğinizde, Trakt üzerinde de izlendi olarak işaretlenir.',
 			'seerr.title' => 'Seerr',
 			'seerr.connectTitle' => 'Seerr Bağla',
 			'seerr.serverUrl' => 'Sunucu URL\'si',
@@ -4423,10 +4469,10 @@ extension on TranslationsTr {
 			'seerr.signInWithEmby' => 'Emby ile Giriş Yap',
 			'seerr.signInWithLocal' => 'Yerel hesap kullan',
 			'seerr.email' => 'E-posta',
-			'seerr.noSignInMethods' => 'Bu Seerr örneği Plexy\'nin desteklediği bir giriş yöntemi sunmuyor.',
+			'seerr.noSignInMethods' => 'Bu Seerr örneği Plezy\'nin desteklediği bir giriş yöntemi sunmuyor.',
 			'seerr.instance' => 'Örnek (Instance)',
 			'seerr.disconnectConfirm' => 'Seerr bağlantısı kesilsin mi?',
-			'seerr.disconnectConfirmBody' => 'Plexy bu Seerr örneğini unutacak. İstediğiniz zaman yeniden bağlanabilirsiniz.',
+			'seerr.disconnectConfirmBody' => 'Plezy bu Seerr örneğini unutacak. İstediğiniz zaman yeniden bağlanabilirsiniz.',
 			'seerr.request' => 'İstek Gönder',
 			'seerr.request4k' => '4K İstek Gönder',
 			'seerr.seasons' => 'Sezonlar',
@@ -4461,14 +4507,14 @@ extension on TranslationsTr {
 			'services.scrobble' => 'İlerlemeyi otomatik takip et',
 			'services.scrobbleDescription' => 'Bir bölümü veya filmi bitirdiğinizde listenizi güncelleyin.',
 			'services.disconnectConfirm' => ({required Object service}) => '${service} bağlantısı kesilsin mi?',
-			'services.disconnectConfirmBody' => ({required Object service}) => 'Plexy, ${service} güncellemeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.',
+			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezy, ${service} güncellemeyi durduracak. İstediğiniz zaman yeniden bağlanabilirsiniz.',
 			'services.connectFailed' => ({required Object service}) => '${service} ile bağlantı kurulamadı. Tekrar deneyin.',
 			'services.names.mal' => 'MyAnimeList',
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
-			'services.deviceCode.title' => ({required Object service}) => 'Plexy\'yi ${service} üzerinde etkinleştirin',
+			'services.deviceCode.title' => ({required Object service}) => 'Plezy\'yi ${service} üzerinde etkinleştirin',
 			'services.deviceCode.instructions' => 'QR kodunu tarayın veya aşağıdaki adresi ziyaret edip bu kodu girin:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Etkinleştirmek için ${service} servisini açın',
 			'services.deviceCode.copyCode' => 'Etkinleştirme kodunu kopyala',

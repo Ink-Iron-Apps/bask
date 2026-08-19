@@ -62,7 +62,8 @@ dependencies:
       # Fork of edde746@12ef3ff (which keeps holding-queue limits intact across
       # resumes) adding ForegroundSlot: one task at a time holds the process's
       # WorkManager foreground service, so a holding queue wider than one stops
-      # cancelling its own workers.
+      # cancelling its own workers. Upstream now points at 12ef3ff itself, which
+      # this fork already contains.
       url: https://github.com/LightWraith8268/background_downloader
       ref: 9e292ad8000e909f7f23aa1b0480f9877d363f8a
   sentry_flutter: ^9.25.0
