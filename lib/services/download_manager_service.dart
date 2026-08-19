@@ -14,6 +14,7 @@ import '../database/download_operations.dart';
 import '../media/download_resolution.dart';
 import '../media/media_backend.dart';
 import '../media/media_item.dart';
+import '../media/media_item_labels.dart';
 import '../media/media_item_merge.dart';
 import '../media/media_item_types.dart';
 import '../media/media_kind.dart';
@@ -2004,14 +2005,7 @@ class DownloadManagerService {
           ? await _fetchShowYear(serverId, metadata.grandparentId, clientScopeId: existing.clientScopeId)
           : null;
 
-      // Build display name for notifications. Episodes lead with the show,
-      // tracks with the artist — same "container - leaf" pattern.
-      final trackArtist = metadata.trackArtistTitle;
-      final displayName = metadata.isEpisode
-          ? '${metadata.grandparentTitle ?? metadata.displayTitle} - ${metadata.displayTitle}'
-          : metadata.kind == MediaKind.track && trackArtist != null && trackArtist.isNotEmpty
-          ? '$trackArtist - ${metadata.displayTitle}'
-          : metadata.displayTitle;
+      final displayName = formatDownloadNotificationName(metadata);
 
       // Get WiFi-only setting for native enforcement
       final settings = await SettingsService.getInstance();

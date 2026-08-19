@@ -44,3 +44,19 @@ String formatMediaTargetLabel(MediaItem item) {
   // beats an empty confirmation.
   return segments.isEmpty ? item.displayTitle : toBulletedString(segments);
 }
+
+/// Name shown in the system download notification.
+///
+/// Episodes get the show, the season and episode, and the episode title.
+/// [MediaItem.displayTitle] collapses an episode to its show name so cards can
+/// headline the series, which made the notification read "Ted Lasso - Ted
+/// Lasso" and say nothing about which episode was downloading.
+String formatDownloadNotificationName(MediaItem item) {
+  if (item.kind == MediaKind.episode) return formatMediaTargetLabel(item);
+
+  final trackArtist = item.trackArtistTitle;
+  if (item.kind == MediaKind.track && trackArtist != null && trackArtist.isNotEmpty) {
+    return '$trackArtist - ${item.displayTitle}';
+  }
+  return item.displayTitle;
+}
