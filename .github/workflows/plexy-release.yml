@@ -117,8 +117,23 @@ jobs:
         # pubspec.yaml before the build so the APK reports the version it ships as,
         # which is what the in-app updater compares against.
         run: |
-          current=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | cut -d'+' -f1)
+          # Bump from whichever is further ahead: the version pubspec records, or
+          # the newest release that actually exists. They diverge when a run
+          # publishes a release but cannot write the version back — main then
+          # names a version older than the newest tag, and bumping from it would
+          # land on a tag that is already taken and overwrite that release's
+          # APKs. Tags are the record of what shipped, so they win ties.
+          pubspec_version=$(grep '^version:' pubspec.yaml | sed 's/version: *//' | cut -d'+' -f1)
           last_tag=$(git tag --list 'v*' --sort=-creatordate | head -n1)
+          tag_version=${last_tag#v}
+          if [ -z "$tag_version" ]; then
+            current="$pubspec_version"
+          else
+            current=$(printf '%s\n%s\n' "$pubspec_version" "$tag_version" | sort -V | tail -n1)
+          fi
+          if [ "$current" != "$pubspec_version" ]; then
+            echo "::warning::pubspec records $pubspec_version but $last_tag is published; bumping from $current"
+          fi
           if [ -z "$last_tag" ]; then
             range=""
           else
@@ -143,6 +158,16 @@ jobs:
             patch) patch=$((patch+1)) ;;
           esac
           next="${major}.${minor}.${patch}"
+
+          # Last line of defence: never reuse a tag. The publish step treats an
+          # existing tag as "already created" and then clobbers its assets, so a
+          # collision would replace a shipped release's APKs with this build's.
+          while git rev-parse -q --verify "refs/tags/v${next}" >/dev/null; do
+            patch=$((patch+1))
+            next="${major}.${minor}.${patch}"
+            echo "::warning::v${next%.*}.$((patch-1)) already exists; advancing to v${next}"
+          done
+
           echo "$current -> $next ($bump)"
 
           sed -i "s/^version: .*/version: ${next}+${{ github.run_number }}/" pubspec.yaml
