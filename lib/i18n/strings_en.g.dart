@@ -4230,6 +4230,27 @@ class Translations$downloads$en {
 
 	/// en: 'Unknown playlist'
 	String get unknownPlaylist => 'Unknown playlist';
+
+	/// en: 'Delete ${count} selected downloads?'
+	String deleteSelectedConfirm({required Object count}) => 'Delete ${count} selected downloads?';
+
+	/// en: '${count} selected'
+	String selectedCount({required Object count}) => '${count} selected';
+
+	/// en: 'Select all'
+	String get selectAll => 'Select all';
+
+	/// en: 'Pause selected'
+	String get pauseSelected => 'Pause selected';
+
+	/// en: 'Resume selected'
+	String get resumeSelected => 'Resume selected';
+
+	/// en: 'Retry selected'
+	String get retrySelected => 'Retry selected';
+
+	/// en: 'Delete selected'
+	String get deleteSelected => 'Delete selected';
 }
 
 // Path: shaders
@@ -8040,6 +8061,13 @@ extension on Translations {
 			'downloads.retryAll' => 'Retry all failed',
 			'downloads.retryAllFailed' => ({required Object count}) => 'Retry ${count} failed downloads',
 			'downloads.unknownPlaylist' => 'Unknown playlist',
+			'downloads.deleteSelectedConfirm' => ({required Object count}) => 'Delete ${count} selected downloads?',
+			'downloads.selectedCount' => ({required Object count}) => '${count} selected',
+			'downloads.selectAll' => 'Select all',
+			'downloads.pauseSelected' => 'Pause selected',
+			'downloads.resumeSelected' => 'Resume selected',
+			'downloads.retrySelected' => 'Retry selected',
+			'downloads.deleteSelected' => 'Delete selected',
 			'shaders.title' => 'Shaders',
 			'shaders.noShaderDescription' => 'No video enhancement',
 			'shaders.nvscalerDescription' => 'NVIDIA image scaling for sharper video',
@@ -8076,6 +8104,8 @@ extension on Translations {
 			'companionRemote.pairing.noDevicesFound' => 'No devices found on your network',
 			'companionRemote.pairing.noDevicesHint' => 'Open Plezy on desktop and use the same Wi-Fi',
 			'companionRemote.pairing.availableDevices' => 'Available Devices',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.pairing.manualConnection' => 'Manual Connection',
 			'companionRemote.pairing.cryptoInitFailed' => 'Couldn\'t start secure connection. Sign in to Plex first.',
 			'companionRemote.pairing.validationHostRequired' => 'Please enter host address',
@@ -8083,8 +8113,6 @@ extension on Translations {
 			'companionRemote.pairing.connectionTimedOut' => 'Connection timed out. Use the same network on both devices.',
 			'companionRemote.pairing.sessionNotFound' => 'Device not found. Make sure Plezy is running on the host.',
 			'companionRemote.pairing.authFailed' => 'Authentication failed. Both devices need the same Plex account.',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Failed to connect: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Do you want to disconnect from the remote session?',
 			'companionRemote.remote.reconnecting' => 'Reconnecting...',

@@ -1637,7 +1637,14 @@
     "notificationPaused": "Download paused",
     "retryAll": "Retry all failed",
     "retryAllFailed": "Retry ${count} failed downloads",
-    "unknownPlaylist": "Unknown playlist"
+    "unknownPlaylist": "Unknown playlist",
+    "deleteSelectedConfirm": "Delete ${count} selected downloads?",
+    "selectedCount": "${count} selected",
+    "selectAll": "Select all",
+    "pauseSelected": "Pause selected",
+    "resumeSelected": "Resume selected",
+    "retrySelected": "Retry selected",
+    "deleteSelected": "Delete selected"
   },
   "shaders": {
     "title": "Shaders",
