@@ -542,6 +542,19 @@ Future<void> manageSyncRule(
   }
 }
 
+/// Whether the detail-screen download button should still respond while a
+/// download is in flight.
+///
+/// Queued and downloading states have nothing to start, so the button was
+/// inert. But a show can download for hours, and its sync rule was unreachable
+/// for that whole time — the only way to change one was to delete it and start
+/// over, taking the finished downloads with it. When a rule exists the button
+/// stays live and opens rule management instead.
+///
+/// [isQueueing] is deliberately included: building the queue is brief and
+/// mutating the rule underneath it would race the very rows being inserted.
+bool canManageRuleWhileBusy({required bool isQueueing, required bool hasSyncRule}) => hasSyncRule && !isQueueing;
+
 /// Confirm + remove a sync rule and show a success snackbar.
 Future<void> removeSyncRuleAndSnack(
   BuildContext context, {
