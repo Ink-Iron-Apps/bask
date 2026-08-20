@@ -284,7 +284,11 @@ jobs:
             # Rebuild the one-line change on top of current main. The build tree is
             # finished with by now, so moving it is safe — and starting from main
             # keeps this commit from reverting anything that landed meanwhile.
-            git checkout -B record-version origin/main
+            #
+            # Forced because the bump step edited pubspec.yaml in place to build
+            # the APKs, and an ordinary checkout refuses to overwrite that. The
+            # edit is re-applied on the next line, so discarding it loses nothing.
+            git checkout -f -B record-version origin/main
             sed -i "s/^version: .*/version: ${VERSION}+${{ github.run_number }}/" pubspec.yaml
             git add pubspec.yaml
             git commit -m "chore(release): ${TAG} [skip ci]" || exit 0
