@@ -4251,6 +4251,9 @@ class Translations$downloads$en {
 
 	/// en: 'Delete selected'
 	String get deleteSelected => 'Delete selected';
+
+	/// en: 'Nothing in this playlist has finished downloading yet'
+	String get playlistNothingDownloaded => 'Nothing in this playlist has finished downloading yet';
 }
 
 // Path: shaders
@@ -8068,6 +8071,7 @@ extension on Translations {
 			'downloads.resumeSelected' => 'Resume selected',
 			'downloads.retrySelected' => 'Retry selected',
 			'downloads.deleteSelected' => 'Delete selected',
+			'downloads.playlistNothingDownloaded' => 'Nothing in this playlist has finished downloading yet',
 			'shaders.title' => 'Shaders',
 			'shaders.noShaderDescription' => 'No video enhancement',
 			'shaders.nvscalerDescription' => 'NVIDIA image scaling for sharper video',
@@ -8103,9 +8107,9 @@ extension on Translations {
 			'companionRemote.pairing.searchingForDevices' => 'Looking for devices...',
 			'companionRemote.pairing.noDevicesFound' => 'No devices found on your network',
 			'companionRemote.pairing.noDevicesHint' => 'Open Plezy on desktop and use the same Wi-Fi',
-			'companionRemote.pairing.availableDevices' => 'Available Devices',
 			_ => null,
 		} ?? switch (path) {
+			'companionRemote.pairing.availableDevices' => 'Available Devices',
 			'companionRemote.pairing.manualConnection' => 'Manual Connection',
 			'companionRemote.pairing.cryptoInitFailed' => 'Couldn\'t start secure connection. Sign in to Plex first.',
 			'companionRemote.pairing.validationHostRequired' => 'Please enter host address',

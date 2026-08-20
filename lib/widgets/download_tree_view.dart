@@ -91,6 +91,9 @@ class DownloadTreeView extends StatefulWidget {
   final Map<String, DownloadProgress> downloads;
   final Map<String, MediaItem> metadata;
 
+  /// Plays a playlist's downloaded contents as a queue, shuffled or in order.
+  final void Function(DownloadPlaylistGroup playlist, {required bool shuffle})? onPlayPlaylist;
+
   /// Playlists whose downloaded contents should group under their title.
   final List<DownloadPlaylistGroup> playlists;
   final void Function(String globalKey)? onPause;
@@ -107,6 +110,7 @@ class DownloadTreeView extends StatefulWidget {
     required this.downloads,
     required this.metadata,
     this.playlists = const [],
+    this.onPlayPlaylist,
     this.onPause,
     this.onResume,
     this.onRetry,
@@ -263,6 +267,7 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
       onBack: widget.onBack,
       rowFocusNode: isFirst ? firstItemFocusNode : null,
       autofocus: isFirst && !widget.suppressAutoFocus,
+      onPlayPlaylist: _playCallbackFor(node),
       selecting: _selecting,
       isSelected: _selection.containsAllOf(node),
       isPartiallySelected: _selection.containsSomeOf(node),
@@ -292,6 +297,17 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
     for (final key in keys) {
       widget.onResume?.call(key);
     }
+  }
+
+  /// The play/shuffle handler for [node], or null when it is not a playlist
+  /// this view was given a way to play.
+  void Function({required bool shuffle})? _playCallbackFor(DownloadTreeNode node) {
+    if (node.type != DownloadNodeType.playlist) return null;
+    final onPlay = widget.onPlayPlaylist;
+    if (onPlay == null) return null;
+    final playlist = widget.playlists.where((p) => p.key == node.key).firstOrNull;
+    if (playlist == null) return null;
+    return ({required bool shuffle}) => onPlay(playlist, shuffle: shuffle);
   }
 
   void _startSelecting(DownloadTreeNode node) {
@@ -479,6 +495,7 @@ class _DownloadTreeItem extends StatefulWidget {
   final void Function(DownloadTreeNode) resumeAllChildren;
   final void Function(DownloadTreeNode) retryAllChildren;
   final void Function(DownloadTreeNode) deleteAllChildren;
+  final void Function({required bool shuffle})? onPlayPlaylist;
   final bool selecting;
   final bool isSelected;
   final bool isPartiallySelected;
@@ -503,6 +520,7 @@ class _DownloadTreeItem extends StatefulWidget {
     required this.resumeAllChildren,
     required this.retryAllChildren,
     required this.deleteAllChildren,
+    this.onPlayPlaylist,
     required this.selecting,
     required this.isSelected,
     required this.isPartiallySelected,
@@ -735,6 +753,22 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
         widget.node.type == DownloadNodeType.season ||
         widget.node.type == DownloadNodeType.album;
     final actions = <_RowAction>[];
+
+    // A downloaded playlist is playable as a queue, which is the whole point of
+    // downloading one; the transport actions follow it.
+    final onPlayPlaylist = widget.onPlayPlaylist;
+    if (onPlayPlaylist != null) {
+      actions.add((
+        icon: Symbols.play_arrow_rounded,
+        tooltip: t.common.play,
+        onPressed: () => onPlayPlaylist(shuffle: false),
+      ));
+      actions.add((
+        icon: Symbols.shuffle_rounded,
+        tooltip: t.common.shuffle,
+        onPressed: () => onPlayPlaylist(shuffle: true),
+      ));
+    }
 
     if (isContainer) {
       // Pause all button
