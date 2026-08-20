@@ -13,6 +13,10 @@ import '../../services/music/music_playback_service.dart';
 import '../../theme/mono_tokens.dart';
 import '../../utils/music_navigation.dart';
 import '../../models/download_models.dart';
+import '../../utils/snackbar_helper.dart';
+import '../../utils/video_player_navigation.dart';
+import '../../services/offline_playlist_queue.dart';
+import '../../providers/playback_state_provider.dart';
 import '../../utils/content_utils.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/background_download_warning_banner.dart';
@@ -221,6 +225,9 @@ class DownloadsScreenState extends State<DownloadsScreen>
                             downloads: downloadProvider.downloads,
                             metadata: downloadProvider.metadata,
                             playlists: _playlistGroups(downloadProvider),
+                            onPlayPlaylist: (playlist, {required shuffle}) => unawaited(
+                              _playDownloadedPlaylist(context, downloadProvider, playlist, shuffle: shuffle),
+                            ),
                             onPause: downloadProvider.pauseDownload,
                             onResume: (globalKey) {
                               final client = getClient(globalKey);
@@ -263,6 +270,36 @@ class DownloadsScreenState extends State<DownloadsScreen>
       ),
     );
   }
+}
+
+/// Plays a playlist's downloaded contents as a queue.
+///
+/// Everything needed is already on the device, so this never reaches the
+/// server: the members come from the sync rule that queued them, and the queue
+/// is published through the same client-side path used by backends without a
+/// server-side queue. Playing a downloaded playlist otherwise meant starting
+/// one item and stopping at the end of it.
+Future<void> _playDownloadedPlaylist(
+  BuildContext context,
+  DownloadProvider provider,
+  DownloadPlaylistGroup playlist, {
+  required bool shuffle,
+}) async {
+  final members = OfflinePlaylistQueue.playableMembers(
+    memberKeys: playlist.memberKeys,
+    metadata: provider.metadata,
+    downloads: provider.downloads,
+  );
+  final queue = OfflinePlaylistQueue.build(id: playlist.key, members: members, shuffle: shuffle);
+  if (queue == null) {
+    showAppSnackBar(context, t.downloads.playlistNothingDownloaded);
+    return;
+  }
+
+  context.read<PlaybackStateProvider>().setPlaybackFromLocalQueue(queue, contextKey: playlist.key);
+  final first = queue.items[queue.currentIndex ?? 0];
+  if (!context.mounted) return;
+  await navigateToVideoPlayer(context, metadata: first, isOffline: true, resolveWatchState: false);
 }
 
 /// Playlist sync rules paired with the downloads they pulled in, so the manage

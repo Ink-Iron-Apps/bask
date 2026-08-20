@@ -1644,7 +1644,8 @@
     "pauseSelected": "Pause selected",
     "resumeSelected": "Resume selected",
     "retrySelected": "Retry selected",
-    "deleteSelected": "Delete selected"
+    "deleteSelected": "Delete selected",
+    "playlistNothingDownloaded": "Nothing in this playlist has finished downloading yet"
   },
   "shaders": {
     "title": "Shaders",
