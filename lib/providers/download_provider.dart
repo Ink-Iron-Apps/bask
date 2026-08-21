@@ -112,6 +112,14 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
 
   String? _activeProfileId;
   int _profileGeneration = 0;
+
+  /// Client scope per server for the active profile.
+  ///
+  /// Resolving one is a database round trip, and the metadata walks ask for it
+  /// once per episode or track — the same handful of answers, re-fetched for
+  /// every downloaded item. Cleared with the profile, which is the only thing
+  /// that changes them.
+  final Map<String, String?> _clientScopeByServer = {};
   Future<void>? _profileScopedReloadFuture;
 
   _QueueOwnership _captureQueueOwnership() => (profileId: _requireActiveProfileId(), generation: _profileGeneration);
@@ -183,6 +191,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   void setActiveProfileId(String? profileId) {
     if (_activeProfileId == profileId) return;
     _profileGeneration++;
+    _clientScopeByServer.clear();
     _queueing.clear();
     _ownedDownloadKeys.clear();
     _syncRules.clear();
@@ -294,6 +303,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     _activeProfileId = null;
     _metadataStore.setActiveProfileId(null);
     _profileGeneration++;
+    _clientScopeByServer.clear();
     await _initFuture;
     await _profileScopedReloadFuture;
     await _downloadManager.preparePlexMetadataForLogoutTransfer();
@@ -508,7 +518,13 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     if (cached != null) {
       _metadata[globalKey] = cached;
       if (cached.isEpisode || cached.kind == MediaKind.track) {
-        final clientScopeId = await _downloadManager.profileClientScopeIdForServer(parsed.serverId, _activeProfileId);
+        final serverKey = parsed.serverId.toString();
+        final clientScopeId = _clientScopeByServer.containsKey(serverKey)
+            ? _clientScopeByServer[serverKey]
+            : _clientScopeByServer[serverKey] = await _downloadManager.profileClientScopeIdForServer(
+                parsed.serverId,
+                _activeProfileId,
+              );
         if (isStale?.call() ?? false) return (metadata: null, networkFilled: false, stale: true);
         _loadParentMetadataFromMap(cached, allMetadata, clientScopeId: clientScopeId);
       }
@@ -1663,10 +1679,11 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     await ensureInitialized();
     if (isStale()) return;
 
-    // Walk every download — not just keys we already have metadata for. The
-    // initial `_loadPersistedDownloads` may have raced with connection setup
-    // (Jellyfin's cache reads need a [Connections] row) and skipped entries;
-    // this lets a later refresh actually populate them.
+    // Every download, not just the unresolved ones. `_loadPersistedDownloads`
+    // already walked these in the constructor, but that pass can race connection
+    // setup (Jellyfin's cache reads need a [Connections] row) and skip entries —
+    // and this walk also evicts metadata whose cache row has since gone, which
+    // skipping the resolved keys would quietly stop doing.
     final keys = <String>{..._downloads.keys.where(_ownsDownloadKey)};
     if (keys.isEmpty) {
       await _applyOfflineWatchOverlay(expectedProfileGeneration: profileGeneration);
