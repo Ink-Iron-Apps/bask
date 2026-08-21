@@ -1889,10 +1889,6 @@ class SetupScreen extends StatefulWidget {
 class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
   String _statusMessage = '';
 
-  /// Fraction of the startup metadata pass completed, or null when no pass is
-  /// running. Drives the splash's determinate bar so a large library reads as
-  /// working rather than hung.
-  double? _startupProgress;
   bool _enteringOffline = false;
 
   // Per-server connection status: serverId -> (name, connected?)
@@ -2151,23 +2147,13 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
     // are resolvable (the Connections row + live MediaBrowser client are in
     // place). Without this the downloads list and sync-rule titles render
     // empty until something forces a later refresh.
-    // The servers have reported by now, so the splash would otherwise sit on
-    // "connecting" while this walks the library.
-    _setStatus(t.common.preparingDownloads);
-    await downloadProvider.refreshMetadataFromCache(
-      onProgress: (done, total) {
-        if (!mounted || total == 0) return;
-        setStateIfMounted(() {
-          _startupProgress = done / total;
-          _statusMessage = t.common.preparingDownloadsCount(done: done, total: total);
-        });
-      },
-    );
-    if (!mounted) return;
-    setStateIfMounted(() {
-      _startupProgress = null;
-      _statusMessage = t.common.almostReady;
-    });
+    // Not awaited: this walks the whole library, and the app is usable without
+    // it. The provider notifies as it goes, so the downloads list and sync-rule
+    // titles fill in behind the main screen rather than holding the splash up
+    // after every server has already reported connected. A profile switch
+    // mid-walk is handled by the pass's own staleness check.
+    _setStatus(t.common.almostReady);
+    unawaited(downloadProvider.refreshMetadataFromCache());
 
     AndroidExitDiagnostics.markStartupPhase(AndroidStartupPhase.mainScreen);
     unawaited(Navigator.pushReplacement(context, fadeRoute(ProfileSessionScreen(initialPromptHandled: shouldPrompt))));
@@ -2300,25 +2286,6 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
                           )
                         : _buildServerStatusList(context),
                   ),
-
-                  // Determinate once the metadata pass starts: the servers have
-                  // already reported by then, and a library large enough to take
-                  // a while is exactly when the screen looks stuck.
-                  if (_startupProgress != null) ...[
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: 200,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(2),
-                        child: LinearProgressIndicator(
-                          value: _startupProgress,
-                          minHeight: 4,
-                          backgroundColor: coralColor.withValues(alpha: 0.2),
-                          valueColor: const AlwaysStoppedAnimation<Color>(coralColor),
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
