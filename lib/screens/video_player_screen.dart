@@ -1805,12 +1805,11 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
             // Locked: Apply landscape orientation only
             OrientationHelper.setLandscapeOrientation();
           } else {
-            // Unlocked: Allow all orientations immediately, and turn with the
-            // device even when the system rotation lock is on — holding the
-            // phone sideways to watch something is the whole gesture, and it
-            // should not depend on a setting outside the app.
-            unawaited(SystemChrome.setPreferredOrientations(DeviceOrientation.values));
-            unawaited(OrientationHelper.setFollowSensorOrientation(true));
+            // Unlocked: turn with the device, including when the system
+            // rotation lock is on — holding the phone sideways to watch
+            // something is the whole gesture, and it should not depend on a
+            // setting outside the app.
+            unawaited(OrientationHelper.allowAllOrientations());
             unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky));
           }
         } catch (e) {
