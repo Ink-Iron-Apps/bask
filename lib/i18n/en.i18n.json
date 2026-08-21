@@ -81,7 +81,10 @@
     },
     "notAvailable": "N/A",
     "url": "URL",
-    "letterKeys": "ABC"
+    "letterKeys": "ABC",
+    "preparingDownloads": "Preparing downloads",
+    "preparingDownloadsCount": "Preparing downloads · ${done} of ${total}",
+    "almostReady": "Almost ready"
   },
   "screens": {
     "licenses": "Licenses",

@@ -314,6 +314,15 @@ class Translations$common$en {
 
 	/// en: 'ABC'
 	String get letterKeys => 'ABC';
+
+	/// en: 'Preparing downloads'
+	String get preparingDownloads => 'Preparing downloads';
+
+	/// en: 'Preparing downloads · ${done} of ${total}'
+	String preparingDownloadsCount({required Object done, required Object total}) => 'Preparing downloads · ${done} of ${total}';
+
+	/// en: 'Almost ready'
+	String get almostReady => 'Almost ready';
 }
 
 // Path: screens
@@ -6643,6 +6652,9 @@ extension on Translations {
 			'common.notAvailable' => 'N/A',
 			'common.url' => 'URL',
 			'common.letterKeys' => 'ABC',
+			'common.preparingDownloads' => 'Preparing downloads',
+			'common.preparingDownloadsCount' => ({required Object done, required Object total}) => 'Preparing downloads · ${done} of ${total}',
+			'common.almostReady' => 'Almost ready',
 			'screens.licenses' => 'Licenses',
 			'screens.switchProfile' => 'Switch Profile',
 			'screens.subtitleStyling' => 'Subtitle Styling',
@@ -7076,11 +7088,11 @@ extension on Translations {
 			'mediaMenu.viewDetails' => 'View details',
 			'mediaMenu.goToSeries' => 'Go to series',
 			'mediaMenu.shufflePlay' => 'Shuffle Play',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.shuffleNotAvailableOffline' => 'Shuffle not available offline',
 			'mediaMenu.fileInfo' => 'File Info',
 			'mediaMenu.deleteEpisodeFromServer' => 'Delete episode from server',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.deleteSeasonFromServer' => 'Delete season from server',
 			'mediaMenu.deleteShowFromServer' => 'Delete show from server',
 			'mediaMenu.deleteMovieFromServer' => 'Delete movie from server',
@@ -7590,11 +7602,11 @@ extension on Translations {
 			'licenses.licensesCount' => ({required Object count}) => '${count} licenses',
 			'navigation.libraries' => 'Libraries',
 			'navigation.downloads' => 'Downloads',
+			_ => null,
+		} ?? switch (path) {
 			'navigation.liveTv' => 'Live TV',
 			'navigation.explore' => 'Explore',
 			'explore.title' => 'Explore',
-			_ => null,
-		} ?? switch (path) {
 			'explore.selectSource' => 'Select source',
 			'explore.rows.watchlist' => 'Watchlist',
 			'explore.rows.recommendedMovies' => 'Recommended Movies',
@@ -8104,11 +8116,11 @@ extension on Translations {
 			'companionRemote.pairing.discoveryDescription' => 'Plezy devices with the same Plex account appear here',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => 'Connecting...',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.pairing.searchingForDevices' => 'Looking for devices...',
 			'companionRemote.pairing.noDevicesFound' => 'No devices found on your network',
 			'companionRemote.pairing.noDevicesHint' => 'Open Plezy on desktop and use the same Wi-Fi',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.availableDevices' => 'Available Devices',
 			'companionRemote.pairing.manualConnection' => 'Manual Connection',
 			'companionRemote.pairing.cryptoInitFailed' => 'Couldn\'t start secure connection. Sign in to Plex first.',
