@@ -1836,6 +1836,41 @@ void main() {
       p.dispose();
     });
 
+    test('reports how far the startup metadata pass has got', () async {
+      // The splash renders this; without it a large library looks hung after
+      // the servers have already reported connected.
+      await insertJellyfinConnection('user-a');
+      for (final id in ['ep-1', 'ep-2']) {
+        await db.insertDownload(
+          serverId: ServerId('jf-machine'),
+          clientScopeId: 'jf-machine/user-a',
+          ratingKey: id,
+          globalKey: 'jf-machine:$id',
+          type: 'episode',
+          status: DownloadStatus.completed.index,
+        );
+        await db.addDownloadOwner(profileId: 'test-profile', globalKey: 'jf-machine:$id');
+      }
+
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      await p.ensureInitialized();
+      p.debugSeedState(
+        downloads: {
+          for (final id in ['ep-1', 'ep-2'])
+            'jf-machine:$id': DownloadProgress(globalKey: 'jf-machine:$id', status: DownloadStatus.completed),
+        },
+      );
+
+      final reports = <(int, int)>[];
+      await p.refreshMetadataFromCache(onProgress: (done, total) => reports.add((done, total)));
+
+      expect(reports.first, (0, 2), reason: 'starts at zero so the bar appears before the first item');
+      expect(reports.last, (2, 2), reason: 'ends complete');
+      expect(reports.map((r) => r.$1), [0, 1, 2], reason: 'advances one download at a time');
+
+      p.dispose();
+    });
+
     test('startup does not wait on the server for metadata the caches lack', () async {
       // Every miss used to be fetched inside the awaited loop, one round trip
       // at a time, holding the splash up after the servers had all connected.
