@@ -1648,7 +1648,9 @@
     "resumeSelected": "Resume selected",
     "retrySelected": "Retry selected",
     "deleteSelected": "Delete selected",
-    "playlistNothingDownloaded": "Nothing in this playlist has finished downloading yet"
+    "playlistNothingDownloaded": "Nothing in this playlist has finished downloading yet",
+    "playlists": "Playlists",
+    "playlistItemCount": "${count} downloaded"
   },
   "shaders": {
     "title": "Shaders",

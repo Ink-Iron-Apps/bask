@@ -4263,6 +4263,12 @@ class Translations$downloads$en {
 
 	/// en: 'Nothing in this playlist has finished downloading yet'
 	String get playlistNothingDownloaded => 'Nothing in this playlist has finished downloading yet';
+
+	/// en: 'Playlists'
+	String get playlists => 'Playlists';
+
+	/// en: '${count} downloaded'
+	String playlistItemCount({required Object count}) => '${count} downloaded';
 }
 
 // Path: shaders
@@ -8084,6 +8090,8 @@ extension on Translations {
 			'downloads.retrySelected' => 'Retry selected',
 			'downloads.deleteSelected' => 'Delete selected',
 			'downloads.playlistNothingDownloaded' => 'Nothing in this playlist has finished downloading yet',
+			'downloads.playlists' => 'Playlists',
+			'downloads.playlistItemCount' => ({required Object count}) => '${count} downloaded',
 			'shaders.title' => 'Shaders',
 			'shaders.noShaderDescription' => 'No video enhancement',
 			'shaders.nvscalerDescription' => 'NVIDIA image scaling for sharper video',
@@ -8114,10 +8122,10 @@ extension on Translations {
 			'companionRemote.session.stopServer' => 'Stop Server',
 			'companionRemote.session.minimize' => 'Minimize',
 			'companionRemote.pairing.discoveryDescription' => 'Plezy devices with the same Plex account appear here',
-			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
-			'companionRemote.pairing.connecting' => 'Connecting...',
 			_ => null,
 		} ?? switch (path) {
+			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
+			'companionRemote.pairing.connecting' => 'Connecting...',
 			'companionRemote.pairing.searchingForDevices' => 'Looking for devices...',
 			'companionRemote.pairing.noDevicesFound' => 'No devices found on your network',
 			'companionRemote.pairing.noDevicesHint' => 'Open Plezy on desktop and use the same Wi-Fi',
