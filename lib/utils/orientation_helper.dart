@@ -16,6 +16,22 @@ class OrientationHelper {
   /// which obeys the lock, so a phone with auto-rotate off stays fixed however
   /// it is held. The native side switches to FULL_SENSOR instead, and back when
   /// the player closes so the rest of the app keeps honouring the lock.
+  /// Lets the player be held any way up, turning with the device.
+  ///
+  /// One writer only. [SystemChrome.setPreferredOrientations] and the native
+  /// override both set the activity's requested orientation, so issuing both
+  /// leaves the result to whichever platform message lands last — and Flutter's
+  /// maps to FULL_USER, which obeys the rotation lock and undoes the override.
+  /// On Android the native call already permits every orientation, so it is the
+  /// only one made.
+  static Future<void> allowAllOrientations() async {
+    if (Platform.isAndroid) {
+      await setFollowSensorOrientation(true);
+      return;
+    }
+    await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+  }
+
   static Future<void> setFollowSensorOrientation(bool follow) async {
     if (!Platform.isAndroid || PlatformDetector.isAutomotive()) return;
     try {

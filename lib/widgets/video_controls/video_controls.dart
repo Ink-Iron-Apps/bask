@@ -2,6 +2,7 @@ import 'dart:async' show StreamSubscription, Timer, unawaited;
 import 'dart:io' show Platform;
 
 import '../../services/video_equalizer.dart';
+import '../../utils/orientation_helper.dart';
 import '../../media/ids.dart';
 
 import 'package:flutter/gestures.dart'
