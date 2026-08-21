@@ -1648,7 +1648,12 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   ///
   /// This is more lightweight than full refresh() - only updates metadata
   /// without reloading download progress from database.
-  Future<void> refreshMetadataFromCache() async {
+  /// Reports how far the startup metadata pass has got, as (done, total).
+  ///
+  /// The splash shows this: the pass walks every download, so on a large
+  /// library it is the last thing standing between the servers reporting
+  /// connected and the app opening, and without it the screen looks hung.
+  Future<void> refreshMetadataFromCache({void Function(int done, int total)? onProgress}) async {
     final profileGeneration = _profileGeneration;
     bool isStale() => isDisposed || profileGeneration != _profileGeneration;
     // The initial load runs in the constructor and may still be in flight
@@ -1679,9 +1684,12 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     // to reach the server from inside the loop — one round trip per download,
     // in series, with the splash still up after every server had reported
     // connected. Collect the misses and settle them afterwards instead.
+    var walked = 0;
+    onProgress?.call(0, keys.length);
     for (final globalKey in keys) {
       try {
         final result = await _hydrateDownloadMetadata(globalKey, allMetadata, isStale: isStale);
+        onProgress?.call(++walked, keys.length);
         if (result.stale) return;
         if (result.metadata == null) {
           needNetwork.add(globalKey);
