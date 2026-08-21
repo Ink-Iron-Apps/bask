@@ -116,11 +116,25 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
   /// this toggle or from the settings screen — fires the same SystemChrome call.
   void _applyRotationLock(bool locked) {
     if (PlatformDetector.isAutomotive()) return;
-    unawaited(
-      SystemChrome.setPreferredOrientations(
-        locked ? const [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight] : DeviceOrientation.values,
-      ),
-    );
+    if (locked) {
+      // Clear the sensor override first: it outranks preferred orientations, so
+      // leaving it on would keep the picture turning after the lock is applied.
+      unawaited(
+        OrientationHelper.setFollowSensorOrientation(false).then(
+          (_) => SystemChrome.setPreferredOrientations(const [
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]),
+        ),
+      );
+      return;
+    }
+    // This fires when the controls bind, which is after the player has already
+    // asked to follow the sensor. Going through the same helper keeps one
+    // writer of the activity's requested orientation — asking for every
+    // preferred orientation here instead would map to FULL_USER and quietly
+    // put the rotation lock back in charge.
+    unawaited(OrientationHelper.allowAllOrientations());
   }
 
   void _toggleRotationLock() {
