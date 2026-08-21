@@ -27,6 +27,29 @@ Future<T> _withShortenedTimer<T>({
   );
 }
 
+/// Waits until the relay has observed [connections] sockets, each carrying at
+/// least the given number of messages.
+///
+/// These tests drive a real WebSocket relay while the service's timers are
+/// shortened to a millisecond or two. Asserting straight after the call under
+/// test therefore races delivery: the assertion can run before the socket has
+/// handed the message over, which shows up as a failure only when the machine
+/// is busy enough to lose that race — a full suite running in parallel.
+///
+/// A genuine regression still fails: the counts never arrive, the wait expires,
+/// and the assertion that follows reports exactly what it would have before.
+Future<void> _awaitRelayMessages(_RelayServer relay, List<int> perConnection) async {
+  for (var attempt = 0; attempt < 200; attempt++) {
+    final satisfied =
+        relay.messages.length >= perConnection.length &&
+        [
+          for (var i = 0; i < perConnection.length; i++) relay.messages[i].length >= perConnection[i],
+        ].every((ready) => ready);
+    if (satisfied) return;
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
+}
+
 Future<T> _withSetupTimersShortened<T>(Future<T> Function() body) {
   return _withShortenedTimer(
     original: const Duration(seconds: 10),
@@ -939,6 +962,8 @@ void main() {
 
     await service.joinSession('lostl');
     await _withSetupTimersShortened(service.releaseSession);
+
+    await _awaitRelayMessages(relay, [2, 1]);
 
     expect(relay.messages, hasLength(2));
     expect(relay.messages[0].map((message) => message['type']), ['join', 'leave']);
