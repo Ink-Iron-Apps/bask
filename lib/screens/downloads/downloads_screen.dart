@@ -38,6 +38,7 @@ import '../../widgets/download_tree_view.dart';
 import '../main_screen.dart';
 import '../libraries/state_messages.dart';
 import '../../i18n/strings.g.dart';
+import 'downloaded_playlists_tab.dart';
 import 'sync_rules_screen.dart';
 
 class DownloadsScreen extends StatefulWidget {
@@ -55,13 +56,42 @@ class DownloadsScreenState extends State<DownloadsScreen>
   final _musicTabChipFocusNode = FocusNode(debugLabel: 'tab_chip_music');
   final _actionBarKey = GlobalKey<FocusableActionBarState>();
 
+  /// Playlists earns its tab only while one is downloaded, so the strip does
+  /// not carry an empty section for a feature most libraries never use.
+  bool _showPlaylistsTab = false;
+  FocusNode? _playlistsTabChipFocusNode;
+
   @override
   List<FocusNode> get tabChipFocusNodes => [
     _queueTabChipFocusNode,
+    ?_playlistsTabChipFocusNode,
     _tvShowsTabChipFocusNode,
     _moviesTabChipFocusNode,
     _musicTabChipFocusNode,
   ];
+
+  /// Adds or removes the Playlists tab, keeping the user on the tab they were
+  /// looking at rather than snapping them elsewhere when the set changes.
+  void _updatePlaylistsTab({required bool show}) {
+    if (show == _showPlaylistsTab) return;
+    final previousIndex = tabController.index;
+
+    disposeTabNavigation();
+    _showPlaylistsTab = show;
+    if (show) {
+      _playlistsTabChipFocusNode = FocusNode(debugLabel: 'tab_chip_playlists');
+    } else {
+      _playlistsTabChipFocusNode?.dispose();
+      _playlistsTabChipFocusNode = null;
+    }
+    initTabNavigation();
+
+    // Playlists sits at index 1, so tabs after it shift by one.
+    final restored = show
+        ? (previousIndex == 0 ? 0 : previousIndex + 1)
+        : (previousIndex == 0 ? 0 : (previousIndex - 1).clamp(0, tabCount - 1));
+    if (restored < tabCount) tabController.index = restored;
+  }
 
   @override
   void initState() {
@@ -114,6 +144,9 @@ class DownloadsScreenState extends State<DownloadsScreen>
     });
   }
 
+  /// Position of a fixed tab once the optional Playlists tab is accounted for.
+  int _tabIndex(int baseIndex) => _showPlaylistsTab ? baseIndex + 1 : baseIndex;
+
   Widget _buildTabChip(String label, int index) {
     return buildTabChip(
       label,
@@ -131,11 +164,12 @@ class DownloadsScreenState extends State<DownloadsScreen>
         children: [
           _buildTabChip(t.downloads.manage, 0),
           const SizedBox(width: 8),
-          _buildTabChip(t.downloads.tvShows, 1),
+          if (_showPlaylistsTab) ...[_buildTabChip(t.downloads.playlists, 1), const SizedBox(width: 8)],
+          _buildTabChip(t.downloads.tvShows, _tabIndex(1)),
           const SizedBox(width: 8),
-          _buildTabChip(t.downloads.movies, 2),
+          _buildTabChip(t.downloads.movies, _tabIndex(2)),
           const SizedBox(width: 8),
-          _buildTabChip(t.downloads.music, 3),
+          _buildTabChip(t.downloads.music, _tabIndex(3)),
         ],
       );
     }
@@ -178,6 +212,24 @@ class DownloadsScreenState extends State<DownloadsScreen>
               children: [
                 // Only while something is actually queued or transferring —
                 // an idle Downloads screen has nothing to warn about.
+                // The tab set follows what is actually downloaded, so a
+                // playlist finishing adds it and deleting the last one takes it
+                // away without leaving an empty section behind.
+                Selector<DownloadProvider, bool>(
+                  selector: (_, provider) => _playlistGroups(provider).isNotEmpty,
+                  builder: (context, hasPlaylists, _) {
+                    // Only when it actually changes: rebuilding unconditionally
+                    // from a post-frame callback re-triggers this build, which
+                    // schedules another callback, and the frame never settles.
+                    if (hasPlaylists != _showPlaylistsTab) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted || hasPlaylists == _showPlaylistsTab) return;
+                        setState(() => _updatePlaylistsTab(show: hasPlaylists));
+                      });
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
                 Selector<DownloadProvider, bool>(
                   selector: (_, provider) => provider.downloads.values.any(
                     (progress) =>
@@ -196,11 +248,12 @@ class DownloadsScreenState extends State<DownloadsScreen>
                         children: [
                           _buildTabChip(t.downloads.manage, 0),
                           const SizedBox(width: 8),
-                          _buildTabChip(t.downloads.tvShows, 1),
+                          if (_showPlaylistsTab) ...[_buildTabChip(t.downloads.playlists, 1), const SizedBox(width: 8)],
+                          _buildTabChip(t.downloads.tvShows, _tabIndex(1)),
                           const SizedBox(width: 8),
-                          _buildTabChip(t.downloads.movies, 2),
+                          _buildTabChip(t.downloads.movies, _tabIndex(2)),
                           const SizedBox(width: 8),
-                          _buildTabChip(t.downloads.music, 3),
+                          _buildTabChip(t.downloads.music, _tabIndex(3)),
                         ],
                       ),
                     ),
@@ -225,9 +278,6 @@ class DownloadsScreenState extends State<DownloadsScreen>
                             downloads: downloadProvider.downloads,
                             metadata: downloadProvider.metadata,
                             playlists: _playlistGroups(downloadProvider),
-                            onPlayPlaylist: (playlist, {required shuffle}) => unawaited(
-                              _playDownloadedPlaylist(context, downloadProvider, playlist, shuffle: shuffle),
-                            ),
                             onPause: downloadProvider.pauseDownload,
                             onResume: (globalKey) {
                               final client = getClient(globalKey);
@@ -249,6 +299,19 @@ class DownloadsScreenState extends State<DownloadsScreen>
                           );
                         },
                       ),
+                      if (_showPlaylistsTab)
+                        Consumer<DownloadProvider>(
+                          builder: (context, downloadProvider, _) => DownloadedPlaylistsTab(
+                            playlists: _playlistGroups(downloadProvider),
+                            metadata: downloadProvider.metadata,
+                            downloads: downloadProvider.downloads,
+                            suppressAutoFocus: suppressAutoFocus,
+                            onBack: focusTabBar,
+                            onPlay: (playlist, {required shuffle}) => unawaited(
+                              _playDownloadedPlaylist(context, downloadProvider, playlist, shuffle: shuffle),
+                            ),
+                          ),
+                        ),
                       _DownloadsGridContent(
                         type: DownloadType.tvShows,
                         suppressAutoFocus: suppressAutoFocus,
