@@ -34,7 +34,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SELF_HOSTED_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -43,6 +43,9 @@ jobs:
           fetch-depth: 0
 
       - name: Free runner disk space
+        # Only on GitHub's disposable machines. On a self-hosted runner this
+        # deletes the real NDK and prunes every Docker image on the box.
+        if: ${{ !vars.SELF_HOSTED_RUNNER }}
         # The runner ships ~25 GB of toolchains this build never touches, and the
         # pinned NDK, the restored Gradle cache and the build outputs together
         # overflow what is left. That surfaced at the very end of the job as tar
