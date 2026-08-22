@@ -508,7 +508,12 @@ class FakeMediaControlsManager extends MediaControlsManager {
   Stream<MediaControlEvent> get controlEvents => eventsCtrl.stream;
 
   @override
-  Future<void> updateMetadata({required MediaItem metadata, MediaServerClient? client, Duration? duration}) async {
+  Future<void> updateMetadata({
+    required MediaItem metadata,
+    MediaServerClient? client,
+    Duration? duration,
+    String? localArtworkPath,
+  }) async {
     metadataTitles.add(metadata.title ?? '');
   }
 

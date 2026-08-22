@@ -24,6 +24,18 @@ extension _VideoPlayerMediaControlsMethods on VideoPlayerScreenState {
     _recordLifecycleState('media_controls', action: 'resumed:$reason');
   }
 
+  /// The downloaded poster for [metadata], if one was kept.
+  ///
+  /// Read through the provider rather than the server so it still resolves with
+  /// nothing reachable, which is the case this exists for.
+  String? _localArtworkPathFor(MediaItem metadata) {
+    final serverId = metadata.serverId;
+    if (serverId == null) return null;
+    final provider = context.read<DownloadProvider?>();
+    final artwork = provider?.getArtworkPaths(metadata.globalKey);
+    return artwork?.getLocalPath(DownloadStorageService.instance, ServerId(serverId));
+  }
+
   Future<void> _syncMediaControlsAvailability() async {
     if (_mediaControlsSuspendedForTvBackground) return;
 
@@ -74,6 +86,7 @@ extension _VideoPlayerMediaControlsMethods on VideoPlayerScreenState {
         metadata: _currentMetadata,
         client: client,
         duration: _currentMetadata.durationMs != null ? Duration(milliseconds: _currentMetadata.durationMs!) : null,
+        localArtworkPath: _localArtworkPathFor(_currentMetadata),
       );
       await _syncMediaControlsAvailability();
     }

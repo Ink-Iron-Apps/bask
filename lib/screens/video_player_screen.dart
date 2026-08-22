@@ -60,6 +60,7 @@ import '../services/multi_server_manager.dart';
 import '../services/offline_watch_sync_service.dart';
 import '../services/display_mode_service.dart';
 import '../services/media_control_router.dart';
+import '../services/download_storage_service.dart';
 import '../services/playback_disk_cache.dart';
 import '../services/scoped_player_prefs.dart';
 import '../services/video_equalizer.dart';
