@@ -49,7 +49,15 @@ class MediaControlsManager {
   /// the [MediaServerClient.thumbnailUrl] adapter handles per-backend URL
   /// shape (Plex's `/photo/:/transcode` proxy vs. Jellyfin's
   /// self-authenticated image URL).
-  Future<void> updateMetadata({required MediaItem metadata, MediaServerClient? client, Duration? duration}) async {
+  /// [localArtworkPath] is the poster already on this device, used when there is
+  /// no server to ask — downloaded media is played offline, which is exactly
+  /// when the card would otherwise show no image at all.
+  Future<void> updateMetadata({
+    required MediaItem metadata,
+    MediaServerClient? client,
+    Duration? duration,
+    String? localArtworkPath,
+  }) async {
     if (_updatesSuspended) return;
 
     try {
@@ -62,6 +70,9 @@ class MediaControlsManager {
           appLogger.w('Failed to build artwork URL', error: e);
         }
       }
+      // Only as a fallback: a live server gives the full-size poster, while the
+      // stored one is whatever was kept for the download.
+      artworkUrl ??= localArtworkPath;
 
       await OsMediaControls.setMetadata(
         MediaMetadata(
