@@ -128,7 +128,14 @@ jobs:
         # whose storage is the bottleneck they starve each other: individual
         # tests pass the 30s timeout and the suite takes far longer than running
         # fewer at once would. TEST_CONCURRENCY caps it where that applies.
-        run: flutter test ${{ vars.TEST_CONCURRENCY && format('--concurrency={0}', vars.TEST_CONCURRENCY) || '' }}
+        # TEST_TIMEOUT scales the per-test limit. The default 30s assumes the
+        # machine finishes a test in ordinary time; on slower hardware tests
+        # that pass in under a second here cross it, which reads as 24 failures
+        # that are really one slow disk.
+        run: >-
+          flutter test
+          ${{ vars.TEST_CONCURRENCY && format('--concurrency={0}', vars.TEST_CONCURRENCY) || '' }}
+          ${{ vars.TEST_TIMEOUT && format('--timeout={0}', vars.TEST_TIMEOUT) || '' }}
 
       - name: Bump version from conventional commits
         id: version
