@@ -438,6 +438,14 @@ extension _VideoPlayerPlaybackServiceMethods on VideoPlayerScreenState {
     // the answer, and a denial only costs the card.
     unawaited(NotificationPermission.ensure());
 
+    // Without this the plugin's policy answers NONE for every playback state:
+    // no foreground service, and therefore no card on the lock screen or in the
+    // shade, however complete the session's metadata is. Music sets it; video
+    // never did. Playback still pauses when the app is hidden — the flag only
+    // decides whether the session gets a notification to live in, which then
+    // survives that pause so it can be resumed from.
+    unawaited(mediaControlsManager.setBackgroundMode(true));
+
     final mediaControlRouter = MediaControlRouter(
       // Authority stays Watch Together's. The automotive gate lives in the
       // playback-intent wrappers below, so `onPause` can never be denied: a
