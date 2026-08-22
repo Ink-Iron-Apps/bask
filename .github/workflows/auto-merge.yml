@@ -82,7 +82,9 @@ jobs:
         run: flutter pub get
 
       - name: Run tests (shard ${{ matrix.shard }} of 4)
-        run: flutter test --total-shards 4 --shard-index ${{ matrix.shard }}
+        run: >-
+          flutter test --total-shards 4 --shard-index ${{ matrix.shard }}
+          ${{ vars.TEST_CONCURRENCY && format('--concurrency={0}', vars.TEST_CONCURRENCY) || '' }}
 
   merge:
     needs: [static, test]
