@@ -84,10 +84,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run tests (shard ${{ matrix.shard }} of 4)
+      - name: Run tests (shard ${{ matrix.shard }} of ${{ strategy.job-total }})
         run: >-
           flutter test --total-shards ${{ strategy.job-total }} --shard-index ${{ matrix.shard }}
           ${{ vars.TEST_CONCURRENCY && format('--concurrency={0}', vars.TEST_CONCURRENCY) || '' }}
+          ${{ vars.TEST_TIMEOUT && format('--timeout={0}', vars.TEST_TIMEOUT) || '' }}
 
   merge:
     needs: [static, test]
