@@ -375,8 +375,10 @@ List<DownloadPlaylistGroup> _playlistGroups(DownloadProvider provider) {
   final groups = <DownloadPlaylistGroup>[];
   for (final rule in provider.syncRules.values) {
     if (rule.targetType != ContentTypes.playlist) continue;
-    final memberKeys = membership[rule.globalKey];
-    if (memberKeys == null || memberKeys.isEmpty) continue;
+    // Kept even with nothing downloaded yet: the rule is the playlist, and a
+    // list that is still fetching should be visible rather than appear only
+    // once its first item finishes.
+    final memberKeys = membership[rule.globalKey] ?? const <String>{};
 
     // Same precedence as the sync rules screen: live metadata, then the name
     // stored on the rule, so the two surfaces never disagree.
