@@ -430,6 +430,14 @@ extension _VideoPlayerPlaybackServiceMethods on VideoPlayerScreenState {
     final mediaControlsManager = MediaControlsManager();
     _mediaControlsManager = mediaControlsManager;
 
+    // The lock-screen and shade card is a notification, so on Android 13+ it
+    // needs POST_NOTIFICATIONS to appear at all. Music and downloads already
+    // ask; video never did, so anyone who had used neither got a session with
+    // nothing to show it in. Starting playback is the moment it becomes
+    // useful, which is when to ask. Fire-and-forget: playback does not wait on
+    // the answer, and a denial only costs the card.
+    unawaited(NotificationPermission.ensure());
+
     final mediaControlRouter = MediaControlRouter(
       // Authority stays Watch Together's. The automotive gate lives in the
       // playback-intent wrappers below, so `onPause` can never be denied: a
