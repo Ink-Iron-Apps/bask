@@ -62,12 +62,15 @@ jobs:
           dart run dart_code_linter:metrics check-unused-code lib --fatal-unused
 
   test:
-    # The suite is ~19 minutes on a runner against ~3 locally — it is CPU-bound,
-    # not setup-bound, so it is split across runners rather than cached harder.
+    # Sharding only pays when the shards run at the same time. One runner takes
+    # one job at a time, so four shards run back to back and each repeats the
+    # checkout, the Flutter install and pub get — the same test work plus three
+    # extra setups. TEST_SHARDS matches the split to however many runners there
+    # actually are; '[0]' is a single unsharded job.
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: ${{ fromJSON(vars.TEST_SHARDS || '[0, 1, 2, 3]') }}
     runs-on: ${{ vars.SELF_HOSTED_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v7
@@ -83,7 +86,7 @@ jobs:
 
       - name: Run tests (shard ${{ matrix.shard }} of 4)
         run: >-
-          flutter test --total-shards 4 --shard-index ${{ matrix.shard }}
+          flutter test --total-shards ${{ strategy.job-total }} --shard-index ${{ matrix.shard }}
           ${{ vars.TEST_CONCURRENCY && format('--concurrency={0}', vars.TEST_CONCURRENCY) || '' }}
 
   merge:

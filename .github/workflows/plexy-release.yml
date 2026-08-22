@@ -90,7 +90,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Everything below re-checks a tree the auto-merge already verified before
+      # it let the merge happen: same commit content, same gates. That is worth
+      # paying for as a second opinion when the runners are free, and is pure
+      # duplication when there is one slow machine doing both. Setting
+      # RELEASE_REVERIFY to false trusts the pre-merge gates instead.
+      #
+      # A release dispatched by hand against an unverified main is the case this
+      # protects, so the default stays on.
       - name: Check formatting
+        if: ${{ vars.RELEASE_REVERIFY != 'false' }}
         # dart format has no exclude flag, and generated sources are formatted by
         # whatever generated them, so format everything and then ask git whether
         # anything that is not generated actually moved.
@@ -100,9 +109,11 @@ jobs:
           git checkout -- .
 
       - name: Analyze
+        if: ${{ vars.RELEASE_REVERIFY != 'false' }}
         run: flutter analyze
 
       - name: Check for unused files and code
+        if: ${{ vars.RELEASE_REVERIFY != 'false' }}
         # dart_code_linter's analyzer plugin crashes on Linux, so its checks run
         # as explicit commands. --fatal-unused matters: without it the command
         # reports findings and still exits 0, which is a gate that never fails.
@@ -111,6 +122,7 @@ jobs:
           dart run dart_code_linter:metrics check-unused-code lib --fatal-unused
 
       - name: Run tests
+        if: ${{ vars.RELEASE_REVERIFY != 'false' }}
         # `flutter test` runs one worker per core by default. Every worker does
         # real disk I/O — atomic writes, fsync, temp files — so on a machine
         # whose storage is the bottleneck they starve each other: individual
