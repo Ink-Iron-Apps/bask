@@ -399,7 +399,11 @@ class SettingsService extends BaseSharedPreferencesService {
   static const subtitleSyncOffset = IntPref('subtitle_sync_offset');
   static const subtitleSearchLanguage = NullableStringPref('subtitle_search_language');
   static const volume = DoublePref('volume', defaultValue: 100.0);
-  static const rotationLocked = BoolPref('rotation_locked', defaultValue: true);
+
+  /// Pins the player to landscape. Off by default so the picture follows the
+  /// device: locking is the deliberate choice, not the starting state, and a
+  /// default lock made the player look like it ignored rotation entirely.
+  static const rotationLocked = BoolPref('rotation_locked');
   static const subtitleFontSize = IntPref('subtitle_font_size', defaultValue: 38);
   static const subtitleTextColor = StringPref('subtitle_text_color', defaultValue: '#FFFFFF');
   static const subtitleBorderSize = IntPref('subtitle_border_size', defaultValue: 3);
