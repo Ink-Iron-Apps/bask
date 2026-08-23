@@ -112,7 +112,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          git fetch --no-tags origin main:refs/remotes/origin/main
+          # Fully qualified: an unqualified `main` on the left-hand side left the
+          # source unresolved on one runner, and git reads a source it cannot
+          # resolve as "delete the destination" — which removed origin/main and
+          # failed every command after it.
+          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
           if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
             echo "main already at $(git rev-parse --short HEAD); nothing to merge"
             echo "merged=false" >> "$GITHUB_OUTPUT"
@@ -151,7 +155,7 @@ jobs:
           # The dispatch below builds whatever main points at, so make sure the
           # merge is actually visible before asking for it.
           for attempt in 1 2 3 4 5 6 7 8 9 10; do
-            git fetch --no-tags origin main:refs/remotes/origin/main
+            git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
             if git merge-base --is-ancestor HEAD origin/main; then
               echo "main now contains $(git rev-parse --short HEAD)"
               echo "merged=true" >> "$GITHUB_OUTPUT"
