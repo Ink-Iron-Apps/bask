@@ -17,6 +17,13 @@ on:
         required: false
         type: string
 
+# Every step is written in bash. A Windows runner would otherwise get
+# PowerShell and fail on the first pipeline, so pin the shell rather than write
+# each step twice.
+defaults:
+  run:
+    shell: bash
+
 permissions:
   contents: write
 
@@ -74,8 +81,21 @@ jobs:
       - name: Install pinned NDK and CMake
         # sdkmanager is not on PATH on the runner image.
         run: |
-          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          [ -x "$sdkmanager" ] || sdkmanager=$(find "$ANDROID_HOME" -name sdkmanager -type f | head -n1)
+          sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          if [ -z "$sdk" ]; then
+            echo "::error::Neither ANDROID_HOME nor ANDROID_SDK_ROOT is set"
+            exit 1
+          fi
+
+          # A machine that develops this app already has them, and sdkmanager on
+          # Windows wants a console it does not get here.
+          if [ -d "$sdk/ndk/$ANDROID_NDK_VERSION" ] && [ -d "$sdk/cmake/$ANDROID_CMAKE_VERSION" ]; then
+            echo "NDK $ANDROID_NDK_VERSION and CMake $ANDROID_CMAKE_VERSION already installed"
+            exit 0
+          fi
+
+          sdkmanager="$sdk/cmdline-tools/latest/bin/sdkmanager"
+          [ -x "$sdkmanager" ] || sdkmanager=$(find "$sdk" -name 'sdkmanager*' -type f | head -n1)
           echo "using $sdkmanager"
           yes | "$sdkmanager" --install "ndk;${ANDROID_NDK_VERSION}" "cmake;${ANDROID_CMAKE_VERSION}" > /dev/null
 

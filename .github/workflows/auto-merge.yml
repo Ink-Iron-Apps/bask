@@ -16,6 +16,13 @@ on:
   push:
     branches: [claude/dev]
 
+# Every step is written in bash. A Windows runner would otherwise get
+# PowerShell and fail on the first pipeline, so pin the shell rather than write
+# each step twice.
+defaults:
+  run:
+    shell: bash
+
 permissions:
   contents: write
   pull-requests: write
