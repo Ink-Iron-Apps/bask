@@ -46,7 +46,9 @@ jobs:
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
+          # Uploading to GitHub's cache service is a net loss on a self-hosted
+          # runner: the SDK already persists on local disk between runs.
+          cache: ${{ !vars.SELF_HOSTED_RUNNER }}
 
       - name: Install dependencies
         run: flutter pub get
@@ -86,7 +88,9 @@ jobs:
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
+          # Uploading to GitHub's cache service is a net loss on a self-hosted
+          # runner: the SDK already persists on local disk between runs.
+          cache: ${{ !vars.SELF_HOSTED_RUNNER }}
 
       - name: Install dependencies
         run: flutter pub get
