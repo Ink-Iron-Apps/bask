@@ -248,7 +248,11 @@ jobs:
         # The read token is baked in so the installed app can poll this
         # repository's releases.
         run: |
-          flutter build apk --release --split-per-abi \
+          # arm64 only: the CMake step below builds FFmpeg, libdovi and mpv once
+          # per ABI, and no 32-bit or x86 device installs this app. Adding an ABI
+          # back means republishing it before any device on it can update, since
+          # selectApkAsset falls back to a universal APK that is not published.
+          flutter build apk --release --split-per-abi --target-platform android-arm64 \
             --dart-define=UPDATE_READ_TOKEN=${{ secrets.UPDATE_READ_TOKEN }}
 
       - name: Remove signing material
@@ -260,8 +264,13 @@ jobs:
           TAG: ${{ inputs.tag || steps.version.outputs.tag }}
         run: |
           cd build/app/outputs/flutter-apk
+          # `if` rather than `[ -f ] && mv`: the build no longer emits every ABI,
+          # and a false test on the last iteration would make the loop -- and so
+          # the step, under set -e -- exit non-zero.
           for abi in arm64-v8a armeabi-v7a x86_64; do
-            [ -f "app-$abi-release.apk" ] && mv "app-$abi-release.apk" "Plexy-${TAG}-${abi}.apk"
+            if [ -f "app-$abi-release.apk" ]; then
+              mv "app-$abi-release.apk" "Plexy-${TAG}-${abi}.apk"
+            fi
           done
 
       - name: Publish release
