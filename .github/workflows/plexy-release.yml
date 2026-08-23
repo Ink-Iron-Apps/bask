@@ -76,7 +76,9 @@ jobs:
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
+          # Uploading to GitHub's cache service is a net loss on a self-hosted
+          # runner: the SDK already persists on local disk between runs.
+          cache: ${{ !vars.SELF_HOSTED_RUNNER }}
 
       - name: Install pinned NDK and CMake
         # sdkmanager is not on PATH on the runner image.
@@ -100,6 +102,8 @@ jobs:
           yes | "$sdkmanager" --install "ndk;${ANDROID_NDK_VERSION}" "cmake;${ANDROID_CMAKE_VERSION}" > /dev/null
 
       - name: Cache Gradle
+        # Same reason as the Flutter cache above.
+        if: ${{ !vars.SELF_HOSTED_RUNNER }}
         uses: actions/cache@v6
         with:
           path: |
