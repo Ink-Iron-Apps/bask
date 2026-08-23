@@ -430,6 +430,22 @@ extension _VideoPlayerPlaybackServiceMethods on VideoPlayerScreenState {
     final mediaControlsManager = MediaControlsManager();
     _mediaControlsManager = mediaControlsManager;
 
+    // The lock-screen and shade card is a notification, so on Android 13+ it
+    // needs POST_NOTIFICATIONS to appear at all. Music and downloads already
+    // ask; video never did, so anyone who had used neither got a session with
+    // nothing to show it in. Starting playback is the moment it becomes
+    // useful, which is when to ask. Fire-and-forget: playback does not wait on
+    // the answer, and a denial only costs the card.
+    unawaited(NotificationPermission.ensure());
+
+    // Without this the plugin's policy answers NONE for every playback state:
+    // no foreground service, and therefore no card on the lock screen or in the
+    // shade, however complete the session's metadata is. Music sets it; video
+    // never did. Playback still pauses when the app is hidden — the flag only
+    // decides whether the session gets a notification to live in, which then
+    // survives that pause so it can be resumed from.
+    unawaited(mediaControlsManager.setBackgroundMode(true));
+
     final mediaControlRouter = MediaControlRouter(
       // Authority stays Watch Together's. The automotive gate lives in the
       // playback-intent wrappers below, so `onPause` can never be denied: a

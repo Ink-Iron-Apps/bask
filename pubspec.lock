@@ -775,9 +775,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "75556a968a4a1ebc42fbb8c31942c2418d4326e1"
-      resolved-ref: "75556a968a4a1ebc42fbb8c31942c2418d4326e1"
-      url: "https://github.com/edde746/media_controls"
+      ref: cebd4a62c9cd9423365ab7c274f0ec51e4aaf486
+      resolved-ref: cebd4a62c9cd9423365ab7c274f0ec51e4aaf486
+      url: "https://github.com/LightWraith8268/media_controls"
     source: git
     version: "0.3.0"
   package_config:

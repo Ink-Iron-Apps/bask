@@ -4269,6 +4269,9 @@ class Translations$downloads$en {
 
 	/// en: '${count} downloaded'
 	String playlistItemCount({required Object count}) => '${count} downloaded';
+
+	/// en: '${done} of ${total} downloaded'
+	String playlistItemCountOf({required Object done, required Object total}) => '${done} of ${total} downloaded';
 }
 
 // Path: shaders
@@ -8092,6 +8095,7 @@ extension on Translations {
 			'downloads.playlistNothingDownloaded' => 'Nothing in this playlist has finished downloading yet',
 			'downloads.playlists' => 'Playlists',
 			'downloads.playlistItemCount' => ({required Object count}) => '${count} downloaded',
+			'downloads.playlistItemCountOf' => ({required Object done, required Object total}) => '${done} of ${total} downloaded',
 			'shaders.title' => 'Shaders',
 			'shaders.noShaderDescription' => 'No video enhancement',
 			'shaders.nvscalerDescription' => 'NVIDIA image scaling for sharper video',
@@ -8121,9 +8125,9 @@ extension on Translations {
 			'companionRemote.session.startServer' => 'Start Server',
 			'companionRemote.session.stopServer' => 'Stop Server',
 			'companionRemote.session.minimize' => 'Minimize',
-			'companionRemote.pairing.discoveryDescription' => 'Plezy devices with the same Plex account appear here',
 			_ => null,
 		} ?? switch (path) {
+			'companionRemote.pairing.discoveryDescription' => 'Plezy devices with the same Plex account appear here',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => 'Connecting...',
 			'companionRemote.pairing.searchingForDevices' => 'Looking for devices...',

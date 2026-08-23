@@ -1650,7 +1650,8 @@
     "deleteSelected": "Delete selected",
     "playlistNothingDownloaded": "Nothing in this playlist has finished downloading yet",
     "playlists": "Playlists",
-    "playlistItemCount": "${count} downloaded"
+    "playlistItemCount": "${count} downloaded",
+    "playlistItemCountOf": "${done} of ${total} downloaded"
   },
   "shaders": {
     "title": "Shaders",

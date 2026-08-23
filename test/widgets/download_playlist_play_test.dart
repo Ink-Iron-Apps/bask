@@ -65,16 +65,10 @@ void main() {
     expect(await pump(tester, downloads: bothDownloaded, tapTooltip: 'Shuffle'), [true]);
   });
 
-  testWidgets('the row counts only what has finished downloading', (tester) async {
-    await pump(
-      tester,
-      downloads: {
-        'plex1:m1': const DownloadProgress(globalKey: 'plex1:m1', status: DownloadStatus.completed),
-        'plex1:m2': const DownloadProgress(globalKey: 'plex1:m2', status: DownloadStatus.downloading),
-      },
-    );
+  testWidgets('a fully downloaded playlist just states its size', (tester) async {
+    await pump(tester, downloads: bothDownloaded);
 
-    expect(find.text('1 downloaded'), findsOneWidget);
+    expect(find.text('2 downloaded'), findsOneWidget);
   });
 
   testWidgets('a playlist with nothing finished cannot be played', (tester) async {
@@ -90,5 +84,48 @@ void main() {
       find.ancestor(of: find.byTooltip('Play'), matching: find.byType(IconButton)).first,
     );
     expect(play.onPressed, isNull, reason: 'nothing to play yet');
+  });
+
+  testWidgets('a playlist expands to show what is on it', (tester) async {
+    await pump(tester, downloads: bothDownloaded);
+
+    // Collapsed by default: the tab is a list of playlists, not of everything.
+    expect(find.text('First'), findsNothing);
+
+    await tester.tap(find.text('Road Trip'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('Second'), findsOneWidget);
+  });
+
+  testWidgets('expanding twice closes it again', (tester) async {
+    await pump(tester, downloads: bothDownloaded);
+
+    await tester.tap(find.text('Road Trip'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Road Trip'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsNothing);
+  });
+
+  testWidgets('a part-downloaded playlist names both numbers', (tester) async {
+    await pump(
+      tester,
+      downloads: {
+        'plex1:m1': const DownloadProgress(globalKey: 'plex1:m1', status: DownloadStatus.completed),
+        'plex1:m2': const DownloadProgress(globalKey: 'plex1:m2', status: DownloadStatus.downloading),
+      },
+    );
+
+    // "1 downloaded" on a two-item list reads as finished; this does not.
+    expect(find.text('1 of 2 downloaded'), findsOneWidget);
+  });
+
+  testWidgets('a playlist with nothing downloaded still appears', (tester) async {
+    await pump(tester, downloads: const {});
+
+    expect(find.text('Road Trip'), findsOneWidget);
   });
 }

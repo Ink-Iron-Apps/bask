@@ -35,8 +35,11 @@ dependencies:
       path: packages/connectivity_plus/connectivity_plus
   os_media_controls:
     git:
-      url: https://github.com/edde746/media_controls
-      ref: 75556a968a4a1ebc42fbb8c31942c2418d4326e1
+      # Fork of edde746@75556a9 that also reads artwork already on the device.
+      # Upstream fetches every poster over HTTP, so downloaded media — played
+      # when there is no server to ask — showed a card with no image.
+      url: https://github.com/LightWraith8268/media_controls
+      ref: cebd4a62c9cd9423365ab7c274f0ec51e4aaf486
   rate_limiter: ^1.0.0
   wakelock_plus:
     path: packages/wakelock_plus
