@@ -93,8 +93,12 @@ import 'utils/dialogs.dart';
 import 'widgets/dialog_action_button.dart';
 import 'widgets/startup_failure_view.dart';
 
-const bool _enableSentry = bool.fromEnvironment('ENABLE_SENTRY', defaultValue: false);
-const String _sentryDsn = 'https://6a1a6ef8c72140099b2798973c1bfb2f@bugs.plezy.app/1';
+// Supplied per build. Hardcoding one meant every fork that turned reporting on
+// aimed it at the upstream project's Sentry, which is neither readable by the
+// fork nor the upstream maintainer's to receive; a build that does not set it
+// gets no crash reporting instead.
+const String _sentryDsn = String.fromEnvironment('SENTRY_DSN');
+const bool _enableSentry = bool.fromEnvironment('ENABLE_SENTRY', defaultValue: false) && _sentryDsn != '';
 const String gitCommit = String.fromEnvironment('GIT_COMMIT');
 const String _sentryEnvironment = String.fromEnvironment('SENTRY_ENVIRONMENT');
 const String _sentryDist = String.fromEnvironment('SENTRY_DIST');
