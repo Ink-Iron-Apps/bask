@@ -291,7 +291,7 @@ class SideNavigationRailState extends State<SideNavigationRail> with MountedSetS
 
   bool get _interactionExpanded => _isHovered || _isTouchExpanded;
 
-  bool get _showDownloads => !PlatformDetector.isAppleTV();
+  bool get _showDownloads => PlatformDetector.supportsDownloads();
 
   /// macOS has the system green button; mobile/TV have no OS fullscreen toggle.
   bool get _showFullscreenToggle => Platform.isWindows || Platform.isLinux;
