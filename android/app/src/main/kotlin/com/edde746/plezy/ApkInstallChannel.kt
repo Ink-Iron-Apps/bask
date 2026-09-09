@@ -38,19 +38,35 @@ class ApkInstallChannel(private val activity: Activity) {
         return activity.packageManager.canRequestPackageInstalls()
     }
 
+    /**
+     * Opens the "install unknown apps" toggle, falling back as the screens narrow.
+     *
+     * Google TV's Settings has no per-app unknown-sources activity to deep-link into: the toggle
+     * lives under Security & restrictions, and the per-package intent resolves to nothing there.
+     * An unresolved intent left the user with no way to grant the permission at all, since the
+     * Flutter side only reports that the grant is missing. Each fallback is broader than the last,
+     * so the worst case still lands in Settings rather than nowhere.
+     */
     private fun openInstallPermissionSettings(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
-        return try {
-            activity.startActivity(
-                Intent(
-                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                    Uri.parse("package:${activity.packageName}")
-                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-            true
-        } catch (e: Exception) {
-            false
+        val intents = listOf(
+            Intent(
+                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                Uri.parse("package:${activity.packageName}")
+            ),
+            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES),
+            Intent(Settings.ACTION_SECURITY_SETTINGS),
+            Intent(Settings.ACTION_SETTINGS)
+        )
+        for (intent in intents) {
+            try {
+                activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                return true
+            } catch (e: Exception) {
+                // Try the next, broader screen.
+            }
         }
+        return false
     }
 
     private fun installApk(path: String?, result: MethodChannel.Result) {
