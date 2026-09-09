@@ -192,7 +192,8 @@ class TvDetectionService {
   /// device itself: a phone in forced TV mode still has user-accessible
   /// storage, and hiding downloads there would strand an offline library the
   /// user already has on disk.
-  static bool isTVDeviceSync() => _debugTvDeviceOverride ?? _debugAppleTVOverride ?? _singleton.instance?._detected ?? false;
+  static bool isTVDeviceSync() =>
+      _debugTvDeviceOverride ?? _debugAppleTVOverride ?? _singleton.instance?._detected ?? false;
 
   /// Synchronous Apple TV check (returns false if not initialized or not tvOS).
   static bool isAppleTVSync() => _debugAppleTVOverride ?? (_tvosBuild || _singleton.instance?._isAppleTV == true);
