@@ -267,7 +267,7 @@ extension _MediaDetailActionButtons on _MediaDetailScreenState {
           )
         : null;
 
-    final downloadAction = !widget.isOffline && !PlatformDetector.isAppleTV()
+    final downloadAction = !widget.isOffline && PlatformDetector.supportsDownloads()
         ? FocusableAction(
             debugLabel: 'detail_download',
             onPressed: () => unawaited(_handleDownloadButtonPressed(metadata)),

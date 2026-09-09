@@ -406,7 +406,7 @@ class MediaContextMenuState extends State<MediaContextMenu> {
       // shows, albums, and artists; audio playlists queue their tracks.
       final isDownloadablePlaylist =
           isPlaylist && (playlist.playlistType == 'video' || playlist.playlistType == 'audio');
-      if ((isDownloadablePlaylist || isCollection) && !PlatformDetector.isAppleTV()) {
+      if ((isDownloadablePlaylist || isCollection) && PlatformDetector.supportsDownloads()) {
         menuActions.addAll(
           _syncDownloadMenuActions(
             hasSyncRule: Provider.of<DownloadProvider>(context, listen: false).hasSyncRule(_itemSyncRuleKey(context)),
@@ -616,9 +616,9 @@ class MediaContextMenuState extends State<MediaContextMenu> {
 
       // Download options (for episodes, movies, shows, seasons, albums, and
       // tracks — not artists, whose full discography is too large for a
-      // one-tap download). Apple TV has no user-accessible file storage —
-      // skip entirely.
-      if (!PlatformDetector.isAppleTV() &&
+      // one-tap download). TV sets carry no offline library at all, so the
+      // entry is skipped there entirely.
+      if (PlatformDetector.supportsDownloads() &&
           (mediaKind == MediaKind.episode ||
               mediaKind == MediaKind.movie ||
               mediaKind == MediaKind.show ||
