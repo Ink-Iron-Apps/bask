@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plezy/navigation/navigation_tabs.dart';
+import 'package:plezy/utils/platform_detector.dart';
 
 void main() {
   group('NavigationTab.resolveDefaultTab', () {
@@ -75,6 +76,23 @@ void main() {
     test('Explore is online-only', () {
       final offline = NavigationTab.getVisibleTabs(isOffline: true, hasExplore: true);
       expect(offline.map((tab) => tab.id), isNot(contains(NavigationTabId.explore)));
+    });
+
+    test('a TV set has no Downloads tab', () {
+      addTearDown(TvDetectionService.debugReset);
+      TvDetectionService.debugSetTvDeviceOverride(true);
+
+      final ids = NavigationTab.getVisibleTabs(isOffline: false).map((tab) => tab.id);
+      expect(ids, isNot(contains(NavigationTabId.downloads)));
+    });
+
+    test('forcing TV mode on other hardware keeps Downloads', () async {
+      addTearDown(TvDetectionService.debugReset);
+      await TvDetectionService.getInstance(forceTv: true);
+
+      expect(PlatformDetector.isTV(), isTrue);
+      final ids = NavigationTab.getVisibleTabs(isOffline: false).map((tab) => tab.id);
+      expect(ids, contains(NavigationTabId.downloads));
     });
   });
 }

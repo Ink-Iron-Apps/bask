@@ -206,7 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
 
                 _buildConnectionsSection(sheetContext),
 
-                if (!PlatformDetector.isAppleTV()) _buildDownloadsSection(),
+                if (PlatformDetector.supportsDownloads()) _buildDownloadsSection(),
 
                 if (_keyboardShortcutsSupported) ...[_buildKeyboardShortcutsSection()],
 

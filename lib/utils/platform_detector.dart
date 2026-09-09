@@ -74,6 +74,7 @@ class TvDetectionService {
   @visibleForTesting
   static set debugDetectionGate(Future<void>? value) => _singleton.debugGate = value;
   static bool? _debugAppleTVOverride;
+  static bool? _debugTvDeviceOverride;
   static bool? _debugAutomotiveOverride;
   bool _detected = false;
   bool _forceTv = false;
@@ -184,6 +185,16 @@ class TvDetectionService {
   /// and siblings); these raw accessors exist for the facade and tests.
   static bool isTVSync() => _debugAppleTVOverride ?? _singleton.instance?._isTV ?? false;
 
+  /// Whether the hardware is a TV, ignoring the user's force-TV override.
+  ///
+  /// [isTVSync] answers "should this look and navigate like a TV", which the
+  /// override is allowed to turn on anywhere. Capability questions need the
+  /// device itself: a phone in forced TV mode still has user-accessible
+  /// storage, and hiding downloads there would strand an offline library the
+  /// user already has on disk.
+  static bool isTVDeviceSync() =>
+      _debugTvDeviceOverride ?? _debugAppleTVOverride ?? _singleton.instance?._detected ?? false;
+
   /// Synchronous Apple TV check (returns false if not initialized or not tvOS).
   static bool isAppleTVSync() => _debugAppleTVOverride ?? (_tvosBuild || _singleton.instance?._isAppleTV == true);
 
@@ -195,6 +206,14 @@ class TvDetectionService {
     _debugAppleTVOverride = value;
   }
 
+  /// Test-only: simulate Android TV hardware, which no host platform can
+  /// report. Only [isTVDeviceSync] reads it; pair it with a force-TV instance
+  /// when the layout has to follow as well.
+  @visibleForTesting
+  static void debugSetTvDeviceOverride(bool? value) {
+    _debugTvDeviceOverride = value;
+  }
+
   @visibleForTesting
   static void debugSetAutomotiveOverride(bool? value) {
     _debugAutomotiveOverride = value;
@@ -204,6 +223,7 @@ class TvDetectionService {
   static void debugReset() {
     _singleton.debugReset();
     _debugAppleTVOverride = null;
+    _debugTvDeviceOverride = null;
     _debugAutomotiveOverride = null;
   }
 
@@ -301,6 +321,16 @@ class PlatformDetector {
       return false;
     }
   }
+
+  /// Whether offline downloads are offered at all.
+  ///
+  /// TV sets are excluded on both platforms. Apple TV has no user-accessible
+  /// file storage, and an Android TV set is a fixed, always-networked appliance
+  /// whose internal storage is small and often not user-managed — the offline
+  /// library has no use there, and every download affordance is dead weight in
+  /// a D-pad UI. The check is on the hardware, not [isTV], so forcing TV mode
+  /// on a phone keeps its downloads reachable.
+  static bool supportsDownloads() => !isAppleTV() && !TvDetectionService.isTVDeviceSync();
 
   static bool supportsExternalPlayers() {
     if (isAppleTV()) return false;
