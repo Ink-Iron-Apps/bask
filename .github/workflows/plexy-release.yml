@@ -248,11 +248,15 @@ jobs:
         # The read token is baked in so the installed app can poll this
         # repository's releases.
         run: |
-          # arm64 only: the CMake step below builds FFmpeg, libdovi and mpv once
-          # per ABI, and no 32-bit or x86 device installs this app. Adding an ABI
-          # back means republishing it before any device on it can update, since
-          # selectApkAsset falls back to a universal APK that is not published.
-          flutter build apk --release --split-per-abi --target-platform android-arm64 \
+          # arm64-v8a and armeabi-v7a. The CMake step below builds FFmpeg, libdovi
+          # and mpv once per ABI, so each added ABI costs another full native
+          # build; 32-bit is carried because Google TV sets ship a 32-bit
+          # userspace (Sony Bravia on Android 12 reports armeabi-v7a only) and
+          # selectApkAsset falls back to a universal APK that is not published,
+          # so an unpublished ABI cannot install or update at all. x86 stays out:
+          # no device here runs it.
+          flutter build apk --release --split-per-abi \
+            --target-platform android-arm64,android-arm \
             --dart-define=UPDATE_READ_TOKEN=${{ secrets.UPDATE_READ_TOKEN }}
 
       - name: Remove signing material
@@ -286,8 +290,9 @@ jobs:
         run: |
           notes="Personal build of Plexy ${VERSION} (commit ${GITHUB_SHA}).
 
-          Install \`arm64-v8a\` on any modern phone. Signed with the same key as
-          previous builds, so it updates in place."
+          Install \`arm64-v8a\` on any modern phone. Install \`armeabi-v7a\` on a
+          32-bit Android TV set, such as a Sony Bravia on Android 12. Signed with
+          the same key as previous builds, so it updates in place."
 
           attempt=0
           until gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; do
