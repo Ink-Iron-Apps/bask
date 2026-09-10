@@ -35,11 +35,24 @@ class SubtitleFontLoader {
   static Future<String?>? _cachedFontDir;
 
   static Future<String?> loadSubtitleFont() {
-    return _cachedFontDir ??= _loadSubtitleFontOnce();
+    return _cachedFontDir = _loadSubtitleFontOnce(previous: _cachedFontDir);
   }
 
-  static Future<String?> _loadSubtitleFontOnce() async {
+  /// Re-extracts anything missing rather than trusting the cached path.
+  ///
+  /// These files live in the cache directory, which Android reclaims on its own
+  /// when storage runs low — and a TV's data partition is small enough for that
+  /// to happen in ordinary use. The Android libmpv build has no fontconfig, so
+  /// an emptied directory leaves libass with no glyphs at all and subtitles
+  /// silently stop rendering until the app is restarted. Checking costs two
+  /// stat calls per playback; the extraction itself still only runs when a file
+  /// is actually gone.
+  static Future<String?> _loadSubtitleFontOnce({Future<String?>? previous}) async {
     try {
+      final resolved = await previous;
+      if (resolved != null && _fonts.every((f) => File(path.join(resolved, f.$2)).existsSync())) {
+        return resolved;
+      }
       final cacheDir = await getTemporaryDirectory();
       final fontDir = Directory(path.join(cacheDir.path, 'subtitle_fonts'));
 
