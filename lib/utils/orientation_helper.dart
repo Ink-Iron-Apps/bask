@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'app_logger.dart';
 import 'platform_detector.dart';
@@ -8,14 +7,6 @@ import 'platform_detector.dart';
 class OrientationHelper {
   static const MethodChannel _deviceChannel = MethodChannel('com.plezy/device');
 
-  /// Whether the player should turn with the device even with the system
-  /// rotation lock on.
-  ///
-  /// [SystemChrome.setPreferredOrientations] cannot express this: Flutter maps
-  /// a full set of orientations to Android's SCREEN_ORIENTATION_FULL_USER,
-  /// which obeys the lock, so a phone with auto-rotate off stays fixed however
-  /// it is held. The native side switches to FULL_SENSOR instead, and back when
-  /// the player closes so the rest of the app keeps honouring the lock.
   /// Lets the player be held any way up, turning with the device.
   ///
   /// One writer only. [SystemChrome.setPreferredOrientations] and the native
@@ -32,6 +23,14 @@ class OrientationHelper {
     await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
   }
 
+  /// Whether the player should turn with the device even with the system
+  /// rotation lock on.
+  ///
+  /// [SystemChrome.setPreferredOrientations] cannot express this: Flutter maps
+  /// a full set of orientations to Android's SCREEN_ORIENTATION_FULL_USER,
+  /// which obeys the lock, so a phone with auto-rotate off stays fixed however
+  /// it is held. The native side switches to FULL_SENSOR instead, and back when
+  /// the player closes so the rest of the app keeps honouring the lock.
   static Future<void> setFollowSensorOrientation(bool follow) async {
     if (!Platform.isAndroid || PlatformDetector.isAutomotive()) return;
     try {
@@ -42,30 +41,20 @@ class OrientationHelper {
     }
   }
 
-  /// Restores default orientation preferences based on device type.
-  ///
-  /// For phones: Locks to portrait-only (up and down)
-  /// For tablets/desktop: Allows all orientations
+  /// Restores the app's default orientation preferences: every orientation
+  /// on every handheld. Phones rotate into the landscape shell (leading
+  /// navigation rail) like tablets do; the video player owns its own lock.
   ///
   /// This should be called when leaving full-screen experiences like
   /// the video player to restore the app's default orientation behavior.
-  static void restoreDefaultOrientations(BuildContext context) {
+  static Future<void> restoreDefaultOrientations() async {
+    // Cars are fixed-orientation devices; asking would only pin a compact
+    // head unit that reads as a phone.
     if (PlatformDetector.isAutomotive()) return;
     // Leaving a full-screen experience also gives rotation back to the system
     // lock, in case the player exited by a path that did not clear it.
     unawaited(setFollowSensorOrientation(false));
-    final isPhone = PlatformDetector.isPhone(context);
-
-    if (isPhone) {
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-    } else {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    }
+    await SystemChrome.setPreferredOrientations(DeviceOrientation.values);
   }
 
   /// Sets orientation to landscape-only mode.

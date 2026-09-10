@@ -86,7 +86,6 @@ PlexConfig testPlexConfig({
   String platform = 'Flutter Test',
   String? device,
   String? deviceName,
-  bool acceptJson = true,
   String? machineIdentifier,
   String? languageCode,
 }) {
@@ -99,7 +98,6 @@ PlexConfig testPlexConfig({
     platform: platform,
     device: device,
     deviceName: deviceName,
-    acceptJson: acceptJson,
     machineIdentifier: machineIdentifier,
     languageCode: languageCode,
   );
@@ -147,7 +145,7 @@ PlexClient testPlexClient({
   List<String>? prioritizedEndpoints,
   http.Client Function()? endpointProbeHttpClientFactory,
   void Function()? onAllEndpointsExhausted,
-  List<({String identifier, String gridEndpoint})> epgProviders = const [],
+  List<PlexEpgProvider> epgProviders = const [],
   String? homeHubKey,
   String? promotedHubKey,
   String? continueWatchingHubKey,

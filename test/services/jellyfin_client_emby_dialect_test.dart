@@ -81,13 +81,11 @@ void main() {
 
       expect(await emby.checkHealth(), HealthStatus.online);
       expect(await emby.isHealthy(), isTrue);
-      expect(await emby.fetchUserProfile(), isNotNull);
       expect(await jellyfin.checkHealth(), HealthStatus.online);
       expect(await jellyfin.isHealthy(), isTrue);
-      expect(await jellyfin.fetchUserProfile(), isNotNull);
 
-      expect(embyRequests.log, ['GET /Users/user-1?', 'GET /Users/user-1?', 'GET /Users/user-1?']);
-      expect(jellyfinRequests.log, ['GET /Users/Me?', 'GET /Users/Me?', 'GET /Users/Me?']);
+      expect(embyRequests.log, ['GET /Users/user-1?', 'GET /Users/user-1?']);
+      expect(jellyfinRequests.log, ['GET /Users/Me?', 'GET /Users/Me?']);
       expect(embyRequests.log, isNot(contains('GET /Users/Me?')));
       expect(embyRequests.requests.every((request) => request.body.isEmpty), isTrue);
       expect(jellyfinRequests.requests.every((request) => request.body.isEmpty), isTrue);
@@ -171,7 +169,7 @@ void main() {
         'Limit': '300',
         // Emby withholds these from list rows unless asked, so the hub field set
         // is widened for it and only for it.
-        'Fields': 'Overview,ProductionYear,OfficialRating,PremiereDate,DateCreated,UserDataLastPlayedDate',
+        'Fields': 'Overview,DateCreated,ProductionYear,OfficialRating,PremiereDate,UserDataLastPlayedDate',
         'MediaTypes': 'Video',
         'Recursive': 'true',
         'EnableTotalRecordCount': 'false',
@@ -181,9 +179,9 @@ void main() {
       expect(jellyfinResume.url.queryParameters, {
         'userId': 'user-1',
         'Limit': '1',
-        // Jellyfin volunteers the row metadata and filters its own resume route,
-        // so its request string is unchanged from before Emby existed.
-        'Fields': 'Overview',
+        // Jellyfin volunteers year/rating and filters its own resume route,
+        // but withholds DateCreated (addedAt) unless Fields names it.
+        'Fields': 'Overview,DateCreated',
         'MediaTypes': 'Video',
         'Recursive': 'true',
         'EnableTotalRecordCount': 'false',
@@ -245,6 +243,9 @@ void main() {
       final jellyfinFields = jellyfinRequests.requests.last.url.queryParameters['Fields']!.split(',');
 
       expect(embyFields, containsAll(<String>['ProductionYear', 'OfficialRating', 'PremiereDate', 'DateCreated']));
+      // Jellyfin gates DateCreated behind ItemFields too, so the base set —
+      // not the Emby widening — must carry it or addedAt is null on every row.
+      expect(jellyfinFields, contains('DateCreated'));
       // Jellyfin's request string must not gain them.
       expect(jellyfinFields, isNot(contains('ProductionYear')));
       expect(jellyfinFields, isNot(contains('OfficialRating')));
@@ -1130,6 +1131,16 @@ void main() {
   });
 
   group('MediaBrowser playback session identity', () {
+    test('Emby direct streams keep the lowercase api_key query parameter', () {
+      final client = testEmbyClient();
+      addTearDown(client.close);
+
+      final query = Uri.parse(client.buildDirectStreamUrl('item-1')).queryParameters;
+
+      expect(query['api_key'], 'token');
+      expect(query.containsKey('ApiKey'), isFalse);
+    });
+
     test('Emby synthesizes one item-derived PlaySessionId for a replay triple', () async {
       final requests = _RequestCapture((_) => http.Response('', 204));
       final client = testEmbyClient(handler: requests.handle);

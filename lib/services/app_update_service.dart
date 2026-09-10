@@ -23,9 +23,17 @@ const _updateReadToken = String.fromEnvironment('UPDATE_READ_TOKEN');
 /// This one is built for a single device and never handed out, so the mirror
 /// would add a repository, a second token and a CI step to guard against
 /// something that cannot happen here.
+/// CI passes the repository it is building from, so a transfer or rename
+/// corrects this by itself; the default only covers a local build.
+///
+/// It has to be right rather than merely redirect-able: GitHub answers a moved
+/// repository with a 301, and [AppUpdateService._get] deliberately drops the
+/// Authorization header across a redirect (asset storage rejects a request
+/// carrying both), so a redirected read of a private repository arrives
+/// unauthenticated and comes back as 404.
 const _releasesApiBase = String.fromEnvironment(
   'UPDATE_RELEASES_REPO',
-  defaultValue: 'https://api.github.com/repos/LightWraith8268/plexy',
+  defaultValue: 'https://api.github.com/repos/Ink-Iron-Apps/plexy',
 );
 
 /// Whether [latest] is a higher version than [current].
