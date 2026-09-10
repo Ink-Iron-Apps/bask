@@ -145,7 +145,13 @@ void main() {
     put('debug-info/android-aab/app.ios-arm64.symbols', elf(80));
     final selected = await plan();
     expect(selected.native.map((a) => path.basename(a.file.path)).toList()..sort(), ['libapp.so', 'libmpv.so']);
-    expect(selected.native.singleWhere((a) => path.basename(a.file.path) == 'libmpv.so').file.path, rich.path);
+    // Canonicalised on both sides: the fixture path is built from a '/' literal
+    // while the plan's came back from a directory listing, and on Windows those
+    // spell the same file with different separators.
+    expect(
+      path.canonicalize(selected.native.singleWhere((a) => path.basename(a.file.path) == 'libmpv.so').file.path),
+      path.canonicalize(rich.path),
+    );
     expect(selected.dart.map((a) => a.variants.single.debugId), [fixtureDebugId(1)]);
   });
 
@@ -174,7 +180,10 @@ void main() {
     put('debug-info/android-apk/obfuscation.map.json', utf8.encode('["Original","a"]'));
     final selected = await plan('android-apk');
     expect(selected.native.expand((a) => a.variants).map((v) => v.arch).toSet(), {'arm64'});
-    expect(selected.dart.single.file.parent.path, path.join(repository.path, 'debug-info/android-apk'));
+    expect(
+      path.canonicalize(selected.dart.single.file.parent.path),
+      path.canonicalize(path.join(repository.path, 'debug-info/android-apk')),
+    );
   });
 
   test('desktop release roots and Dart files isolate the requested architecture', () async {
