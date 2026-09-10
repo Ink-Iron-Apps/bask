@@ -229,6 +229,12 @@ class ExoPlayerCore(private val activity: Activity) :
   private var trackSelector: DefaultTrackSelector? = null
   private var tunnelingUserEnabled: Boolean = true
   private var tunnelingDisabledForAudioCodec: Boolean = false
+
+  // Tunnelled playback is driven by the audio codec's clock, so without a
+  // hardware audio decoder media3 never tunnels regardless of the flag —
+  // used to skip selector churn for no-op flips (see
+  // updateCurrentTunnelingState). True until an evaluation says otherwise.
+  private var selectedAudioHasHwDecoder: Boolean = true
   private var tunnelingDisabledForVideoCodec: Boolean = false
   private var tunnelingDisabledForDecodedPcm: Boolean = false
   private var tunnelingDisabledForAudioRecovery: Boolean = false
@@ -565,8 +571,6 @@ class ExoPlayerCore(private val activity: Activity) :
   }
 
   fun initialize(
-    bufferSizeBytes: Int? = null,
-    bufferSizeAuto: Boolean = false,
     tunnelingEnabled: Boolean = true,
     audioPassthroughEnabled: Boolean = false,
     // Read-ahead depth, as the wire name Dart sends. Kept a String because `LoadControlPolicy`
@@ -735,8 +739,8 @@ class ExoPlayerCore(private val activity: Activity) :
       // composition object and blanks palette-only fade updates (#1953).
       val subtitleParserFactory = PgsSubtitleParserFactory(AssSubtitleParserFactory(handler))
 
-      // Wrap extractors: replace MatroskaExtractor with ASS+DV variant,
-      // wrap MP4 extractors with DV converter when enabled.
+      // Wrap extractors: replace MatroskaExtractor with the ASS+zlib+LATM
+      // variant, wrap MP4 extractors with the DV converter when enabled.
       // Reads this.dvMode each time (not captured) so DV7→8.1 retry can
       // change mode and reload without reinitializing the player.
       val wrappedExtractorsFactory = androidx.media3.extractor.ExtractorsFactory {
@@ -781,21 +785,15 @@ class ExoPlayerCore(private val activity: Activity) :
           .toTypedArray()
       }
 
-      // Buffer budget. `bufferSizeBytes` carries the user's explicit Buffer Size choice; on
-      // Auto it still arrives (Dart derives it for mpv's demuxer, which shares the property)
-      // but `bufferSizeAuto` says to ignore it here, because mpv's demuxer and ExoPlayer's
-      // sample allocator have different shapes and different failure modes.
+      // Buffer budget. Derived natively from device memory (LoadControlPolicy);
+      // mpv's demuxer sizes itself the same way in MpvPlayerCore.
       val activityManager = activity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
       val memoryInfo = ActivityManager.MemoryInfo()
       activityManager.getMemoryInfo(memoryInfo)
       val availableMB = (memoryInfo.availMem / (1024 * 1024)).toInt()
       val largeHeapMB = activityManager.largeMemoryClass
 
-      val targetBufferBytes = if (!bufferSizeAuto && bufferSizeBytes != null && bufferSizeBytes > 0) {
-        bufferSizeBytes
-      } else {
-        LoadControlPolicy.autoTargetBufferBytes(largeHeapMB, availableMB)
-      }
+      val targetBufferBytes = LoadControlPolicy.autoTargetBufferBytes(largeHeapMB, availableMB)
 
       val resolvedTier = LoadControlPolicy.BufferTier.fromWire(bufferTier)
       val bufferDurations = LoadControlPolicy.bufferDurations(resolvedTier, availableMB)
@@ -818,8 +816,8 @@ class ExoPlayerCore(private val activity: Activity) :
       emitLog(
         "info",
         "init",
-        "Buffer: ${targetBufferBytes / 1024 / 1024}MB limit (${if (bufferSizeAuto) "auto" else "manual"}, " +
-          "heap=${largeHeapMB}MB, available=${availableMB}MB), " +
+        "Buffer: ${targetBufferBytes / 1024 / 1024}MB limit " +
+          "(heap=${largeHeapMB}MB, available=${availableMB}MB), " +
           "buffer=${bufferDurations.minBufferMs / 1000}-${bufferDurations.maxBufferMs / 1000}s " +
           "(${resolvedTier.name.lowercase()}), " +
           "tunneling=$tunnelingUserEnabled, dataSource=$dataSourceLabel"
@@ -2447,7 +2445,7 @@ class ExoPlayerCore(private val activity: Activity) :
    * is false the stream decodes regardless of the passthrough setting.
    */
   private fun routeCanBitstreamDts(mimeType: String): Boolean {
-    if (mimeType == MimeTypes.AUDIO_DTS_HD && supportsIecCarrier(activity)) return true
+    if (mimeType == MimeTypes.AUDIO_DTS_HD && supportsDtsHdIecCarrier(activity)) return true
     val audioAttributes = buildMovieAudioAttributes()
     return try {
       AudioCapabilities
@@ -2699,6 +2697,18 @@ class ExoPlayerCore(private val activity: Activity) :
 
   private fun updateCurrentTunnelingState(reason: String, shouldTunnel: Boolean): Boolean {
     if (shouldTunnel == currentTunneledPlayback) return false
+    // A switch to "off" that the selected audio decoder could never have
+    // honored anyway is transparent to media3: tunnelled playback needs a
+    // tunneling-capable audio codec (it owns the AV-sync clock), so a
+    // software decoder already ignored the flag. Writing the selector
+    // parameter regardless forces a renderer rebuild that can tear down a
+    // live codec mid-queueInputBuffer — observed as
+    // "queueInputBuffer ... Released state" right after tracks arrive from
+    // the ffmpeg demuxer. Record the state without the churn.
+    if (!shouldTunnel && !selectedAudioHasHwDecoder) {
+      currentTunneledPlayback = false
+      return false
+    }
     currentTunneledPlayback = shouldTunnel
     val speed = exoPlayer?.playbackParameters?.speed ?: 1f
     val audioDelayActive = (renderersFactory?.audioDelayUs?.get() ?: 0L) != 0L
@@ -2726,6 +2736,7 @@ class ExoPlayerCore(private val activity: Activity) :
     }
 
     val newDisabled = !hasHardwareAudioDecoder(mimeType)
+    selectedAudioHasHwDecoder = !newDisabled
     if (newDisabled != tunnelingDisabledForAudioCodec) {
       tunnelingDisabledForAudioCodec = newDisabled
       emitLog("info", "tunneling", "Audio codec ${format.codecs} ($mimeType): tunneling ${if (newDisabled) "DISABLED (no hw decoder)" else "enabled"}")
@@ -4111,6 +4122,7 @@ class ExoPlayerCore(private val activity: Activity) :
     extraDelayMs: Long,
     videoWidth: Int,
     videoHeight: Int,
+    matchResolution: Boolean,
     onComplete: (switched: Boolean) -> Unit
   ) {
     val mgr = frameRateManager
@@ -4118,11 +4130,17 @@ class ExoPlayerCore(private val activity: Activity) :
       onComplete(false)
       return
     }
-    mgr.setVideoFrameRate(fps, videoDurationMs, extraDelayMs, videoWidth, videoHeight, onComplete)
+    mgr.setVideoFrameRate(fps, videoDurationMs, extraDelayMs, videoWidth, videoHeight, matchResolution, onComplete)
   }
 
   override fun clearVideoFrameRate() {
-    frameRateManager?.clearVideoFrameRate()
+    // HDR content on an HDR display means the decoder's dataspace put the
+    // display into HDR signaling; defer the rate restore past the HDR exit
+    // (see FrameRateManager.clearVideoFrameRate).
+    val transfer = currentVideoFormat?.colorInfo?.colorTransfer
+    val hdrActive = (transfer == C.COLOR_TRANSFER_ST2084 || transfer == C.COLOR_TRANSFER_HLG) &&
+      DoviBridge.displaySupportsHdr(activity)
+    frameRateManager?.clearVideoFrameRate(hdrActive = hdrActive)
   }
 
   private fun computeFrameRate(timestamps: LongArray): Float {
@@ -4213,7 +4231,7 @@ class ExoPlayerCore(private val activity: Activity) :
       "audioMimeType" to audioFormat?.sampleMimeType,
       "audioSampleRate" to audioFormat?.sampleRate,
       "audioChannels" to audioFormat?.channelCount,
-      "audioBitrate" to audioFormat?.bitrate,
+      "audioBitrate" to audioFormat?.bitrate?.takeIf { it > 0 },
       "audioDecoderName" to audioDecoderInitName,
       "audioOutputEncoding" to audioTrackConfig?.encoding,
       "audioOutputChannels" to audioTrackConfig?.channelConfig?.let { Integer.bitCount(it) },

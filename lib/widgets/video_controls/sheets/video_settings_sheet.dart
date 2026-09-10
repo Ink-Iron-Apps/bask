@@ -33,6 +33,7 @@ import '../../../theme/mono_tokens.dart';
 import '../../../widgets/focusable_list_tile.dart';
 import '../../../widgets/overlay_sheet.dart';
 import '../../../services/video_equalizer.dart';
+import '../../../watch_together/providers/watch_together_provider.dart';
 import '../models/track_controls_state.dart';
 import '../widgets/sync_offset_control.dart';
 import '../widgets/sleep_timer_content.dart';
@@ -720,7 +721,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             stream: widget.player.streams.rate,
             initialData: widget.player.state.rate,
             builder: (context, snapshot) {
-              final currentRate = snapshot.data ?? 1.0;
+              final currentRate = _displayedRate(snapshot.data ?? 1.0);
               return _SettingsMenuItem(
                 icon: Symbols.speed_rounded,
                 title: t.videoSettings.playbackSpeed,
@@ -865,9 +866,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           _SettingsMenuItem(
             icon: Symbols.auto_fix_high_rounded,
             title: t.shaders.title,
-            valueText: _state.shaderService!.currentPreset.id == ShaderPreset.none.id
-                ? t.common.off
-                : _state.shaderService!.currentPreset.name,
+            valueText: _shaderPresetTitle(_state.shaderService!.currentPreset),
             isHighlighted: _state.shaderService!.currentPreset.isEnabled,
             onTap: () => _navigateTo(_SettingsView.shader),
           ),
@@ -989,12 +988,24 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     );
   }
 
+  /// The rate the user chose, as opposed to what the player is momentarily
+  /// running at: a Watch Together drift nudge is not a speed setting.
+  double _displayedRate(double playerRate) {
+    try {
+      final session = context.read<WatchTogetherProvider>();
+      if (session.syncOwnsRate) return session.roomRate ?? playerRate;
+    } catch (_) {
+      // No session provider above this sheet.
+    }
+    return playerRate;
+  }
+
   Widget _buildSpeedView() {
     return StreamBuilder<double>(
       stream: widget.player.streams.rate,
       initialData: widget.player.state.rate,
       builder: (context, snapshot) {
-        final currentRate = snapshot.data ?? 1.0;
+        final currentRate = _displayedRate(snapshot.data ?? 1.0);
         const speeds = <double>[
           0.5,
           0.75,
@@ -1029,7 +1040,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
               title: Text(label, style: TextStyle(color: isSelected ? primary : null)),
               trailing: isSelected ? AppIcon(Symbols.check_rounded, fill: 1, color: primary) : null,
               onTap: () async {
-                await widget.player.setRate(speed);
+                await (_state.onRateRequested ?? widget.player.setRate)(speed);
                 // Save at the configured persistence scope (global by default).
                 await ScopedPlayerPrefs.write(ScopedPlayerPrefs.playbackSpeed, _state.metadata, speed);
                 if (context.mounted) {
@@ -1044,7 +1055,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   }
 
   Widget _buildZoomView() {
-    const zoomPresets = [0.5, 0.75, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5, 1.75, 2.0];
+    const zoomPresets = [0.5, 0.75, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.75, 2.0];
     final primary = Theme.of(context).colorScheme.primary;
 
     return ListView(
@@ -1304,7 +1315,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             final preset = presets[index];
             final isSelected = preset.id == currentPreset.id;
             final isCustom = preset.type == ShaderPresetType.custom;
-            final presetName = preset.id == ShaderPreset.none.id ? t.common.off : preset.name;
+            final presetName = _shaderPresetTitle(preset);
 
             return FocusableListTile(
               title: Text(presetName, style: TextStyle(color: isSelected ? Colors.amber : null)),
@@ -1389,6 +1400,37 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     await shaderProvider.deleteCustomShader(preset);
   }
 
+  String _artcnnVariantLabel(ArtCNNVariant variant) => switch (variant) {
+    ArtCNNVariant.neutral => t.shaders.artcnnVariantNeutral,
+    ArtCNNVariant.denoise => t.shaders.artcnnVariantDenoise,
+    ArtCNNVariant.denoiseSharpen => t.shaders.artcnnVariantDenoiseSharpen,
+  };
+
+  String _anime4kQualityLabel(Anime4KQuality quality) =>
+      quality == Anime4KQuality.fast ? t.shaders.qualityFast : t.shaders.qualityHQ;
+
+  /// Localized tile title for [preset]. [ShaderPreset.name] is a stable non-localized identity string, so built-in
+  /// presets are re-composed here with translated variant/quality words; `ArtCNN`/`Anime4K` and the model/mode labels
+  /// are upstream shader identities and stay verbatim.
+  String _shaderPresetTitle(ShaderPreset preset) {
+    switch (preset.type) {
+      case ShaderPresetType.none:
+        return t.common.off;
+      case ShaderPresetType.artcnn:
+        final config = preset.artcnnConfig;
+        if (config == null) return preset.name;
+        if (config.variant == ArtCNNVariant.neutral) return 'ArtCNN ${config.model.label}';
+        return 'ArtCNN ${config.model.label} ${_artcnnVariantLabel(config.variant)}';
+      case ShaderPresetType.anime4k:
+        final config = preset.anime4kConfig;
+        if (config == null) return preset.name;
+        return 'Anime4K ${_anime4kQualityLabel(config.quality)} ${config.mode.label}';
+      case ShaderPresetType.nvscaler:
+      case ShaderPresetType.custom:
+        return preset.name;
+    }
+  }
+
   String? _getShaderSubtitle(ShaderPreset preset) {
     switch (preset.type) {
       case ShaderPresetType.none:
@@ -1397,19 +1439,13 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return t.shaders.nvscalerDescription;
       case ShaderPresetType.artcnn:
         if (preset.artcnnConfig != null) {
-          final variant = switch (preset.artcnnConfig!.variant) {
-            ArtCNNVariant.neutral => t.shaders.artcnnVariantNeutral,
-            ArtCNNVariant.denoise => t.shaders.artcnnVariantDenoise,
-            ArtCNNVariant.denoiseSharpen => t.shaders.artcnnVariantDenoiseSharpen,
-          };
+          final variant = _artcnnVariantLabel(preset.artcnnConfig!.variant);
           return '${preset.artcnnModelDisplayName} - $variant';
         }
         return null;
       case ShaderPresetType.anime4k:
         if (preset.anime4kConfig != null) {
-          final quality = preset.anime4kConfig!.quality == Anime4KQuality.fast
-              ? t.shaders.qualityFast
-              : t.shaders.qualityHQ;
+          final quality = _anime4kQualityLabel(preset.anime4kConfig!.quality);
           final mode = preset.modeDisplayName;
           return '$quality - ${t.shaders.mode} $mode';
         }

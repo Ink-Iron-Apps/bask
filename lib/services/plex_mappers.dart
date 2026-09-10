@@ -126,7 +126,8 @@ List<MediaStream> _mediaStreamsFromPlexPart(Object? raw, {Map<String, dynamic>? 
         languageCode: stream['languageCode']?.toString(),
         title: stream['title']?.toString(),
         displayTitle: stream['displayTitle']?.toString() ?? stream['extendedDisplayTitle']?.toString(),
-        selected: flexibleBool(stream['selected']) || flexibleBool(stream['default']),
+        selected: flexibleBool(stream['selected']),
+        isDefault: flexibleBool(stream['default']),
         channels: flexibleInt(stream['channels']),
         frameRate: flexibleDouble(stream['frameRate']),
         hdr: isHdr,
@@ -362,6 +363,11 @@ class PlexLibraryDto {
   final String title;
   @JsonKey(defaultValue: '')
   final String type;
+
+  /// `"clip"` on home-video ("Other Videos") sections. Only present in the
+  /// `/media/providers` listing; the legacy `/library/sections` fallback
+  /// omits it, degrading those sections to [MediaKind.movie].
+  final String? subtype;
   final String? agent;
   final String? scanner;
   final String? language;
@@ -383,6 +389,7 @@ class PlexLibraryDto {
     required this.key,
     required this.title,
     required this.type,
+    this.subtype,
     this.agent,
     this.scanner,
     this.language,
@@ -402,6 +409,7 @@ class PlexLibraryDto {
       key: key,
       title: title,
       type: type,
+      subtype: subtype,
       agent: agent,
       scanner: scanner,
       language: language,
@@ -642,10 +650,6 @@ class PlexMetadataDto {
   final List<String>? format;
   @JsonKey(name: 'Subformat', fromJson: _tagListFromJson, includeToJson: false)
   final List<String>? subformat;
-  final String? audioLanguage;
-  final String? subtitleLanguage;
-  @JsonKey(fromJson: flexibleInt)
-  final int? subtitleMode;
   @JsonKey(fromJson: flexibleInt)
   final int? playlistItemID;
   @JsonKey(fromJson: flexibleInt)
@@ -725,9 +729,6 @@ class PlexMetadataDto {
     this.mood,
     this.format,
     this.subformat,
-    this.audioLanguage,
-    this.subtitleLanguage,
-    this.subtitleMode,
     this.playlistItemID,
     this.playQueueItemID,
     this.librarySectionID,
@@ -852,9 +853,6 @@ class PlexMetadataDto {
     List<String>? mood,
     List<String>? format,
     List<String>? subformat,
-    String? audioLanguage,
-    String? subtitleLanguage,
-    int? subtitleMode,
     int? playlistItemID,
     int? playQueueItemID,
     int? librarySectionID,
@@ -926,9 +924,6 @@ class PlexMetadataDto {
       mood: mood ?? this.mood,
       format: format ?? this.format,
       subformat: subformat ?? this.subformat,
-      audioLanguage: audioLanguage ?? this.audioLanguage,
-      subtitleLanguage: subtitleLanguage ?? this.subtitleLanguage,
-      subtitleMode: subtitleMode ?? this.subtitleMode,
       playlistItemID: playlistItemID ?? this.playlistItemID,
       playQueueItemID: playQueueItemID ?? this.playQueueItemID,
       librarySectionID: librarySectionID ?? this.librarySectionID,
@@ -1133,8 +1128,6 @@ class PlexMappers {
       mediaVersions: dto.mediaVersions?.map(mediaVersion).toList(),
       libraryId: dto.librarySectionID?.toString(),
       libraryTitle: dto.librarySectionTitle,
-      audioLanguage: dto.audioLanguage,
-      subtitleLanguage: dto.subtitleLanguage,
       trailerKey: dto.primaryExtraKey,
       playlistItemId: dto.playlistItemID,
       playQueueItemId: dto.playQueueItemID,
@@ -1231,7 +1224,10 @@ class PlexMappers {
       id: dto.key,
       backend: MediaBackend.plex,
       title: dto.title,
-      kind: MediaKind.fromString(dto.type),
+      // Home-video sections come back as `type="movie" subtype="clip"`; map
+      // them to the clip kind MediaBrowser `homevideos` views already use so
+      // they share the folder-first grouping and wide grid cells (#2036).
+      kind: dto.type == 'movie' && dto.subtype == 'clip' ? MediaKind.clip : MediaKind.fromString(dto.type),
       language: dto.language,
       updatedAt: dto.updatedAt,
       createdAt: dto.createdAt,
@@ -1281,36 +1277,88 @@ class PlexMappers {
   }
 }
 
-/// Build a [MediaSourceInfo] from a Plex `/library/metadata/{id}` JSON
-/// envelope as stored by [PlexApiCache]. Parses audio/subtitle tracks from
-/// `Media[0].Part[0].Stream[]` so that offline playback can still apply
-/// language-based track selection.
-///
-/// Returns `null` when the JSON shape is missing the `Media`/`Part` arrays.
-/// Plex-only — the on-disk format mirrors what the Plex API returns and
-/// uses Plex `streamType` int codes (1=video, 2=audio, 3=subtitle).
-MediaSourceInfo? plexMediaSourceInfoFromCacheJson(Map<String, dynamic> metadata, {int mediaIndex = 0}) {
-  final media = flexibleList(metadata['Media']);
-  if (media == null || media.isEmpty) return null;
-  final selectedMedia = mediaIndex >= 0 && mediaIndex < media.length ? media[mediaIndex] : media.first;
-  final parts = flexibleList(selectedMedia['Part']);
-  if (parts == null || parts.isEmpty) return null;
+/// Authoritative version and playable-part selection shared by cache previews
+/// and playback. A stable id wins over a sibling-version signature and index.
+typedef PlexPlaybackSelection = ({List<Map> media, List<MediaVersion> versions, int mediaIndex, int partIndex});
+
+PlexPlaybackSelection? resolvePlexPlaybackSelection(
+  Map<String, dynamic> metadata, {
+  int mediaIndex = 0,
+  String? mediaSourceId,
+  String? preferredVersionSignature,
+  void Function(int requestedIndex, int fallbackIndex)? onVersionFallback,
+  bool preferPlayable = true,
+}) {
+  final media = [
+    for (final value in flexibleList(metadata['Media']) ?? const [])
+      if (value is Map) value,
+  ];
+  if (media.isEmpty) return null;
+  final versions = [for (final value in media) PlexMappers.mediaVersionFromJson(Map<String, dynamic>.from(value))];
+  final requestedId = mediaSourceId?.trim();
+  final byId = requestedId == null || requestedId.isEmpty ? -1 : versions.indexWhere((v) => v.id == requestedId);
+  if (byId >= 0) {
+    mediaIndex = byId;
+  } else if (preferredVersionSignature != null && preferredVersionSignature.isNotEmpty) {
+    mediaIndex = MediaVersion.findMatchingIndex(versions, {preferredVersionSignature}) ?? mediaIndex;
+  }
+  if (mediaIndex < 0 || mediaIndex >= versions.length) mediaIndex = 0;
+  if (preferPlayable && !versions[mediaIndex].isPlayable) {
+    final fallback = versions.indexWhere((v) => v.isPlayable);
+    if (fallback >= 0) {
+      onVersionFallback?.call(mediaIndex, fallback);
+      mediaIndex = fallback;
+    }
+  }
+  final playablePart = preferPlayable ? versions[mediaIndex].parts.indexWhere((part) => part.isPlayable) : 0;
+  return (media: media, versions: versions, mediaIndex: mediaIndex, partIndex: playablePart < 0 ? 0 : playablePart);
+}
+
+MediaSourceInfo? plexMediaSourceInfoForSelection(
+  Map<String, dynamic> metadata,
+  PlexPlaybackSelection selection, {
+  String videoUrl = '',
+}) {
+  final media = selection.media[selection.mediaIndex];
+  final parts = [
+    for (final value in flexibleList(media['Part']) ?? const [])
+      if (value is Map) value,
+  ];
+  if (parts.isEmpty) return null;
+  final part = parts[selection.partIndex];
   final streams = walkStreams(
-    flexibleList(parts.first['Stream']),
+    flexibleList(part['Stream']),
     const PlexFileInfoStreamReader(),
     onMalformed: (error, _, _) => appLogger.d('Skipping malformed stream in cached metadata', error: error),
   );
-
   return MediaSourceInfo(
-    videoUrl: '',
+    videoUrl: videoUrl,
     audioTracks: streams.audioTracks,
     subtitleTracks: streams.subtitleTracks,
-    chapters: const [],
-    displayCriteria: PlexMappers.displayCriteriaFromJson(
-      selectedMedia is Map<String, dynamic> ? selectedMedia : null,
-      streams.videoStream,
-    ),
+    chapters: plexChaptersFromCacheJson(metadata),
+    partId: flexibleInt(part['id']),
+    mediaSourceId: selection.versions[selection.mediaIndex].id,
+    mediaIndex: selection.mediaIndex,
+    partIndex: selection.partIndex,
+    displayCriteria: PlexMappers.displayCriteriaFromJson(Map<String, dynamic>.from(media), streams.videoStream),
+    videoAspectRatio: flexibleDouble(media['aspectRatio']),
   );
+}
+
+/// Read a selected source from cached item JSON, without playback negotiation.
+MediaSourceInfo? plexMediaSourceInfoFromCacheJson(
+  Map<String, dynamic> metadata, {
+  int mediaIndex = 0,
+  String? mediaSourceId,
+  String? preferredVersionSignature,
+}) {
+  final selection = resolvePlexPlaybackSelection(
+    metadata,
+    mediaIndex: mediaIndex,
+    mediaSourceId: mediaSourceId,
+    preferredVersionSignature: preferredVersionSignature,
+  );
+  return selection == null ? null : plexMediaSourceInfoForSelection(metadata, selection);
 }
 
 PlaybackExtras plexPlaybackExtrasFromCacheJson(
@@ -1326,6 +1374,57 @@ PlaybackExtras plexPlaybackExtrasFromCacheJson(
     creditsPatternStr: creditsPattern,
     forceChapterFallback: forceChapterFallback,
   );
+}
+
+/// Plex's per-item credits-detection state, read from a show/movie metadata
+/// JSON. `enableCreditsMarkerGeneration` is `0` when the admin explicitly
+/// disabled the setting; it is `-1` ("Library default") or absent otherwise,
+/// including on servers without the credits-detection feature. Episodes never
+/// carry the attribute — callers must read the grandparent show row.
+bool plexCreditsDetectionDisabled(Map<String, dynamic>? metadataJson) =>
+    flexibleInt(metadataJson?['enableCreditsMarkerGeneration']) == 0;
+
+/// Drops credits markers from [extras] when the owning show/movie explicitly
+/// disables Plex credits detection (`enableCreditsMarkerGeneration == 0`).
+///
+/// PMS already strips *detected* credits markers from its responses when the
+/// setting is disabled, so this mostly guards the chapter-title fallback in
+/// [PlaybackExtras.withChapterFallback], which would otherwise resurrect a
+/// credits skip action the server admin turned off (#2137). Stale cached rows
+/// that predate the setting change are suppressed by the same check.
+///
+/// Movies carry the attribute on [metadataJson] itself; episodes resolve the
+/// grandparent show row through [loadMetadataJson] — cache-first with a
+/// network miss path online (`PlexClient.getPlaybackExtras`), cache-only
+/// offline (`CachedPlaybackMetadataService`). The lookup runs only when a
+/// credits marker is actually present. An absent attribute (servers without
+/// the credits-detection feature), `-1` ("Library default"), and any loader
+/// failure all keep the markers untouched.
+Future<PlaybackExtras> plexApplyCreditsDetectionPreference(
+  PlaybackExtras extras,
+  Map<String, dynamic>? metadataJson, {
+  required Future<Map<String, dynamic>?> Function(String ratingKey) loadMetadataJson,
+}) async {
+  if (metadataJson == null || !extras.hasCreditsMarkers) return extras;
+
+  final ownPreference = flexibleInt(metadataJson['enableCreditsMarkerGeneration']);
+  bool disabled;
+  if (ownPreference != null) {
+    disabled = ownPreference == 0;
+  } else {
+    final grandparentRatingKey = metadataJson['grandparentRatingKey']?.toString();
+    if (grandparentRatingKey == null || grandparentRatingKey.isEmpty) return extras;
+    try {
+      disabled = plexCreditsDetectionDisabled(await loadMetadataJson(grandparentRatingKey));
+    } catch (e) {
+      appLogger.w('Failed to resolve credits-detection preference for show $grandparentRatingKey', error: e);
+      return extras;
+    }
+  }
+  if (!disabled) return extras;
+
+  appLogger.d('Suppressing credits markers: Plex credits detection disabled for this item');
+  return extras.withoutCreditsMarkers();
 }
 
 List<MediaChapter> plexChaptersFromCacheJson(Map<String, dynamic>? metadataJson) {

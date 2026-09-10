@@ -4,8 +4,10 @@ publish_to: "none"
 version: 2.23.1+47
 
 environment:
+  # Dart floor stays 3.12: freezed 3.x emits `final` constructor parameters,
+  # which language 3.13 removed. Raise together with a freezed 4 migration.
   sdk: ">=3.12.0 <4.0.0"
-  flutter: ">=3.44.0"
+  flutter: ">=3.47.0"
 
 dependencies:
   flutter:
@@ -38,6 +40,8 @@ dependencies:
       # Fork of edde746@75556a9 that also reads artwork already on the device.
       # Upstream fetches every poster over HTTP, so downloaded media — played
       # when there is no server to ask — showed a card with no image.
+      # Upstream has since moved to a27208e6 (SPM support, Apple warning fixes);
+      # neither reaches Android, so this ref stays until the fork is rebased.
       url: https://github.com/LightWraith8268/media_controls
       ref: cebd4a62c9cd9423365ab7c274f0ec51e4aaf486
   rate_limiter: ^1.0.0
@@ -76,8 +80,6 @@ dependencies:
       url: https://github.com/edde746/auto_updater
       path: packages/auto_updater
       ref: 9e150f7
-  cupertino_http: ^3.0.2
-  cronet_http: ^1.6.0
   win_http: ^0.2.2
   collection: ^1.18.0
   freezed_annotation: ^3.1.0
@@ -86,6 +88,7 @@ dependencies:
   unorm_dart: ^0.3.2
 
 dev_dependencies:
+  archive: ^4.0.9
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
@@ -96,7 +99,6 @@ dev_dependencies:
   build_runner: ^2.13.0
   json_serializable: ^6.7.1
   slang_build_runner: ^4.14.0
-  sentry_dart_plugin: ^3.3.0
   # Used by explicit check-unused CI steps; analyzer plugin disabled.
   dart_code_linter: ^4.1.8
   drift_dev: ^2.28.3
@@ -133,13 +135,6 @@ dependency_overrides:
     path: packages/shared_preferences_windows
   shared_preferences_linux:
     path: packages/shared_preferences_linux
-sentry:
-  org: plezy
-  project: plezy
-  url: https://bugs.plezy.app
-  upload_sources: true
-  commits: false
-
 flutter:
   uses-material-design: true
   assets:
