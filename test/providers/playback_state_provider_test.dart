@@ -319,6 +319,37 @@ void main() {
       await p.setPlaybackFromPlayQueue(_queue(playQueueID: 1, totalCount: 1, items: [_item('a', 1)]), null);
     });
 
+    test('a local movie queue resolves next and previous', () async {
+      // Anchor: a downloaded playlist of films is published through
+      // setPlaybackFromLocalQueue, and the offline branch of
+      // _loadAdjacentEpisodesOffline resolves Next/Previous through these two
+      // calls. They must not assume episodes — a movie queue is the whole
+      // point of the offline playlist feature, and answering `unavailable`
+      // here is what hid the Next control.
+      final p = PlaybackStateProvider();
+      addTearDown(p.dispose);
+
+      final first = testMediaItem(id: 'movie-1', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
+      final second = testMediaItem(id: 'movie-2', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
+
+      p.setPlaybackFromLocalQueue(
+        LocalPlayQueue(id: 'offline:playlist-1', items: [first, second], currentIndex: 0),
+        contextKey: 'playlist-1',
+      );
+
+      final next = await p.getNextEpisode(first.id);
+      expect(next.status, QueueNavigationStatus.found);
+      expect(next.item?.id, 'movie-2');
+
+      final previous = await p.getPreviousEpisode(second.id);
+      expect(previous.status, QueueNavigationStatus.found);
+      expect(previous.item?.id, 'movie-1');
+
+      // The far edges are boundaries, not failures.
+      expect((await p.getPreviousEpisode(first.id)).item, isNull);
+      expect((await p.getNextEpisode(second.id)).item, isNull);
+    });
+
     test('playQueueItemIdFor returns synthetic ids for Jellyfin local queue items', () {
       // Anchor: VideoPlayerScreen.initState and `_ensurePlayQueue` both gate
       // on `isItemInActiveQueue(meta)` (which delegates to `playQueueItemIdFor`)

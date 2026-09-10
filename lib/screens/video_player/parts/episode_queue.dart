@@ -84,7 +84,7 @@ extension _VideoPlayerEpisodeQueueMethods on VideoPlayerScreenState {
     final targetMetadata = metadata ?? _currentMetadata;
     try {
       final adjacentEpisodes = _offlineLibraryMode
-          ? _loadAdjacentEpisodesOffline(targetMetadata)
+          ? await _loadAdjacentEpisodesOffline(targetMetadata)
           : await _episode.navigation.loadAdjacentEpisodes(
               context: context,
               metadata: targetMetadata,
@@ -100,8 +100,31 @@ extension _VideoPlayerEpisodeQueueMethods on VideoPlayerScreenState {
     }
   }
 
-  /// Load next/previous episodes from locally downloaded content.
-  AdjacentEpisodes _loadAdjacentEpisodesOffline(MediaItem metadata) {
+  /// Load next/previous items from locally downloaded content.
+  ///
+  /// An active queue wins, whatever the item type: a downloaded playlist is
+  /// published to [PlaybackStateProvider] by OfflinePlaylistQueue, and it is
+  /// the only thing that knows the list's order — including a shuffle, which
+  /// cannot be re-derived from the downloads. Without this the player fell
+  /// through to the show lookup below, which answers `unavailable` for a movie,
+  /// so a downloaded playlist of films offered no Next at all.
+  Future<AdjacentEpisodes> _loadAdjacentEpisodesOffline(MediaItem metadata) async {
+    final playbackState = context.read<PlaybackStateProvider>();
+    if (playbackState.isItemInActiveQueue(metadata)) {
+      final next = await playbackState.getNextEpisode(metadata.id);
+      final previous = await playbackState.getPreviousEpisode(metadata.id);
+      // The queue is fully loaded offline — there is no window to fetch — so
+      // `unavailable` here means the boundary, not a failed lookup.
+      return AdjacentEpisodes(
+        next: next.item,
+        previous: previous.item,
+        nextStatus: next.status == QueueNavigationStatus.unavailable ? QueueNavigationStatus.boundary : next.status,
+        previousStatus: previous.status == QueueNavigationStatus.unavailable
+            ? QueueNavigationStatus.boundary
+            : previous.status,
+      );
+    }
+
     if (!metadata.isEpisode) return const AdjacentEpisodes.unavailable();
 
     final showKey = metadata.grandparentId;
