@@ -6,6 +6,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:plezy/connection/connection.dart';
+
+import '../../test_helpers/prefs.dart';
 import 'package:plezy/database/app_database.dart';
 import 'package:plezy/exceptions/media_server_exceptions.dart';
 import 'package:plezy/media/ids.dart';
@@ -192,6 +194,13 @@ void main() {
   late StreamSubscription<DeletionEvent> deletionSubscription;
 
   setUp(() {
+    // This fork folds user-pinned endpoints into a Plex server before binding
+    // it, so MultiServerManager.refreshTokensForProfile reads StorageService —
+    // and so shared preferences — even though nothing here is a widget test.
+    resetSharedPreferencesForTest();
+    // The test binding installs a mock HttpClient that refuses detachSocket,
+    // which breaks the real loopback WebSockets these tests drive.
+    HttpOverrides.global = null;
     db = AppDatabase.forTesting(NativeDatabase.memory());
     PlexApiCache.initialize(db);
     manager = MultiServerManager(connectivityChanges: () => const Stream.empty());

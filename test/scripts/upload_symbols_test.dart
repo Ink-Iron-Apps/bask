@@ -53,11 +53,16 @@ void main() {
   late List<List<String>> uploadedMaps;
   late int Function(List<String>) failure;
 
+  // Fixture paths are written with '/' separators, but the script discovers
+  // files through the platform's own directory listing — on Windows that comes
+  // back with backslashes, and a raw path key would never match.
+  String featureKey(String filePath) => path.canonicalize(filePath);
+
   File put(String relative, List<int> bytes, {String info = 'debug, symtab, unwind'}) {
     final file = File(path.join(repository.path, relative));
     file.parent.createSync(recursive: true);
     file.writeAsBytesSync(bytes);
-    features[file.path] = info;
+    features[featureKey(file.path)] = info;
     return file;
   }
 
@@ -75,7 +80,7 @@ void main() {
         jsonEncode({
           'type': 'elf',
           'is_usable': !packaged,
-          'features': features[file.path] ?? 'none',
+          'features': features[featureKey(file.path)] ?? 'none',
           'variants': [
             {'debug_id': id, 'code_id': null, 'arch': machine == 62 ? 'x86_64' : 'arm64'},
           ],

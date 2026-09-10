@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plezy/database/app_database.dart';
 import 'package:plezy/database/download_operations.dart';
@@ -100,13 +101,16 @@ void main() {
 
   group('file copies', () {
     test('a deleted file yields no source', () async {
-      final row = await completedRow('${tmpRoot.path}/gone.mkv');
+      final row = await completedRow(path.join(tmpRoot.path, 'gone.mkv'));
 
       expect(await resolveDownloadedVideoSource(row, requestedMediaIndex: 0), isNull);
     });
 
     test('a present file resolves to its absolute path', () async {
-      final video = File('${tmpRoot.path}/movie-1.mkv');
+      // path.join, not string interpolation: the resolver normalises
+      // separators, so a '/' built path never equals its own resolution on
+      // Windows.
+      final video = File(path.join(tmpRoot.path, 'movie-1.mkv'));
       await video.writeAsBytes(const <int>[0]);
       final row = await completedRow(video.path);
 

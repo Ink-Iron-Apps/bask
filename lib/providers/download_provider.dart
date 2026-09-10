@@ -2018,7 +2018,9 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       if (episodeCount < 0) throw ArgumentError('Episode count must be nonnegative');
     }
     if (downloadFilter != null) {
-      if (!isList) throw UnsupportedError('Episode rules always select unwatched episodes');
+      // Every rule kind reads this filter, not just lists: SyncRuleExecutor
+      // derives `syncAll` from it for show and season rules too, so an episode
+      // rule can mirror a whole show rather than only what is unwatched.
       if (downloadFilter != SyncRuleFilter.all && downloadFilter != SyncRuleFilter.unwatched) {
         throw ArgumentError('Invalid sync rule filter');
       }
