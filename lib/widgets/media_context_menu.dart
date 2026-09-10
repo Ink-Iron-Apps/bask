@@ -23,6 +23,7 @@ import '../services/catalog/library_watchlist_candidates.dart';
 import '../utils/content_utils.dart';
 import '../utils/delete_impact.dart';
 import '../utils/download_utils.dart';
+import '../utils/focus_utils.dart';
 import '../utils/global_key_utils.dart';
 import '../providers/download_provider.dart';
 import '../providers/multi_server_provider.dart';
@@ -959,12 +960,8 @@ class MediaContextMenuState extends State<MediaContextMenu> {
 
       // Restore focus to the previously focused item after the menu closes,
       // but only if no navigation occurred and the focus node is still valid
-      if (!didNavigate && previousFocus != null && previousFocus.canRequestFocus) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (previousFocus.canRequestFocus) {
-            previousFocus.requestFocus();
-          }
-        });
+      if (!didNavigate && previousFocus != null) {
+        FocusUtils.restoreFocusAfterBuild(this, previousFocus);
       }
     }
   }
@@ -1116,24 +1113,31 @@ class MediaContextMenuState extends State<MediaContextMenu> {
   }
 
   Future<void> _showFileInfo(BuildContext context) async {
-    var loadingShown = false;
+    // The spinner is owned by a ScopedLoadingDialogController so the
+    // `finally` can dismiss it even after the launching card unmounts —
+    // the controller pops via the dialog's own context and only while the
+    // dialog route is still current. A bare captured navigator + `canPop`
+    // is insufficient: it can pop an intervening route instead.
+    final loadingDialog = ScopedLoadingDialogController();
 
     try {
       final client = _getMediaClientForItem();
       if (context.mounted) {
-        showLoadingDialog(context);
-        loadingShown = true;
+        loadingDialog.show(
+          context,
+          // Same back-trapping spinner as [showLoadingDialog]: nothing the
+          // user can do mid-fetch is better than backing into the screen
+          // underneath while the pop is pending.
+          builder: (_) => const PopScope(canPop: false, child: Center(child: CircularProgressIndicator())),
+        );
       }
 
       // Fetch file info
       final item = _mediaItem!;
       final fileInfo = await client.getFileInfo(item);
 
-      // Close loading indicator
-      if (loadingShown && context.mounted) {
-        Navigator.pop(context);
-        loadingShown = false;
-      }
+      // Close the loading indicator before presenting the sheet.
+      await loadingDialog.dismiss();
 
       if (fileInfo != null && context.mounted && mounted) {
         // Show file info bottom sheet, presented from the menu's own context
@@ -1147,14 +1151,11 @@ class MediaContextMenuState extends State<MediaContextMenu> {
         showErrorSnackBar(context, t.messages.fileInfoNotAvailable);
       }
     } catch (e) {
-      // Close loading indicator if it's still open
-      if (loadingShown && context.mounted && Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
-
       if (context.mounted) {
         showErrorSnackBar(context, t.messages.errorLoadingFileInfo(error: e.toString()));
       }
+    } finally {
+      await loadingDialog.dismiss();
     }
   }
 
@@ -1624,30 +1625,9 @@ class MediaContextMenuState extends State<MediaContextMenu> {
   /// Handle download action
   Future<void> _handleDownload(BuildContext context) async {
     final downloadProvider = Provider.of<DownloadProvider>(context, listen: false);
-    final item = _mediaItem!;
-
-    try {
-      // Backend-agnostic resolve so Jellyfin items can be downloaded too.
-      final client = context.getMediaClientWithFallback(serverIdOrNull(_itemServerId));
-      final result = await showDownloadOptionsAndQueue(
-        context,
-        metadata: item,
-        client: client,
-        downloadProvider: downloadProvider,
-      );
-      if (result == null || !context.mounted) return;
-
-      showSuccessSnackBar(context, result.toSnackBarMessage());
-    } on CellularDownloadBlockedException {
-      if (context.mounted) {
-        showErrorSnackBar(context, t.settings.cellularDownloadBlocked);
-      }
-    } catch (e) {
-      appLogger.e('Failed to queue download', error: e);
-      if (context.mounted) {
-        showErrorSnackBar(context, t.messages.errorLoading(error: e.toString()));
-      }
-    }
+    // Backend-agnostic resolve so Jellyfin items can be downloaded too.
+    final client = _getMediaClientForItem();
+    await queueDownloadWithFeedback(context, metadata: _mediaItem!, client: client, downloadProvider: downloadProvider);
   }
 
   /// Handle delete download action

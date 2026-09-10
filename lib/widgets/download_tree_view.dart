@@ -1014,7 +1014,7 @@ List<DownloadTreeNode> buildDownloadTree({
       final seasonProgress = episodeNodes.isEmpty
           ? 0.0
           : episodeNodes.map((e) => e.progress).reduce((a, b) => a + b) / episodeNodes.length;
-      final seasonStatus = _determineAggregateStatus(episodeNodes.map((e) => e.status).toList());
+      final seasonStatus = determineDownloadAggregateStatus(episodeNodes.map((e) => e.status).toList());
 
       seasons.add(
         DownloadTreeNode(
@@ -1039,7 +1039,7 @@ List<DownloadTreeNode> buildDownloadTree({
     final showProgress = seasons.isEmpty
         ? 0.0
         : seasons.map((s) => s.progress).reduce((a, b) => a + b) / seasons.length;
-    final showStatus = _determineAggregateStatus(seasons.map((s) => s.status).toList());
+    final showStatus = determineDownloadAggregateStatus(seasons.map((s) => s.status).toList());
 
     shows.add(
       DownloadTreeNode(
@@ -1092,7 +1092,7 @@ List<DownloadTreeNode> buildDownloadTree({
     });
 
     final albumProgress = trackNodes.map((e) => e.progress).reduce((a, b) => a + b) / trackNodes.length;
-    final albumStatus = _determineAggregateStatus(trackNodes.map((e) => e.status).toList());
+    final albumStatus = determineDownloadAggregateStatus(trackNodes.map((e) => e.status).toList());
 
     albums.add(
       DownloadTreeNode(
@@ -1138,7 +1138,7 @@ List<DownloadTreeNode> buildDownloadTree({
         title: playlist.title,
         type: DownloadNodeType.playlist,
         progress: children.map((c) => c.progress).reduce((a, b) => a + b) / children.length,
-        status: _determineAggregateStatus(children.map((c) => c.status).toList()),
+        status: determineDownloadAggregateStatus(children.map((c) => c.status).toList()),
         children: children,
       ),
     );
@@ -1157,7 +1157,15 @@ List<DownloadTreeNode> buildDownloadTree({
   return [...ordered.where((node) => node.isActive), ...ordered.where((node) => !node.isActive)];
 }
 
-DownloadStatus _determineAggregateStatus(List<DownloadStatus> statuses) {
+/// Reduce child statuses to a container status, covering every
+/// [DownloadStatus] value explicitly.
+///
+/// Active states take precedence (downloading > queued > paused > failed);
+/// among purely terminal children, all-cancelled stays cancelled, all-completed
+/// stays completed, and any other mix — completed next to cancelled, or a
+/// child that is itself partial — is partial.
+@visibleForTesting
+DownloadStatus determineDownloadAggregateStatus(List<DownloadStatus> statuses) {
   if (statuses.isEmpty) return DownloadStatus.queued;
 
   if (statuses.any((s) => s == DownloadStatus.downloading)) {
@@ -1172,7 +1180,15 @@ DownloadStatus _determineAggregateStatus(List<DownloadStatus> statuses) {
   if (statuses.any((s) => s == DownloadStatus.failed)) {
     return DownloadStatus.failed;
   }
-  return DownloadStatus.completed;
+
+  // Only terminal outcomes remain: completed, cancelled, partial.
+  if (statuses.every((s) => s == DownloadStatus.cancelled)) {
+    return DownloadStatus.cancelled;
+  }
+  if (statuses.every((s) => s == DownloadStatus.completed)) {
+    return DownloadStatus.completed;
+  }
+  return DownloadStatus.partial;
 }
 
 int _compareByStatus(DownloadStatus a, DownloadStatus b) {

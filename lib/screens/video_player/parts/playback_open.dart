@@ -7,10 +7,14 @@ part of '../../video_player_screen.dart';
 class _FrameRateStartupPlan {
   _FrameRateStartupPlan({required this.fps, this.width = 0, this.height = 0});
 
+  /// The fps to rate-match; null when refresh-rate matching is off or the
+  /// rate is unknown (a resolution-only switch passes 0 natively, which
+  /// keeps the current refresh rate).
   final double? fps;
 
-  /// Native video dimensions, so a display-mode fallback can avoid downscaling
-  /// the video below its resolution just to match cadence (0 = unknown).
+  /// Native video dimensions: the resolution-matching target when that
+  /// setting is on, and otherwise the floor a display-mode fallback must not
+  /// downscale below just to match cadence (0 = unknown).
   final int width;
   final int height;
   bool attemptedMpvPreLoad = false;
@@ -116,7 +120,7 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
       metadata: metadata,
       mediaInfo: result.mediaInfo,
       sidecars: result.subtitleSidecars,
-      profileSettings: context.read<UserProfileProvider>().profileSettings,
+      profileSettings: context.read<AccountPreferencesController>().activePreferences,
       preferredAudioTrack: preferredAudioTrack,
       preferredSubtitleTrack: preferredSubtitleTrack,
       preferredSecondarySubtitleTrack: preferredSecondarySubtitleTrack,
@@ -129,22 +133,35 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
   /// before the decoder emits stream properties. The native side resolves
   /// only after any resulting display-mode switch has settled, plus the
   /// user-configured extra delay on Apple TV.
+  ///
+  /// On Android mpv the same server metadata announces the stream's transfer
+  /// (`content-color-transfer`) so an HDR session can get a BT.2020 PQ GL
+  /// surface if it ever renders through GL (software fallback, hardware
+  /// decoding off). Transcoded streams stay unannounced: the server may
+  /// tone-map, so the default SDR surface is the safe target.
   Future<void> _primeDisplayCriteria({
     required Player player,
     required SettingsService settingsService,
     required MediaDisplayCriteria? displayCriteria,
     required bool isTranscoding,
-  }) {
+  }) async {
+    // needsDecoderRefreshAfterDisplaySwitch is how this file distinguishes
+    // the two Android backends (true = the mpv core).
+    if (Platform.isAndroid && player.needsDecoderRefreshAfterDisplaySwitch) {
+      final transfer = isTranscoding ? null : displayCriteria?.transfer;
+      await player.setProperty('content-color-transfer', transfer ?? 'unknown');
+    }
     return player.setDisplayCriteria(
       !isTranscoding && displayCriteria?.canPrimeNativeDisplayCriteria == true ? displayCriteria : null,
       extraDelayMs: PlatformDetector.isAppleTV() ? settingsService.read(SettingsService.displaySwitchDelay) * 1000 : 0,
     );
   }
 
-  /// Ask the platform to renegotiate the display refresh rate for [fps],
-  /// arming the MediaSession pause-suppression window first. The native call
-  /// returns only after the real display-change event (+ settle + the
-  /// user-configured delay). Returns whether a switch was initiated.
+  /// Ask the platform to renegotiate the display mode for [fps] and/or the
+  /// video resolution, arming the MediaSession pause-suppression window
+  /// first. The native call returns only after the real display-change event
+  /// (+ settle + the user-configured delay). Returns whether a switch was
+  /// initiated.
   Future<bool> _switchDisplayFrameRateForOpen({
     required Player player,
     required SettingsService settingsService,
@@ -161,15 +178,25 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
       extraDelayMs: delaySec * 1000,
       videoWidth: videoWidth,
       videoHeight: videoHeight,
+      matchResolution: settingsService.read(SettingsService.matchContentResolution),
     );
   }
 
-  /// Whether the Android pre-open frame-rate negotiation applies: the user
+  /// Whether the Android pre-open display-mode negotiation applies: the user
   /// opted into per-content refresh-rate matching and metadata already told
-  /// us the target fps. Shared by the start and reload flows so the
-  /// eligibility rule cannot drift between them.
-  bool _shouldAutoSwitchFrameRateForOpen(SettingsService settingsService, double? fps) {
-    return Platform.isAndroid && settingsService.read(SettingsService.matchContentFrameRate) && fps != null && fps > 0;
+  /// us the target fps, and/or opted into resolution matching and metadata
+  /// carries the video dimensions. Shared by the start and reload flows so
+  /// the eligibility rule cannot drift between them.
+  bool _shouldAutoSwitchDisplayModeForOpen(
+    SettingsService settingsService, {
+    double? fps,
+    int width = 0,
+    int height = 0,
+  }) {
+    if (!Platform.isAndroid) return false;
+    final rateEligible = settingsService.read(SettingsService.matchContentFrameRate) && fps != null && fps > 0;
+    final resolutionEligible = settingsService.read(SettingsService.matchContentResolution) && width > 0 && height > 0;
+    return rateEligible || resolutionEligible;
   }
 
   /// Resolve where a fresh open should start: explicit request → locally
@@ -210,8 +237,16 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
     int preKnownWidth = 0,
     int preKnownHeight = 0,
   }) async {
-    final plan = _FrameRateStartupPlan(fps: preKnownFps, width: preKnownWidth, height: preKnownHeight);
-    final willAutoSwitch = _shouldAutoSwitchFrameRateForOpen(settingsService, preKnownFps);
+    // Rate-match only when the user opted in; the plan's fps drives the
+    // switch calls, so a resolution-only open passes 0 to the native side.
+    final rateMatchFps = settingsService.read(SettingsService.matchContentFrameRate) ? preKnownFps : null;
+    final plan = _FrameRateStartupPlan(fps: rateMatchFps, width: preKnownWidth, height: preKnownHeight);
+    final willAutoSwitch = _shouldAutoSwitchDisplayModeForOpen(
+      settingsService,
+      fps: preKnownFps,
+      width: preKnownWidth,
+      height: preKnownHeight,
+    );
     // willAutoSwitch is Android-only, so the strategy fork below is between
     // the two Android backends: mpv needs its decoder refreshed after a
     // display switch (pre-load path), ExoPlayer switches pre-open instead.
@@ -241,11 +276,11 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
     if (needsMpvPreLoad) {
       final durationMs = _currentMetadata.durationMs ?? currentPlayer.state.duration.inMilliseconds;
       try {
-        appLogger.d('Frame rate matching: pre-load MPV switch to ${preKnownFps}fps (duration: ${durationMs}ms)');
+        appLogger.d('Display matching: pre-load MPV switch to ${plan.fps}fps (duration: ${durationMs}ms)');
         plan.didPreLoadSwitch = await _switchDisplayFrameRateForOpen(
           player: currentPlayer,
           settingsService: settingsService,
-          fps: preKnownFps!,
+          fps: plan.fps ?? 0,
           durationMs: durationMs,
           videoWidth: plan.width,
           videoHeight: plan.height,
@@ -274,11 +309,11 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
       try {
         await ensureAudioFocus();
         if (!mounted || player != currentPlayer) return null;
-        appLogger.d('Frame rate matching: pre-open ExoPlayer switch to ${preKnownFps}fps (duration: ${durationMs}ms)');
+        appLogger.d('Display matching: pre-open ExoPlayer switch to ${plan.fps}fps (duration: ${durationMs}ms)');
         final didSwitch = await _switchDisplayFrameRateForOpen(
           player: currentPlayer,
           settingsService: settingsService,
-          fps: preKnownFps!,
+          fps: plan.fps ?? 0,
           durationMs: durationMs,
           videoWidth: plan.width,
           videoHeight: plan.height,
@@ -327,7 +362,7 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
         didSwitch = await _switchDisplayFrameRateForOpen(
           player: currentPlayer,
           settingsService: settingsService,
-          fps: plan.fps!,
+          fps: plan.fps ?? 0,
           durationMs: durationMs,
           videoWidth: plan.width,
           videoHeight: plan.height,
@@ -516,6 +551,7 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
       showMessage: (message, {duration}) {
         if (mounted) showAppSnackBar(context, message, duration: duration);
       },
+      playbackRateOwnedExternally: _watchTogetherOwnsPlaybackRate,
     );
   }
 
@@ -631,7 +667,7 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
       // Transcode (HLS) playback only uses the mpv stream layer for the
       // playlist file; segment fetches happen inside ffmpeg's hls demuxer.
       final maxBytes = Platform.isAndroid
-          ? androidStreamRingCapBytes(await PlayerAndroid.getHeapSize())
+          ? androidStreamRingCapBytes(await PlayerNative.getHeapSize())
           : maxStreamRingBytes;
       ringBytes = networkStreamRingBytes(
         container: selectedVersion?.container,
@@ -690,6 +726,9 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
     final media = Media(videoUrl, start: timing.mediaStart, headers: headers);
     final sidecarOpenGuard = MpvSidecarOpenGuard.armIfNeeded(player: player, subtitles: externalSubtitlesAtOpen);
     Future<void> openMedia({required bool shouldPlay, List<SubtitleTrack>? externalSubtitles}) {
+      if (!_launchCurrent || (shouldContinue != null && !shouldContinue())) {
+        throw PlaybackException(t.messages.playbackFailed);
+      }
       onOpening?.call();
       return player.open(
         media,
@@ -871,7 +910,7 @@ extension _VideoPlayerOpenMethods on VideoPlayerScreenState {
     // Open video through Player
     if (result.videoUrl != null) {
       // Reset first frame flag and frame rate retry counter for new video
-      if (clearFirstFrameForOpen) _hasFirstFrame.value = false;
+      if (clearFirstFrameForOpen) _firstFrame.resetUiForOpen();
       _frameRate.resetForNewItem();
       if (frameRatePlan.countsAsApplied) {
         _frameRate.applied = true;

@@ -31,6 +31,8 @@ import 'package:plezy/widgets/video_controls/widgets/skip_marker_button.dart';
 import 'package:plezy/widgets/video_controls/widgets/sync_offset_control.dart';
 import 'package:plezy/widgets/video_controls/widgets/timeline_slider.dart';
 import 'package:plezy/widgets/video_controls/video_control_button.dart';
+import 'package:plezy/widgets/app_bar_back_button.dart';
+import 'package:plezy/widgets/system_clock.dart';
 import 'package:plezy/widgets/video_controls/widgets/video_timeline_bar.dart';
 
 import '../test_helpers/watch_together_fakes.dart';
@@ -924,6 +926,59 @@ void main() {
     });
   });
 
+  group('shouldDismissSkipMarkerOnBack', () {
+    bool call({
+      PlayerNavigationKey navigationKey = PlayerNavigationKey.back,
+      bool controlsVisible = false,
+      bool skipMarkerButtonVisible = true,
+      bool canControl = true,
+      bool isMobile = false,
+      bool playbackPromptOpen = false,
+    }) {
+      return shouldDismissSkipMarkerOnBack(
+        navigationKey: navigationKey,
+        controlsVisible: controlsVisible,
+        skipMarkerButtonVisible: skipMarkerButtonVisible,
+        canControl: canControl,
+        isMobile: isMobile,
+        playbackPromptOpen: playbackPromptOpen,
+      );
+    }
+
+    test('declines a skip prompt while the button is the sole affordance', () {
+      expect(call(), isTrue);
+    });
+
+    test('claims physical Escape too, which has no fullscreen role here', () {
+      expect(call(navigationKey: PlayerNavigationKey.physicalEscape), isTrue);
+    });
+
+    test('leaves Back to the screen when no skip button is up', () {
+      expect(call(skipMarkerButtonVisible: false), isFalse);
+    });
+
+    test('keeps Back on the chrome while the controls are visible', () {
+      expect(call(controlsVisible: true), isFalse);
+    });
+
+    test('leaves a phone Back unconditional, as #1938 requires', () {
+      expect(call(isMobile: true), isFalse);
+    });
+
+    test('does not eat the exit press for a viewer who cannot skip', () {
+      expect(call(canControl: false), isFalse);
+    });
+
+    test('leaves Back to a screen-level prompt that is waiting for it', () {
+      expect(call(playbackPromptOpen: true), isFalse);
+    });
+
+    test('ignores keys the screen owns outright', () {
+      expect(call(navigationKey: PlayerNavigationKey.home), isFalse);
+      expect(call(navigationKey: PlayerNavigationKey.none), isFalse);
+    });
+  });
+
   group('shouldPhysicalEscapeExitFullscreen', () {
     test('uses fullscreen-first behavior for normal Windows and Linux navigation', () {
       expect(
@@ -1195,6 +1250,77 @@ void main() {
       expect(startAutoHide, 1);
       expect(cancelAutoHide, 0);
       expect(player.commandLog.where((entry) => entry == 'play' || entry == 'pause'), isEmpty);
+    });
+  });
+
+  group('mobile header', () {
+    Future<void> pumpMobileControls(
+      WidgetTester tester, {
+      required Size physicalSize,
+      FakeViewPadding padding = FakeViewPadding.zero,
+    }) async {
+      LocaleSettings.setLocaleSync(AppLocale.en);
+      await initializeDateFormatting('en');
+      // Phone-sized viewport: 390x844 logical at 3x is ~4.9in diagonal.
+      tester.view.physicalSize = physicalSize;
+      tester.view.devicePixelRatio = 3;
+      tester.view.padding = padding;
+      addTearDown(tester.view.reset);
+      resetSharedPreferencesForTest();
+      SettingsService.resetForTesting();
+      await SettingsService.getInstance();
+      final player = FakeSyncPlayer();
+      addTearDown(player.dispose);
+      final watchTogether = WatchTogetherProvider();
+      addTearDown(watchTogether.dispose);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<WatchTogetherProvider>.value(
+          value: watchTogether,
+          child: MaterialApp(
+            theme: ThemeData(platform: TargetPlatform.android, extensions: const [testMonoTokens]),
+            home: Scaffold(
+              body: MobileVideoControls(
+                player: player,
+                metadata: testMediaItem(id: 'mobile'),
+                chapters: const [],
+                chaptersLoaded: true,
+                seekTimeSmall: 10,
+                trackChapterControls: const SizedBox.shrink(),
+                onSeek: (_) {},
+                onSeekEnd: (_) {},
+                onPlayPause: () {},
+                onStartAutoHide: () {},
+                onCancelAutoHide: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    testWidgets('portrait phone hides the clock', (tester) async {
+      await pumpMobileControls(tester, physicalSize: const Size(1170, 2532));
+      expect(find.byType(SystemClock), findsNothing, reason: 'the portrait header has no room for the clock');
+    });
+
+    testWidgets('landscape phone keeps the clock', (tester) async {
+      await pumpMobileControls(tester, physicalSize: const Size(2532, 1170));
+      expect(find.byType(SystemClock), findsOneWidget);
+    });
+
+    testWidgets('landscape phone keeps the header clear of the horizontal system insets', (tester) async {
+      // Landscape iPhone: the notch is on one side and the rounded corners on
+      // both; the video surface underneath stays full-bleed, the controls do
+      // not. View padding is in physical pixels (44 logical at 3x).
+      await pumpMobileControls(
+        tester,
+        physicalSize: const Size(2532, 1170),
+        padding: const FakeViewPadding(left: 44 * 3, right: 44 * 3),
+      );
+      final backButton = tester.getRect(find.byType(AppBarBackButton));
+      expect(backButton.left, greaterThanOrEqualTo(44));
     });
   });
 

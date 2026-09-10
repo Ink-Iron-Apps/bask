@@ -205,9 +205,15 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
     await FullscreenStateManager().toggleFullscreen();
   }
 
-  /// Initialize always-on-top state from window manager (desktop only)
+  /// Initialize always-on-top state (desktop only). The toggle is remembered
+  /// across player sessions via [SettingsService.playerAlwaysOnTop] (#931) —
+  /// including episode transitions, which rebuild these controls — while the
+  /// window flag itself is only held while a player is open (dispose drops
+  /// the flag without touching the pref).
   Future<void> _initAlwaysOnTopState() async {
-    final isOnTop = await windowManager.isAlwaysOnTop();
+    final remembered = SettingsService.instance.read(SettingsService.playerAlwaysOnTop);
+    if (remembered) await windowManager.setAlwaysOnTop(true);
+    final isOnTop = remembered || await windowManager.isAlwaysOnTop();
     if (mounted && isOnTop != _isAlwaysOnTop) {
       _setControlsState(() {
         _isAlwaysOnTop = isOnTop;
@@ -221,6 +227,7 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
 
     final newValue = !_isAlwaysOnTop;
     await windowManager.setAlwaysOnTop(newValue);
+    unawaited(SettingsService.instance.write(SettingsService.playerAlwaysOnTop, newValue));
     if (!mounted) return;
     _setControlsState(() {
       _isAlwaysOnTop = newValue;
@@ -275,8 +282,13 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
     if (visibilityChanged && !controlsVisible) {
       _desktopControlsKey.currentState?.hideContentStrip();
       _cancelSkipButtonDismissTimer();
+      // When the chrome never reached full opacity, hide() already retired the
+      // presented flag — no fade-out will run, so AnimatedOpacity.onEnd never
+      // fires. Drop the subtree here instead of waiting for it.
+      final controlsDismissed = !widget.chromeController.controlsPresented;
       _setControlsState(() {
         _controlsOpaque = false;
+        if (controlsDismissed) _controlsMounted = false;
         if (_currentMarker != null) _skipButtonDismissed = true;
       });
       _claimPlayerSurfaceFocus();
@@ -290,10 +302,18 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
         _controlsOpaque = false;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Only flips the render target so the freshly mounted AnimatedOpacity
+        // animates up instead of inserting at full opacity. The controller's
+        // opaque flag follows the real fade-in completion (AnimatedOpacity.onEnd
+        // in video_controls.dart): marking it here would let a hide() landing
+        // before the next build trust an opacity the renderer never realized —
+        // hide() would keep controlsPresented while the fade-in target never
+        // rendered, so no fade-out runs and markControlsHidden never arrives.
         if (!mounted || !_showControls || !_controlsMounted) return;
         _setControlsState(() => _controlsOpaque = true);
       });
     } else if (controlsVisible && !_controlsMounted) {
+      widget.chromeController.markControlsOpaque();
       _setControlsState(() {
         _controlsMounted = true;
         _controlsOpaque = true;

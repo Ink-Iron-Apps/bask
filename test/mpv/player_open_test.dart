@@ -621,6 +621,40 @@ void main() {
       );
     });
 
+    test('MPV combines server-positioned HLS options with quoted external subtitles', () async {
+      final calls = <MethodCall>[];
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        methodHandler: (call) async {
+          calls.add(call);
+          return call.method == 'initialize' ? true : null;
+        },
+        testBody: () async {
+          final player = PlayerNative();
+          const uri = 'https://example.test/live.m3u8';
+          const subtitle = 'https://example.test/sub.srt?value=a,b';
+          try {
+            await player.open(
+              Media(uri),
+              isLive: true,
+              startLivePlaylistFromBeginning: true,
+              externalSubtitles: const [SubtitleTrack(id: 'external', uri: subtitle)],
+            );
+            expect(_loadfileArgs(calls), [
+              'loadfile',
+              uri,
+              'replace',
+              '-1',
+              'sub-files=${_fixedLengthPathList([subtitle])},demuxer-lavf-o-append=live_start_index=0',
+            ]);
+          } finally {
+            await player.dispose();
+          }
+        },
+      );
+    });
+
     test('MPV passes external subtitles through loadfile options', () async {
       final calls = <MethodCall>[];
 
@@ -948,6 +982,101 @@ void main() {
             final fileLoadFailed = expectLater(player.streams.fileLoadFailed, emits(isNull));
             player.handlePlayerEvent('end-file', {'reason': 'error'});
             await fileLoadFailed;
+          } finally {
+            await player.dispose();
+          }
+        },
+      );
+    });
+
+    test('MPV open resolves with the playlist entry id the loadfile reply names', () async {
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        methodHandler: (call) {
+          switch (call.method) {
+            case 'initialize':
+              return Future.value(true);
+            case 'command':
+              final args = Map<Object?, Object?>.from(call.arguments as Map)['args'] as List;
+              return Future.value(args.first == 'loadfile' ? {'playlistEntryId': 17} : null);
+            default:
+              return Future.value(null);
+          }
+        },
+        testBody: () async {
+          final player = PlayerNative();
+          try {
+            expect(await player.open(Media('https://example.test/live.m3u8'), isLive: true), 17);
+          } finally {
+            await player.dispose();
+          }
+        },
+      );
+    });
+
+    test('MPV open resolves null when the core does not name the source', () async {
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        testBody: () async {
+          final player = PlayerNative();
+          try {
+            expect(await player.open(Media('https://example.test/live.m3u8'), isLive: true), isNull);
+          } finally {
+            await player.dispose();
+          }
+        },
+      );
+    });
+
+    test('MPV source readiness carries the first rendered non-zero clock position once', () async {
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        testBody: () async {
+          final player = PlayerNative();
+          final started = <PlayerSourceStarted>[];
+          final ready = <PlayerSourceReady>[];
+          final startedSubscription = player.streams.sourceStarted.listen(started.add);
+          final readySubscription = player.streams.sourceReady.listen(ready.add);
+          try {
+            player.handlePlayerEvent('start-file', {'sourceId': 17});
+            player.handlePlayerEvent('playback-restart', {'sourceId': 17, 'positionSeconds': 47.25});
+            player.handlePlayerEvent('playback-restart', {'sourceId': 17, 'positionSeconds': 52.0});
+            await Future<void>.delayed(Duration.zero);
+
+            expect(started.single.sourceId, 17);
+            expect(ready, hasLength(1));
+            expect(ready.single.sourceId, 17);
+            expect(ready.single.position, const Duration(milliseconds: 47250));
+            expect(player.currentPosition, const Duration(milliseconds: 47250));
+          } finally {
+            await startedSubscription.cancel();
+            await readySubscription.cancel();
+            await player.dispose();
+          }
+        },
+      );
+    });
+
+    test('MPV ignores delayed positions from a replaced source', () async {
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        testBody: () async {
+          final player = PlayerNative();
+          try {
+            player.handlePlayerEvent('start-file', {'sourceId': 17});
+            player.handlePropertyChange('time-pos', 47.0, sourceId: 17);
+            expect(player.currentPosition, const Duration(seconds: 47));
+
+            player.handlePlayerEvent('start-file', {'sourceId': 18});
+            player.handlePropertyChange('time-pos', 99.0, sourceId: 17);
+            expect(player.currentPosition, const Duration(seconds: 47));
+
+            player.handlePropertyChange('time-pos', 5.0, sourceId: 18);
+            expect(player.currentPosition, const Duration(seconds: 5));
           } finally {
             await player.dispose();
           }

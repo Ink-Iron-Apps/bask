@@ -31,7 +31,9 @@ import com.edde746.plezy.car.CarRestrictionsMonitor
 import com.edde746.plezy.exoplayer.ExoPlayerPlugin
 import com.edde746.plezy.mpv.MpvAudioPlayerPlugin
 import com.edde746.plezy.mpv.MpvPlayerPlugin
+import com.edde746.plezy.shared.AssistiveTechnologyMonitor
 import com.edde746.plezy.shared.DeviceQuirks
+import com.edde746.plezy.shared.MediaCodecQuery
 import com.edde746.plezy.shared.ThemeHelper
 import com.edde746.plezy.watchnext.WatchNextPlugin
 import io.flutter.embedding.android.FlutterActivity
@@ -96,9 +98,12 @@ class MainActivity : FlutterActivity() {
   private val APP_EXIT_CHANNEL = "com.plezy/app_exit"
   private val CAR_RESTRICTIONS_CHANNEL = "com.plezy/car_restrictions"
   private val APK_INSTALL_CHANNEL = "com.plezy/apk_install"
+  private val ASSISTIVE_TECHNOLOGY_CHANNEL = "com.plezy/assistive_technology"
   private var watchNextPlugin: WatchNextPlugin? = null
   private var carRestrictions: CarRestrictionsMonitor? = null
   private var carRestrictionsChannel: MethodChannel? = null
+  private var assistiveTechnology: AssistiveTechnologyMonitor? = null
+  private var assistiveTechnologyChannel: MethodChannel? = null
   private var nativeTextInputFocused = false
   private val imeRecoveryHandler = Handler(Looper.getMainLooper())
   private var imeShowAttempts = 0
@@ -594,6 +599,9 @@ class MainActivity : FlutterActivity() {
     carRestrictions?.release()
     carRestrictions = null
     carRestrictionsChannel = null
+    assistiveTechnology?.release()
+    assistiveTechnology = null
+    assistiveTechnologyChannel = null
     activityStarted = false
     flutterSurfaceReconnectPending = false
     flutterTextureView = null
@@ -740,6 +748,7 @@ class MainActivity : FlutterActivity() {
         // actually runs rather than guessing from the release's asset list.
         "getSupportedAbis" -> result.success(android.os.Build.SUPPORTED_ABIS.toList())
         "getPerformanceSignals" -> result.success(getPerformanceSignals())
+        "getVideoDecodeCapabilities" -> result.success(MediaCodecQuery.hardwareVideoDecodeSupport())
         "getBackgroundWorkSignals" -> result.success(
           BackgroundWorkClassifier.toMap(BackgroundWorkDiagnostics.read(this))
         )
@@ -801,6 +810,19 @@ class MainActivity : FlutterActivity() {
 
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, APK_INSTALL_CHANNEL).setMethodCallHandler { call, result ->
       apkInstallChannel.handle(call, result)
+    }
+
+    val assistiveChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ASSISTIVE_TECHNOLOGY_CHANNEL)
+    assistiveTechnologyChannel = assistiveChannel
+    val assistiveMonitor = assistiveTechnology ?: AssistiveTechnologyMonitor(applicationContext).also {
+      assistiveTechnology = it
+    }
+    assistiveMonitor.start { runOnUiThread { assistiveTechnologyChannel?.invokeMethod("onChanged", null) } }
+    assistiveChannel.setMethodCallHandler { call, result ->
+      when (call.method) {
+        "getSignals" -> result.success(assistiveMonitor.signals())
+        else -> result.notImplemented()
+      }
     }
 
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_ADJUSTMENT_CHANNEL).setMethodCallHandler { call, result ->
@@ -906,7 +928,8 @@ class MainActivity : FlutterActivity() {
           } catch (e: IllegalStateException) {
             result.success(mapOf("success" to false, "errorCode" to "not_supported"))
           } catch (e: Exception) {
-            result.success(mapOf("success" to false, "errorCode" to "unknown", "errorMessage" to (e.message ?: "Unknown error")))
+            Log.w(TAG, "Failed to enter PiP", e)
+            result.success(mapOf("success" to false, "errorCode" to "unknown", "errorMessage" to e.message))
           }
         }
         "setAutoPipReady" -> {
