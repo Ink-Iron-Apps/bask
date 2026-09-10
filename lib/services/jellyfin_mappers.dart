@@ -16,10 +16,6 @@ import '../utils/resolution_label.dart';
 import 'file_info_parser.dart';
 import 'jellyfin_display_metadata.dart';
 
-// Re-export so existing callers that pulled `resolutionLabelFromHeight`
-// from this file keep compiling without a bulk import rewrite.
-export '../utils/resolution_label.dart' show resolutionLabelFromHeight;
-
 Map<String, dynamic>? jellyfinFirstVideoStream(Object? streams) {
   if (streams is! List) return null;
   for (final stream in streams) {
@@ -296,7 +292,6 @@ class JellyfinMappers {
       // stamps — scoped search, the Ancestors lookup, caller passthrough.
       libraryId: null,
       libraryTitle: null,
-      audioLanguage: item['PreferredMetadataLanguage'] as String?,
       // Only present when the item came out of `/Playlists/{id}/Items`; the
       // playlist write endpoints address rows by this id, not the media id.
       playlistItemId: item['PlaylistItemId'] as String?,
@@ -578,6 +573,7 @@ class JellyfinMappers {
             defaultAudioStreamIndex: defaultAudioStreamIndex,
             defaultSubtitleStreamIndex: defaultSubtitleStreamIndex,
           ),
+          isDefault: f.isDefault,
           channels: f.channels,
           frameRate: f.frameRate,
           hdr: isVideo && jellyfinVideoStreamIsHdr(source ?? const <String, dynamic>{}, s),

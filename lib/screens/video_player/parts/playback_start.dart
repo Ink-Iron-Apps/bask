@@ -3,9 +3,17 @@ part of '../../video_player_screen.dart';
 extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
   Future<void> _startPlayback() async {
     final currentPlayer = player;
-    if (!mounted || currentPlayer == null) return;
+    if (!mounted || _shuttingDown || currentPlayer == null) return;
     final attempt = _beginPlaybackAttempt(currentPlayer);
-    _hasRenderedFirstFrame = false;
+    final watchTogether = _activeWatchTogetherSession();
+    final watchTogetherLease = widget.watchTogetherLease;
+    _watchTogetherLease = watchTogetherLease;
+    if (watchTogether != null && watchTogetherLease != null && watchTogetherLease.isCurrent) {
+      _watchTogetherProvider = watchTogether;
+      watchTogether.onPlayerMediaSwitched = _handlePlayerMediaSwitch;
+    }
+    bool isCurrentStart() => attempt.isCurrent && (watchTogetherLease == null || watchTogetherLease.isCurrent);
+    _firstFrame.resetRenderedForAttempt();
     _hasFatalPlaybackError = false;
     // 503s observed from here on belong to this attempt's open.
     _http503Watchdog.disarm();
@@ -13,7 +21,7 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
     // Live TV mode: bypass standard playback initialization
     if (widget.isLive) {
       try {
-        _hasFirstFrame.value = false;
+        _firstFrame.resetUiForOpen();
         await currentPlayer.requestAudioFocus();
         await _setLiveStreamOptions(currentPlayer);
         if (!attempt.isCurrent) return;
@@ -50,8 +58,10 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
             'beginsAt=$programBeginsAt, elapsed=${elapsed}s (need >60 for dialog)',
           );
           if (elapsed > 60) {
+            widget.launchObserver?.mark('blocked', blocker: 'confirmationRequired');
             final watchFromStart = await _showWatchFromStartDialog(effectiveStart, nowEpoch);
-            if (!mounted) return;
+            widget.launchObserver?.mark('opening');
+            if (!mounted || !attempt.isCurrent) return;
             if (watchFromStart == true) {
               offsetSeconds = useProgramStart ? offsetProgramStart : captureBuffer.seekStartSeconds.round();
             }
@@ -60,31 +70,38 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
 
         // Build the stream URL (with optional offset for time-shift)
         final streamUrl = await session.streamUrlAt(offsetSeconds: offsetSeconds);
+        if (!attempt.isCurrent) return;
         if (streamUrl == null || !mounted) {
           throw PlaybackException(t.liveTv.failedToBuildStreamUrl, reason: PlaybackFailureReason.noPlayableSource);
         }
 
-        // Track stream start epoch for position calculations
+        // Track the requested epoch separately from MPV's source-local clock.
+        int? targetEpoch;
         if (offsetSeconds != null) {
-          _live.streamStartEpoch = captureBuffer!.startedAt + offsetSeconds;
+          targetEpoch = (captureBuffer!.startedAt + offsetSeconds).round();
+          if (currentPlayer is! PlayerNative) {
+            _live.streamStartEpoch = captureBuffer.startedAt + offsetSeconds;
+          }
           _live.atLiveEdge = false;
           _live.playbackStartTime = DateTime.now();
         } else {
-          _live.markStreamRestartedAtLiveEdge();
+          _live.markStreamRestartedAtLiveEdge(captureBuffer);
+          targetEpoch = captureBuffer == null ? null : _live.streamStartEpoch.round();
         }
 
-        await currentPlayer.setProperty('force-seekable', 'no');
-        await currentPlayer.open(
-          Media(streamUrl, headers: const {'Accept-Language': 'en'}),
+        await _openLiveStream(
+          currentPlayer,
+          streamUrl,
+          targetEpoch: targetEpoch,
           play: !PlatformDetector.isAutomotive(),
-          isLive: true,
+          timeShifted: offsetSeconds != null,
         );
         if (!attempt.isCurrent) return;
 
         _trackManager?.cacheExternalSubtitles(const []);
 
         await _initVideoFilterAndPip();
-        if (!mounted || player != currentPlayer) return;
+        if (!mounted || !attempt.isCurrent) return;
 
         if (mounted) {
           // Live TV never commits a PlaybackSession, so the session-derived
@@ -100,7 +117,8 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
       } catch (e, st) {
         appLogger.e('Failed to start live TV playback', error: e, stackTrace: st);
         unawaited(_sendLiveTimeline('stopped'));
-        if (mounted) {
+        widget.launchObserver?.mark('failed', failure: 'playbackFailed');
+        if (mounted && !_shuttingDown) {
           showErrorSnackBar(context, e.toString());
           unawaited(_handleBackButton());
         }
@@ -155,6 +173,14 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
         }
       }
       final result = playbackContext.result;
+      if (!attempt.isCurrent) return;
+      if (widget.strictMediaSelection &&
+          (result.selectedMediaIndex != widget.selectedMediaIndex ||
+              (widget.selectedMediaSourceId != null &&
+                  (result.selectedMediaSourceId ?? result.selectedVersion?.id) != widget.selectedMediaSourceId))) {
+        widget.launchObserver?.mark('failed', failure: 'staleMediaSelection');
+        throw PlaybackException(t.messages.playbackFailed);
+      }
       final streamHeaders = playbackContext.streamHeaders;
       final subtitleSelection = await _resolveSubtitleSelectionForOpen(
         metadata: _currentMetadata,
@@ -207,15 +233,15 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
         subtitleSelection: subtitleSelection,
         headers: streamHeaders,
         isLocalMedia: _isOfflinePlayback,
-        isCurrent: () => attempt.isCurrent,
+        isCurrent: isCurrentStart,
         // When a Watch Together session is active the sync layer owns the
         // start: open paused everywhere and let the host coordinate one
         // simultaneous group start.
-        watchTogetherOwnsStart: _watchTogetherOwnsPlaybackStart,
+        watchTogetherOwnsStart: () => watchTogetherLease != null && _watchTogetherOwnsPlaybackStart(),
         resolveShouldAutoStart: (wtOwnsStart) => !wtOwnsStart,
         resumePosition: () => resumePosition,
         plexClient: () => plexClientForTracks,
-        getProfileSettings: () => context.read<UserProfileProvider>().profileSettings,
+        getProfileSettings: () => context.read<AccountPreferencesController>().activePreferences,
         preferredAudioTrack: _preferredAudioTrack,
         primarySubtitleTranscoding: () => _isTranscoding,
         ensureAudioFocus: ensureAudioFocus,
@@ -233,6 +259,7 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
             metadata: _currentMetadata,
             isOffline: _isOfflinePlayback,
             offlineWatchService: offlineWatchService,
+            requested: widget.initialPosition,
           );
           return mounted && player == currentPlayer;
         },
@@ -240,12 +267,15 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
           // Attach player to Watch Together session for sync (if in session).
           // With a frame-rate startup gate pending, sync readiness waits for
           // its release so the group start can't fire mid display switch.
-          if (mounted && !_isOfflinePlayback) {
-            if (wtOwnsStart && holdPlaybackStart) {
-              wtStartupHold = Completer<void>();
-            }
-            _attachToWatchTogetherSession(startupHold: wtStartupHold?.future);
-            _notifyWatchTogetherMediaChange();
+          if (isCurrentStart() && !_isOfflinePlayback && watchTogetherLease != null) {
+            _commitWatchTogetherSelection(
+              watchTogether,
+              watchTogetherLease,
+              _currentMetadata,
+              resumePosition ?? Duration.zero,
+            );
+            if (wtOwnsStart && holdPlaybackStart) wtStartupHold = Completer<void>();
+            _attachToWatchTogetherSession(lease: watchTogetherLease, startupHold: wtStartupHold?.future);
           }
           if (shouldAutoPlay && PlatformDetector.isAutomotive()) {
             await _playWithPlaybackIntent(currentPlayer);
@@ -292,8 +322,8 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
               _shaderService!.ambientLightingService = _ambientLightingService;
               _videoFilterManager?.ambientLightingService = _ambientLightingService;
 
-              await _applySavedShaderPreset();
-              await _restoreAmbientLighting();
+              await _visualEffects.applySavedPreset();
+              await _visualEffects.restoreAmbientLighting();
             }
           }
           return attempt.isCurrent;
@@ -309,22 +339,30 @@ extension _VideoPlayerPlaybackStartMethods on VideoPlayerScreenState {
         startupHold.complete();
       }
     } on PlaybackException catch (e, st) {
+      if (attempt.isCurrent && widget.launchObserver?.failure == null) {
+        widget.launchObserver?.mark('failed', failure: e.reason.name);
+      }
       appLogger.w('Playback initialization failed', error: e, stackTrace: st);
       if (attempt.isCurrent && mounted) {
         if (!primaryMediaOpened) {
           _hasFatalPlaybackError = true;
         }
-        _hasFirstFrame.value = true; // Hide spinner on every current startup failure
+        _firstFrame.forceUiReadyOnFailure(); // Hide spinner on every current startup failure
         showErrorSnackBar(context, e.message);
       }
     } catch (e, st) {
+      if (attempt.isCurrent) widget.launchObserver?.mark('failed', failure: 'playbackFailed');
       appLogger.e('Failed to start playback', error: e, stackTrace: st);
       if (attempt.isCurrent && mounted) {
         if (!primaryMediaOpened) {
           _hasFatalPlaybackError = true;
         }
-        _hasFirstFrame.value = true; // Hide spinner on every current startup failure
-        showErrorSnackBar(context, t.messages.errorLoading(error: e.toString()));
+        _firstFrame.forceUiReadyOnFailure(); // Hide spinner on every current startup failure
+        // The init sentinel carries no prose — the UI owns the wording.
+        showErrorSnackBar(
+          context,
+          e is PlayerInitializationException ? t.messages.playbackFailed : t.messages.errorLoading(error: e.toString()),
+        );
       }
     }
   }

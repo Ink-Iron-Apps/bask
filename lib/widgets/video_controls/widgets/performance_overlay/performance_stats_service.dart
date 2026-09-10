@@ -148,6 +148,13 @@ class PerformanceStatsService {
 
     if (playerType == 'mpv') {
       // Parse MPV stats format (returned when in fallback mode)
+      final audio = _resolveAudioDisplay(
+        format: statsMap['audio-params/format'] as String?,
+        samplerate: statsMap['audio-params/samplerate'] as String?,
+        hrChannels: statsMap['audio-params/hr-channels'] as String?,
+        demuxSamplerate: statsMap['current-tracks/audio/demux-samplerate'] as String?,
+        demuxChannelCount: statsMap['current-tracks/audio/demux-channel-count'] as String?,
+      );
       final stats = PerformanceStats(
         playerType: 'mpv',
         videoCodec: _formatVideoCodecName(statsMap['video-codec'] as String?),
@@ -158,8 +165,9 @@ class PerformanceStatsService {
         videoBitrate: _parseInt(statsMap['video-bitrate'] as String?),
         hwdecCurrent: statsMap['hwdec-current'] as String?,
         audioCodec: _formatAudioCodecName(statsMap['audio-codec-name'] as String?),
-        audioSamplerate: _parseInt(statsMap['audio-params/samplerate'] as String?),
-        audioChannels: statsMap['audio-params/hr-channels'] as String?,
+        audioSamplerate: audio.samplerate,
+        audioChannels: audio.channels,
+        audioPassthroughFormat: audio.passthroughFormat,
         audioBitrate: _parseInt(statsMap['audio-bitrate'] as String?),
         avsyncChange: _parseDouble(statsMap['total-avsync-change'] as String?),
         cacheUsed: _parseInt(statsMap['cache-used'] as String?),
@@ -192,14 +200,14 @@ class PerformanceStatsService {
       final stats = PerformanceStats(
         playerType: 'exoplayer',
         // Video metrics
-        videoCodec: _formatVideoCodecName(statsMap['videoCodec'] as String?),
+        videoCodec: _formatVideoCodecName((statsMap['videoCodec'] ?? statsMap['videoMimeType']) as String?),
         videoWidth: statsMap['videoWidth'] as int?,
         videoHeight: statsMap['videoHeight'] as int?,
         videoFps: (statsMap['videoFps'] as num?)?.toDouble(),
         videoBitrate: statsMap['videoBitrate'] as int?,
         videoDecoderName: statsMap['videoDecoderName'] as String?,
         // Audio metrics
-        audioCodec: _formatAudioCodecName(statsMap['audioCodec'] as String?),
+        audioCodec: _formatAudioCodecName((statsMap['audioCodec'] ?? statsMap['audioMimeType']) as String?),
         audioSamplerate: statsMap['audioSampleRate'] as int?,
         audioChannels: CodecUtils.formatAudioChannels(statsMap['audioChannels'] as int?),
         audioBitrate: statsMap['audioBitrate'] as int?,
@@ -252,6 +260,9 @@ class PerformanceStatsService {
       player.getProperty('frame-drop-count'), // 15
       player.getProperty('decoder-frame-drop-count'), // 16
       player.getProperty('demuxer-cache-duration'), // 17
+      player.getProperty('audio-params/format'), // 18
+      player.getProperty('current-tracks/audio/demux-samplerate'), // 19
+      player.getProperty('current-tracks/audio/demux-channel-count'), // 20
     ]);
 
     final hasVideo = results[1] != null;
@@ -287,6 +298,14 @@ class PerformanceStatsService {
       // ProcessInfo not available on all platforms
     }
 
+    final audio = _resolveAudioDisplay(
+      format: results[18],
+      samplerate: results[8],
+      hrChannels: results[9],
+      demuxSamplerate: results[19],
+      demuxChannelCount: results[20],
+    );
+
     final stats = PerformanceStats(
       playerType: 'mpv',
       videoCodec: _formatVideoCodecName(results.first),
@@ -297,8 +316,9 @@ class PerformanceStatsService {
       videoBitrate: _parseInt(results[5]),
       hwdecCurrent: results[6],
       audioCodec: _formatAudioCodecName(results[7]),
-      audioSamplerate: _parseInt(results[8]),
-      audioChannels: results[9],
+      audioSamplerate: audio.samplerate,
+      audioChannels: audio.channels,
+      audioPassthroughFormat: audio.passthroughFormat,
       audioBitrate: _parseInt(results[10]),
       avsyncChange: _parseDouble(results[11]),
       cacheUsed: _parseInt(results[12]),
@@ -337,6 +357,29 @@ class PerformanceStatsService {
     return int.tryParse(value);
   }
 
+  /// Resolves the displayed audio sample rate and channel layout.
+  ///
+  /// When mpv bitstreams (`audio-params/format` is 'spdif-*'), audio-params
+  /// describe the IEC 61937 carrier — 192 kHz "stereo" for E-AC-3 — which is
+  /// transport framing, not audio. Reporters read that as "downgraded to
+  /// 2ch PCM" (#1300), so show the source track's values instead.
+  ({int? samplerate, String? channels, String? passthroughFormat}) _resolveAudioDisplay({
+    required String? format,
+    required String? samplerate,
+    required String? hrChannels,
+    required String? demuxSamplerate,
+    required String? demuxChannelCount,
+  }) {
+    if (format == null || !format.startsWith('spdif-')) {
+      return (samplerate: _parseInt(samplerate), channels: hrChannels, passthroughFormat: null);
+    }
+    return (
+      samplerate: _parseInt(demuxSamplerate),
+      channels: CodecUtils.formatAudioChannels(_parseInt(demuxChannelCount)),
+      passthroughFormat: format,
+    );
+  }
+
   /// Parse a string to double, returning null if parsing fails.
   double? _parseDouble(String? value) {
     if (value == null || value.isEmpty) return null;
@@ -344,17 +387,26 @@ class PerformanceStatsService {
   }
 
   /// Format a video codec name for display. Handles mpv's descriptive
-  /// strings ('hevc (Main 10)') and ExoPlayer's RFC 6381 codec IDs
-  /// ('hvc1.2.4.L153.B0', 'av01.0.08M.10').
+  /// strings ('hevc (Main 10)'), ExoPlayer's RFC 6381 codec IDs
+  /// ('hvc1.2.4.L153.B0', 'av01.0.08M.10'), and `video/...` MIME types
+  /// ('video/hevc') used as a fallback when the container carries no
+  /// codecs string.
   String? _formatVideoCodecName(String? codec) {
     if (codec == null || codec.isEmpty) return null;
     final upper = codec.toUpperCase();
+    if (upper.contains('DVHE') || upper.contains('DVH1') || upper.contains('DOLBY-VISION')) {
+      return 'Dolby Vision';
+    }
     if (upper.contains('HEVC') || upper.contains('H265') || upper.contains('HVC1') || upper.contains('HEV1')) {
       return 'HEVC';
     }
     if (upper.contains('H264') || upper.contains('AVC')) return 'H.264';
     if (upper.contains('AV1') || upper.contains('AV01')) return 'AV1';
     if (upper.contains('VP9') || upper.contains('VP09')) return 'VP9';
+    if (upper.contains('VP8') || upper.contains('VP08')) return 'VP8';
+    if (upper.contains('MP4V')) return 'MPEG-4';
+    if (upper.contains('MPEG2')) return 'MPEG-2';
+    if (upper.startsWith('VIDEO/')) return codec.substring('video/'.length).toUpperCase();
     return codec;
   }
 

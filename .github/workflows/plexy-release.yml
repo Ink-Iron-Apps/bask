@@ -257,7 +257,8 @@ jobs:
           # no device here runs it.
           flutter build apk --release --split-per-abi \
             --target-platform android-arm64,android-arm \
-            --dart-define=UPDATE_READ_TOKEN=${{ secrets.UPDATE_READ_TOKEN }}
+            --dart-define=UPDATE_READ_TOKEN=${{ secrets.UPDATE_READ_TOKEN }} \
+            --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
 
       - name: Remove signing material
         if: always()

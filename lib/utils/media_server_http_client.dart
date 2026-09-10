@@ -52,7 +52,7 @@ void throwIfHttpError(MediaServerResponse r) {
 /// Abort controller for cancelling in-flight HTTP requests.
 ///
 /// Uses the `package:http` [AbortableRequest] mechanism so the underlying
-/// transport (IOClient, CronetClient, CupertinoClient) actually cancels
+/// transport (IOClient, WinHttpClient) actually cancels
 /// the network operation.
 class AbortController {
   final _completer = Completer<void>();
@@ -97,10 +97,7 @@ class MediaServerHttpClient {
     Map<String, String> defaultHeaders = const {},
     this.connectTimeout = const Duration(seconds: 10),
     this.receiveTimeout = const Duration(seconds: 120),
-    // Plex home loads fan out many HTTP/1.1 calls on Linux. Keep that tuning
-    // opt-in so generic tracker/auth clients stay disposable and closeable.
-    bool usePlexApiClient = false,
-  }) : _client = client ?? (usePlexApiClient ? platform.createPlexApiClient() : platform.createPlatformClient()),
+  }) : _client = client ?? platform.createPlatformClient(),
        defaultHeaders = Map.of(defaultHeaders);
 
   /// The underlying [http.Client] for direct streaming / multipart requests.
@@ -237,8 +234,8 @@ class MediaServerHttpClient {
   Future<void> closeGracefully({Duration drainTimeout = const Duration(seconds: 2)}) async {
     _closing = true;
     _abortActiveRequests();
-    if (_client case final ManagedHttpClient managed) {
-      await managed.closeGracefully(drainTimeout: drainTimeout);
+    if (_client case final GracefulHttpClient graceful) {
+      await graceful.closeGracefully(drainTimeout: drainTimeout);
     } else {
       _client.close();
     }
@@ -334,8 +331,20 @@ class MediaServerHttpClient {
       );
       return await consume(streamed, scope);
     } catch (e) {
+      // Once this request's abort has fired, any secondary teardown error that
+      // surfaces first (a file sink failing after the stream died, a socket
+      // reset) is still a cancellation to the caller. Timeouts abort the
+      // request themselves before rethrowing and must keep their own type.
+      final wasAborted = requestAbort.isAborted || (abort?.isAborted ?? false);
       requestAbort.abort();
       await onError?.call();
+      if (wasAborted && e is! MediaServerHttpException && e is! TimeoutException) {
+        throw MediaServerHttpException(
+          type: MediaServerHttpErrorType.cancelled,
+          requestUri: uri,
+          message: 'Request aborted: $e',
+        );
+      }
       throw MediaServerHttpException.from(e, uri: uri);
     } finally {
       _activeAborts.remove(requestAbort);

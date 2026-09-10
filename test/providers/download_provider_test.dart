@@ -21,12 +21,14 @@ import 'package:plezy/services/download_storage_service.dart';
 import 'package:plezy/services/jellyfin_api_cache.dart';
 import 'package:plezy/services/plex_api_cache.dart';
 import 'package:plezy/services/offline_mode_source.dart';
+import 'package:plezy/services/saf_storage_service.dart';
 import 'package:plezy/utils/deletion_notifier.dart';
 import 'package:plezy/utils/notification_permission.dart';
 import 'package:plezy/utils/watch_state_notifier.dart';
 import 'package:plezy/utils/active_client_scope.dart';
 import '../test_helpers/download_fixtures.dart';
 import '../test_helpers/media_items.dart';
+import '../test_helpers/saf_fakes.dart';
 
 /// Implements only [fetchPlayableDescendants], the surface [collectEpisodes]
 /// uses. Every other call reaches [noSuchMethod] and throws.
@@ -137,6 +139,7 @@ class _DownloadOwnerSelectGate extends QueryInterceptor {
   Completer<void>? _started;
   Completer<void>? _release;
   String? _globalKey;
+  int selectCount = 0;
 
   Future<void> get started => _started!.future;
 
@@ -150,6 +153,7 @@ class _DownloadOwnerSelectGate extends QueryInterceptor {
 
   @override
   Future<List<Map<String, Object?>>> runSelect(QueryExecutor executor, String statement, List<Object?> args) async {
+    selectCount++;
     final started = _started;
     final release = _release;
     if (started != null && !started.isCompleted && statement.contains('download_owners') && args.contains(_globalKey)) {
@@ -255,6 +259,9 @@ void main() {
     PlexApiCache.initialize(db);
     JellyfinApiCache.initialize(db);
     testClientResolver = null;
+    // Local-path tests store SAF content:// URIs; resolution confirms such a
+    // copy is still reachable before returning it (issue #2101).
+    SafStorageService.setOpsForTesting(FakeSafStorage());
     downloadManager = DownloadManagerService(
       database: db,
       storageService: DownloadStorageService.instance,
@@ -269,6 +276,7 @@ void main() {
   tearDown(() async {
     downloadManager.dispose();
     await db.close();
+    SafStorageService.setOpsForTesting(null);
   });
 
   group('DownloadManagerService — platform support', () {
@@ -288,41 +296,6 @@ void main() {
       await unsupportedManager.recoverInterruptedDownloads();
 
       unsupportedManager.dispose();
-    });
-  });
-
-  group('DownloadProvider — download location coordinator', () {
-    test('set and reset delegate to the manager-owned ordered transition', () async {
-      DownloadLocationSnapshot location = (path: null, type: null);
-      final events = <String>[];
-      final coordinator = DownloadManagerService(
-        database: db,
-        storageService: DownloadStorageService.instance,
-        clientResolver: (_, {clientScopeId}) => null,
-        downloadsSupportedOverride: false,
-        downloadLocationReader: () => location,
-        downloadPathWriter: (value) async {
-          events.add('path:$value');
-          location = (path: value, type: location.type);
-        },
-        downloadPathTypeWriter: (value) async {
-          events.add('type:$value');
-          location = (path: location.path, type: value);
-        },
-        downloadStorageRefresher: () async {
-          events.add('refresh');
-        },
-      )..recoveryFuture = Future<void>.value();
-      final provider = DownloadProvider.forTesting(downloadManager: coordinator, database: db);
-      await provider.ensureInitialized();
-
-      await provider.setDownloadLocation(path: '/downloads', pathType: 'file');
-      await provider.resetDownloadLocation();
-
-      expect(events, ['path:/downloads', 'type:file', 'refresh', 'path:null', 'type:null', 'refresh']);
-      expect(location, (path: null, type: null));
-      provider.dispose();
-      coordinator.dispose();
     });
   });
 
@@ -617,7 +590,7 @@ void main() {
       var notified = 0;
       p.addListener(() => notified++);
 
-      await p.updateSyncRuleCount(ruleKey, 12);
+      await p.updateSyncRuleOptions(ruleKey, episodeCount: 12);
       expect(p.getSyncRule(ruleKey)!.episodeCount, 12);
       expect((await db.getSyncRule(ruleKey))!.episodeCount, 12);
       expect(notified, 1);
@@ -635,7 +608,7 @@ void main() {
       var notified = 0;
       p.addListener(() => notified++);
 
-      await p.updateSyncRuleFilter(ruleKey, 'all');
+      await p.updateSyncRuleOptions(ruleKey, downloadFilter: 'all');
       expect(p.getSyncRule(ruleKey)!.downloadFilter, 'all');
       expect(notified, 1);
 
@@ -650,11 +623,11 @@ void main() {
       final ruleKey = p.syncRuleKeyFor(ServerId('srv'), '10');
       expect(p.getSyncRule(ruleKey)!.enabled, isTrue);
 
-      await p.setSyncRuleEnabled(ruleKey, false);
+      await p.updateSyncRuleOptions(ruleKey, enabled: false);
       expect(p.getSyncRule(ruleKey)!.enabled, isFalse);
       expect((await db.getSyncRule(ruleKey))!.enabled, isFalse);
 
-      await p.setSyncRuleEnabled(ruleKey, true);
+      await p.updateSyncRuleOptions(ruleKey, enabled: true);
       expect(p.getSyncRule(ruleKey)!.enabled, isTrue);
 
       p.dispose();
@@ -2076,6 +2049,85 @@ void main() {
       expect(provider.getMetadata('jf-machine:ep-1')?.isWatched, isTrue);
       provider.dispose();
     });
+
+    test('cold Jellyfin hydration issues a constant number of selects as downloads grow', () async {
+      await insertJellyfinConnection('user-a');
+      await insertJellyfinConnection('user-b');
+      await db
+          .into(db.profileConnections)
+          .insert(
+            ProfileConnectionsCompanion.insert(
+              profileId: 'test-profile',
+              connectionId: 'jf-machine/user-b',
+              userIdentifier: 'user-b',
+            ),
+          );
+      await putPinnedItem('jf-machine/user-b', 'user-b', 'show-1', {
+        'Id': 'show-1',
+        'Type': 'Series',
+        'Name': 'Show B',
+        'UserData': {'UnplayedItemCount': 1},
+      });
+      await putPinnedItem('jf-machine/user-b', 'user-b', 'season-1', {
+        'Id': 'season-1',
+        'Type': 'Season',
+        'Name': 'Season B',
+        'SeriesId': 'show-1',
+        'UserData': {'UnplayedItemCount': 1},
+      });
+
+      Future<void> addEpisode(int index) async {
+        await putPinnedItem('jf-machine/user-b', 'user-b', 'ep-$index', {
+          'Id': 'ep-$index',
+          'Type': 'Episode',
+          'Name': 'Episode $index',
+          'SeriesId': 'show-1',
+          'SeasonId': 'season-1',
+          'UserData': {'PlayCount': 0},
+        });
+        await db.insertDownload(
+          serverId: ServerId('jf-machine'),
+          clientScopeId: 'jf-machine/user-a',
+          ratingKey: 'ep-$index',
+          globalKey: 'jf-machine:ep-$index',
+          type: 'episode',
+          parentRatingKey: 'season-1',
+          grandparentRatingKey: 'show-1',
+          status: DownloadStatus.completed.index,
+        );
+        await db.addDownloadOwner(profileId: 'test-profile', globalKey: 'jf-machine:ep-$index');
+      }
+
+      Future<int> selectsToHydrate(int episodeCount) async {
+        final provider = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+        await provider.ensureInitialized();
+        provider.debugSeedState(
+          downloads: {
+            for (var i = 1; i <= episodeCount; i++)
+              'jf-machine:ep-$i': DownloadProgress(globalKey: 'jf-machine:ep-$i', status: DownloadStatus.completed),
+          },
+        );
+        downloadOwnerSelectGate.selectCount = 0;
+        await provider.refreshMetadataFromCache();
+        final selects = downloadOwnerSelectGate.selectCount;
+        for (var i = 1; i <= episodeCount; i++) {
+          expect(provider.getMetadata('jf-machine:ep-$i')?.title, 'Episode $i');
+        }
+        expect(provider.getMetadata('jf-machine:show-1')?.title, 'Show B');
+        expect(provider.getMetadata('jf-machine:season-1')?.title, 'Season B');
+        provider.dispose();
+        return selects;
+      }
+
+      await addEpisode(1);
+      final oneEpisodeSelects = await selectsToHydrate(1);
+
+      for (var i = 2; i <= 40; i++) {
+        await addEpisode(i);
+      }
+
+      expect(await selectsToHydrate(40), oneEpisodeSelects);
+    });
     test('offline watch hydration snapshots downloads before database awaits', () async {
       final provider = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
       await provider.ensureInitialized();
@@ -2247,6 +2299,68 @@ void main() {
 
       expect(await JellyfinApiCache.instance.getMetadata(ServerId(scopeId), 'movie-1'), isNull);
       expect(await JellyfinApiCache.instance.get(ServerId(scopeId), segmentsEndpoint), isNull);
+    });
+
+    test('lookupOfflineMetadata resolves the active profile scope, not the download creator scope', () async {
+      await insertJellyfinConnection('user-a');
+      await insertJellyfinConnection('user-b');
+      await _insertProfile(db, 'profile-a');
+      await _insertProfile(db, 'profile-b');
+      for (final (profileId, userId) in [('profile-a', 'user-a'), ('profile-b', 'user-b')]) {
+        await db
+            .into(db.profileConnections)
+            .insert(
+              ProfileConnectionsCompanion.insert(
+                profileId: profileId,
+                connectionId: 'jf-machine/$userId',
+                userIdentifier: userId,
+              ),
+            );
+      }
+      // Shared download physically created under user A's compound scope;
+      // metadata cached only in A's namespace.
+      await db.insertDownload(
+        serverId: ServerId('jf-machine'),
+        clientScopeId: 'jf-machine/user-a',
+        ratingKey: 'movie-1',
+        globalKey: 'jf-machine:movie-1',
+        type: 'movie',
+        status: DownloadStatus.completed.index,
+      );
+      for (final profileId in ['profile-a', 'profile-b']) {
+        await db.addDownloadOwner(
+          profileId: profileId,
+          globalKey: 'jf-machine:movie-1',
+          backendId: MediaBackend.jellyfin.id,
+          clientScopeId: 'jf-machine/user-a',
+        );
+      }
+      await putPinnedItem('jf-machine/user-a', 'user-a', 'movie-1', {
+        'Id': 'movie-1',
+        'Type': 'Movie',
+        'Name': 'User A Movie',
+      });
+
+      final providerB = DownloadProvider.forTesting(
+        downloadManager: downloadManager,
+        database: db,
+        activeProfileId: 'profile-b',
+      );
+      addTearDown(providerB.dispose);
+      await providerB.ensureInitialized();
+      // Profile B must never inherit the creator's clientScopeId: its own
+      // namespace has no cached row, so the lookup yields null and the
+      // caller falls back to its lightweight seed metadata.
+      expect(await providerB.lookupOfflineMetadata(ServerId('jf-machine'), 'movie-1'), isNull);
+
+      final providerA = DownloadProvider.forTesting(
+        downloadManager: downloadManager,
+        database: db,
+        activeProfileId: 'profile-a',
+      );
+      addTearDown(providerA.dispose);
+      await providerA.ensureInitialized();
+      expect((await providerA.lookupOfflineMetadata(ServerId('jf-machine'), 'movie-1'))?.title, 'User A Movie');
     });
   });
 

@@ -11,7 +11,7 @@ SubscriptionTemplate _$SubscriptionTemplateFromJson(Map<String, dynamic> json) =
 );
 
 MediaSubscription _$MediaSubscriptionFromJson(Map<String, dynamic> json) => MediaSubscription(
-  key: json['key'] as String? ?? '',
+  key: _readSubscriptionKey(json, 'key') as String? ?? '',
   type: flexibleInt(json['type']),
   provider: json['provider'] as String?,
   targetLibrarySectionID: flexibleInt(json['targetLibrarySectionID']),
