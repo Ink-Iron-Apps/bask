@@ -1481,12 +1481,40 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
       if (diskCacheGB > 0) {
         final cacheDirectory = await PlaybackDiskCache.ensureDirectory();
         if (!_isPlayerInitializationCurrent(generation)) return;
+        // mpv stores this option as a signed 32-bit byte count, so anything at
+        // or above 2 GiB is rejected outright ("must be <= 2147483647"), and a
+        // rejected write leaves cache-on-disk enabled with the native
+        // DemuxerBudget's 64 MB window: read-write churn against storage rather
+        // than the lead this exists to build.
+        const maxDemuxerBytes = 2147483647;
+        var cacheBytes = diskCacheGB * 1024 * 1024 * 1024;
+        if (cacheBytes > maxDemuxerBytes) cacheBytes = maxDemuxerBytes;
         if (cacheDirectory != null) {
+          // Never ask for more than the volume can give. A TV's data partition
+          // can be 4 GB in total, and overfilling it does not fail cleanly:
+          // Android reclaims the app's cache directory to recover, which takes
+          // the extracted subtitle fonts with it and silently stops subtitles
+          // rendering. Leave a gigabyte of headroom and skip the disk entirely
+          // if that cannot be met.
+          const headroomBytes = 1024 * 1024 * 1024;
+          final free = await PlaybackDiskCache.freeBytes(cacheDirectory);
+          if (!_isPlayerInitializationCurrent(generation)) return;
+          if (free != null) {
+            final usable = free - headroomBytes;
+            if (usable < 256 * 1024 * 1024) {
+              appLogger.i('On-disk playback cache skipped: only ${(free / (1024 * 1024)).round()} MB free');
+              cacheBytes = 0;
+            } else if (usable < cacheBytes) {
+              cacheBytes = usable;
+            }
+          }
+        }
+        if (cacheDirectory != null && cacheBytes > 0) {
           try {
             await currentPlayer.setProperty('cache', 'yes');
             await currentPlayer.setProperty('demuxer-cache-dir', cacheDirectory.path);
             await currentPlayer.setProperty('cache-on-disk', 'yes');
-            await currentPlayer.setProperty('demuxer-max-bytes', '${diskCacheGB * 1024 * 1024 * 1024}');
+            await currentPlayer.setProperty('demuxer-max-bytes', '$cacheBytes');
           } catch (e) {
             // Only a transport failure lands here: mpv accepts an unknown
             // property without complaint, so a build lacking on-disk cache
