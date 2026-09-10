@@ -88,6 +88,15 @@ Map<String, dynamic>? selectApkAsset(List<Map<String, dynamic>> assets, {require
   return null;
 }
 
+/// The ABI order assumed when the device cannot tell us its own.
+///
+/// 32-bit first, deliberately. This list is only reached when the platform
+/// channel fails, so it has to degrade safely rather than optimally: a 64-bit
+/// device runs the armeabi-v7a build, but a 32-bit device — an older Android TV,
+/// typically — cannot install the arm64-v8a one, and the failure only surfaces
+/// after the whole APK has been downloaded.
+const fallbackDeviceAbis = ['armeabi-v7a', 'arm64-v8a'];
+
 /// An update available on the release mirror.
 @immutable
 class AvailableUpdate {
@@ -231,7 +240,7 @@ class AppUpdateService {
     } catch (e) {
       appLogger.d('Could not read supported ABIs: $e');
     }
-    return const ['arm64-v8a', 'armeabi-v7a'];
+    return fallbackDeviceAbis;
   }
 }
 

@@ -69,6 +69,15 @@ void main() {
       expect(selectApkAsset(assets, abis: ['riscv64'])?['name'], 'Plexy-v2.14.0.apk');
     });
 
+    test('fallback ABI order degrades safely when the device cannot be asked', () {
+      // A 32-bit device cannot install the arm64 build, and finds out only
+      // after downloading it. A 64-bit device runs the 32-bit build fine, so
+      // the blind guess has to be armeabi-v7a first.
+      final assets = [asset('Plexy-v2.23.0-arm64-v8a.apk'), asset('Plexy-v2.23.0-armeabi-v7a.apk')];
+
+      expect(selectApkAsset(assets, abis: fallbackDeviceAbis)?['name'], 'Plexy-v2.23.0-armeabi-v7a.apk');
+    });
+
     test('returns null when the release carries no APK', () {
       expect(selectApkAsset([asset('Plexy-sources.zip')], abis: ['arm64-v8a']), isNull);
       expect(selectApkAsset([], abis: ['arm64-v8a']), isNull);
