@@ -1672,6 +1672,9 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   /// The splash shows this: the pass walks every download, so on a large
   /// library it is the last thing standing between the servers reporting
   /// connected and the app opening, and without it the screen looks hung.
+  /// How often a metadata walk publishes what it has resolved so far.
+  static const Duration _metadataPublishInterval = Duration(milliseconds: 250);
+
   Future<void> refreshMetadataFromCache({void Function(int done, int total)? onProgress}) async {
     final profileGeneration = _profileGeneration;
     bool isStale() => isDisposed || profileGeneration != _profileGeneration;
@@ -1704,7 +1707,16 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     // to reach the server from inside the loop — one round trip per download,
     // in series, with the splash still up after every server had reported
     // connected. Collect the misses and settle them afterwards instead.
+    //
+    // Publishing as they land, rather than once at the end, is what makes the
+    // list fill in: a row is only rendered when its metadata is resolved, and
+    // these are sequential cache reads, so a library of any size left the
+    // screen empty for the whole walk — and a walk that resolved nothing
+    // published nothing at all, leaving it empty until something else forced a
+    // rebuild (switching tabs and back).
     var walked = 0;
+    var publishedHits = 0;
+    var lastPublish = DateTime.now();
     onProgress?.call(0, keys.length);
     for (final globalKey in keys) {
       try {
@@ -1721,6 +1733,15 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       } catch (e) {
         appLogger.d('Failed to refresh metadata for $globalKey: $e');
       }
+      // Time-based rather than every-n-items: the cost of a rebuild does not
+      // scale with how many rows resolved between them, and a slow walk is
+      // exactly the case that needs the updates.
+      final now = DateTime.now();
+      if (cacheHits > publishedHits && now.difference(lastPublish) >= _metadataPublishInterval) {
+        publishedHits = cacheHits;
+        lastPublish = now;
+        safeNotifyListeners();
+      }
     }
     misses = needNetwork.length;
 
@@ -1733,7 +1754,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       'refreshMetadataFromCache: walked ${keys.length} keys in ${stopwatch.elapsedMilliseconds}ms → '
       '$cacheHits cache hits, $misses needing the server',
     );
-    if (cacheHits > 0) {
+    if (cacheHits > publishedHits) {
       safeNotifyListeners();
     }
 
@@ -1754,6 +1775,8 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     final stopwatch = Stopwatch()..start();
     var filled = 0;
 
+    var published = 0;
+    var lastPublish = DateTime.now();
     for (final globalKey in globalKeys) {
       if (isStale()) return;
       try {
@@ -1763,6 +1786,14 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       } catch (e) {
         appLogger.d('Failed to fetch metadata for $globalKey: $e');
       }
+      // Same cadence as the cache pass: these are per-item server round trips,
+      // so the last one can land long after the first.
+      final now = DateTime.now();
+      if (filled > published && now.difference(lastPublish) >= _metadataPublishInterval) {
+        published = filled;
+        lastPublish = now;
+        safeNotifyListeners();
+      }
     }
 
     if (isStale()) return;
@@ -1770,7 +1801,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       'refreshMetadataFromCache: filled $filled of ${globalKeys.length} from the server '
       'in ${stopwatch.elapsedMilliseconds}ms',
     );
-    if (filled > 0) safeNotifyListeners();
+    if (filled > published) safeNotifyListeners();
   }
 
   /// Deletes [globalKey] if it is a completed episode/movie download; returns
