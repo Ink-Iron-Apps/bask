@@ -698,6 +698,7 @@
     "timerActive": "Timer Active",
     "playbackWillPauseIn": "Playback will pause in ${duration}",
     "sleepTimerEndOfVideo": "End of current video",
+    "sleepTimerEndOfVideos": "End of ${count} videos",
     "sleepTimerStopAtHeader": "Stop at",
     "sleepTimerDurationHeader": "Timer",
     "playbackWillPauseAtEnd": "Playback will pause at the end of this video",

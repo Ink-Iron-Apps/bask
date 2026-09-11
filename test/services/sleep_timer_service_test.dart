@@ -412,6 +412,71 @@ void main() {
     });
   });
 
+  group('armEndOfVideos', () {
+    test('counts down and only fires on the last completion', () {
+      var fired = 0;
+      timer.armEndOfVideos(3, () => fired++);
+
+      expect(timer.isEndOfVideoMode, isTrue);
+      expect(timer.videosRemaining, 3);
+
+      expect(timer.notifyVideoCompleted(), isFalse);
+      expect(fired, 0);
+      expect(timer.videosRemaining, 2);
+
+      expect(timer.notifyVideoCompleted(), isFalse);
+      expect(fired, 0);
+
+      // The one it was waiting for: the caller stops here instead of advancing.
+      expect(timer.notifyVideoCompleted(), isTrue);
+      expect(fired, 1);
+      expect(timer.isEndOfVideoMode, isFalse);
+      expect(timer.videosRemaining, 0);
+
+      // Completions after it has fired are inert.
+      expect(timer.notifyVideoCompleted(), isFalse);
+      expect(fired, 1);
+    });
+
+    test('a count below one arms nothing', () {
+      timer.armEndOfVideos(0, () {});
+      expect(timer.isActive, isFalse);
+      expect(timer.videosRemaining, 0);
+      expect(timer.notifyVideoCompleted(), isFalse);
+    });
+
+    test('armEndOfVideo is the single-video case', () {
+      timer.armEndOfVideo(() {});
+      expect(timer.videosRemaining, 1);
+      expect(timer.notifyVideoCompleted(), isTrue);
+      timer.cancelTimer();
+    });
+
+    test('cancelling clears a partly counted timer', () {
+      var fired = 0;
+      timer.armEndOfVideos(2, () => fired++);
+      timer.notifyVideoCompleted();
+      timer.cancelTimer();
+
+      expect(timer.isActive, isFalse);
+      expect(timer.videosRemaining, 0);
+      expect(timer.notifyVideoCompleted(), isFalse);
+      expect(fired, 0);
+    });
+
+    test('a session swap keeps what is left, not what was asked for', () {
+      timer.armEndOfVideos(4, () {});
+      timer.notifyVideoCompleted();
+      expect(timer.videosRemaining, 3);
+
+      timer.markNeedsRestart();
+      timer.restartIfNeeded(() {});
+
+      expect(timer.videosRemaining, 3);
+      timer.cancelTimer();
+    });
+  });
+
   group('end-of-video + restartIfNeeded', () {
     test('preserves the end-of-video mode across a playback session swap', () {
       timer.armEndOfVideo(() {});
