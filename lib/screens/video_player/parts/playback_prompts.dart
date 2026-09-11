@@ -37,12 +37,15 @@ extension _VideoPlayerPlaybackPromptMethods on VideoPlayerScreenState {
     }
 
     // End-of-video sleep timer takes precedence over autoplay / next-episode
-    // dialogs: the user explicitly asked to stop after this item.
+    // dialogs, but only on the completion it was actually waiting for: a timer
+    // set for several videos counts this one and then lets the normal advance
+    // happen, otherwise "stop after 3" would stop after the first.
     final sleepTimerService = SleepTimerService();
     if (sleepTimerService.isEndOfVideoMode && !_episode.completionLatch.triggered) {
-      _episode.completionLatch.latch();
-      sleepTimerService.notifyVideoCompleted();
-      return;
+      if (sleepTimerService.notifyVideoCompleted()) {
+        _episode.completionLatch.latch();
+        return;
+      }
     }
     if (!_canNavigateMediaItems()) {
       if (!_episode.completionLatch.triggered) _episode.completionLatch.latch();
