@@ -654,6 +654,12 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
 
   String _formatSleepTimer(SleepTimerService sleepTimer) {
     if (!sleepTimer.isActive) return t.common.off;
+    // Armed by item count rather than by clock: there is no remaining time to
+    // show, so name what it is still waiting for.
+    final videos = sleepTimer.videosRemaining;
+    if (videos > 0) {
+      return videos == 1 ? t.videoControls.sleepTimerEndOfVideo : t.videoControls.sleepTimerEndOfVideos(count: videos);
+    }
     final remaining = sleepTimer.remainingTime;
     if (remaining == null) return t.common.off;
     return t.videoSettings.sleepTimerActive(duration: formatDurationWithSeconds(remaining));
