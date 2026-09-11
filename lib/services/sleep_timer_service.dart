@@ -19,8 +19,10 @@ class SleepTimerService extends ChangeNotifier {
   Duration? _originalDuration;
   VoidCallback? _onTimerComplete;
   bool _needsRestart = false;
-  bool _restartAsEndOfVideo = false;
-  bool _endOfVideoArmed = false;
+  int _restartVideosRemaining = 0;
+
+  /// Items still to finish before the timer fires, or 0 when not armed this way.
+  int _videosRemaining = 0;
   final StreamController<void> _completedController = StreamController<void>.broadcast();
   final StreamController<void> _promptController = StreamController<void>.broadcast();
 
@@ -30,11 +32,15 @@ class SleepTimerService extends ChangeNotifier {
   /// Emits when the timer fires and wants to show a "still watching?" prompt
   Stream<void> get onPrompt => _promptController.stream;
 
-  bool get isActive => (_timer != null && _timer!.isActive) || _endOfVideoArmed;
+  bool get isActive => (_timer != null && _timer!.isActive) || _videosRemaining > 0;
 
-  /// Whether the sleep timer is armed to fire at the end of the current video
+  /// Whether the sleep timer is armed to fire at the end of a number of videos
   /// rather than after a fixed duration.
-  bool get isEndOfVideoMode => _endOfVideoArmed;
+  bool get isEndOfVideoMode => _videosRemaining > 0;
+
+  /// Items still to finish before the timer fires. Zero when it is not armed
+  /// this way; 1 during the last item, whatever it was originally set to.
+  int get videosRemaining => _videosRemaining;
 
   /// The time when the timer will complete
   DateTime? get endTime => _endTime;
@@ -77,34 +83,51 @@ class SleepTimerService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Arm the sleep timer to fire when the currently playing video reaches its end.
-  /// Unlike [startTimer], no periodic timer runs — playback completion is reported
-  /// externally via [notifyVideoCompleted].
-  void armEndOfVideo(VoidCallback onComplete) {
-    cancelTimer();
+  /// Arm the sleep timer to fire when the current video reaches its end.
+  void armEndOfVideo(VoidCallback onComplete) => armEndOfVideos(1, onComplete);
 
-    _endOfVideoArmed = true;
+  /// Arm the sleep timer to fire after [count] videos have finished.
+  ///
+  /// Unlike [startTimer], no periodic timer runs — playback completion is
+  /// reported externally via [notifyVideoCompleted]. A count above one leaves
+  /// the intervening completions to the player's normal autoplay, so the queue
+  /// keeps advancing until the last one.
+  void armEndOfVideos(int count, VoidCallback onComplete) {
+    cancelTimer();
+    if (count < 1) return;
+
+    _videosRemaining = count;
     _onTimerComplete = onComplete;
 
-    appLogger.d('Sleep timer armed: end of current video');
+    appLogger.d('Sleep timer armed: end of $count video(s)');
     notifyListeners();
   }
 
   /// Notify the service that the currently playing video has completed.
-  /// If armed via [armEndOfVideo], fires the completion callback and resets the mode.
-  /// Safe to call unconditionally — does nothing when end-of-video mode is not armed.
-  void notifyVideoCompleted() {
-    if (!_endOfVideoArmed) return;
+  ///
+  /// Returns true when that completion is the one the timer was waiting for,
+  /// so the caller can stop rather than advance; false means the timer is
+  /// either not armed this way or still counting, and playback should carry on
+  /// as normal. Safe to call unconditionally.
+  bool notifyVideoCompleted() {
+    if (_videosRemaining < 1) return false;
+
+    _videosRemaining--;
+    if (_videosRemaining > 0) {
+      appLogger.d('Sleep timer: $_videosRemaining video(s) to go');
+      notifyListeners();
+      return false;
+    }
 
     appLogger.d('Sleep timer (end of video) triggered');
-    _endOfVideoArmed = false;
     _executeCallback();
     notifyListeners();
+    return true;
   }
 
   /// Cancel the active timer (user-initiated, clears everything)
   void cancelTimer() {
-    if (_timer != null || _originalDuration != null || _endOfVideoArmed) {
+    if (_timer != null || _originalDuration != null || _videosRemaining > 0) {
       appLogger.d('Sleep timer cancelled');
       _timer?.cancel();
       _timer = null;
@@ -112,8 +135,8 @@ class SleepTimerService extends ChangeNotifier {
       _duration = null;
       _originalDuration = null;
       _onTimerComplete = null;
-      _endOfVideoArmed = false;
-      _restartAsEndOfVideo = false;
+      _videosRemaining = 0;
+      _restartVideosRemaining = 0;
       notifyListeners();
     }
   }
@@ -137,7 +160,7 @@ class SleepTimerService extends ChangeNotifier {
   void markNeedsRestart() {
     if (isActive || _originalDuration != null) {
       _needsRestart = true;
-      _restartAsEndOfVideo = _endOfVideoArmed;
+      _restartVideosRemaining = _videosRemaining;
     }
   }
 
@@ -147,9 +170,10 @@ class SleepTimerService extends ChangeNotifier {
     if (!_needsRestart) return;
     _needsRestart = false;
 
-    if (_restartAsEndOfVideo) {
-      _restartAsEndOfVideo = false;
-      armEndOfVideo(onComplete);
+    if (_restartVideosRemaining > 0) {
+      final remaining = _restartVideosRemaining;
+      _restartVideosRemaining = 0;
+      armEndOfVideos(remaining, onComplete);
     } else if (_originalDuration != null) {
       startTimer(_originalDuration!, onComplete);
     }

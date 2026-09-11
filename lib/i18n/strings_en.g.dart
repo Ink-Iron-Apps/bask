@@ -2057,6 +2057,9 @@ class Translations$videoControls$en {
 	/// en: 'End of current video'
 	String get sleepTimerEndOfVideo => 'End of current video';
 
+	/// en: 'End of ${count} videos'
+	String sleepTimerEndOfVideos({required Object count}) => 'End of ${count} videos';
+
 	/// en: 'Stop at'
 	String get sleepTimerStopAtHeader => 'Stop at';
 
@@ -7879,6 +7882,7 @@ extension on Translations {
 			'videoControls.timerActive' => 'Timer Active',
 			'videoControls.playbackWillPauseIn' => ({required Object duration}) => 'Playback will pause in ${duration}',
 			'videoControls.sleepTimerEndOfVideo' => 'End of current video',
+			'videoControls.sleepTimerEndOfVideos' => ({required Object count}) => 'End of ${count} videos',
 			'videoControls.sleepTimerStopAtHeader' => 'Stop at',
 			'videoControls.sleepTimerDurationHeader' => 'Timer',
 			'videoControls.playbackWillPauseAtEnd' => 'Playback will pause at the end of this video',
@@ -8247,9 +8251,9 @@ extension on Translations {
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => 'Failed to delete ${displayName}',
 			'errors.failedToRate' => 'Couldn\'t update rating',
 			'libraries.title' => 'Libraries',
-			'libraries.fallbackTitle' => 'Library',
 			_ => null,
 		} ?? switch (path) {
+			'libraries.fallbackTitle' => 'Library',
 			'libraries.scanLibraryFiles' => 'Scan Library Files',
 			'libraries.scanLibrary' => 'Scan Library',
 			'libraries.analyze' => 'Analyze',
@@ -8761,9 +8765,9 @@ extension on Translations {
 			'watchTogether.waitingForName' => ({required Object name}) => 'Waiting for ${name}...',
 			'watchTogether.recentRooms' => 'Recent Rooms',
 			'watchTogether.renameRoom' => 'Rename Room',
-			'watchTogether.removeRoom' => 'Remove',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.removeRoom' => 'Remove',
 			'watchTogether.guestSwitchUnavailable' => 'Couldn\'t switch — server unavailable for sync',
 			'watchTogether.guestSwitchFailed' => 'Couldn\'t switch — content not found on this server',
 			'watchTogether.defaultDisplayName' => 'User',
@@ -9275,9 +9279,9 @@ extension on Translations {
 			'addServer.pinExpired' => 'PIN expired before sign-in. Please try again.',
 			'addServer.failedToRegisterAccount' => ({required Object error}) => 'Failed to register account: ${error}',
 			'addServer.enterMediaBrowserUrlError' => ({required Object product}) => 'Enter your ${product} server URL',
-			'addServer.addConnectionTitle' => 'Add connection',
 			_ => null,
 		} ?? switch (path) {
+			'addServer.addConnectionTitle' => 'Add connection',
 			'addServer.addConnectionTitleScoped' => ({required Object name}) => 'Add to ${name}',
 			'addServer.signInWithPlexCard' => 'Sign in with Plex',
 			'addServer.signInWithPlexCardSubtitle' => 'Authorize this device. Shared servers are added.',

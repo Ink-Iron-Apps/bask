@@ -82,10 +82,18 @@ class _SleepTimerEventColumn extends StatelessWidget {
 
   const _SleepTimerEventColumn({required this.player, required this.sleepTimer});
 
+  /// How many videos a single "stop at" choice can cover.
+  ///
+  /// One is the common case; the rest exist because a queue or a playlist is
+  /// usually what is playing when someone sets this at all, and "two more
+  /// episodes then stop" is not expressible as a duration.
+  static const int _maxVideos = 5;
+
+  static String _labelFor(int count) =>
+      count == 1 ? t.videoControls.sleepTimerEndOfVideo : t.videoControls.sleepTimerEndOfVideos(count: count);
+
   @override
   Widget build(BuildContext context) {
-    final label = t.videoControls.sleepTimerEndOfVideo;
-
     return Column(
       mainAxisSize: .min,
       children: [
@@ -94,24 +102,27 @@ class _SleepTimerEventColumn extends StatelessWidget {
           child: ListView(
             shrinkWrap: true,
             children: [
-              FocusableListTile(
-                leading: AppIcon(
-                  Symbols.hourglass_bottom_rounded,
-                  fill: 1,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                title: Text(label),
-                selected: sleepTimer.isEndOfVideoMode,
-                onTap: () {
-                  sleepTimer.armEndOfVideo(() {
-                    // Pause playback when the current video ends
-                    player.pause();
-                  });
-                  OverlaySheetController.closeAdaptive(context);
+              for (var count = 1; count <= _maxVideos; count++)
+                FocusableListTile(
+                  leading: AppIcon(
+                    Symbols.hourglass_bottom_rounded,
+                    fill: 1,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  title: Text(_labelFor(count)),
+                  // The armed count counts down as items finish, so the row
+                  // that stays selected is the one matching what is left.
+                  selected: sleepTimer.videosRemaining == count,
+                  onTap: () {
+                    sleepTimer.armEndOfVideos(count, () {
+                      // Pause playback when the last of them ends
+                      player.pause();
+                    });
+                    OverlaySheetController.closeAdaptive(context);
 
-                  showSuccessSnackBar(context, t.messages.sleepTimerSet(label: label));
-                },
-              ),
+                    showSuccessSnackBar(context, t.messages.sleepTimerSet(label: _labelFor(count)));
+                  },
+                ),
             ],
           ),
         ),
