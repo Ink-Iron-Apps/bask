@@ -1,3 +1,5 @@
+import '../utils/app_logger.dart';
+import '../utils/platform_detector.dart';
 import 'dart:async';
 import 'dart:collection';
 
@@ -52,10 +54,39 @@ class PlexImageCacheManager extends ce_cache.DefaultCacheManager {
   static const _artworkRetention = Duration(days: 3650);
   static const _artworkObjectLimit = 100000;
 
+  /// Object cap on a TV set.
+  ///
+  /// This cache deliberately lives where Android cannot reclaim it, which is
+  /// right on a phone and dangerous on a TV: a set's data partition can be
+  /// 4 GB with a gigabyte free, and an unreclaimable cache bounded only by a
+  /// hundred thousand objects will fill it and stay filled. At server-sized
+  /// posters three thousand objects is roughly a couple of hundred megabytes
+  /// — enough that a browse through a library of a few hundred titles is
+  /// served from disk, small enough that it cannot eat the volume.
+  ///
+  /// Not zero: without a disk cache every scroll re-fetches and re-decodes
+  /// artwork on the weakest CPU in the fleet, which is exactly where that
+  /// cost shows.
+  static const _artworkObjectLimitTv = 3000;
+
+  /// The cap for a device, read once when the manager is first constructed.
+  ///
+  /// Construction is lazy and the first artwork request comes well after
+  /// startup resolves TV detection (the theme gate awaits it), but a wrong
+  /// answer here would be silent and last the whole session — so it is logged.
+  @visibleForTesting
+  static int artworkObjectLimitFor({required bool isTv}) => isTv ? _artworkObjectLimitTv : _artworkObjectLimit;
+
+  static int _resolvedObjectLimit() {
+    final limit = artworkObjectLimitFor(isTv: PlatformDetector.isTV());
+    appLogger.i('Artwork cache object limit: $limit');
+    return limit;
+  }
+
   PlexImageCacheManager._()
     : super(
         stalePeriod: _artworkRetention,
-        maxNrOfCacheObjects: _artworkObjectLimit,
+        maxNrOfCacheObjects: _resolvedObjectLimit(),
         httpClientFactory: () => _SharedHttpClient(_artworkHttpClient.inner, _artworkRequestLimiter),
         // Application support, not the cache directory: Android reclaims cache
         // directories under storage pressure, which would discard the whole

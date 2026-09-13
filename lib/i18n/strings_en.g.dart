@@ -2251,6 +2251,12 @@ class Translations$videoControls$en {
 	/// en: 'Search Subtitles'
 	String get searchSubtitles => 'Search Subtitles';
 
+	/// en: 'Get exact match'
+	String get subtitleBestMatch => 'Get exact match';
+
+	/// en: 'No exact match for this file — pick one from the list'
+	String get subtitleNoPerfectMatch => 'No exact match for this file — pick one from the list';
+
 	/// en: 'Language'
 	String get language => 'Language';
 
@@ -4758,6 +4764,27 @@ class Translations$videoSettings$en {
 
 	/// en: 'Subtitle Sync'
 	String get subtitleSync => 'Subtitle Sync';
+
+	/// en: 'Subtitle Rate'
+	String get subtitleRate => 'Subtitle Rate';
+
+	/// en: 'Normal'
+	String get subtitleRateNormal => 'Normal';
+
+	/// en: 'Use the subtitle file’s own timings'
+	String get subtitleRateNormalDescription => 'Use the subtitle file’s own timings';
+
+	/// en: '25 → 23.976 fps'
+	String get subtitleRateSlower => '25 → 23.976 fps';
+
+	/// en: 'Subtitles timed for a 25 fps release, running ahead of the film'
+	String get subtitleRateSlowerDescription => 'Subtitles timed for a 25 fps release, running ahead of the film';
+
+	/// en: '23.976 → 25 fps'
+	String get subtitleRateFaster => '23.976 → 25 fps';
+
+	/// en: 'Subtitles timed for a 23.976 fps release, running behind'
+	String get subtitleRateFasterDescription => 'Subtitles timed for a 23.976 fps release, running behind';
 
 	/// en: 'HDR'
 	String get hdr => 'HDR';
@@ -7978,6 +8005,8 @@ extension on Translations {
 			'videoControls.noQueueItems' => 'No items in queue',
 			'videoControls.noAudioDevicesAvailable' => 'No audio devices available',
 			'videoControls.searchSubtitles' => 'Search Subtitles',
+			'videoControls.subtitleBestMatch' => 'Get exact match',
+			'videoControls.subtitleNoPerfectMatch' => 'No exact match for this file — pick one from the list',
 			'videoControls.language' => 'Language',
 			'videoControls.noSubtitlesFound' => 'No subtitles found',
 			'videoControls.subtitleDownloaded' => 'Subtitle downloaded',
@@ -8273,10 +8302,10 @@ extension on Translations {
 			'errors.searchFailed' => ({required Object error}) => 'Search failed: ${error}',
 			'errors.searchUnavailable' => 'Search could not reach any media server.',
 			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
-			'errors.connectionFailed' => 'Unable to connect to media server',
-			'errors.unableToLoad' => ({required Object context}) => 'Unable to load ${context}. Please try again.',
 			_ => null,
 		} ?? switch (path) {
+			'errors.connectionFailed' => 'Unable to connect to media server',
+			'errors.unableToLoad' => ({required Object context}) => 'Unable to load ${context}. Please try again.',
 			'errors.noClientAvailable' => 'No client available',
 			'errors.pleaseEnterToken' => 'Please enter a token',
 			'errors.invalidToken' => 'Invalid token',
@@ -8787,10 +8816,10 @@ extension on Translations {
 			'watchTogether.participantJoined' => ({required Object name}) => '${name} joined',
 			'watchTogether.participantLeft' => ({required Object name}) => '${name} left',
 			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
-			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
-			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
+			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
 			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
 			'watchTogether.participantBuffering' => ({required Object name}) => '${name} is buffering',
 			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} is on an older app version — sync unavailable',
@@ -9020,6 +9049,13 @@ extension on Translations {
 			'videoSettings.sleepTimer' => 'Sleep Timer',
 			'videoSettings.audioSync' => 'Audio Sync',
 			'videoSettings.subtitleSync' => 'Subtitle Sync',
+			'videoSettings.subtitleRate' => 'Subtitle Rate',
+			'videoSettings.subtitleRateNormal' => 'Normal',
+			'videoSettings.subtitleRateNormalDescription' => 'Use the subtitle file’s own timings',
+			'videoSettings.subtitleRateSlower' => '25 → 23.976 fps',
+			'videoSettings.subtitleRateSlowerDescription' => 'Subtitles timed for a 25 fps release, running ahead of the film',
+			'videoSettings.subtitleRateFaster' => '23.976 → 25 fps',
+			'videoSettings.subtitleRateFasterDescription' => 'Subtitles timed for a 23.976 fps release, running behind',
 			'videoSettings.hdr' => 'HDR',
 			'videoSettings.hdrUnsupported' => 'HDR isn\'t available here — this desktop compositor or video output can\'t carry it.',
 			'videoSettings.hdrToneMapping' => 'HDR Tone Mapping',
@@ -9294,6 +9330,8 @@ extension on Translations {
 			'services.libraryFilter.libraries' => 'Libraries',
 			'services.libraryFilter.noLibraries' => 'No libraries available',
 			'addServer.addMediaBrowserTitle' => ({required Object product}) => 'Add ${product} server',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.serverUrls' => 'Server URLs',
 			'addServer.serverUrlsHelper' => 'Multiple URLs allowed, separated by commas.',
 			'addServer.findServer' => 'Find server',
@@ -9303,8 +9341,6 @@ extension on Translations {
 			'addServer.password' => 'Password',
 			'addServer.signIn' => 'Sign in',
 			'addServer.change' => 'Change',
-			_ => null,
-		} ?? switch (path) {
 			'addServer.required' => 'Required',
 			'addServer.couldNotReachServer' => ({required Object error}) => 'Could not reach the server: ${error}',
 			'addServer.signInFailed' => ({required Object error}) => 'Sign-in failed: ${error}',

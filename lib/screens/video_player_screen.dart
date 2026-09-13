@@ -1866,6 +1866,13 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
         await currentPlayer.setProperty('sub-delay', offsetSeconds.toString());
       }
 
+      // Rate correction for a file authored against another frame rate, which
+      // an offset cannot fix: the error is proportional to the runtime.
+      final subtitleSpeed = ScopedPlayerPrefs.resolve(ScopedPlayerPrefs.subtitleSpeed, _currentMetadata);
+      if (subtitleSpeed != 1.0) {
+        await currentPlayer.setProperty('sub-speed', subtitleSpeed.toStringAsFixed(5));
+      }
+
       if (settingsService.read(SettingsService.audioNormalization)) {
         await currentPlayer.setAudioNormalization(true);
       }
