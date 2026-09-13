@@ -1078,26 +1078,6 @@ class TrackSelectionService {
   /// the result is a real decision rather than "ask again later". A deadline
   /// pass must use it, otherwise it re-derives the same null and applies
   /// nothing at all.
-  /// Whether the server names a subtitle track for *this* item.
-  ///
-  /// A carried-over "off" must not outrank it. Plex folds the account's
-  /// subtitle mode into `selected`, so a subtitle mode of `always` arrives
-  /// here as a selected track — and an off that the user actually chose for
-  /// this title was written back to the server when they chose it, so the
-  /// server agrees and there is nothing to override. The only "off" this
-  /// overrides is one carried in from whatever played before, which is not a
-  /// preference about this item at all.
-  bool get _serverSelectsASubtitle {
-    final info = plexMediaInfo;
-    if (info == null) return false;
-    if (info.subtitleTracks.any((track) => track.selected)) return true;
-    if (metadata.backend.usesMediaBrowserApi) {
-      final index = info.defaultSubtitleStreamIndex;
-      return index != null && index != -1;
-    }
-    return false;
-  }
-
   TrackSelectionResult<SubtitleTrack>? selectSubtitleTrack(
     List<SubtitleTrack> availableTracks,
     SubtitlePreference? preference,
@@ -1110,17 +1090,10 @@ class TrackSelectionService {
       case null:
         break;
       case SubtitleOffPreference():
-        if (!_serverSelectsASubtitle) {
-          return TrackSelectionResult(SubtitleTrack.off, TrackSelectionPriority.navigation);
-        }
-        // Falls through to the server's selection below — see [_serverSelectsASubtitle].
-        break;
+        return TrackSelectionResult(SubtitleTrack.off, TrackSelectionPriority.navigation);
       case SubtitleTrackPreference(:final track):
         if (track.id == 'no') {
-          if (!_serverSelectsASubtitle) {
-            return TrackSelectionResult(SubtitleTrack.off, TrackSelectionPriority.navigation);
-          }
-          break;
+          return TrackSelectionResult(SubtitleTrack.off, TrackSelectionPriority.navigation);
         }
         if (availableTracks.isNotEmpty) {
           final subtitleToSelect = findBestSubtitleMatch(availableTracks, track);
