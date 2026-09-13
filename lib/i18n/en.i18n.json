@@ -425,6 +425,8 @@
     "diskCacheGB": "${size} GB on disk",
     "diskCacheDescription": "Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.",
     "installUpdate": "Install update",
+    "installUpdateTitle": "Install ${version}?",
+    "installUpdateNoNotes": "This release came with no notes.",
     "downloadingUpdate": "Downloading… ${percent}%",
     "upToDate": "You are on the latest version",
     "bufferSize": "Buffer Size",

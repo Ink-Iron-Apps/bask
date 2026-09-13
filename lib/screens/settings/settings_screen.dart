@@ -751,6 +751,17 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   }
 
   Future<void> _installAppUpdate(AvailableUpdate update) async {
+    // A sideloaded build has no store listing, so the release body is the only
+    // account of what is about to change. Show it before committing to the
+    // install rather than after.
+    final confirmed = await showConfirmDialog(
+      context,
+      title: t.settings.installUpdateTitle(version: update.version),
+      message: update.notes.isEmpty ? t.settings.installUpdateNoNotes : update.notes,
+      confirmText: t.settings.installUpdate,
+    );
+    if (!confirmed || !mounted) return;
+
     setStateIfMounted(() {
       _appUpdateProgress = 0;
       _appUpdateError = null;
