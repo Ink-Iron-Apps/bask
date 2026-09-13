@@ -1,3 +1,6 @@
+import '../../utils/formatters.dart';
+import '../../utils/storage_space.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -539,6 +542,41 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
     return SettingsGroup(title: t.settings.controls, children: children);
   }
 
+  /// Free space on the volume the app writes to.
+  ///
+  /// Surfaced because a small volume fails in ways that do not look like a
+  /// storage problem: filling it makes Android reclaim the app's cache
+  /// directory, which has already cost this app its subtitle fonts mid-session
+  /// and turned playback buffering into stutter. A number on screen is cheaper
+  /// than diagnosing that twice.
+  Widget _deviceStorageTile() {
+    return FutureBuilder<StorageSpace?>(
+      future: _deviceStorage ??= getApplicationSupportDirectory().then(StorageSpace.measure),
+      builder: (context, snapshot) {
+        final space = snapshot.data;
+        final subtitle = space == null
+            ? t.settings.deviceStorageUnknown
+            : space.isLow
+            ? t.settings.deviceStorageLow(
+                free: ByteFormatter.formatBytes(space.freeBytes),
+                total: ByteFormatter.formatBytes(space.totalBytes),
+              )
+            : t.settings.deviceStorageFree(
+                free: ByteFormatter.formatBytes(space.freeBytes),
+                total: ByteFormatter.formatBytes(space.totalBytes),
+              );
+        return SettingInfoTile(
+          icon: space?.isLow ?? false ? Symbols.warning_rounded : Symbols.storage_rounded,
+          iconColor: space?.isLow ?? false ? Theme.of(context).colorScheme.error : null,
+          title: t.settings.deviceStorage,
+          subtitle: subtitle,
+        );
+      },
+    );
+  }
+
+  Future<StorageSpace?>? _deviceStorage;
+
   Widget _buildAdvancedSection() {
     return SettingsGroup(
       title: t.settings.advanced,
@@ -578,6 +616,7 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           subtitle: t.settings.viewLogsDescription,
           destinationBuilder: (context) => const LogsScreen(),
         ),
+        _deviceStorageTile(),
         SettingNavigationTile(
           focusNode: _focusTracker.get(_kClearImageCache),
           icon: Symbols.cleaning_services_rounded,

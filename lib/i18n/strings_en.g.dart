@@ -777,6 +777,18 @@ class Translations$settings$en {
 	/// en: 'Clear cached artwork and thumbnails. Images may load slower until downloaded again.'
 	String get clearImageCacheDescription => 'Clear cached artwork and thumbnails. Images may load slower until downloaded again.';
 
+	/// en: 'Device storage'
+	String get deviceStorage => 'Device storage';
+
+	/// en: '${free} free of ${total}'
+	String deviceStorageFree({required Object free, required Object total}) => '${free} free of ${total}';
+
+	/// en: '${free} free of ${total} — downloads and playback buffering need room'
+	String deviceStorageLow({required Object free, required Object total}) => '${free} free of ${total} — downloads and playback buffering need room';
+
+	/// en: 'Free space unavailable on this platform'
+	String get deviceStorageUnknown => 'Free space unavailable on this platform';
+
 	/// en: 'Image cache cleared successfully'
 	String get clearImageCacheSuccess => 'Image cache cleared successfully';
 
@@ -7460,6 +7472,10 @@ extension on Translations {
 			'settings.viewLogsDescription' => 'View application logs',
 			'settings.clearImageCache' => 'Clear Image Cache',
 			'settings.clearImageCacheDescription' => 'Clear cached artwork and thumbnails. Images may load slower until downloaded again.',
+			'settings.deviceStorage' => 'Device storage',
+			'settings.deviceStorageFree' => ({required Object free, required Object total}) => '${free} free of ${total}',
+			'settings.deviceStorageLow' => ({required Object free, required Object total}) => '${free} free of ${total} — downloads and playback buffering need room',
+			'settings.deviceStorageUnknown' => 'Free space unavailable on this platform',
 			'settings.clearImageCacheSuccess' => 'Image cache cleared successfully',
 			'settings.resetSettings' => 'Reset Settings',
 			'settings.resetSettingsDescription' => 'Restore default settings. This can\'t be undone.',
@@ -7736,12 +7752,12 @@ extension on Translations {
 			'fileInfo.dolbyVision' => 'Dolby Vision',
 			'fileInfo.dolbyVisionLevel' => 'Dolby Vision Level',
 			'fileInfo.dolbyVisionVersion' => 'Dolby Vision Version',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.dolbyVisionLayers' => 'Dolby Vision Layers',
 			'fileInfo.baseLayerCompatibility' => 'Base Layer Compatibility',
 			'fileInfo.avcBitstream' => 'AVC Bitstream',
 			'fileInfo.nalLengthSize' => 'NAL Length Size',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.scalingMatrix' => 'Custom Scaling Matrix',
 			'fileInfo.streamIdentifier' => 'Stream Identifier',
 			'fileInfo.streamIndex' => 'Stream Index',
@@ -8250,12 +8266,12 @@ extension on Translations {
 			'errors.noClientAvailable' => 'No client available',
 			'errors.pleaseEnterToken' => 'Please enter a token',
 			'errors.invalidToken' => 'Invalid token',
+			_ => null,
+		} ?? switch (path) {
 			'errors.failedToVerifyToken' => ({required Object error}) => 'Failed to verify token: ${error}',
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => 'Failed to switch to ${displayName}',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => 'Failed to delete ${displayName}',
 			'errors.failedToRate' => 'Couldn\'t update rating',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.title' => 'Libraries',
 			'libraries.fallbackTitle' => 'Library',
 			'libraries.scanLibraryFiles' => 'Scan Library Files',
@@ -8764,12 +8780,12 @@ extension on Translations {
 			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
 			'watchTogether.participantBuffering' => ({required Object name}) => '${name} is buffering',
 			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} is on an older app version — sync unavailable',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.resumingWithout' => ({required Object name}) => 'Resuming without ${name}',
 			'watchTogether.waitingForParticipants' => 'Waiting for others to load...',
 			'watchTogether.waitingForName' => ({required Object name}) => 'Waiting for ${name}...',
 			'watchTogether.recentRooms' => 'Recent Rooms',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.renameRoom' => 'Rename Room',
 			'watchTogether.removeRoom' => 'Remove',
 			'watchTogether.guestSwitchUnavailable' => 'Couldn\'t switch — server unavailable for sync',
@@ -9278,12 +9294,12 @@ extension on Translations {
 			'addServer.required' => 'Required',
 			'addServer.couldNotReachServer' => ({required Object error}) => 'Could not reach the server: ${error}',
 			'addServer.signInFailed' => ({required Object error}) => 'Sign-in failed: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.quickConnectFailed' => ({required Object error}) => 'Quick Connect failed: ${error}',
 			'addServer.addPlexTitle' => 'Sign in with Plex',
 			'addServer.pinExpired' => 'PIN expired before sign-in. Please try again.',
 			'addServer.failedToRegisterAccount' => ({required Object error}) => 'Failed to register account: ${error}',
-			_ => null,
-		} ?? switch (path) {
 			'addServer.enterMediaBrowserUrlError' => ({required Object product}) => 'Enter your ${product} server URL',
 			'addServer.addConnectionTitle' => 'Add connection',
 			'addServer.addConnectionTitleScoped' => ({required Object name}) => 'Add to ${name}',
