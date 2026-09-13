@@ -1,3 +1,6 @@
+import 'dart:io';
+import '../test_helpers/io_fakes.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:drift/drift.dart' show ApplyInterceptor, QueryExecutor, QueryInterceptor;
@@ -3386,5 +3389,52 @@ void main() {
       p.dispose();
       expect(p.isDisposed, isTrue);
     });
+  });
+
+  test('the list loads before recovery finishes, then corrects itself', () async {
+    // Anchor: recovery repairs rows, initialises the downloader and reconciles
+    // native tasks — measured at eight seconds on a library of a couple of
+    // hundred. The list must not wait for it: rows appear from the database
+    // first, and a correcting pass follows when recovery lands.
+    // The persisted load resolves the artwork directory, so the path plugin
+    // has to answer in this suite too.
+    final tempRoot = await Directory.systemTemp.createTemp('download_recovery_test_');
+    addTearDown(() => tempRoot.delete(recursive: true));
+    final previousPathProvider = PathProviderPlatform.instance;
+    PathProviderPlatform.instance = FakePathProvider(tempRoot);
+    addTearDown(() => PathProviderPlatform.instance = previousPathProvider);
+
+    final recovery = Completer<void>();
+    final manager = DownloadManagerService(
+      database: db,
+      storageService: DownloadStorageService.instance,
+      clientResolver: (serverId, {clientScopeId}) => null,
+    )..recoveryFuture = recovery.future;
+    addTearDown(manager.dispose);
+
+    await db.insertDownload(
+      serverId: ServerId('srv-a'),
+      ratingKey: '1',
+      globalKey: 'srv-a:1',
+      type: 'movie',
+      status: DownloadStatus.downloading.index,
+    );
+    await db.addDownloadOwner(profileId: 'test-profile', globalKey: 'srv-a:1');
+
+    // The real constructor, not forTesting: this exercises the persisted-load
+    // path, which is the one that used to block on recovery.
+    final provider = DownloadProvider(downloadManager: manager, database: db);
+    addTearDown(provider.dispose);
+    provider.setActiveProfileId('test-profile');
+
+    // Initialisation completes while recovery is still outstanding: this is
+    // the assertion that matters — before the fix it would time out.
+    await provider.ensureInitialized().timeout(const Duration(seconds: 5));
+    await provider.debugWaitForProfileScopedReload();
+    expect(provider.downloads.containsKey('srv-a:1'), isTrue, reason: 'rows must not wait for recovery');
+
+    recovery.complete();
+    await pumpEventQueue();
+    expect(provider.downloads.containsKey('srv-a:1'), isTrue);
   });
 }
