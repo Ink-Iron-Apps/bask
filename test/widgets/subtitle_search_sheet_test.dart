@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:plezy/models/plex/plex_subtitle_search_result.dart';
 import 'package:plezy/database/app_database.dart';
 import 'package:plezy/i18n/strings.g.dart';
 import 'package:plezy/media/ids.dart';
@@ -33,6 +34,36 @@ void main() {
 
     test('falls back to English when saved and system languages are invalid', () {
       expect(resolveSubtitleSearchLanguageCode(savedLanguageCode: 'zz', systemLocale: const Locale('xx')), 'en');
+    });
+  });
+
+  group('rankSubtitleResults', () {
+    PlexSubtitleSearchResult result(String key, {bool perfect = false, double? score}) =>
+        PlexSubtitleSearchResult(id: 0, key: key, perfectMatch: perfect, score: score);
+
+    test('a hash match outranks a higher-scoring result for another release', () {
+      // Anchor: a perfect match is timed against this exact file, so it cannot
+      // drift. A 4% frame-rate mismatch puts a "better scoring" subtitle two
+      // minutes out by the end of a film, so score must not beat the hash.
+      final ranked = rankSubtitleResults([result('high-score', score: 99), result('hash', perfect: true, score: 12)]);
+
+      expect(ranked.first.key, 'hash');
+      expect(ranked.last.key, 'high-score');
+    });
+
+    test('score orders results within each group', () {
+      final ranked = rankSubtitleResults([
+        result('c', score: 5),
+        result('a', perfect: true, score: 30),
+        result('d'),
+        result('b', perfect: true, score: 80),
+      ]);
+
+      expect(ranked.map((r) => r.key), ['b', 'a', 'c', 'd']);
+    });
+
+    test('leaves an empty result set alone', () {
+      expect(rankSubtitleResults(const []), isEmpty);
     });
   });
 
