@@ -130,4 +130,18 @@ void main() {
     expect(ok.statusCode, 200);
     await ok.stream.drain<void>();
   });
+
+  group('artwork object limit', () {
+    test('a TV gets a cap that cannot eat its volume', () {
+      // Anchor: this cache lives where Android cannot reclaim it, which is
+      // right on a phone and dangerous on a set whose data partition is 4 GB.
+      // Three thousand server-sized posters is a couple of hundred megabytes.
+      expect(PlexImageCacheManager.artworkObjectLimitFor(isTv: true), 3000);
+    });
+
+    test('everything else keeps the large cap', () {
+      // Evicting on a phone made scrolling re-download artwork it already had.
+      expect(PlexImageCacheManager.artworkObjectLimitFor(isTv: false), 100000);
+    });
+  });
 }
