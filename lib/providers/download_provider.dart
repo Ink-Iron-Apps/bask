@@ -415,18 +415,27 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       _queueing.clear();
       _deletionProgress.clear();
       _ownedDownloadKeys.clear();
+      // Phase timings: this load gates the Downloads list, and on a library of
+      // a couple of hundred it has been seen to take seconds with no way to
+      // tell which phase spent them. Cheap enough to keep — one log line per
+      // cold start, off the critical path.
+      final loadWatch = Stopwatch()..start();
       await _loadDownloadOwners();
+      final ownersMs = loadWatch.elapsedMilliseconds;
 
       final storageService = DownloadStorageService.instance;
 
       // Initialize artwork directory path for synchronous access
       await storageService.getArtworkDirectory();
+      final artworkMs = loadWatch.elapsedMilliseconds - ownersMs;
 
       final downloads = await _downloadManager.getAllDownloads();
+      final rowsMs = loadWatch.elapsedMilliseconds - ownersMs - artworkMs;
 
       // Bulk-load all pinned metadata across every backend in a single pass
       // instead of per-item DB calls.
       final pinned = await _downloadManager.getAllPinnedMetadata(activeProfileId: _activeProfileId);
+      final pinnedMs = loadWatch.elapsedMilliseconds - ownersMs - artworkMs - rowsMs;
 
       for (final item in downloads) {
         _downloads[item.globalKey] = DownloadProgress(
@@ -445,7 +454,14 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
         }
       }
 
+      final hydrateMs = loadWatch.elapsedMilliseconds - ownersMs - artworkMs - rowsMs - pinnedMs;
+
       await _loadSyncRules();
+      appLogger.i(
+        'Downloads load phases: owners ${ownersMs}ms, artwork dir ${artworkMs}ms, rows ${rowsMs}ms, '
+        'pinned metadata ${pinnedMs}ms, hydrate ${hydrateMs}ms, sync rules '
+        '${loadWatch.elapsedMilliseconds - ownersMs - artworkMs - rowsMs - pinnedMs - hydrateMs}ms',
+      );
 
       // Apply queued offline watch actions on top of the server-time metadata
       // we just loaded, so re-entries reflect locally-marked watched/unwatched
