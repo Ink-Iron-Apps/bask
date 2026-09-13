@@ -17,12 +17,17 @@ class SleepTimerService extends ChangeNotifier {
   DateTime? _endTime;
   Duration? _duration;
   Duration? _originalDuration;
+  Object? _playbackOwner;
   VoidCallback? _onTimerComplete;
   bool _needsRestart = false;
   int _restartVideosRemaining = 0;
+  bool _restartUntilQueueEnd = false;
 
   /// Items still to finish before the timer fires, or 0 when not armed this way.
   int _videosRemaining = 0;
+
+  /// Armed to run until the queue has nothing left to play.
+  bool _untilQueueEnd = false;
   final StreamController<void> _completedController = StreamController<void>.broadcast();
   final StreamController<void> _promptController = StreamController<void>.broadcast();
 
@@ -32,11 +37,14 @@ class SleepTimerService extends ChangeNotifier {
   /// Emits when the timer fires and wants to show a "still watching?" prompt
   Stream<void> get onPrompt => _promptController.stream;
 
-  bool get isActive => (_timer != null && _timer!.isActive) || _videosRemaining > 0;
+  bool get isActive => (_timer != null && _timer!.isActive) || _videosRemaining > 0 || _untilQueueEnd;
 
-  /// Whether the sleep timer is armed to fire at the end of a number of videos
-  /// rather than after a fixed duration.
-  bool get isEndOfVideoMode => _videosRemaining > 0;
+  /// Whether the sleep timer is armed to fire at the end of a number of videos,
+  /// or at the end of the queue, rather than after a fixed duration.
+  bool get isEndOfVideoMode => _videosRemaining > 0 || _untilQueueEnd;
+
+  /// Whether it is waiting for the queue to run out rather than counting items.
+  bool get isQueueEndMode => _untilQueueEnd;
 
   /// Items still to finish before the timer fires. Zero when it is not armed
   /// this way; 1 during the last item, whatever it was originally set to.
@@ -58,13 +66,32 @@ class SleepTimerService extends ChangeNotifier {
     return remaining.isNegative ? Duration.zero : remaining;
   }
 
-  void startTimer(Duration duration, VoidCallback onComplete) {
+  /// Replace the playback target without changing the selected timer or deadline.
+  void bindPlayback({required Object owner, required VoidCallback onComplete}) {
+    _playbackOwner = owner;
+    _onTimerComplete = onComplete;
+  }
+
+  /// Release the current playback target and restart its timer on the next session.
+  /// A superseded owner cannot detach its successor or restart the countdown.
+  void unbindPlayback(Object owner) {
+    if (!identical(_playbackOwner, owner)) return;
+
+    _playbackOwner = null;
+    _onTimerComplete = null;
+    if (isActive || _originalDuration != null) {
+      _needsRestart = true;
+      _restartVideosRemaining = _videosRemaining;
+      _restartUntilQueueEnd = _untilQueueEnd;
+    }
+  }
+
+  void startTimer(Duration duration) {
     cancelTimer();
 
     _originalDuration = duration;
     _duration = duration;
     _endTime = _now().add(duration);
-    _onTimerComplete = onComplete;
 
     appLogger.d('Sleep timer started: ${duration.inMinutes} minutes');
 
@@ -84,7 +111,7 @@ class SleepTimerService extends ChangeNotifier {
   }
 
   /// Arm the sleep timer to fire when the current video reaches its end.
-  void armEndOfVideo(VoidCallback onComplete) => armEndOfVideos(1, onComplete);
+  void armEndOfVideo() => armEndOfVideos(1);
 
   /// Arm the sleep timer to fire after [count] videos have finished.
   ///
@@ -92,12 +119,23 @@ class SleepTimerService extends ChangeNotifier {
   /// reported externally via [notifyVideoCompleted]. A count above one leaves
   /// the intervening completions to the player's normal autoplay, so the queue
   /// keeps advancing until the last one.
-  void armEndOfVideos(int count, VoidCallback onComplete) {
+  /// Arm the sleep timer to fire when the queue has nothing left to play.
+  ///
+  /// The count is unknowable up front — a queue can be a playlist, a shuffled
+  /// list, or a series the server extends as it goes — so this asks the player
+  /// at each completion whether anything follows, rather than counting.
+  void armEndOfQueue() {
+    cancelTimer();
+    _untilQueueEnd = true;
+    appLogger.d('Sleep timer armed: end of queue');
+    notifyListeners();
+  }
+
+  void armEndOfVideos(int count) {
     cancelTimer();
     if (count < 1) return;
 
     _videosRemaining = count;
-    _onTimerComplete = onComplete;
 
     appLogger.d('Sleep timer armed: end of $count video(s)');
     notifyListeners();
@@ -109,7 +147,19 @@ class SleepTimerService extends ChangeNotifier {
   /// so the caller can stop rather than advance; false means the timer is
   /// either not armed this way or still counting, and playback should carry on
   /// as normal. Safe to call unconditionally.
-  bool notifyVideoCompleted() {
+  bool notifyVideoCompleted({bool hasNext = false}) {
+    if (_untilQueueEnd) {
+      if (hasNext) {
+        appLogger.d('Sleep timer: queue still has items');
+        return false;
+      }
+      appLogger.d('Sleep timer (end of queue) triggered');
+      _untilQueueEnd = false;
+      _executeCallback();
+      notifyListeners();
+      return true;
+    }
+
     if (_videosRemaining < 1) return false;
 
     _videosRemaining--;
@@ -125,57 +175,48 @@ class SleepTimerService extends ChangeNotifier {
     return true;
   }
 
-  /// Cancel the active timer (user-initiated, clears everything)
+  /// Cancel the timer configuration and pending restart, keeping playback bound.
   void cancelTimer() {
-    if (_timer != null || _originalDuration != null || _videosRemaining > 0) {
+    if (_timer != null ||
+        _originalDuration != null ||
+        _videosRemaining > 0 ||
+        _needsRestart ||
+        _restartVideosRemaining > 0) {
       appLogger.d('Sleep timer cancelled');
       _timer?.cancel();
       _timer = null;
       _endTime = null;
       _duration = null;
       _originalDuration = null;
-      _onTimerComplete = null;
+      _needsRestart = false;
       _videosRemaining = 0;
+      _untilQueueEnd = false;
       _restartVideosRemaining = 0;
+      _restartUntilQueueEnd = false;
       notifyListeners();
     }
   }
 
   void restartTimer() {
-    if (_originalDuration != null && _onTimerComplete != null) {
-      final duration = _originalDuration!;
-      final callback = _onTimerComplete!;
-      startTimer(duration, callback);
-    }
-  }
-
-  /// Execute the completion callback directly (fallback path)
-  @visibleForTesting
-  void executeCompletion() {
-    _executeCallback();
-  }
-
-  /// Mark that the timer should restart when a new playback session begins
-  /// (e.g. user exited the player and started something new)
-  void markNeedsRestart() {
-    if (isActive || _originalDuration != null) {
-      _needsRestart = true;
-      _restartVideosRemaining = _videosRemaining;
+    if (_originalDuration != null) {
+      startTimer(_originalDuration!);
     }
   }
 
   /// Restart the timer if it was marked for restart (new playback session).
-  /// [onComplete] provides the new callback for the fresh session.
-  void restartIfNeeded(VoidCallback onComplete) {
+  void restartIfNeeded() {
     if (!_needsRestart) return;
     _needsRestart = false;
 
-    if (_restartVideosRemaining > 0) {
+    if (_restartUntilQueueEnd) {
+      _restartUntilQueueEnd = false;
+      armEndOfQueue();
+    } else if (_restartVideosRemaining > 0) {
       final remaining = _restartVideosRemaining;
       _restartVideosRemaining = 0;
-      armEndOfVideos(remaining, onComplete);
+      armEndOfVideos(remaining);
     } else if (_originalDuration != null) {
-      startTimer(_originalDuration!, onComplete);
+      startTimer(_originalDuration!);
     }
   }
 
@@ -189,8 +230,8 @@ class SleepTimerService extends ChangeNotifier {
     }
   }
 
-  /// Stop the periodic timer but preserve _originalDuration and _onTimerComplete
-  /// for the prompt flow (restart/completion)
+  /// Stop the countdown but preserve the selection and playback binding for
+  /// the still-watching prompt's restart flow.
   void _stopTimerOnly() {
     _timer?.cancel();
     _timer = null;
@@ -213,6 +254,8 @@ class SleepTimerService extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
+    _playbackOwner = null;
+    _onTimerComplete = null;
     _completedController.close();
     _promptController.close();
     super.dispose();

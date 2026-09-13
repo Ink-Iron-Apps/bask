@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import '../utils/app_logger.dart';
+import '../utils/storage_space.dart';
 
 /// On-disk home for the player's read-ahead buffer.
 ///
@@ -73,27 +73,10 @@ class PlaybackDiskCache {
 
   /// Bytes free on the volume holding [directory], or null if unknown.
   ///
-  /// There is no Dart API for this, and the cache lives on the same partition
-  /// as the app's data, so ask the platform. A TV's data partition can be 4 GB
-  /// total — asking mpv to buffer more than fits does not fail cleanly: it
-  /// fills the volume, and Android reclaims the app's cache directory to
-  /// recover, taking the extracted subtitle fonts with it.
-  static Future<int?> freeBytes(Directory directory) async {
-    if (!Platform.isAndroid && !Platform.isLinux && !Platform.isMacOS) return null;
-    try {
-      final result = await Process.run('df', ['-k', directory.path]);
-      if (result.exitCode != 0) return null;
-      final lines = const LineSplitter().convert(result.stdout.toString()).where((l) => l.trim().isNotEmpty);
-      if (lines.length < 2) return null;
-      final fields = lines.last.trim().split(RegExp(r'\s+'));
-      // df -k: Filesystem, 1K-blocks, Used, Available, ...
-      final availableKb = fields.length > 3 ? int.tryParse(fields[3]) : null;
-      return availableKb == null ? null : availableKb * 1024;
-    } catch (e) {
-      appLogger.d('Could not measure free space for ${directory.path}', error: e);
-      return null;
-    }
-  }
+  /// A TV's data partition can be 4 GB in total, and asking mpv to buffer more
+  /// than fits does not fail cleanly: it fills the volume, and Android reclaims
+  /// the app's cache directory to recover.
+  static Future<int?> freeBytes(Directory directory) async => (await StorageSpace.measure(directory))?.freeBytes;
 
   /// Prunes the real cache directory, if there is one.
   static Future<void> pruneDefault() async {

@@ -108,7 +108,7 @@ const fallbackDeviceAbis = ['armeabi-v7a', 'arm64-v8a'];
 /// An update available on the release mirror.
 @immutable
 class AvailableUpdate {
-  const AvailableUpdate({required this.version, required this.assetUrl, required this.assetName});
+  const AvailableUpdate({required this.version, required this.assetUrl, required this.assetName, this.notes = ''});
 
   final String version;
 
@@ -116,6 +116,11 @@ class AvailableUpdate {
   /// fetched with a token on a private repository.
   final String assetUrl;
   final String assetName;
+
+  /// The release body, as written by the release workflow. Empty when the
+  /// release carried none — worth showing when it is there, since a sideloaded
+  /// build has no store listing to explain what changed.
+  final String notes;
 }
 
 /// Checks the private release mirror, downloads the matching APK, and hands it
@@ -167,6 +172,7 @@ class AppUpdateService {
       version: tag.replaceFirst(RegExp('^v'), ''),
       assetUrl: asset['url'] as String,
       assetName: asset['name'] as String,
+      notes: (body['body'] as String? ?? '').trim(),
     );
   }
 
