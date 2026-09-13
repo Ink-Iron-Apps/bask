@@ -978,6 +978,22 @@ class DownloadManagerService {
   Future<void> recoverInterruptedDownloads() async {
     if (_skipDownloadsUnsupported('download recovery')) return;
 
+    // Phase timings. Recovery was measured at roughly eight seconds on a
+    // library of a couple of hundred downloads, most of it in a single silent
+    // stretch between two background_downloader calls that both returned no
+    // tasks. Nothing here logs on the happy path — every message below is
+    // conditional on having found something — so an expensive phase is
+    // indistinguishable from a cheap one. One line per recovery, and it no
+    // longer blocks the Downloads list either way.
+    final watch = Stopwatch()..start();
+    final phases = <String, int>{};
+    var lastMs = 0;
+    void mark(String phase) {
+      final now = watch.elapsedMilliseconds;
+      phases[phase] = now - lastMs;
+      lastMs = now;
+    }
+
     try {
       try {
         final repaired = await _database.repairMissingQueuedDownloadEntries();
@@ -987,6 +1003,7 @@ class DownloadManagerService {
       } catch (e, st) {
         appLogger.e('Failed to repair missing download queue items', error: e, stackTrace: st);
       }
+      mark('repair');
       final nativeRecoveryOverride = _nativeRecoveryOverride;
       if (nativeRecoveryOverride != null) {
         await nativeRecoveryOverride();
@@ -997,11 +1014,14 @@ class DownloadManagerService {
       // task already hit on the old path — and a failed row is no longer restartable.
       // rescheduleKilledTasks, further down, would re-enqueue it against that path again.
       await _purgeRelocatedDownloadRecords();
+      mark('purge relocated');
 
       unawaited(Sentry.addBreadcrumb(Breadcrumb(message: 'Initializing FileDownloader', category: 'downloads')));
       await (_fileDownloaderInitializerOverride?.call() ?? _initializeFileDownloader());
+      mark('downloader init');
 
       final deletedTempFiles = await _nativeOps.cleanUpOrphanedTempFiles();
+      mark('temp file sweep');
       if (deletedTempFiles > 0) {
         appLogger.i('Deleted $deletedTempFiles orphaned downloader temp file(s)');
       }
@@ -1009,12 +1029,15 @@ class DownloadManagerService {
       // Let background_downloader re-enqueue tasks killed by the OS
       unawaited(Sentry.addBreadcrumb(Breadcrumb(message: 'Rescheduling killed tasks', category: 'downloads')));
       final (rescheduled, _) = await _nativeOps.rescheduleKilledTasks();
+      mark('reschedule killed');
       if (rescheduled.isNotEmpty) {
         appLogger.i('Rescheduled ${rescheduled.length} killed download task(s)');
       }
 
       await _reconcileNativeDownloadTasks();
+      mark('reconcile native tasks');
       await _reconcileSafGrantOwnership();
+      mark('reconcile SAF grants');
 
       // One-time migration: normalize stored file paths that may contain a
       // doubled base-dir prefix from an earlier bug in the recovery callback.
@@ -1054,6 +1077,7 @@ class DownloadManagerService {
         if (fixed > 0) appLogger.i('Normalized $fixed corrupted download path(s)');
         await prefs.setInt('download_paths_normalized_version', 2);
       }
+      mark('path migration');
 
       // Scan drift for orphaned items stuck in 'downloading'
       unawaited(Sentry.addBreadcrumb(Breadcrumb(message: 'Scanning for orphaned downloads', category: 'downloads')));
@@ -1089,8 +1113,14 @@ class DownloadManagerService {
           }
         }
       }
+      mark('orphan scan');
     } catch (e) {
       appLogger.e('Failed to recover interrupted downloads', error: e);
+    } finally {
+      appLogger.i(
+        'Download recovery phases (${watch.elapsedMilliseconds}ms total): '
+        '${phases.entries.map((e) => '${e.key} ${e.value}ms').join(', ')}',
+      );
     }
   }
 
