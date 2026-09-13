@@ -87,6 +87,21 @@ class _SleepTimerEventColumn extends StatelessWidget {
           child: ListView(
             shrinkWrap: true,
             children: [
+              FocusableListTile(
+                leading: AppIcon(
+                  Symbols.playlist_play_rounded,
+                  fill: 1,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                title: Text(t.videoControls.sleepTimerEndOfQueue),
+                selected: sleepTimer.isQueueEndMode,
+                onTap: () {
+                  sleepTimer.armEndOfQueue();
+                  OverlaySheetController.closeAdaptive(context);
+
+                  showSuccessSnackBar(context, t.messages.sleepTimerSet(label: t.videoControls.sleepTimerEndOfQueue));
+                },
+              ),
               for (var count = 1; count <= _maxVideos; count++)
                 FocusableListTile(
                   leading: AppIcon(

@@ -21,9 +21,13 @@ class SleepTimerService extends ChangeNotifier {
   VoidCallback? _onTimerComplete;
   bool _needsRestart = false;
   int _restartVideosRemaining = 0;
+  bool _restartUntilQueueEnd = false;
 
   /// Items still to finish before the timer fires, or 0 when not armed this way.
   int _videosRemaining = 0;
+
+  /// Armed to run until the queue has nothing left to play.
+  bool _untilQueueEnd = false;
   final StreamController<void> _completedController = StreamController<void>.broadcast();
   final StreamController<void> _promptController = StreamController<void>.broadcast();
 
@@ -33,11 +37,14 @@ class SleepTimerService extends ChangeNotifier {
   /// Emits when the timer fires and wants to show a "still watching?" prompt
   Stream<void> get onPrompt => _promptController.stream;
 
-  bool get isActive => (_timer != null && _timer!.isActive) || _videosRemaining > 0;
+  bool get isActive => (_timer != null && _timer!.isActive) || _videosRemaining > 0 || _untilQueueEnd;
 
-  /// Whether the sleep timer is armed to fire at the end of a number of videos
-  /// rather than after a fixed duration.
-  bool get isEndOfVideoMode => _videosRemaining > 0;
+  /// Whether the sleep timer is armed to fire at the end of a number of videos,
+  /// or at the end of the queue, rather than after a fixed duration.
+  bool get isEndOfVideoMode => _videosRemaining > 0 || _untilQueueEnd;
+
+  /// Whether it is waiting for the queue to run out rather than counting items.
+  bool get isQueueEndMode => _untilQueueEnd;
 
   /// Items still to finish before the timer fires. Zero when it is not armed
   /// this way; 1 during the last item, whatever it was originally set to.
@@ -75,6 +82,7 @@ class SleepTimerService extends ChangeNotifier {
     if (isActive || _originalDuration != null) {
       _needsRestart = true;
       _restartVideosRemaining = _videosRemaining;
+      _restartUntilQueueEnd = _untilQueueEnd;
     }
   }
 
@@ -111,6 +119,18 @@ class SleepTimerService extends ChangeNotifier {
   /// reported externally via [notifyVideoCompleted]. A count above one leaves
   /// the intervening completions to the player's normal autoplay, so the queue
   /// keeps advancing until the last one.
+  /// Arm the sleep timer to fire when the queue has nothing left to play.
+  ///
+  /// The count is unknowable up front — a queue can be a playlist, a shuffled
+  /// list, or a series the server extends as it goes — so this asks the player
+  /// at each completion whether anything follows, rather than counting.
+  void armEndOfQueue() {
+    cancelTimer();
+    _untilQueueEnd = true;
+    appLogger.d('Sleep timer armed: end of queue');
+    notifyListeners();
+  }
+
   void armEndOfVideos(int count) {
     cancelTimer();
     if (count < 1) return;
@@ -127,7 +147,19 @@ class SleepTimerService extends ChangeNotifier {
   /// so the caller can stop rather than advance; false means the timer is
   /// either not armed this way or still counting, and playback should carry on
   /// as normal. Safe to call unconditionally.
-  bool notifyVideoCompleted() {
+  bool notifyVideoCompleted({bool hasNext = false}) {
+    if (_untilQueueEnd) {
+      if (hasNext) {
+        appLogger.d('Sleep timer: queue still has items');
+        return false;
+      }
+      appLogger.d('Sleep timer (end of queue) triggered');
+      _untilQueueEnd = false;
+      _executeCallback();
+      notifyListeners();
+      return true;
+    }
+
     if (_videosRemaining < 1) return false;
 
     _videosRemaining--;
@@ -158,7 +190,9 @@ class SleepTimerService extends ChangeNotifier {
       _originalDuration = null;
       _needsRestart = false;
       _videosRemaining = 0;
+      _untilQueueEnd = false;
       _restartVideosRemaining = 0;
+      _restartUntilQueueEnd = false;
       notifyListeners();
     }
   }
@@ -174,7 +208,10 @@ class SleepTimerService extends ChangeNotifier {
     if (!_needsRestart) return;
     _needsRestart = false;
 
-    if (_restartVideosRemaining > 0) {
+    if (_restartUntilQueueEnd) {
+      _restartUntilQueueEnd = false;
+      armEndOfQueue();
+    } else if (_restartVideosRemaining > 0) {
       final remaining = _restartVideosRemaining;
       _restartVideosRemaining = 0;
       armEndOfVideos(remaining);
