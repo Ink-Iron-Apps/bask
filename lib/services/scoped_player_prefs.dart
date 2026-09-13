@@ -76,6 +76,22 @@ abstract final class ScopedPlayerPrefs {
     _decodeInt,
   );
 
+  /// Scoped with the offsets: a rate mismatch belongs to one subtitle file,
+  /// the same way an offset does, and carrying it to the next title would put
+  /// correctly timed subtitles out by 4% instead.
+  static final subtitleSpeed = ScopedPlayerPref<double>._(
+    'subtitle_speed',
+    SettingsService.syncOffsetScope,
+    SettingsService.subtitleSpeed,
+    _decodeSubtitleSpeed,
+  );
+
+  /// Bounds for [subtitleSpeed]. Wide enough for both common frame-rate
+  /// conversions (0.959 and 1.0427) with room either side; anything beyond is
+  /// a broken file rather than a mistimed one.
+  static const double minimumSubtitleSpeed = 0.5;
+  static const double maximumSubtitleSpeed = 2.0;
+
   /// Shared limits for persisted sync offsets and the player's offset controls.
   static const int minimumSyncOffsetMs = -60000;
   static const int maximumSyncOffsetMs = 60000;
@@ -222,6 +238,9 @@ abstract final class ScopedPlayerPrefs {
 
   static double? _decodeSpeed(Object? raw) =>
       raw is num ? raw.toDouble().clamp(minimumPlaybackRate, maximumPlaybackRate) : null;
+
+  static double? _decodeSubtitleSpeed(Object? raw) =>
+      raw is num ? raw.toDouble().clamp(minimumSubtitleSpeed, maximumSubtitleSpeed) : null;
 
   static int? _decodeInt(Object? raw) => raw is int ? raw : null;
 

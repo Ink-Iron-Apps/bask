@@ -564,6 +564,14 @@ class SettingsService extends BaseSharedPreferencesService {
   static const sleepTimerDuration = IntPref('sleep_timer_duration', defaultValue: 30);
   static const audioSyncOffset = IntPref('audio_sync_offset');
   static const subtitleSyncOffset = IntPref('subtitle_sync_offset');
+
+  /// Multiplier applied to subtitle timings, as mpv's `sub-speed`.
+  ///
+  /// A constant offset cannot fix a file authored against a different frame
+  /// rate: the error grows with runtime. 25 fps subtitles over 23.976 fps
+  /// video run 4.27% fast — eight seconds out at three minutes, over two
+  /// minutes out at fifty — and only a rate correction closes that.
+  static const subtitleSpeed = DoublePref('subtitle_speed', defaultValue: 1.0);
   static const subtitleSearchLanguage = NullableStringPref('subtitle_search_language');
   static const volume = DoublePref('volume', defaultValue: 100.0);
 
@@ -1325,6 +1333,7 @@ class SettingsService extends BaseSharedPreferencesService {
     sleepTimerDuration,
     audioSyncOffset,
     subtitleSyncOffset,
+    subtitleSpeed,
     subtitleSearchLanguage,
     volume,
     subtitleFontSize,

@@ -51,6 +51,7 @@ enum _SettingsView {
   shader,
   dvConversion,
   hdrToneMapping,
+  subtitleRate,
   picture,
   pictureChannel,
 }
@@ -347,6 +348,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   late VideoEqualizer _equalizer = _state.videoEqualizer;
   late int _audioSyncOffset;
   late int _subtitleSyncOffset;
+  late double _subtitleSpeed;
   late double _zoomScale;
   String _dvConversionMode = 'auto';
   int _dvConversionWriteGeneration = 0;
@@ -388,6 +390,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     super.initState();
     _audioSyncOffset = _state.audioSyncOffset;
     _subtitleSyncOffset = _state.subtitleSyncOffset;
+    _subtitleSpeed = ScopedPlayerPrefs.resolve(ScopedPlayerPrefs.subtitleSpeed, _state.metadata);
     _zoomScale = VideoFilterManager.normalizeZoomScale(_state.videoZoomScale);
     _hdrToneMapping = SettingsService.instance.read(SettingsService.hdrToneMapping);
     _loadDebugDvConversionMode();
@@ -596,6 +599,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return t.settings.dvConversionMode;
       case _SettingsView.hdrToneMapping:
         return t.videoSettings.hdrToneMapping;
+      case _SettingsView.subtitleRate:
+        return t.videoSettings.subtitleRate;
       case _SettingsView.picture:
         return t.videoSettings.pictureAdjustments;
       case _SettingsView.pictureChannel:
@@ -623,6 +628,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return Symbols.hdr_strong_rounded;
       case _SettingsView.hdrToneMapping:
         return Symbols.tonality_rounded;
+      case _SettingsView.subtitleRate:
+        return Symbols.speed_rounded;
       case _SettingsView.picture:
       case _SettingsView.pictureChannel:
         return Symbols.exposure_rounded;
@@ -793,6 +800,17 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           valueText: formatSyncOffset(_subtitleSyncOffset.toDouble()),
           isHighlighted: _subtitleSyncOffset != 0,
           onTap: () => _openSyncBar(isSubtitle: true),
+        ),
+
+        // Separate from the offset because it fixes a different fault: an
+        // offset shifts every line by the same amount, which cannot correct a
+        // file authored against another frame rate.
+        _SettingsMenuItem(
+          icon: Symbols.av_timer_rounded,
+          title: t.videoSettings.subtitleRate,
+          valueText: _formatSubtitleRate(_subtitleSpeed),
+          isHighlighted: _subtitleSpeed != 1.0,
+          onTap: () => _navigateTo(_SettingsView.subtitleRate),
         ),
 
         if (_supportsHdrControl)
@@ -989,6 +1007,66 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             subtitle: Text(mode.subtitle, style: TextStyle(color: tokens(context).textMuted, fontSize: 12)),
             trailing: _hdrToneMapping == mode.value ? AppIcon(Symbols.check_rounded, fill: 1, color: primary) : null,
             onTap: () => _setHdrToneMapping(mode.value),
+          ),
+      ],
+    );
+  }
+
+  /// The two frame-rate conversions that actually occur in the wild, plus off.
+  ///
+  /// A free slider would be worse here: the error is never arbitrary, it is
+  /// one of these two ratios, and reading "95.9%" off a slider is harder than
+  /// recognising which release the subtitles came from.
+  static const double _subtitleRateSlower = 24000 / 1001 / 25; // 25 fps subs on 23.976 video
+  static const double _subtitleRateFaster = 25 / (24000 / 1001);
+
+  String _formatSubtitleRate(double speed) {
+    if ((speed - _subtitleRateSlower).abs() < 0.0005) return t.videoSettings.subtitleRateSlower;
+    if ((speed - _subtitleRateFaster).abs() < 0.0005) return t.videoSettings.subtitleRateFaster;
+    if (speed == 1.0) return t.videoSettings.subtitleRateNormal;
+    return '${(speed * 100).toStringAsFixed(1)}%';
+  }
+
+  Future<void> _setSubtitleRate(double speed) async {
+    setState(() => _subtitleSpeed = speed);
+    await ScopedPlayerPrefs.write(ScopedPlayerPrefs.subtitleSpeed, _state.metadata, speed);
+    try {
+      await widget.player.setProperty('sub-speed', speed.toStringAsFixed(5));
+    } catch (e) {
+      appLogger.w('Could not apply the subtitle rate', error: e);
+    }
+    if (mounted) _navigateTo(_SettingsView.menu);
+  }
+
+  Widget _buildSubtitleRateView() {
+    final rates = [
+      (value: 1.0, label: t.videoSettings.subtitleRateNormal, subtitle: t.videoSettings.subtitleRateNormalDescription),
+      (
+        value: _subtitleRateSlower,
+        label: t.videoSettings.subtitleRateSlower,
+        subtitle: t.videoSettings.subtitleRateSlowerDescription,
+      ),
+      (
+        value: _subtitleRateFaster,
+        label: t.videoSettings.subtitleRateFaster,
+        subtitle: t.videoSettings.subtitleRateFasterDescription,
+      ),
+    ];
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return ListView(
+      children: [
+        for (final rate in rates)
+          FocusableListTile(
+            title: Text(
+              rate.label,
+              style: TextStyle(color: (_subtitleSpeed - rate.value).abs() < 0.0005 ? primary : null),
+            ),
+            subtitle: Text(rate.subtitle, style: TextStyle(color: tokens(context).textMuted, fontSize: 12)),
+            trailing: (_subtitleSpeed - rate.value).abs() < 0.0005
+                ? AppIcon(Symbols.check_rounded, fill: 1, color: primary)
+                : null,
+            onTap: () => unawaited(_setSubtitleRate(rate.value)),
           ),
       ],
     );
@@ -1499,6 +1577,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             return _buildDvConversionView();
           case _SettingsView.hdrToneMapping:
             return _buildHdrToneMappingView();
+          case _SettingsView.subtitleRate:
+            return _buildSubtitleRateView();
         }
       }(),
     );

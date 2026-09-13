@@ -29,6 +29,24 @@ String resolveSubtitleSearchLanguageCode({String? savedLanguageCode, required Lo
       'en';
 }
 
+/// Hash matches first, then by the provider's score.
+///
+/// `perfectMatch` is OpenSubtitles reporting that the subtitle was timed
+/// against a file with this file's hash, so it cannot drift — which a
+/// high-scoring subtitle for another release certainly can, by 4% if the two
+/// releases differ in frame rate. The provider does not return them in that
+/// order, so an exact match could sit below worse results with only a star to
+/// distinguish it.
+@visibleForTesting
+List<PlexSubtitleSearchResult> rankSubtitleResults(List<PlexSubtitleSearchResult> results) {
+  final ranked = List<PlexSubtitleSearchResult>.of(results);
+  ranked.sort((a, b) {
+    if (a.perfectMatch != b.perfectMatch) return a.perfectMatch ? -1 : 1;
+    return (b.score ?? 0).compareTo(a.score ?? 0);
+  });
+  return ranked;
+}
+
 class SubtitleSearchSheet extends StatefulWidget {
   final String ratingKey;
   final String serverId;
@@ -117,7 +135,7 @@ class _SubtitleSearchSheetState extends State<SubtitleSearchSheet> with Controll
       );
       if (!mounted || generation != _searchGeneration) return;
       setState(() {
-        _results = results;
+        _results = rankSubtitleResults(results);
         _isSearching = false;
       });
     } catch (e) {
@@ -301,10 +319,53 @@ class _SubtitleSearchSheetState extends State<SubtitleSearchSheet> with Controll
               ],
             ),
           ),
+          // One tap for the common case. A hash match is timed against this
+          // exact file, so there is nothing to choose between it and the rest
+          // — reading a list to find the starred row is work the app can do.
+          if (_bestMatch case final best?)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: FocusableButton(
+                onPressed: _downloadingKey == null ? () => unawaited(_downloadSubtitle(best)) : null,
+                autoScroll: false,
+                child: Material(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: pillInputRadius,
+                  child: InkWell(
+                    borderRadius: pillInputRadius,
+                    canRequestFocus: false,
+                    onTap: _downloadingKey == null ? () => unawaited(_downloadSubtitle(best)) : null,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      child: Row(
+                        mainAxisSize: .min,
+                        spacing: 8,
+                        children: [
+                          const AppIcon(Symbols.star_rounded, fill: 1, size: 18),
+                          Text(t.videoControls.subtitleBestMatch),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           Expanded(child: _buildResults()),
         ],
       ),
     );
+  }
+
+  /// The hash-matched result, if the provider returned one.
+  ///
+  /// `_ranked` puts it first, so this is a check of the head rather than a
+  /// scan — and null when the provider has nothing timed to this file, which
+  /// is when the list is worth reading.
+  PlexSubtitleSearchResult? get _bestMatch {
+    final results = _results;
+    if (results == null || results.isEmpty) return null;
+    final first = results.first;
+    return first.perfectMatch ? first : null;
   }
 
   Widget _buildResults() {
