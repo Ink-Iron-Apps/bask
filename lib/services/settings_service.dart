@@ -228,8 +228,11 @@ class AutomotiveUiScale {
 /// Doing it there cost this app a debugging session — stutter and vanished
 /// subtitle fonts — so the default is off and the setting stays available for
 /// anyone whose set has room.
-class _DiskCacheSizePref extends Pref<int> {
-  const _DiskCacheSizePref() : super('disk_cache_size_gb');
+///
+/// Extends [IntPref] rather than [Pref] directly: the settings export types a
+/// preference by its class, and a bare Pref<int> has no storage type there.
+class _DiskCacheSizePref extends IntPref {
+  const _DiskCacheSizePref() : super('disk_cache_size_gb', defaultValue: _handheldDefault);
 
   static const int _handheldDefault = 4;
 
@@ -238,9 +241,6 @@ class _DiskCacheSizePref extends Pref<int> {
 
   @override
   int readFrom(BaseSharedPreferencesService svc) => svc.readInt(key, defaultValue: resolvedDefault);
-
-  @override
-  Future<void> writeTo(BaseSharedPreferencesService svc, int value) => svc.writeInt(key, value);
 }
 
 /// Uses a larger default on car displays while honoring and clamping a stored
