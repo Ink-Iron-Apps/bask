@@ -1730,6 +1730,24 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
         }
       }
 
+      if (Platform.isAndroid && PlatformDetector.isTV() && !useExoPlayer) {
+        // A TV's audio HAL commonly refuses the deep-buffer track mpv asks for
+        // and hands back a primary one instead — AudioFlinger logs the
+        // downgrade as "mismatch between requested flags (00000008) and output
+        // flags (00000002)" — leaving a buffer shallow enough that ordinary
+        // scheduling jitter underruns it. Observed on a Sony Bravia, where the
+        // underruns recur through otherwise healthy playback.
+        //
+        // mpv's own queue is the part this app controls, so give it room:
+        // half a second instead of the 0.2s default. The cost is a slightly
+        // later response to an audio-delay change, which nothing here notices.
+        try {
+          await currentPlayer.setProperty('audio-buffer', '0.5');
+        } catch (e) {
+          appLogger.w('VideoPlayerScreen: audio buffer not applied', error: e);
+        }
+      }
+
       if (Platform.isIOS) {
         await currentPlayer.setProperty('audio-exclusive', 'yes');
 
