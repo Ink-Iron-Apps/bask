@@ -2072,6 +2072,9 @@ class Translations$videoControls$en {
 	/// en: 'End of ${count} videos'
 	String sleepTimerEndOfVideos({required Object count}) => 'End of ${count} videos';
 
+	/// en: 'End of queue'
+	String get sleepTimerEndOfQueue => 'End of queue';
+
 	/// en: 'Stop at'
 	String get sleepTimerStopAtHeader => 'Stop at';
 
@@ -7902,6 +7905,7 @@ extension on Translations {
 			'videoControls.playbackWillPauseIn' => ({required Object duration}) => 'Playback will pause in ${duration}',
 			'videoControls.sleepTimerEndOfVideo' => 'End of current video',
 			'videoControls.sleepTimerEndOfVideos' => ({required Object count}) => 'End of ${count} videos',
+			'videoControls.sleepTimerEndOfQueue' => 'End of queue',
 			'videoControls.sleepTimerStopAtHeader' => 'Stop at',
 			'videoControls.sleepTimerDurationHeader' => 'Timer',
 			'videoControls.playbackWillPauseAtEnd' => 'Playback will pause at the end of this video',
@@ -8265,9 +8269,9 @@ extension on Translations {
 			'errors.unableToLoad' => ({required Object context}) => 'Unable to load ${context}. Please try again.',
 			'errors.noClientAvailable' => 'No client available',
 			'errors.pleaseEnterToken' => 'Please enter a token',
-			'errors.invalidToken' => 'Invalid token',
 			_ => null,
 		} ?? switch (path) {
+			'errors.invalidToken' => 'Invalid token',
 			'errors.failedToVerifyToken' => ({required Object error}) => 'Failed to verify token: ${error}',
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => 'Failed to switch to ${displayName}',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => 'Failed to delete ${displayName}',
@@ -8779,9 +8783,9 @@ extension on Translations {
 			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
 			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
 			'watchTogether.participantBuffering' => ({required Object name}) => '${name} is buffering',
-			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} is on an older app version — sync unavailable',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} is on an older app version — sync unavailable',
 			'watchTogether.resumingWithout' => ({required Object name}) => 'Resuming without ${name}',
 			'watchTogether.waitingForParticipants' => 'Waiting for others to load...',
 			'watchTogether.waitingForName' => ({required Object name}) => 'Waiting for ${name}...',
@@ -9293,9 +9297,9 @@ extension on Translations {
 			'addServer.change' => 'Change',
 			'addServer.required' => 'Required',
 			'addServer.couldNotReachServer' => ({required Object error}) => 'Could not reach the server: ${error}',
-			'addServer.signInFailed' => ({required Object error}) => 'Sign-in failed: ${error}',
 			_ => null,
 		} ?? switch (path) {
+			'addServer.signInFailed' => ({required Object error}) => 'Sign-in failed: ${error}',
 			'addServer.quickConnectFailed' => ({required Object error}) => 'Quick Connect failed: ${error}',
 			'addServer.addPlexTitle' => 'Sign in with Plex',
 			'addServer.pinExpired' => 'PIN expired before sign-in. Please try again.',

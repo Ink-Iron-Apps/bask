@@ -375,6 +375,41 @@ void main() {
       expect(service.notifyVideoCompleted(), isTrue);
     });
 
+    test('end of queue waits for the queue to run out', () {
+      final service = SleepTimerService.withClock(DateTime.now);
+      addTearDown(service.dispose);
+      var pauses = 0;
+      service.bindPlayback(owner: Object(), onComplete: () => pauses++);
+
+      service.armEndOfQueue();
+      expect(service.isQueueEndMode, isTrue);
+      expect(service.isEndOfVideoMode, isTrue);
+
+      // Something follows: keep playing, however many times.
+      expect(service.notifyVideoCompleted(hasNext: true), isFalse);
+      expect(service.notifyVideoCompleted(hasNext: true), isFalse);
+      expect(pauses, 0);
+
+      // Nothing follows: this was the end of the queue.
+      expect(service.notifyVideoCompleted(hasNext: false), isTrue);
+      expect(pauses, 1);
+      expect(service.isQueueEndMode, isFalse);
+    });
+
+    test('a session swap keeps the end-of-queue mode', () {
+      final service = SleepTimerService.withClock(DateTime.now);
+      addTearDown(service.dispose);
+      final outgoing = Object();
+      service.bindPlayback(owner: outgoing, onComplete: () {});
+
+      service.armEndOfQueue();
+      service.unbindPlayback(outgoing);
+      service.bindPlayback(owner: Object(), onComplete: () {});
+      service.restartIfNeeded();
+
+      expect(service.isQueueEndMode, isTrue);
+    });
+
     test('a session swap keeps what is left, not what was asked for', () {
       final service = SleepTimerService.withClock(DateTime.now);
       addTearDown(service.dispose);
