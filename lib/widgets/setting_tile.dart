@@ -97,6 +97,26 @@ class SettingSwitchTile extends StatelessWidget {
 }
 
 /// Standard settings row that navigates to another screen.
+/// A settings row that only reports something — no tap target, so D-pad
+/// traversal skips it rather than stopping on a dead end.
+class SettingInfoTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color? iconColor;
+
+  const SettingInfoTile({super.key, required this.icon, required this.title, required this.subtitle, this.iconColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: AppIcon(icon, fill: 1, color: iconColor),
+      title: Text(title),
+      subtitle: Text(subtitle, style: TextStyle(color: iconColor)),
+    );
+  }
+}
+
 class SettingNavigationTile extends StatelessWidget {
   final IconData icon;
   final String title;

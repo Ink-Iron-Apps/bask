@@ -777,6 +777,18 @@ class Translations$settings$en {
 	/// en: 'Clear cached artwork and thumbnails. Images may load slower until downloaded again.'
 	String get clearImageCacheDescription => 'Clear cached artwork and thumbnails. Images may load slower until downloaded again.';
 
+	/// en: 'Device storage'
+	String get deviceStorage => 'Device storage';
+
+	/// en: '${free} free of ${total}'
+	String deviceStorageFree({required Object free, required Object total}) => '${free} free of ${total}';
+
+	/// en: '${free} free of ${total} — downloads and playback buffering need room'
+	String deviceStorageLow({required Object free, required Object total}) => '${free} free of ${total} — downloads and playback buffering need room';
+
+	/// en: 'Free space unavailable on this platform'
+	String get deviceStorageUnknown => 'Free space unavailable on this platform';
+
 	/// en: 'Image cache cleared successfully'
 	String get clearImageCacheSuccess => 'Image cache cleared successfully';
 
@@ -1301,6 +1313,12 @@ class Translations$settings$en {
 
 	/// en: 'Install update'
 	String get installUpdate => 'Install update';
+
+	/// en: 'Install ${version}?'
+	String installUpdateTitle({required Object version}) => 'Install ${version}?';
+
+	/// en: 'This release came with no notes.'
+	String get installUpdateNoNotes => 'This release came with no notes.';
 
 	/// en: 'Downloading… ${percent}%'
 	String downloadingUpdate({required Object percent}) => 'Downloading… ${percent}%';
@@ -2060,6 +2078,9 @@ class Translations$videoControls$en {
 	/// en: 'End of ${count} videos'
 	String sleepTimerEndOfVideos({required Object count}) => 'End of ${count} videos';
 
+	/// en: 'End of queue'
+	String get sleepTimerEndOfQueue => 'End of queue';
+
 	/// en: 'Stop at'
 	String get sleepTimerStopAtHeader => 'Stop at';
 
@@ -2487,6 +2508,9 @@ class Translations$messages$en {
 
 	/// en: 'Could not apply the selected streams'
 	String get streamSelectionFailed => 'Could not apply the selected streams';
+
+	/// en: 'This track choice applies to the current playback only.'
+	String get trackSelectionNotRemembered => 'This track choice applies to the current playback only.';
 
 	/// en: 'No server is available for the active profile'
 	String get serverUnavailableForProfile => 'No server is available for the active profile';
@@ -7457,6 +7481,10 @@ extension on Translations {
 			'settings.viewLogsDescription' => 'View application logs',
 			'settings.clearImageCache' => 'Clear Image Cache',
 			'settings.clearImageCacheDescription' => 'Clear cached artwork and thumbnails. Images may load slower until downloaded again.',
+			'settings.deviceStorage' => 'Device storage',
+			'settings.deviceStorageFree' => ({required Object free, required Object total}) => '${free} free of ${total}',
+			'settings.deviceStorageLow' => ({required Object free, required Object total}) => '${free} free of ${total} — downloads and playback buffering need room',
+			'settings.deviceStorageUnknown' => 'Free space unavailable on this platform',
 			'settings.clearImageCacheSuccess' => 'Image cache cleared successfully',
 			'settings.resetSettings' => 'Reset Settings',
 			'settings.resetSettingsDescription' => 'Restore default settings. This can\'t be undone.',
@@ -7632,6 +7660,8 @@ extension on Translations {
 			'settings.diskCacheGB' => ({required Object size}) => '${size} GB on disk',
 			'settings.diskCacheDescription' => 'Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.',
 			'settings.installUpdate' => 'Install update',
+			'settings.installUpdateTitle' => ({required Object version}) => 'Install ${version}?',
+			'settings.installUpdateNoNotes' => 'This release came with no notes.',
 			'settings.downloadingUpdate' => ({required Object percent}) => 'Downloading… ${percent}%',
 			'settings.upToDate' => 'You are on the latest version',
 			'settings.bufferSize' => 'Buffer Size',
@@ -7731,14 +7761,14 @@ extension on Translations {
 			'fileInfo.referenceFrames' => 'Reference Frames',
 			'fileInfo.dynamicRange' => 'Dynamic Range',
 			'fileInfo.dolbyVision' => 'Dolby Vision',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.dolbyVisionLevel' => 'Dolby Vision Level',
 			'fileInfo.dolbyVisionVersion' => 'Dolby Vision Version',
 			'fileInfo.dolbyVisionLayers' => 'Dolby Vision Layers',
 			'fileInfo.baseLayerCompatibility' => 'Base Layer Compatibility',
 			'fileInfo.avcBitstream' => 'AVC Bitstream',
 			'fileInfo.nalLengthSize' => 'NAL Length Size',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.scalingMatrix' => 'Custom Scaling Matrix',
 			'fileInfo.streamIdentifier' => 'Stream Identifier',
 			'fileInfo.streamIndex' => 'Stream Index',
@@ -7883,6 +7913,7 @@ extension on Translations {
 			'videoControls.playbackWillPauseIn' => ({required Object duration}) => 'Playback will pause in ${duration}',
 			'videoControls.sleepTimerEndOfVideo' => 'End of current video',
 			'videoControls.sleepTimerEndOfVideos' => ({required Object count}) => 'End of ${count} videos',
+			'videoControls.sleepTimerEndOfQueue' => 'End of queue',
 			'videoControls.sleepTimerStopAtHeader' => 'Stop at',
 			'videoControls.sleepTimerDurationHeader' => 'Timer',
 			'videoControls.playbackWillPauseAtEnd' => 'Playback will pause at the end of this video',
@@ -8029,6 +8060,7 @@ extension on Translations {
 			'messages.playbackDataNotPrepared' => 'Playback was started before its data was ready',
 			'messages.streamSelectionUnavailable' => 'Stream selection is not available for this source',
 			'messages.streamSelectionFailed' => 'Could not apply the selected streams',
+			'messages.trackSelectionNotRemembered' => 'This track choice applies to the current playback only.',
 			'messages.serverUnavailableForProfile' => 'No server is available for the active profile',
 			'subtitlingStyling.text' => 'Text',
 			'subtitlingStyling.border' => 'Border',
@@ -8243,6 +8275,8 @@ extension on Translations {
 			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
 			'errors.connectionFailed' => 'Unable to connect to media server',
 			'errors.unableToLoad' => ({required Object context}) => 'Unable to load ${context}. Please try again.',
+			_ => null,
+		} ?? switch (path) {
 			'errors.noClientAvailable' => 'No client available',
 			'errors.pleaseEnterToken' => 'Please enter a token',
 			'errors.invalidToken' => 'Invalid token',
@@ -8251,8 +8285,6 @@ extension on Translations {
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => 'Failed to delete ${displayName}',
 			'errors.failedToRate' => 'Couldn\'t update rating',
 			'libraries.title' => 'Libraries',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.fallbackTitle' => 'Library',
 			'libraries.scanLibraryFiles' => 'Scan Library Files',
 			'libraries.scanLibrary' => 'Scan Library',
@@ -8757,6 +8789,8 @@ extension on Translations {
 			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
 			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
 			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
 			'watchTogether.participantBuffering' => ({required Object name}) => '${name} is buffering',
 			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} is on an older app version — sync unavailable',
@@ -8765,8 +8799,6 @@ extension on Translations {
 			'watchTogether.waitingForName' => ({required Object name}) => 'Waiting for ${name}...',
 			'watchTogether.recentRooms' => 'Recent Rooms',
 			'watchTogether.renameRoom' => 'Rename Room',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.removeRoom' => 'Remove',
 			'watchTogether.guestSwitchUnavailable' => 'Couldn\'t switch — server unavailable for sync',
 			'watchTogether.guestSwitchFailed' => 'Couldn\'t switch — content not found on this server',
@@ -9271,6 +9303,8 @@ extension on Translations {
 			'addServer.password' => 'Password',
 			'addServer.signIn' => 'Sign in',
 			'addServer.change' => 'Change',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.required' => 'Required',
 			'addServer.couldNotReachServer' => ({required Object error}) => 'Could not reach the server: ${error}',
 			'addServer.signInFailed' => ({required Object error}) => 'Sign-in failed: ${error}',
@@ -9279,8 +9313,6 @@ extension on Translations {
 			'addServer.pinExpired' => 'PIN expired before sign-in. Please try again.',
 			'addServer.failedToRegisterAccount' => ({required Object error}) => 'Failed to register account: ${error}',
 			'addServer.enterMediaBrowserUrlError' => ({required Object product}) => 'Enter your ${product} server URL',
-			_ => null,
-		} ?? switch (path) {
 			'addServer.addConnectionTitle' => 'Add connection',
 			'addServer.addConnectionTitleScoped' => ({required Object name}) => 'Add to ${name}',
 			'addServer.signInWithPlexCard' => 'Sign in with Plex',
