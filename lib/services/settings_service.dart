@@ -218,6 +218,31 @@ class AutomotiveUiScale {
   static const double defaultValue = 1.35;
 }
 
+/// Gigabytes of read-ahead to keep on disk, defaulting to off on a TV.
+///
+/// In-memory demuxer sizing is owned natively, but it is still bounded by the
+/// device heap — on a phone a minute or two of a high-bitrate stream — and
+/// buffering to storage lifts that ceiling. A TV set is the one form factor
+/// where that trade is usually wrong: its storage is small, often nearly full,
+/// and shared with the cache directory Android reclaims when the volume fills.
+/// Doing it there cost this app a debugging session — stutter and vanished
+/// subtitle fonts — so the default is off and the setting stays available for
+/// anyone whose set has room.
+class _DiskCacheSizePref extends Pref<int> {
+  const _DiskCacheSizePref() : super('disk_cache_size_gb');
+
+  static const int _handheldDefault = 4;
+
+  @override
+  int get resolvedDefault => PlatformDetector.isTV() ? 0 : _handheldDefault;
+
+  @override
+  int readFrom(BaseSharedPreferencesService svc) => svc.readInt(key, defaultValue: resolvedDefault);
+
+  @override
+  Future<void> writeTo(BaseSharedPreferencesService svc, int value) => svc.writeInt(key, value);
+}
+
 /// Uses a larger default on car displays while honoring and clamping a stored
 /// user adjustment on every platform.
 class _AutomotiveUiScalePref extends Pref<double> {
@@ -828,11 +853,7 @@ class SettingsService extends BaseSharedPreferencesService {
   static const videoGamma = IntPref('video_gamma');
 
   /// Gigabytes of read-ahead to keep on disk, or 0 to buffer in memory only.
-  ///
-  /// In-memory demuxer sizing is owned natively now, but it is still bounded by
-  /// the device heap — on a phone a minute or two of a high-bitrate stream.
-  /// Buffering to storage lifts that ceiling.
-  static const diskCacheSizeGB = IntPref('disk_cache_size_gb', defaultValue: 4);
+  static const diskCacheSizeGB = _DiskCacheSizePref();
   static const playbackBufferTier = EnumPref<PlaybackBufferTier>(
     'playback_buffer_tier',
     values: PlaybackBufferTier.values,
