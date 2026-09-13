@@ -137,7 +137,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
 
     _deletionProgressSubscription = _downloadManager.deletionProgressStream.listen(_onDeletionProgressUpdate);
 
-    _initFuture = _loadPersistedDownloads();
+    _initFuture = _loadPersistedDownloadsThenRecovery();
 
     // Lets the diagnostics service score whether downloads actually advance
     // while the app is backgrounded, without it reaching into providers.
@@ -355,6 +355,27 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     if (changed) safeNotifyListeners();
   }
 
+  /// First pass without recovery, then a correcting pass behind it.
+  ///
+  /// Only the first is awaited: callers gate their UI on [ensureInitialized],
+  /// and making them wait for recovery is the whole problem. A generation
+  /// check guards the second pass against a profile switch in between.
+  Future<void> _loadPersistedDownloadsThenRecovery() async {
+    final generation = _profileGeneration;
+    await _loadPersistedDownloads(awaitRecovery: false);
+    unawaited(
+      _downloadManager.recoveryFuture
+          .then((_) async {
+            if (isDisposed || _profileGeneration != generation) return;
+            await _loadPersistedDownloads(awaitRecovery: false);
+            if (!isDisposed) safeNotifyListeners();
+          })
+          .catchError((Object error, StackTrace stackTrace) {
+            appLogger.w('Post-recovery download reload failed', error: error, stackTrace: stackTrace);
+          }),
+    );
+  }
+
   Future<void> _loadProfileScopedState() async {
     await _loadDownloadOwners();
     await _loadSyncRules();
@@ -402,11 +423,25 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   Future<void> debugWaitForWatchStateWrites() => _metadataStore.waitForWatchStateWrites();
 
   /// Load all persisted downloads and metadata from the database/cache
-  Future<void> _loadPersistedDownloads() async {
+  /// Load all persisted downloads and metadata from the database/cache.
+  ///
+  /// [awaitRecovery] blocks on the download manager's interrupted-download
+  /// recovery first, which is what keeps a killed "downloading" row from
+  /// showing as active. That recovery repairs database rows, initialises the
+  /// downloader, cleans orphaned temp files and reconciles native tasks — on a
+  /// library of a couple of hundred it has been measured at eight seconds,
+  /// during which the Downloads list has nothing to show. The list itself
+  /// loads in about 150ms.
+  ///
+  /// So the first pass does not wait: rows appear immediately and a second
+  /// pass corrects their status the moment recovery lands. The visible cost is
+  /// a row that reads "downloading" for a few seconds before settling to
+  /// "queued"; the cost of waiting was an empty screen.
+  Future<void> _loadPersistedDownloads({bool awaitRecovery = true}) async {
     try {
-      // Wait for recovery to finish before loading state so that
-      // interrupted "downloading" rows have been transitioned to "queued"
-      await _downloadManager.recoveryFuture;
+      if (awaitRecovery) {
+        await _downloadManager.recoveryFuture;
+      }
 
       // Clear existing data to prevent stale entries after deletions
       _downloads.clear();
