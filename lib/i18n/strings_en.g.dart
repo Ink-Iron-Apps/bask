@@ -1314,6 +1314,12 @@ class Translations$settings$en {
 	/// en: 'Install update'
 	String get installUpdate => 'Install update';
 
+	/// en: 'Install ${version}?'
+	String installUpdateTitle({required Object version}) => 'Install ${version}?';
+
+	/// en: 'This release came with no notes.'
+	String get installUpdateNoNotes => 'This release came with no notes.';
+
 	/// en: 'Downloading… ${percent}%'
 	String downloadingUpdate({required Object percent}) => 'Downloading… ${percent}%';
 
@@ -7654,6 +7660,8 @@ extension on Translations {
 			'settings.diskCacheGB' => ({required Object size}) => '${size} GB on disk',
 			'settings.diskCacheDescription' => 'Lets a pause build a bigger lead on a weak connection. Cleared automatically after two hours.',
 			'settings.installUpdate' => 'Install update',
+			'settings.installUpdateTitle' => ({required Object version}) => 'Install ${version}?',
+			'settings.installUpdateNoNotes' => 'This release came with no notes.',
 			'settings.downloadingUpdate' => ({required Object percent}) => 'Downloading… ${percent}%',
 			'settings.upToDate' => 'You are on the latest version',
 			'settings.bufferSize' => 'Buffer Size',
@@ -7753,10 +7761,10 @@ extension on Translations {
 			'fileInfo.referenceFrames' => 'Reference Frames',
 			'fileInfo.dynamicRange' => 'Dynamic Range',
 			'fileInfo.dolbyVision' => 'Dolby Vision',
-			'fileInfo.dolbyVisionLevel' => 'Dolby Vision Level',
-			'fileInfo.dolbyVisionVersion' => 'Dolby Vision Version',
 			_ => null,
 		} ?? switch (path) {
+			'fileInfo.dolbyVisionLevel' => 'Dolby Vision Level',
+			'fileInfo.dolbyVisionVersion' => 'Dolby Vision Version',
 			'fileInfo.dolbyVisionLayers' => 'Dolby Vision Layers',
 			'fileInfo.baseLayerCompatibility' => 'Base Layer Compatibility',
 			'fileInfo.avcBitstream' => 'AVC Bitstream',
@@ -8267,10 +8275,10 @@ extension on Translations {
 			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
 			'errors.connectionFailed' => 'Unable to connect to media server',
 			'errors.unableToLoad' => ({required Object context}) => 'Unable to load ${context}. Please try again.',
-			'errors.noClientAvailable' => 'No client available',
-			'errors.pleaseEnterToken' => 'Please enter a token',
 			_ => null,
 		} ?? switch (path) {
+			'errors.noClientAvailable' => 'No client available',
+			'errors.pleaseEnterToken' => 'Please enter a token',
 			'errors.invalidToken' => 'Invalid token',
 			'errors.failedToVerifyToken' => ({required Object error}) => 'Failed to verify token: ${error}',
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => 'Failed to switch to ${displayName}',
@@ -8781,10 +8789,10 @@ extension on Translations {
 			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
 			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
 			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
-			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
-			'watchTogether.participantBuffering' => ({required Object name}) => '${name} is buffering',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
+			'watchTogether.participantBuffering' => ({required Object name}) => '${name} is buffering',
 			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} is on an older app version — sync unavailable',
 			'watchTogether.resumingWithout' => ({required Object name}) => 'Resuming without ${name}',
 			'watchTogether.waitingForParticipants' => 'Waiting for others to load...',
@@ -9295,10 +9303,10 @@ extension on Translations {
 			'addServer.password' => 'Password',
 			'addServer.signIn' => 'Sign in',
 			'addServer.change' => 'Change',
-			'addServer.required' => 'Required',
-			'addServer.couldNotReachServer' => ({required Object error}) => 'Could not reach the server: ${error}',
 			_ => null,
 		} ?? switch (path) {
+			'addServer.required' => 'Required',
+			'addServer.couldNotReachServer' => ({required Object error}) => 'Could not reach the server: ${error}',
 			'addServer.signInFailed' => ({required Object error}) => 'Sign-in failed: ${error}',
 			'addServer.quickConnectFailed' => ({required Object error}) => 'Quick Connect failed: ${error}',
 			'addServer.addPlexTitle' => 'Sign in with Plex',

@@ -83,4 +83,22 @@ void main() {
       expect(selectApkAsset([], abis: ['arm64-v8a']), isNull);
     });
   });
+
+  group('AvailableUpdate', () {
+    test('notes default to empty so a release without a body still installs', () {
+      const update = AvailableUpdate(version: '2.24.2', assetUrl: 'https://example/api', assetName: 'app.apk');
+      expect(update.notes, isEmpty);
+    });
+
+    test('notes are carried verbatim for the install confirmation', () {
+      const body = 'Fixes the thing.\n\n- one\n- two';
+      const update = AvailableUpdate(
+        version: '2.24.2',
+        assetUrl: 'https://example/api',
+        assetName: 'app.apk',
+        notes: body,
+      );
+      expect(update.notes, body);
+    });
+  });
 }
