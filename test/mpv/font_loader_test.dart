@@ -49,6 +49,18 @@ void main() {
     }
   });
 
+  test('the fonts live outside the reclaimable cache directory', () async {
+    // Anchor: Android reclaims the cache directory under storage pressure, and
+    // the Android libmpv build has no fontconfig — an emptied fonts directory
+    // means no subtitles at all, with no error. Application support is not
+    // reclaimed, so the extraction has to land there.
+    final fontDir = await SubtitleFontLoader.loadSubtitleFont();
+
+    expect(fontDir, isNotNull);
+    expect(p.split(fontDir!), contains('support'));
+    expect(p.split(fontDir), isNot(contains('temp')));
+  });
+
   test('default font name stays Go Noto Current-Regular', () {
     // configureSubtitleFonts() sets sub-font to this exact name; libass falls
     // back to the Hangul subset for Korean glyphs.

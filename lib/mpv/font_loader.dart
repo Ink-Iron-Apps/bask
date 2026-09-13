@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
@@ -53,8 +54,16 @@ class SubtitleFontLoader {
       if (resolved != null && _fonts.every((f) => File(path.join(resolved, f.$2)).existsSync())) {
         return resolved;
       }
-      final cacheDir = await getTemporaryDirectory();
-      final fontDir = Directory(path.join(cacheDir.path, 'subtitle_fonts'));
+      // Application support, not the cache directory: Android reclaims the
+      // cache on its own when storage runs low — a TV's data partition is small
+      // enough for that to happen in ordinary use — and the Android libmpv
+      // build has no fontconfig, so an emptied directory leaves libass with no
+      // glyphs and subtitles silently stop rendering. Support survives that.
+      final baseDir = await getApplicationSupportDirectory();
+      final fontDir = Directory(path.join(baseDir.path, 'subtitle_fonts'));
+
+      // Anything left in the old cache location is dead weight now.
+      unawaited(_removeLegacyCacheCopy());
 
       if (!await fontDir.exists()) {
         await fontDir.create(recursive: true);
@@ -71,6 +80,20 @@ class SubtitleFontLoader {
     } catch (e, st) {
       appLogger.w('Failed to load subtitle font', error: e, stackTrace: st);
       return null;
+    }
+  }
+
+  /// Deletes the pre-move copy under the cache directory.
+  ///
+  /// Best-effort: it is a few megabytes of fonts that nothing reads any more,
+  /// and on the devices where this matters the space itself is the point.
+  static Future<void> _removeLegacyCacheCopy() async {
+    try {
+      final cacheDir = await getTemporaryDirectory();
+      final legacy = Directory(path.join(cacheDir.path, 'subtitle_fonts'));
+      if (legacy.existsSync()) await legacy.delete(recursive: true);
+    } catch (e) {
+      appLogger.d('Could not remove the legacy subtitle font cache', error: e);
     }
   }
 
