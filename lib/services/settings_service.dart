@@ -230,7 +230,7 @@ class AutomotiveUiScale {
 /// anyone whose set has room.
 ///
 /// Extends [IntPref] rather than [Pref] directly: the settings export types a
-/// preference by its class, and a bare Pref<int> has no storage type there.
+/// preference by its class, and a bare `Pref<int>` has no storage type there.
 class _DiskCacheSizePref extends IntPref {
   const _DiskCacheSizePref() : super('disk_cache_size_gb', defaultValue: _handheldDefault);
 
