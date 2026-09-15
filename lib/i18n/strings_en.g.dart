@@ -2138,6 +2138,9 @@ class Translations$videoControls$en {
 	/// en: 'Next episode'
 	String get nextButton => 'Next episode';
 
+	/// en: 'Next video'
+	String get nextButtonVideo => 'Next video';
+
 	/// en: 'Previous chapter'
 	String get previousChapterButton => 'Previous chapter';
 
@@ -2283,6 +2286,9 @@ class Translations$videoControls$en {
 
 	/// en: 'Next Episode'
 	String get nextEpisode => 'Next Episode';
+
+	/// en: 'Next Video'
+	String get nextVideo => 'Next Video';
 
 	/// en: 'Track ${n}'
 	String subtitleTrack({required Object n}) => 'Track ${n}';
@@ -7960,6 +7966,7 @@ extension on Translations {
 			'videoControls.seekForwardButton' => ({required Object seconds}) => 'Seek forward ${seconds} seconds',
 			'videoControls.previousButton' => 'Previous episode',
 			'videoControls.nextButton' => 'Next episode',
+			'videoControls.nextButtonVideo' => 'Next video',
 			'videoControls.previousChapterButton' => 'Previous chapter',
 			'videoControls.nextChapterButton' => 'Next chapter',
 			'videoControls.muteButton' => 'Mute',
@@ -8016,6 +8023,7 @@ extension on Translations {
 			'videoControls.skipIntro' => 'Skip Intro',
 			'videoControls.skipCredits' => 'Skip Credits',
 			'videoControls.nextEpisode' => 'Next Episode',
+			'videoControls.nextVideo' => 'Next Video',
 			'videoControls.subtitleTrack' => ({required Object n}) => 'Track ${n}',
 			'videoControls.subtitleFile' => ({required Object name}) => 'Subtitle ${name}',
 			'videoControls.forcedTrack' => ({required Object label}) => '${label} (Forced)',
@@ -8300,10 +8308,10 @@ extension on Translations {
 			'discover.moreLikeThis' => 'More Like This',
 			'discover.titleCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} title', other: '${n} titles', ), 
 			'errors.searchFailed' => ({required Object error}) => 'Search failed: ${error}',
-			'errors.searchUnavailable' => 'Search could not reach any media server.',
-			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
 			_ => null,
 		} ?? switch (path) {
+			'errors.searchUnavailable' => 'Search could not reach any media server.',
+			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
 			'errors.connectionFailed' => 'Unable to connect to media server',
 			'errors.unableToLoad' => ({required Object context}) => 'Unable to load ${context}. Please try again.',
 			'errors.noClientAvailable' => 'No client available',
@@ -8814,10 +8822,10 @@ extension on Translations {
 			'watchTogether.joinCurrentPlaybackDescription' => 'Jump back into what the host is currently watching',
 			'watchTogether.failedToOpenCurrentPlayback' => 'Failed to open current playback',
 			'watchTogether.participantJoined' => ({required Object name}) => '${name} joined',
-			'watchTogether.participantLeft' => ({required Object name}) => '${name} left',
-			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.participantLeft' => ({required Object name}) => '${name} left',
+			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
 			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
 			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
 			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
@@ -9328,10 +9336,10 @@ extension on Translations {
 			'services.libraryFilter.modeHintBlacklist' => 'Sync every library except the ones checked below.',
 			'services.libraryFilter.modeHintWhitelist' => 'Sync only the libraries checked below.',
 			'services.libraryFilter.libraries' => 'Libraries',
-			'services.libraryFilter.noLibraries' => 'No libraries available',
-			'addServer.addMediaBrowserTitle' => ({required Object product}) => 'Add ${product} server',
 			_ => null,
 		} ?? switch (path) {
+			'services.libraryFilter.noLibraries' => 'No libraries available',
+			'addServer.addMediaBrowserTitle' => ({required Object product}) => 'Add ${product} server',
 			'addServer.serverUrls' => 'Server URLs',
 			'addServer.serverUrlsHelper' => 'Multiple URLs allowed, separated by commas.',
 			'addServer.findServer' => 'Find server',

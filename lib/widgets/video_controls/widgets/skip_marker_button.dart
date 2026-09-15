@@ -12,6 +12,10 @@ class SkipMarkerButton extends StatelessWidget {
   final MediaMarker marker;
   final Duration playerDuration;
   final bool hasNextEpisode;
+
+  /// Whether what follows is an episode. False in a movie playlist, where
+  /// "Next episode" is simply the wrong word.
+  final bool nextIsEpisode;
   final bool isAutoSkipActive;
   final bool shouldShowAutoSkip;
   final int autoSkipDelay;
@@ -25,6 +29,7 @@ class SkipMarkerButton extends StatelessWidget {
     required this.marker,
     required this.playerDuration,
     required this.hasNextEpisode,
+    this.nextIsEpisode = true,
     required this.isAutoSkipActive,
     required this.shouldShowAutoSkip,
     required this.autoSkipDelay,
@@ -42,7 +47,7 @@ class SkipMarkerButton extends StatelessWidget {
     final showNextEpisode = creditsAtEnd && hasNextEpisode;
     String baseButtonText;
     if (showNextEpisode) {
-      baseButtonText = t.videoControls.nextEpisode;
+      baseButtonText = nextIsEpisode ? t.videoControls.nextEpisode : t.videoControls.nextVideo;
     } else if (isCredits) {
       baseButtonText = t.videoControls.skipCredits;
     } else {

@@ -1,5 +1,7 @@
+import '../i18n/strings.g.dart';
 import '../utils/formatters.dart';
 import 'media_item.dart';
+import 'media_item_types.dart';
 import 'media_kind.dart';
 
 String formatQueueItemSubtitle(MediaItem item) {
@@ -59,4 +61,15 @@ String formatDownloadNotificationName(MediaItem item) {
     return '$trackArtist - ${item.displayTitle}';
   }
   return item.displayTitle;
+}
+
+/// Label for the control that advances to [item].
+///
+/// "Next episode" is wrong for the queues this fork added — a downloaded
+/// playlist of films is the case that exposed it — so the wording follows what
+/// is actually coming next rather than assuming a series.
+String nextItemLabel(MediaItem? item, {required bool compact}) {
+  final isEpisode = item?.isEpisode ?? true;
+  if (compact) return isEpisode ? t.videoControls.nextButton : t.videoControls.nextButtonVideo;
+  return isEpisode ? t.videoControls.nextEpisode : t.videoControls.nextVideo;
 }

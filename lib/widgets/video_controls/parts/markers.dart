@@ -267,6 +267,10 @@ extension _PlexVideoControlsMarkerMethods on _PlexVideoControlsState {
               marker: _currentMarker!,
               playerDuration: widget.player.state.duration,
               hasNextEpisode: widget.onNext != null,
+              // The controls know the current item, not the next one; in a
+              // queue of one kind they agree, and that is the case this
+              // wording gets wrong.
+              nextIsEpisode: widget.metadata.isEpisode,
               isAutoSkipActive: isAutoSkipActive,
               shouldShowAutoSkip: _shouldShowAutoSkip(),
               autoSkipDelay: _autoSkipDelay,
