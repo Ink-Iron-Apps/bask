@@ -56,6 +56,46 @@ void main() {
     });
   });
 
+  group('recovery short-circuit', () {
+    const activeStatuses = [DownloadStatus.downloading, DownloadStatus.queued, DownloadStatus.paused];
+    List<int> statusIndexes() => activeStatuses.map((s) => s.index).toList();
+
+    Future<AppDatabase> dbWith({required int status, String? bgTaskId}) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      await db.insertDownload(
+        serverId: ServerId('srv'),
+        ratingKey: '1',
+        globalKey: 'srv:1',
+        type: 'movie',
+        status: status,
+      );
+      if (bgTaskId != null) await db.updateBgTaskId('srv:1', bgTaskId);
+      return db;
+    }
+
+    test('a library with nothing in flight needs no native recovery', () async {
+      // Anchor: the native phases cross into background_downloader and were
+      // measured at seconds on a large library, on every cold start. With no
+      // row mid-transfer, queued, paused, or holding a task id, there is
+      // nothing for them to reconcile.
+      final db = await dbWith(status: DownloadStatus.completed.index);
+      expect(await db.hasRecoverableDownloads(activeStatuses: statusIndexes()), isFalse);
+    });
+
+    test('an interrupted row still asks for it', () async {
+      final db = await dbWith(status: DownloadStatus.downloading.index);
+      expect(await db.hasRecoverableDownloads(activeStatuses: statusIndexes()), isTrue);
+    });
+
+    test('a finished row that still carries a native task id asks too', () async {
+      // The status says finished but the platform may still hold the task —
+      // the state a kill mid-completion leaves behind.
+      final db = await dbWith(status: DownloadStatus.completed.index, bgTaskId: 'task-1');
+      expect(await db.hasRecoverableDownloads(activeStatuses: statusIndexes()), isTrue);
+    });
+  });
+
   group('downloadExtensionFromUrl', () {
     test('uses path extension when present', () {
       expect(downloadExtensionFromUrl('https://example.com/movie.mkv?Container=mp4'), 'mkv');

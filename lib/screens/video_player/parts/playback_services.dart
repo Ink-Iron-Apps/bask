@@ -349,6 +349,26 @@ extension _VideoPlayerPlaybackServiceMethods on VideoPlayerScreenState {
       mediaInfo: mediaInfo,
     );
 
+    // A video with no subtitles at all is the one case where the app can pick
+    // a subtitle without guessing: an OpenSubtitles hash match is timed to
+    // this exact file. Fire-and-forget and once per item — the server fetches
+    // asynchronously and the stream appears on a later metadata read, so the
+    // next playback picks it up through normal track selection.
+    if (mediaInfo != null && mediaClient is PlexClient && !_isOfflinePlayback) {
+      final languageCode = resolveSubtitleSearchLanguageCode(
+        savedLanguageCode: SettingsService.instance.read(SettingsService.subtitleSearchLanguage),
+        systemLocale: PlatformDispatcher.instance.locale,
+      );
+      unawaited(
+        ExactSubtitleFetcher.fetchIfMissing(
+          metadata: metadata,
+          client: mediaClient,
+          hasSubtitleTracks: mediaInfo.subtitleTracks.isNotEmpty,
+          languageCode: languageCode,
+        ),
+      );
+    }
+
     // Media controls metadata. Fire-and-forget — the OS plugin downloads
     // the poster synchronously inside `setMetadata` (~270 ms); the
     // controls populate a beat after first frame which is fine.

@@ -1514,6 +1514,15 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
         }
       }
 
+      // Runs after the watched sweep, on the same trigger: whatever that rule
+      // left behind is what the budget measures. Silent — an eviction the user
+      // configured by size is not news the way "your watched episode is gone"
+      // is, and it reports itself in the log.
+      final evicted = await downloadProvider.enforceDownloadStorageBudget(activeGlobalKey: activeGlobalKey);
+      if (evicted.isNotEmpty) {
+        appLogger.i('Storage budget evicted: ${evicted.join(', ')}');
+      }
+
       if (targetKeys != null) {
         for (final key in targetKeys) {
           if (!downloadProvider.hasSyncRule(key)) continue;

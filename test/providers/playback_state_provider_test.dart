@@ -319,6 +319,50 @@ void main() {
       await p.setPlaybackFromPlayQueue(_queue(playQueueID: 1, totalCount: 1, items: [_item('a', 1)]), null);
     });
 
+    test('repeat all wraps the end of a queue back to its start', () async {
+      // Anchor: a downloaded playlist of films is a queue like any other, and
+      // repeat is what "play these again" means. The wrap is flagged so a
+      // caller that cares the queue finished — the sleep timer's end-of-queue
+      // — can still tell.
+      final p = PlaybackStateProvider();
+      addTearDown(p.dispose);
+
+      final first = testMediaItem(id: 'movie-1', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
+      final last = testMediaItem(id: 'movie-2', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
+      p.setPlaybackFromLocalQueue(
+        LocalPlayQueue(id: 'offline:playlist-1', items: [first, last], currentIndex: 0),
+        contextKey: 'playlist-1',
+      );
+
+      // Off: the end is the end.
+      expect((await p.getNextEpisode(last.id)).item, isNull);
+
+      p.setRepeatMode(VideoRepeatMode.all);
+      final wrapped = await p.getNextEpisode(last.id);
+      expect(wrapped.item?.id, 'movie-1');
+      expect(wrapped.wrapped, isTrue);
+
+      // An ordinary advance is not a wrap.
+      final ordinary = await p.getNextEpisode(first.id);
+      expect(ordinary.item?.id, 'movie-2');
+      expect(ordinary.wrapped, isFalse);
+    });
+
+    test('a single-item queue does not repeat itself into a loop', () async {
+      final p = PlaybackStateProvider();
+      addTearDown(p.dispose);
+      final only = testMediaItem(id: 'movie-1', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
+      p.setPlaybackFromLocalQueue(
+        LocalPlayQueue(id: 'offline:one', items: [only], currentIndex: 0),
+        contextKey: 'one',
+      );
+      p.setRepeatMode(VideoRepeatMode.all);
+
+      // Repeat-all means "play the queue again", and a queue of one that
+      // replays itself is repeat-one, which is a different request.
+      expect((await p.getNextEpisode(only.id)).item, isNull);
+    });
+
     test('a local movie queue resolves next and previous', () async {
       // Anchor: a downloaded playlist of films is published through
       // setPlaybackFromLocalQueue, and the offline branch of

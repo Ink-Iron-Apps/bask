@@ -1,3 +1,5 @@
+import '../test_helpers/prefs.dart';
+import 'package:plezy/services/settings_service.dart';
 import 'dart:io';
 import '../test_helpers/io_fakes.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -299,6 +301,77 @@ void main() {
       await unsupportedManager.recoverInterruptedDownloads();
 
       unsupportedManager.dispose();
+    });
+  });
+
+  group('download storage budget', () {
+    test('evicts watched downloads oldest-first until the total fits', () async {
+      // Anchor: the point of a budget is to keep downloads until the space is
+      // wanted, rather than deleting a title the moment it is watched. Only
+      // watched titles are eligible — evicting something unwatched would be
+      // the app overruling what the user asked it to keep.
+      resetSharedPreferencesForTest();
+      final svc = await SettingsService.getInstance();
+      await svc.write(SettingsService.downloadStorageBudgetGB, 2);
+
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      addTearDown(p.dispose);
+      await p.ensureInitialized();
+
+      const gb = 1024 * 1024 * 1024;
+      p.debugSeedState(
+        downloads: {
+          'srv:old': const DownloadProgress(
+            globalKey: 'srv:old',
+            status: DownloadStatus.completed,
+            progress: 100,
+            downloadedBytes: gb,
+            totalBytes: gb,
+          ),
+          'srv:new': const DownloadProgress(
+            globalKey: 'srv:new',
+            status: DownloadStatus.completed,
+            progress: 100,
+            downloadedBytes: gb,
+            totalBytes: gb,
+          ),
+          'srv:unwatched': const DownloadProgress(
+            globalKey: 'srv:unwatched',
+            status: DownloadStatus.completed,
+            progress: 100,
+            downloadedBytes: 2 * gb,
+            totalBytes: 2 * gb,
+          ),
+        },
+        metadata: {
+          'srv:old': testMediaItem(id: 'old', kind: MediaKind.movie, title: 'Old', viewCount: 1),
+          'srv:new': testMediaItem(id: 'new', kind: MediaKind.movie, title: 'New', viewCount: 1),
+          'srv:unwatched': testMediaItem(id: 'unwatched', kind: MediaKind.movie, title: 'Keep'),
+        },
+        ownedDownloadKeys: {'srv:old', 'srv:new', 'srv:unwatched'},
+      );
+
+      expect(p.downloadedBytesTotal, 4 * gb);
+
+      final evicted = await p.enforceDownloadStorageBudget();
+
+      // 4 GB against a 2 GB budget: both watched titles go, in order, and the
+      // unwatched one survives even though removing it alone would have done.
+      expect(evicted, ['Old', 'New']);
+      expect(p.downloads.containsKey('srv:unwatched'), isTrue);
+      expect(p.downloadedBytesTotal, 2 * gb);
+    });
+
+    test('no limit means no eviction', () async {
+      resetSharedPreferencesForTest();
+      final svc = await SettingsService.getInstance();
+      await svc.write(SettingsService.downloadStorageBudgetGB, 0);
+
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      addTearDown(p.dispose);
+      await p.ensureInitialized();
+
+      expect(await p.enforceDownloadStorageBudget(), isEmpty);
     });
   });
 

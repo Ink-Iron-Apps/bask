@@ -1,3 +1,4 @@
+import '../services/settings_service.dart';
 import 'dart:async';
 
 import 'package:drift/drift.dart' show Value;
@@ -1902,6 +1903,70 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       }
     }
 
+    return deletedTitles;
+  }
+
+  /// Total bytes of this profile's completed downloads.
+  int get downloadedBytesTotal => _downloads.entries
+      .where((e) => _ownsDownloadKey(e.key) && e.value.status == DownloadStatus.completed)
+      .fold(0, (sum, e) => sum + (e.value.totalBytes > 0 ? e.value.totalBytes : e.value.downloadedBytes));
+
+  /// Delete watched downloads, oldest first, until the total fits the budget.
+  ///
+  /// Distinct from [autoDeleteWatchedDownloads], which removes a title the
+  /// moment it is watched. This keeps watched titles until the space is
+  /// actually wanted — a phone with two hundred downloads should not have to
+  /// choose between losing them on sight and filling the device.
+  ///
+  /// Only watched titles are eligible, and only completed ones: an unwatched
+  /// download is what the user asked for, and evicting it to make room for
+  /// another would be the app arguing with them. If everything watched is gone
+  /// and the total still exceeds the budget, it stops and says so rather than
+  /// reaching for unwatched media.
+  Future<List<String>> enforceDownloadStorageBudget({String? activeGlobalKey}) async {
+    final settings = await SettingsService.getInstance();
+    final budgetGB = settings.read(SettingsService.downloadStorageBudgetGB);
+    if (budgetGB <= 0) return const [];
+
+    final budgetBytes = budgetGB * 1024 * 1024 * 1024;
+    var total = downloadedBytesTotal;
+    if (total <= budgetBytes) return const [];
+
+    // Oldest first by the database's own ordering, which is insertion order:
+    // the download that has been sitting longest is the one to lose.
+    final candidates = <String>[];
+    for (final entry in _downloads.entries) {
+      if (!_ownsDownloadKey(entry.key)) continue;
+      if (entry.value.status != DownloadStatus.completed) continue;
+      if (entry.key == activeGlobalKey) continue;
+      final meta = _resolvedMetadata(entry.key);
+      if (meta == null || !meta.isWatched) continue;
+      candidates.add(entry.key);
+    }
+
+    final deletedTitles = <String>[];
+    for (final globalKey in candidates) {
+      if (total <= budgetBytes) break;
+      final progress = _downloads[globalKey];
+      final size = progress == null ? 0 : (progress.totalBytes > 0 ? progress.totalBytes : progress.downloadedBytes);
+      try {
+        final title = await deleteWatchedDownloadCandidate(globalKey, logContext: 'storage budget');
+        if (title == null) continue;
+        deletedTitles.add(title);
+        total -= size;
+      } catch (e) {
+        appLogger.w('Failed to evict $globalKey for the storage budget: $e');
+      }
+    }
+
+    if (total > budgetBytes) {
+      appLogger.i(
+        'Download storage is ${(total / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB against a '
+        '$budgetGB GB limit; nothing watched is left to remove',
+      );
+    } else if (deletedTitles.isNotEmpty) {
+      appLogger.i('Storage budget removed ${deletedTitles.length} watched download(s)');
+    }
     return deletedTitles;
   }
 

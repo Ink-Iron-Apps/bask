@@ -85,7 +85,17 @@ class SettingsExportService {
   static const String _userPrefixRoot = 'user_';
   // Device-local storage state must never cross installations. Keep these as
   // exact keys so portable download behavior settings remain transferable.
-  static const Set<String> _nonPortableDeviceStorageKeys = {'custom_download_path', 'custom_download_path_type'};
+  static const Set<String> _nonPortableDeviceStorageKeys = {
+    'custom_download_path',
+    'custom_download_path_type',
+    // Resolved per form factor, and wrong when carried across one. Buffering
+    // to storage is off on a TV because its partition is small and shared
+    // with the cache Android reclaims; the download limit is sized to the
+    // device it was set on. Importing a phone's answers onto a TV reinstates
+    // exactly the configuration that cost this app a debugging session.
+    'disk_cache_size_gb',
+    'download_storage_budget_gb',
+  };
   static const String _tvosDatabaseRecoveryPrefix = 'tvos_db_recovery_';
 
   /// Closed registry of portable, user-facing settings, keyed by preference

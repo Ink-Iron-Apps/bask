@@ -26,17 +26,40 @@ enum QueueNavigationStatus {
   failed,
 }
 
+/// How a video queue behaves when it runs out.
+///
+/// Music has had this since it shipped; video queues are newer here — a
+/// downloaded playlist of films is a queue like any other, and "play these
+/// again" is the same request whichever medium it holds.
+enum VideoRepeatMode {
+  /// Stop at the end of the queue.
+  off,
+
+  /// Wrap to the first item.
+  all,
+}
+
 @immutable
 class QueueNavigationResult {
-  const QueueNavigationResult._(this.status, this.item);
+  const QueueNavigationResult._(this.status, this.item, {this.wrapped = false});
 
   const QueueNavigationResult.found(MediaItem item) : this._(QueueNavigationStatus.found, item);
+
+  /// The queue ended and repeat sent playback back to [item].
+  ///
+  /// Distinguished from an ordinary advance because some callers care that
+  /// the queue finished — the sleep timer's "end of queue" must fire here
+  /// rather than looping forever.
+  const QueueNavigationResult.wrapped(MediaItem item) : this._(QueueNavigationStatus.found, item, wrapped: true);
 
   const QueueNavigationResult.boundary() : this._(QueueNavigationStatus.boundary, null);
 
   const QueueNavigationResult.unavailable() : this._(QueueNavigationStatus.unavailable, null);
 
   const QueueNavigationResult.failed() : this._(QueueNavigationStatus.failed, null);
+
+  /// Whether this item came from wrapping past the end of the queue.
+  final bool wrapped;
 
   final QueueNavigationStatus status;
   final MediaItem? item;
@@ -97,6 +120,32 @@ class PlaybackStateProvider with ChangeNotifier, DisposableChangeNotifierMixin {
 
   /// Whether shuffle mode is currently active
   bool get isShuffleActive => _playQueueShuffled;
+
+  VideoRepeatMode _repeatMode = VideoRepeatMode.off;
+
+  /// How the queue behaves at its end. Session state, like shuffle: it
+  /// describes this sitting rather than a preference about all playback.
+  VideoRepeatMode get repeatMode => _repeatMode;
+
+  /// The item to wrap to, or null when wrapping is not possible.
+  ///
+  /// Requires the whole queue to be resident: with a server-side window the
+  /// first loaded item is only the start of the window, and wrapping to it
+  /// would silently replay a fragment rather than the queue.
+  MediaItem? _repeatWrapTarget() {
+    if (_repeatMode != VideoRepeatMode.all) return null;
+    if (_loadedItems.isEmpty) return null;
+    final fullyResident =
+        _windowFetcher == null || (_playQueueTotalCount > 0 && _loadedItems.length >= _playQueueTotalCount);
+    if (!fullyResident) return null;
+    return _loadedItems.first;
+  }
+
+  void setRepeatMode(VideoRepeatMode mode) {
+    if (_repeatMode == mode) return;
+    _repeatMode = mode;
+    notifyListeners();
+  }
 
   /// Whether playlist/collection mode is currently active
   bool get isPlaylistActive => _isQueueMode;
@@ -309,6 +358,15 @@ class PlaybackStateProvider with ChangeNotifier, DisposableChangeNotifierMixin {
       final result = await _itemAtOffset(anchor, 1);
       final candidate = result.item;
       if (result.status != QueueNavigationStatus.found || candidate == null) {
+        // The end of the queue is where repeat applies. Only on a genuine
+        // boundary: a window that failed to load is not the end, and wrapping
+        // there would replay the queue instead of reporting the problem.
+        if (result.status == QueueNavigationStatus.boundary) {
+          final first = _repeatWrapTarget();
+          if (first != null && first.globalKey != current.globalKey) {
+            return QueueNavigationResult.wrapped(first);
+          }
+        }
         return result;
       }
       if (!current.sharesFileWith(candidate, playedPartId: playedPartId)) {
