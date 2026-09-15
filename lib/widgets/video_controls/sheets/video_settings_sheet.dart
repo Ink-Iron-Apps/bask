@@ -1,3 +1,4 @@
+import '../../../providers/playback_state_provider.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -52,6 +53,7 @@ enum _SettingsView {
   dvConversion,
   hdrToneMapping,
   subtitleRate,
+  repeatQueue,
   picture,
   pictureChannel,
 }
@@ -601,6 +603,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return t.videoSettings.hdrToneMapping;
       case _SettingsView.subtitleRate:
         return t.videoSettings.subtitleRate;
+      case _SettingsView.repeatQueue:
+        return t.videoSettings.repeatQueue;
       case _SettingsView.picture:
         return t.videoSettings.pictureAdjustments;
       case _SettingsView.pictureChannel:
@@ -630,6 +634,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return Symbols.tonality_rounded;
       case _SettingsView.subtitleRate:
         return Symbols.speed_rounded;
+      case _SettingsView.repeatQueue:
+        return Symbols.repeat_rounded;
       case _SettingsView.picture:
       case _SettingsView.pictureChannel:
         return Symbols.exposure_rounded;
@@ -793,6 +799,19 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           isHighlighted: _audioSyncOffset != 0,
           onTap: () => _openSyncBar(isSubtitle: false),
         ),
+
+        // Only with a queue behind the current item: repeat describes what
+        // happens at the end of one, and there is nothing to say without it.
+        if (_playbackState?.isQueueActive ?? false)
+          _SettingsMenuItem(
+            icon: Symbols.repeat_rounded,
+            title: t.videoSettings.repeatQueue,
+            valueText: _playbackState?.repeatMode == VideoRepeatMode.all
+                ? t.videoSettings.repeatQueueAll
+                : t.videoSettings.repeatQueueOff,
+            isHighlighted: (_playbackState?.repeatMode ?? VideoRepeatMode.off) != VideoRepeatMode.off,
+            onTap: () => _navigateTo(_SettingsView.repeatQueue),
+          ),
 
         _SettingsMenuItem(
           icon: Symbols.subtitles_rounded,
@@ -1036,6 +1055,54 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
       appLogger.w('Could not apply the subtitle rate', error: e);
     }
     if (mounted) _navigateTo(_SettingsView.menu);
+  }
+
+  /// The queue, when this sheet is inside a player that has one.
+  ///
+  /// The sheet is also built without the player's providers above it — the
+  /// widget tests do exactly that — so absence is a normal state, not a bug
+  /// to throw on. Mirrors how the speed view reaches for Watch Together.
+  PlaybackStateProvider? get _playbackState {
+    try {
+      return context.watch<PlaybackStateProvider>();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Widget _buildRepeatQueueView() {
+    final playbackState = _playbackState;
+    if (playbackState == null) return const SizedBox.shrink();
+    final primary = Theme.of(context).colorScheme.primary;
+    final modes = [
+      (
+        value: VideoRepeatMode.off,
+        label: t.videoSettings.repeatQueueOff,
+        subtitle: t.videoSettings.repeatQueueOffDescription,
+      ),
+      (
+        value: VideoRepeatMode.all,
+        label: t.videoSettings.repeatQueueAll,
+        subtitle: t.videoSettings.repeatQueueAllDescription,
+      ),
+    ];
+
+    return ListView(
+      children: [
+        for (final mode in modes)
+          FocusableListTile(
+            title: Text(mode.label, style: TextStyle(color: playbackState.repeatMode == mode.value ? primary : null)),
+            subtitle: Text(mode.subtitle, style: TextStyle(color: tokens(context).textMuted, fontSize: 12)),
+            trailing: playbackState.repeatMode == mode.value
+                ? AppIcon(Symbols.check_rounded, fill: 1, color: primary)
+                : null,
+            onTap: () {
+              playbackState.setRepeatMode(mode.value);
+              _navigateTo(_SettingsView.menu);
+            },
+          ),
+      ],
+    );
   }
 
   Widget _buildSubtitleRateView() {
@@ -1579,6 +1646,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             return _buildHdrToneMappingView();
           case _SettingsView.subtitleRate:
             return _buildSubtitleRateView();
+          case _SettingsView.repeatQueue:
+            return _buildRepeatQueueView();
         }
       }(),
     );

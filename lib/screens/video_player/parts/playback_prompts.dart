@@ -42,7 +42,9 @@ extension _VideoPlayerPlaybackPromptMethods on VideoPlayerScreenState {
     // happen, otherwise "stop after 3" would stop after the first.
     final sleepTimerService = SleepTimerService();
     if (sleepTimerService.isEndOfVideoMode && !_episode.completionLatch.triggered) {
-      if (sleepTimerService.notifyVideoCompleted(hasNext: _episode.next != null)) {
+      // A wrap is the queue ending, whatever repeat does next: "stop at the
+      // end of the queue" must not be defeated by the queue restarting.
+      if (sleepTimerService.notifyVideoCompleted(hasNext: _episode.next != null && !_episode.nextWraps)) {
         _episode.completionLatch.latch();
         return;
       }

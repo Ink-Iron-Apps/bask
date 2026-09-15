@@ -26,6 +26,11 @@ class EpisodeSessionState {
   /// commits found, boundary, or unavailable.
   QueueNavigationStatus nextStatus = QueueNavigationStatus.failed;
 
+  /// Whether [next] is the queue starting over under repeat rather than a
+  /// genuine following item. Playback advances either way; the sleep timer's
+  /// "end of queue" mode stops here, because the queue did end.
+  bool nextWraps = false;
+
   /// globalKey of the adjacent episode whose playback metadata row was last
   /// prefetched into the API cache.
   String? primedNextGlobalKey;
