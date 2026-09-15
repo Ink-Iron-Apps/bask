@@ -22,7 +22,12 @@ import 'base_video_control_sheet.dart';
 import '../../loading_indicator_box.dart';
 import '../models/track_controls_state.dart';
 
-@visibleForTesting
+/// The language to search subtitles in: the saved choice, else the system
+/// language, else English.
+///
+/// Used by the auto-fetch path too, which needs the same answer the sheet
+/// would give — searching in a language the user does not read would make its
+/// one automatic action useless.
 String resolveSubtitleSearchLanguageCode({String? savedLanguageCode, required Locale systemLocale}) {
   return LanguageCodes.getIso6391Code(savedLanguageCode ?? '') ??
       LanguageCodes.getIso6391Code(systemLocale.languageCode) ??

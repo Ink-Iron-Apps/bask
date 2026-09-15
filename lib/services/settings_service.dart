@@ -573,6 +573,14 @@ class SettingsService extends BaseSharedPreferencesService {
   /// minutes out at fifty — and only a rate correction closes that.
   static const subtitleSpeed = DoublePref('subtitle_speed', defaultValue: 1.0);
   static const subtitleSearchLanguage = NullableStringPref('subtitle_search_language');
+
+  /// Fetch a hash-matched subtitle for a video that has none.
+  ///
+  /// Only an exact match is taken: OpenSubtitles' moviehash says the subtitle
+  /// was timed against this file, so it cannot drift. A merely high-scoring
+  /// subtitle for another release can be minutes out by the end of a film,
+  /// which is worse than no subtitle at all.
+  static const autoFetchExactSubtitles = BoolPref('auto_fetch_exact_subtitles');
   static const volume = DoublePref('volume', defaultValue: 100.0);
 
   /// Pins the player to landscape. Off by default so the picture follows the
@@ -1343,6 +1351,7 @@ class SettingsService extends BaseSharedPreferencesService {
     subtitleSyncOffset,
     subtitleSpeed,
     subtitleSearchLanguage,
+    autoFetchExactSubtitles,
     volume,
     subtitleFontSize,
     subtitleTextColor,

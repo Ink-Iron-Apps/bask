@@ -48,6 +48,17 @@ class SubtitleStylingScreen extends StatelessWidget {
       title: Text(t.screens.subtitleStyling),
       children: [
         SettingsGroup(
+          title: t.videoControls.searchSubtitles,
+          children: [
+            SettingSwitchTile(
+              pref: SettingsService.autoFetchExactSubtitles,
+              icon: Symbols.subtitles_rounded,
+              title: t.settings.autoFetchSubtitles,
+              subtitle: t.settings.autoFetchSubtitlesDescription,
+            ),
+          ],
+        ),
+        SettingsGroup(
           title: t.subtitlingStyling.text,
           children: [
             SettingSelectionTile<SubAssOverride>(
