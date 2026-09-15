@@ -90,6 +90,25 @@ void main() {
       expect(encoded, isNot(contains(sourcePath)));
     });
 
+    test('excludes settings whose right value depends on the device', () async {
+      // Anchor: buffering to storage is off on a TV because its partition is
+      // small and shared with the cache Android reclaims, and the download
+      // limit is sized to whatever device set it. Carrying a phone's answers
+      // to a TV reinstates the configuration that caused stutter and deleted
+      // the subtitle fonts.
+      final prefs = await BaseSharedPreferencesService.sharedCache();
+      await prefs.setInt('disk_cache_size_gb', 4);
+      await prefs.setInt('download_storage_budget_gb', 64);
+      await prefs.setBool('download_on_wifi_only', true);
+
+      final exported = SettingsExportService.buildExportMap(prefs, currentUserUuid: 'alice')['prefs'] as Map;
+
+      expect(exported, isNot(contains('disk_cache_size_gb')));
+      expect(exported, isNot(contains('download_storage_budget_gb')));
+      // A genuinely portable download control still travels.
+      expect(exported['download_on_wifi_only'], {'type': 'bool', 'value': true});
+    });
+
     test('round-trips a custom shader selection as a portable disabled selection', () async {
       const custom = ShaderPreset(
         id: 'custom_local-only.glsl',
