@@ -318,6 +318,10 @@
     "downloadOnWifiOnlyDescription": "Prevent downloads when on cellular data",
     "autoRemoveWatchedDownloads": "Auto-remove watched downloads",
     "autoRemoveWatchedDownloadsDescription": "Delete watched downloads automatically",
+    "downloadStorageBudget": "Download Storage Limit",
+    "downloadStorageBudgetDescription": "Delete the oldest watched downloads when the total passes this",
+    "downloadStorageBudgetOff": "No limit",
+    "downloadStorageBudgetGB": "${size} GB",
     "cellularDownloadBlocked": "Downloads are blocked on cellular. Use Wi-Fi or change the setting.",
     "maxVolume": "Maximum Volume",
     "maxVolumeDescription": "Allow volume boost above 100% for quiet media",
@@ -439,7 +443,9 @@
     "autoSkipCredits": "Auto Skip Credits",
     "autoSkipCreditsDescription": "Automatically skip credits and play next episode",
     "content": "Content",
-    "subtitlesAndConfig": "Subtitles & Configuration"
+    "subtitlesAndConfig": "Subtitles & Configuration",
+    "autoFetchSubtitles": "Fetch a Matching Subtitle",
+    "autoFetchSubtitlesDescription": "When a video has no subtitles, download the one timed to this exact file, if the provider has it"
   },
   "search": {
     "hint": "Search movies, shows, music...",
@@ -1949,6 +1955,11 @@
     "sleepTimerActive": "Active (${duration})",
     "zoom": "Zoom",
     "sleepTimer": "Sleep Timer",
+    "repeatQueue": "Repeat",
+    "repeatQueueOff": "Off",
+    "repeatQueueAll": "Repeat queue",
+    "repeatQueueAllDescription": "Start the queue again when it reaches the end",
+    "repeatQueueOffDescription": "Stop when the queue ends",
     "audioSync": "Audio Sync",
     "subtitleSync": "Subtitle Sync",
     "subtitleRate": "Subtitle Rate",
