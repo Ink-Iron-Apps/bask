@@ -1370,6 +1370,12 @@ class Translations$settings$en {
 
 	/// en: 'Subtitles & Configuration'
 	String get subtitlesAndConfig => 'Subtitles & Configuration';
+
+	/// en: 'Fetch a Matching Subtitle'
+	String get autoFetchSubtitles => 'Fetch a Matching Subtitle';
+
+	/// en: 'When a video has no subtitles, download the one timed to this exact file, if the provider has it'
+	String get autoFetchSubtitlesDescription => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it';
 }
 
 // Path: search
@@ -7724,6 +7730,8 @@ extension on Translations {
 			'settings.autoSkipCreditsDescription' => 'Automatically skip credits and play next episode',
 			'settings.content' => 'Content',
 			'settings.subtitlesAndConfig' => 'Subtitles & Configuration',
+			'settings.autoFetchSubtitles' => 'Fetch a Matching Subtitle',
+			'settings.autoFetchSubtitlesDescription' => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it',
 			'search.hint' => 'Search movies, shows, music...',
 			'search.tryDifferentTerm' => 'Try a different search term',
 			'search.searchYourMedia' => 'Search your media',
@@ -7804,10 +7812,10 @@ extension on Translations {
 			'fileInfo.colorTransfer' => 'Color Transfer',
 			'fileInfo.chromaSubsampling' => 'Chroma Subsampling',
 			'fileInfo.chromaLocation' => 'Chroma Location',
-			'fileInfo.scanType' => 'Scan Type',
-			'fileInfo.interlaced' => 'Interlaced',
 			_ => null,
 		} ?? switch (path) {
+			'fileInfo.scanType' => 'Scan Type',
+			'fileInfo.interlaced' => 'Interlaced',
 			'fileInfo.anamorphic' => 'Anamorphic',
 			'fileInfo.referenceFrames' => 'Reference Frames',
 			'fileInfo.dynamicRange' => 'Dynamic Range',
@@ -8318,10 +8326,10 @@ extension on Translations {
 			'discover.rating' => 'Rating',
 			'discover.director' => 'Director',
 			'discover.directors' => 'Directors',
-			'discover.movie' => 'Movie',
-			'discover.tvShow' => 'TV Show',
 			_ => null,
 		} ?? switch (path) {
+			'discover.movie' => 'Movie',
+			'discover.tvShow' => 'TV Show',
 			'discover.minutesLeft' => ({required Object minutes}) => '${minutes} min left',
 			'discover.moreLikeThis' => 'More Like This',
 			'discover.titleCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} title', other: '${n} titles', ), 
@@ -8832,10 +8840,10 @@ extension on Translations {
 			'watchTogether.failedToJoin' => 'Failed to join session',
 			'watchTogether.sessionCodeCopied' => 'Session code copied to clipboard',
 			'watchTogether.relayUnreachable' => 'Relay server unreachable. ISP blocking may prevent Watch Together.',
-			'watchTogether.reconnectingToHost' => 'Reconnecting to host...',
-			'watchTogether.currentPlayback' => 'Current Playback',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.reconnectingToHost' => 'Reconnecting to host...',
+			'watchTogether.currentPlayback' => 'Current Playback',
 			'watchTogether.joinCurrentPlayback' => 'Join Current Playback',
 			'watchTogether.joinCurrentPlaybackDescription' => 'Jump back into what the host is currently watching',
 			'watchTogether.failedToOpenCurrentPlayback' => 'Failed to open current playback',
@@ -9346,10 +9354,10 @@ extension on Translations {
 			'services.libraryFilter.subtitleNoneSyncing' => 'Nothing syncing',
 			'services.libraryFilter.subtitleBlocked' => ({required Object count}) => '${count} blocked',
 			'services.libraryFilter.subtitleAllowed' => ({required Object count}) => '${count} allowed',
-			'services.libraryFilter.mode' => 'Filter mode',
-			'services.libraryFilter.modeBlacklist' => 'Blacklist',
 			_ => null,
 		} ?? switch (path) {
+			'services.libraryFilter.mode' => 'Filter mode',
+			'services.libraryFilter.modeBlacklist' => 'Blacklist',
 			'services.libraryFilter.modeWhitelist' => 'Whitelist',
 			'services.libraryFilter.modeHintBlacklist' => 'Sync every library except the ones checked below.',
 			'services.libraryFilter.modeHintWhitelist' => 'Sync only the libraries checked below.',

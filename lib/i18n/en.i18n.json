@@ -443,7 +443,9 @@
     "autoSkipCredits": "Auto Skip Credits",
     "autoSkipCreditsDescription": "Automatically skip credits and play next episode",
     "content": "Content",
-    "subtitlesAndConfig": "Subtitles & Configuration"
+    "subtitlesAndConfig": "Subtitles & Configuration",
+    "autoFetchSubtitles": "Fetch a Matching Subtitle",
+    "autoFetchSubtitlesDescription": "When a video has no subtitles, download the one timed to this exact file, if the provider has it"
   },
   "search": {
     "hint": "Search movies, shows, music...",
