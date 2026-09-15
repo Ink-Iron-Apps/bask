@@ -1,3 +1,4 @@
+import '../../../media/media_item_labels.dart';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
@@ -319,7 +320,7 @@ class _PlayNextEpisodeHeader extends StatelessWidget {
                   return Row(
                     children: [
                       Text(
-                        t.videoControls.nextEpisode,
+                        nextItemLabel(episode, compact: false),
                         style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, fontWeight: .w500),
                       ),
                       if (isShuffleActive) ...[

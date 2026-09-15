@@ -1,3 +1,4 @@
+import '../../media/media_item_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -383,7 +384,7 @@ class _MobileVideoControlsState extends State<MobileVideoControls> with SingleTi
             if (!widget.isLive) ...[
               const SizedBox(width: 24),
               CircularControlButton(
-                semanticLabel: t.videoControls.nextButton,
+                semanticLabel: nextItemLabel(widget.metadata, compact: true),
                 icon: Symbols.skip_next_rounded,
                 iconSize: 48,
                 onPressed: widget.onNext,
