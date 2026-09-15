@@ -633,6 +633,14 @@ class SettingsService extends BaseSharedPreferencesService {
   static const downloadOnWifiOnly = BoolPref('download_on_wifi_only');
   static const autoRemoveWatchedDownloads = BoolPref('auto_remove_watched_downloads');
 
+  /// Gigabytes of downloads to keep, or 0 for no limit.
+  ///
+  /// Distinct from [autoRemoveWatchedDownloads], which removes a title as soon
+  /// as it is watched: this keeps watched downloads around until the space is
+  /// actually needed, which is the difference between "I finished it" and "the
+  /// device is full".
+  static const downloadStorageBudgetGB = IntPref('download_storage_budget_gb');
+
   /// Set once the user has seen the pre-flight "background downloads are
   /// blocked" dialog. The persistent Downloads-screen banner covers repeat
   /// offenders, so the interrupting dialog is shown exactly once.
@@ -1449,6 +1457,7 @@ class SettingsService extends BaseSharedPreferencesService {
     introPattern,
     creditsPattern,
     autoRemoveWatchedDownloads,
+    downloadStorageBudgetGB,
     defaultQualityPreset,
     cellularQualityPreset,
     musicQualityPreset,
