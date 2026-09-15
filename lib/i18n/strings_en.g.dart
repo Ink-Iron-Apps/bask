@@ -993,6 +993,18 @@ class Translations$settings$en {
 	/// en: 'Delete watched downloads automatically'
 	String get autoRemoveWatchedDownloadsDescription => 'Delete watched downloads automatically';
 
+	/// en: 'Download Storage Limit'
+	String get downloadStorageBudget => 'Download Storage Limit';
+
+	/// en: 'Delete the oldest watched downloads when the total passes this'
+	String get downloadStorageBudgetDescription => 'Delete the oldest watched downloads when the total passes this';
+
+	/// en: 'No limit'
+	String get downloadStorageBudgetOff => 'No limit';
+
+	/// en: '${size} GB'
+	String downloadStorageBudgetGB({required Object size}) => '${size} GB';
+
 	/// en: 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.'
 	String get cellularDownloadBlocked => 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.';
 
@@ -7586,6 +7598,10 @@ extension on Translations {
 			'settings.downloadOnWifiOnlyDescription' => 'Prevent downloads when on cellular data',
 			'settings.autoRemoveWatchedDownloads' => 'Auto-remove watched downloads',
 			'settings.autoRemoveWatchedDownloadsDescription' => 'Delete watched downloads automatically',
+			'settings.downloadStorageBudget' => 'Download Storage Limit',
+			'settings.downloadStorageBudgetDescription' => 'Delete the oldest watched downloads when the total passes this',
+			'settings.downloadStorageBudgetOff' => 'No limit',
+			'settings.downloadStorageBudgetGB' => ({required Object size}) => '${size} GB',
 			'settings.cellularDownloadBlocked' => 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.',
 			'settings.maxVolume' => 'Maximum Volume',
 			'settings.maxVolumeDescription' => 'Allow volume boost above 100% for quiet media',
@@ -7790,12 +7806,12 @@ extension on Translations {
 			'fileInfo.chromaLocation' => 'Chroma Location',
 			'fileInfo.scanType' => 'Scan Type',
 			'fileInfo.interlaced' => 'Interlaced',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.anamorphic' => 'Anamorphic',
 			'fileInfo.referenceFrames' => 'Reference Frames',
 			'fileInfo.dynamicRange' => 'Dynamic Range',
 			'fileInfo.dolbyVision' => 'Dolby Vision',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.dolbyVisionLevel' => 'Dolby Vision Level',
 			'fileInfo.dolbyVisionVersion' => 'Dolby Vision Version',
 			'fileInfo.dolbyVisionLayers' => 'Dolby Vision Layers',
@@ -8304,12 +8320,12 @@ extension on Translations {
 			'discover.directors' => 'Directors',
 			'discover.movie' => 'Movie',
 			'discover.tvShow' => 'TV Show',
+			_ => null,
+		} ?? switch (path) {
 			'discover.minutesLeft' => ({required Object minutes}) => '${minutes} min left',
 			'discover.moreLikeThis' => 'More Like This',
 			'discover.titleCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} title', other: '${n} titles', ), 
 			'errors.searchFailed' => ({required Object error}) => 'Search failed: ${error}',
-			_ => null,
-		} ?? switch (path) {
 			'errors.searchUnavailable' => 'Search could not reach any media server.',
 			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
 			'errors.connectionFailed' => 'Unable to connect to media server',
@@ -8818,12 +8834,12 @@ extension on Translations {
 			'watchTogether.relayUnreachable' => 'Relay server unreachable. ISP blocking may prevent Watch Together.',
 			'watchTogether.reconnectingToHost' => 'Reconnecting to host...',
 			'watchTogether.currentPlayback' => 'Current Playback',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.joinCurrentPlayback' => 'Join Current Playback',
 			'watchTogether.joinCurrentPlaybackDescription' => 'Jump back into what the host is currently watching',
 			'watchTogether.failedToOpenCurrentPlayback' => 'Failed to open current playback',
 			'watchTogether.participantJoined' => ({required Object name}) => '${name} joined',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.participantLeft' => ({required Object name}) => '${name} left',
 			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
 			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
@@ -9332,12 +9348,12 @@ extension on Translations {
 			'services.libraryFilter.subtitleAllowed' => ({required Object count}) => '${count} allowed',
 			'services.libraryFilter.mode' => 'Filter mode',
 			'services.libraryFilter.modeBlacklist' => 'Blacklist',
+			_ => null,
+		} ?? switch (path) {
 			'services.libraryFilter.modeWhitelist' => 'Whitelist',
 			'services.libraryFilter.modeHintBlacklist' => 'Sync every library except the ones checked below.',
 			'services.libraryFilter.modeHintWhitelist' => 'Sync only the libraries checked below.',
 			'services.libraryFilter.libraries' => 'Libraries',
-			_ => null,
-		} ?? switch (path) {
 			'services.libraryFilter.noLibraries' => 'No libraries available',
 			'addServer.addMediaBrowserTitle' => ({required Object product}) => 'Add ${product} server',
 			'addServer.serverUrls' => 'Server URLs',

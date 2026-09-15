@@ -450,6 +450,22 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           title: t.settings.autoRemoveWatchedDownloads,
           subtitle: t.settings.autoRemoveWatchedDownloadsDescription,
         ),
+        SettingSelectionTile<int>(
+          pref: settings.SettingsService.downloadStorageBudgetGB,
+          icon: Symbols.database_rounded,
+          title: t.settings.downloadStorageBudget,
+          subtitleBuilder: (v) => v == 0
+              ? t.settings.downloadStorageBudgetDescription
+              : '${t.settings.downloadStorageBudgetGB(size: v.toString())} · ${t.settings.downloadStorageBudgetDescription}',
+          options: const [0, 8, 16, 32, 64, 128]
+              .map(
+                (s) => DialogOption(
+                  value: s,
+                  title: s == 0 ? t.settings.downloadStorageBudgetOff : t.settings.downloadStorageBudgetGB(size: '$s'),
+                ),
+              )
+              .toList(),
+        ),
         if (_backgroundWorkDiagnostics.isSupported) _buildBackgroundDownloadsTile(),
         // TODO: "Remove orphaned downloads" toggle (#1413) goes here, next to
         // autoRemoveWatchedDownloads.
