@@ -1,3 +1,4 @@
+import '../../media/media_item_labels.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -873,7 +874,7 @@ class DesktopVideoControlsState extends State<DesktopVideoControls> {
                       icon: Symbols.skip_next_rounded,
                       color: widget.onNext != null && _canControl ? Colors.white : Colors.white54,
                       onPressed: _canControl ? widget.onNext : null,
-                      semanticLabel: t.videoControls.nextButton,
+                      semanticLabel: nextItemLabel(widget.metadata, compact: true),
                     ),
                   ),
                 ],
