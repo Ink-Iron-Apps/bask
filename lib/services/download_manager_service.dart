@@ -987,6 +987,7 @@ class DownloadManagerService {
     // longer blocks the Downloads list either way.
     final watch = Stopwatch()..start();
     final phases = <String, int>{};
+    var needsNativeRecovery = false;
     var lastMs = 0;
     void mark(String phase) {
       final now = watch.elapsedMilliseconds;
@@ -1004,6 +1005,23 @@ class DownloadManagerService {
         appLogger.e('Failed to repair missing download queue items', error: e, stackTrace: st);
       }
       mark('repair');
+
+      // Nothing in flight and nothing holding a native task id means there is
+      // nothing for the platform side to reconcile: no killed task to
+      // reschedule, no orphaned temp file from a transfer that never ran, no
+      // task to resume from background. Those phases are the expensive ones —
+      // they cross into background_downloader and were measured at seconds on
+      // a large library — and they run on every cold start whether or not a
+      // download was ever interrupted.
+      //
+      // The downloader itself is initialised lazily by the queue drain before
+      // anything is enqueued, and native reconciliation already no-ops while
+      // it is uninitialised, so skipping them here costs nothing later.
+      needsNativeRecovery = await _database.hasRecoverableDownloads(
+        activeStatuses: [DownloadStatus.downloading.index, DownloadStatus.queued.index, DownloadStatus.paused.index],
+      );
+      mark('recovery needed check');
+
       final nativeRecoveryOverride = _nativeRecoveryOverride;
       if (nativeRecoveryOverride != null) {
         await nativeRecoveryOverride();
@@ -1013,29 +1031,36 @@ class DownloadManagerService {
       // callbacks and calls resumeFromBackground, which can deliver a failure a relocated
       // task already hit on the old path — and a failed row is no longer restartable.
       // rescheduleKilledTasks, further down, would re-enqueue it against that path again.
-      await _purgeRelocatedDownloadRecords();
+      if (needsNativeRecovery) {
+        await _purgeRelocatedDownloadRecords();
+      }
       mark('purge relocated');
 
-      unawaited(Sentry.addBreadcrumb(Breadcrumb(message: 'Initializing FileDownloader', category: 'downloads')));
-      await (_fileDownloaderInitializerOverride?.call() ?? _initializeFileDownloader());
-      mark('downloader init');
+      if (needsNativeRecovery) {
+        unawaited(Sentry.addBreadcrumb(Breadcrumb(message: 'Initializing FileDownloader', category: 'downloads')));
+        await (_fileDownloaderInitializerOverride?.call() ?? _initializeFileDownloader());
+        mark('downloader init');
 
-      final deletedTempFiles = await _nativeOps.cleanUpOrphanedTempFiles();
-      mark('temp file sweep');
-      if (deletedTempFiles > 0) {
-        appLogger.i('Deleted $deletedTempFiles orphaned downloader temp file(s)');
+        final deletedTempFiles = await _nativeOps.cleanUpOrphanedTempFiles();
+        mark('temp file sweep');
+        if (deletedTempFiles > 0) {
+          appLogger.i('Deleted $deletedTempFiles orphaned downloader temp file(s)');
+        }
+
+        // Let background_downloader re-enqueue tasks killed by the OS
+        unawaited(Sentry.addBreadcrumb(Breadcrumb(message: 'Rescheduling killed tasks', category: 'downloads')));
+        final (rescheduled, _) = await _nativeOps.rescheduleKilledTasks();
+        mark('reschedule killed');
+        if (rescheduled.isNotEmpty) {
+          appLogger.i('Rescheduled ${rescheduled.length} killed download task(s)');
+        }
+
+        await _reconcileNativeDownloadTasks();
+        mark('reconcile native tasks');
       }
 
-      // Let background_downloader re-enqueue tasks killed by the OS
-      unawaited(Sentry.addBreadcrumb(Breadcrumb(message: 'Rescheduling killed tasks', category: 'downloads')));
-      final (rescheduled, _) = await _nativeOps.rescheduleKilledTasks();
-      mark('reschedule killed');
-      if (rescheduled.isNotEmpty) {
-        appLogger.i('Rescheduled ${rescheduled.length} killed download task(s)');
-      }
-
-      await _reconcileNativeDownloadTasks();
-      mark('reconcile native tasks');
+      // Runs either way: a SAF grant can be revoked by the system while no
+      // download is in flight at all, and the check is a database read.
       await _reconcileSafGrantOwnership();
       mark('reconcile SAF grants');
 
@@ -1118,7 +1143,8 @@ class DownloadManagerService {
       appLogger.e('Failed to recover interrupted downloads', error: e);
     } finally {
       appLogger.i(
-        'Download recovery phases (${watch.elapsedMilliseconds}ms total): '
+        'Download recovery phases (${watch.elapsedMilliseconds}ms total, '
+        'native ${needsNativeRecovery ? 'yes' : 'skipped'}): '
         '${phases.entries.map((e) => '${e.key} ${e.value}ms').join(', ')}',
       );
     }
