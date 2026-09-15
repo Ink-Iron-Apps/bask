@@ -539,6 +539,21 @@ extension DownloadDatabaseOperations on AppDatabase {
     return (await query.map((row) => row.read(count) ?? 0).getSingle());
   }
 
+  /// Whether any row implies work for interrupted-download recovery.
+  ///
+  /// Recovery initialises the platform downloader, sweeps temp files and
+  /// reconciles native tasks — eight seconds on a large library, on every cold
+  /// start, and all of it pointless when nothing was in flight. A row is
+  /// interesting if it is mid-transfer, waiting to transfer, or still carries
+  /// a native task id from a previous run.
+  Future<bool> hasRecoverableDownloads({required List<int> activeStatuses}) async {
+    final count = downloadedMedia.id.count();
+    final query = selectOnly(downloadedMedia)
+      ..addColumns([count])
+      ..where(downloadedMedia.status.isIn(activeStatuses) | downloadedMedia.bgTaskId.isNotNull());
+    return (await query.map((row) => row.read(count) ?? 0).getSingle()) > 0;
+  }
+
   @visibleForTesting
   Future<Set<String>> getReferencedDownloadSafRoots() async {
     final rows =
