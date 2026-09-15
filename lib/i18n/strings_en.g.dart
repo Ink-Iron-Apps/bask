@@ -4783,6 +4783,21 @@ class Translations$videoSettings$en {
 	/// en: 'Sleep Timer'
 	String get sleepTimer => 'Sleep Timer';
 
+	/// en: 'Repeat'
+	String get repeatQueue => 'Repeat';
+
+	/// en: 'Off'
+	String get repeatQueueOff => 'Off';
+
+	/// en: 'Repeat queue'
+	String get repeatQueueAll => 'Repeat queue';
+
+	/// en: 'Start the queue again when it reaches the end'
+	String get repeatQueueAllDescription => 'Start the queue again when it reaches the end';
+
+	/// en: 'Stop when the queue ends'
+	String get repeatQueueOffDescription => 'Stop when the queue ends';
+
 	/// en: 'Audio Sync'
 	String get audioSync => 'Audio Sync';
 
@@ -9079,6 +9094,11 @@ extension on Translations {
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Active (${duration})',
 			'videoSettings.zoom' => 'Zoom',
 			'videoSettings.sleepTimer' => 'Sleep Timer',
+			'videoSettings.repeatQueue' => 'Repeat',
+			'videoSettings.repeatQueueOff' => 'Off',
+			'videoSettings.repeatQueueAll' => 'Repeat queue',
+			'videoSettings.repeatQueueAllDescription' => 'Start the queue again when it reaches the end',
+			'videoSettings.repeatQueueOffDescription' => 'Stop when the queue ends',
 			'videoSettings.audioSync' => 'Audio Sync',
 			'videoSettings.subtitleSync' => 'Subtitle Sync',
 			'videoSettings.subtitleRate' => 'Subtitle Rate',
@@ -9349,13 +9369,13 @@ extension on Translations {
 			'services.oauthProxy.openToSignIn' => ({required Object service}) => 'Open ${service} to sign in',
 			'services.pendingAuth.copyUrl' => 'Copy sign-in URL',
 			'services.pendingAuth.urlCopied' => 'URL copied',
+			_ => null,
+		} ?? switch (path) {
 			'services.libraryFilter.title' => 'Library filter',
 			'services.libraryFilter.subtitleAllSyncing' => 'Syncing all libraries',
 			'services.libraryFilter.subtitleNoneSyncing' => 'Nothing syncing',
 			'services.libraryFilter.subtitleBlocked' => ({required Object count}) => '${count} blocked',
 			'services.libraryFilter.subtitleAllowed' => ({required Object count}) => '${count} allowed',
-			_ => null,
-		} ?? switch (path) {
 			'services.libraryFilter.mode' => 'Filter mode',
 			'services.libraryFilter.modeBlacklist' => 'Blacklist',
 			'services.libraryFilter.modeWhitelist' => 'Whitelist',

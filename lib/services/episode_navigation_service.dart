@@ -14,19 +14,33 @@ import '../utils/app_logger.dart';
 
 /// Result of loading adjacent episodes
 class AdjacentEpisodes {
-  const AdjacentEpisodes({this.next, this.previous, required this.nextStatus, required this.previousStatus});
+  const AdjacentEpisodes({
+    this.next,
+    this.previous,
+    required this.nextStatus,
+    required this.previousStatus,
+    this.nextWraps = false,
+  });
+
+  /// Whether [next] is the queue starting over under repeat.
+  ///
+  /// Playback treats it as an ordinary advance; the sleep timer's
+  /// "end of queue" treats it as the end, because it is.
+  final bool nextWraps;
 
   const AdjacentEpisodes.unavailable()
     : next = null,
       previous = null,
       nextStatus = QueueNavigationStatus.unavailable,
-      previousStatus = QueueNavigationStatus.unavailable;
+      previousStatus = QueueNavigationStatus.unavailable,
+      nextWraps = false;
 
   const AdjacentEpisodes.failed()
     : next = null,
       previous = null,
       nextStatus = QueueNavigationStatus.failed,
-      previousStatus = QueueNavigationStatus.failed;
+      previousStatus = QueueNavigationStatus.failed,
+      nextWraps = false;
 
   final MediaItem? next;
   final MediaItem? previous;
@@ -121,6 +135,7 @@ class EpisodeNavigationService {
         previous: previousResult.item,
         nextStatus: nextStatus,
         previousStatus: previousStatus,
+        nextWraps: nextResult.wrapped,
       );
     } catch (e, st) {
       appLogger.w('Could not load adjacent episodes', error: e, stackTrace: st);

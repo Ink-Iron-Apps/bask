@@ -118,6 +118,7 @@ extension _VideoPlayerEpisodeQueueMethods on VideoPlayerScreenState {
       return AdjacentEpisodes(
         next: next.item,
         previous: previous.item,
+        nextWraps: next.wrapped,
         nextStatus: next.status == QueueNavigationStatus.unavailable ? QueueNavigationStatus.boundary : next.status,
         previousStatus: previous.status == QueueNavigationStatus.unavailable
             ? QueueNavigationStatus.boundary
@@ -170,6 +171,7 @@ extension _VideoPlayerEpisodeQueueMethods on VideoPlayerScreenState {
       _episode.next = adjacentEpisodes.next;
       _episode.previous = adjacentEpisodes.previous;
       _episode.nextStatus = adjacentEpisodes.nextStatus;
+      _episode.nextWraps = adjacentEpisodes.nextWraps;
     });
     _primeNextEpisodePlaybackMetadata(adjacentEpisodes.next);
   }
