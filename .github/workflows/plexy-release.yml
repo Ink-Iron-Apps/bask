@@ -260,6 +260,40 @@ jobs:
             --dart-define=UPDATE_READ_TOKEN=${{ secrets.UPDATE_READ_TOKEN }} \
             --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
 
+      - name: Build the portable Windows app
+        # Windows only, and only where the runner can actually build it: the
+        # self-hosted runner is Windows, GitHub's default here is Linux. A
+        # missing Windows build is not worth failing the Android release over,
+        # so this reports and continues.
+        if: ${{ runner.os == 'Windows' }}
+        continue-on-error: true
+        shell: bash
+        run: |
+          flutter build windows --release \
+            --dart-define=UPDATE_READ_TOKEN=${{ secrets.UPDATE_READ_TOKEN }} \
+            --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
+
+      - name: Package the portable Windows app
+        if: ${{ runner.os == 'Windows' }}
+        continue-on-error: true
+        shell: bash
+        env:
+          TAG: ${{ inputs.tag || steps.version.outputs.tag }}
+        run: |
+          bundle=build/windows/x64/runner/Release
+          [ -d "$bundle" ] || { echo "::warning::No Windows bundle to package"; exit 0; }
+          # The marker is what makes it portable: with it beside the exe the
+          # app keeps its database, preferences, caches and downloads in
+          # ./data instead of %APPDATA%, so the folder is the whole install.
+          printf '%s\n' \
+            'Delete this file to make this copy store its data in %APPDATA% instead.' \
+            'While it exists, everything Plexy writes stays in the data folder next to the executable.' \
+            > "$bundle/portable.txt"
+          rm -rf build/windows-portable && mkdir -p build/windows-portable
+          cp -r "$bundle" "build/windows-portable/Plexy-${TAG}-windows-x64"
+          (cd build/windows-portable && 7z a -tzip "Plexy-${TAG}-windows-x64-portable.zip" "Plexy-${TAG}-windows-x64" >/dev/null)
+          ls -la build/windows-portable/*.zip
+
       - name: Remove signing material
         if: always()
         run: rm -f android/app/plexy-release.jks android/key.properties
@@ -304,7 +338,10 @@ jobs:
           done
 
           attempt=0
-          until gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber build/app/outputs/flutter-apk/Plexy-*.apk; do
+          # The Windows zip is optional: its build step is allowed to fail
+          # without taking the Android release with it.
+          windows_zip=$(ls build/windows-portable/*.zip 2>/dev/null || true)
+          until gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber build/app/outputs/flutter-apk/Plexy-*.apk $windows_zip; do
             attempt=$((attempt+1))
             if [ "$attempt" -gt 5 ]; then echo "::error::Could not attach APKs to $TAG"; exit 1; fi
             echo "Retrying asset upload (attempt $attempt)"
