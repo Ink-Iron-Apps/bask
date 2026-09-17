@@ -1854,7 +1854,9 @@
     "playlistNothingDownloaded": "Nothing in this playlist has finished downloading yet",
     "playlists": "Playlists",
     "playlistItemCount": "${count} downloaded",
-    "playlistItemCountOf": "${done} of ${total} downloaded"
+    "playlistItemCountOf": "${done} of ${total} downloaded",
+    "storageUsed": "${size} used",
+    "storageUsedOfLimit": "${size} of ${limit} used"
   },
   "shaders": {
     "title": "Shaders",

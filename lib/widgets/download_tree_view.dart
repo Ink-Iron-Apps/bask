@@ -1,3 +1,4 @@
+import '../utils/formatters.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../media/ids.dart';
@@ -57,6 +58,24 @@ class DownloadTreeNode {
   int get completedLeafCount {
     if (!hasChildren) return status == DownloadStatus.completed ? 1 : 0;
     return children.fold(0, (sum, child) => sum + child.completedLeafCount);
+  }
+
+  /// Bytes this node occupies on the device, summed over everything below it.
+  ///
+  /// A finished download is its total size; one still running is what has
+  /// landed so far, which is what the device is actually holding. A row with
+  /// no size information contributes nothing rather than guessing — the sum
+  /// is meant to answer "what is this costing me", and an invented number
+  /// would answer it wrongly.
+  int get sizeBytes {
+    if (!hasChildren) {
+      final progress = downloadProgress;
+      if (progress == null) return 0;
+      return status == DownloadStatus.completed && progress.totalBytes > 0
+          ? progress.totalBytes
+          : progress.downloadedBytes;
+    }
+    return children.fold(0, (sum, child) => sum + child.sizeBytes);
   }
 }
 
@@ -671,6 +690,16 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
                   _getNodeSummary(),
                   style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                 ),
+              ]
+              // A single download says its own size. Not while it is running:
+              // the progress line below already reports what has landed, and
+              // two numbers for one transfer read as a discrepancy.
+              else if (widget.node.sizeBytes > 0 && _effectiveStatus != DownloadStatus.downloading) ...[
+                const SizedBox(height: 4),
+                Text(
+                  ByteFormatter.formatBytes(widget.node.sizeBytes),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                ),
               ],
 
               // Progress bar for active downloads
@@ -720,7 +749,11 @@ class _DownloadTreeItemState extends State<_DownloadTreeItem> {
   String _getNodeSummary() {
     final total = widget.node.leafCount;
     final completed = widget.node.completedLeafCount;
-    return t.downloads.completedOfTotal(completed: completed, total: total);
+    final counts = t.downloads.completedOfTotal(completed: completed, total: total);
+    final size = widget.node.sizeBytes;
+    // Nothing measured yet reads as a plain count rather than "0 B", which
+    // would claim the group is free.
+    return size > 0 ? '$counts · ${ByteFormatter.formatBytes(size)}' : counts;
   }
 
   /// The actions this row offers, in render order. Single source of truth:
