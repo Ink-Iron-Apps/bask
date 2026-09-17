@@ -1,3 +1,7 @@
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
+import 'package:shared_preferences_windows/shared_preferences_windows.dart';
+import 'services/portable_mode.dart';
 import 'dart:async';
 import 'dart:io' show Directory, Platform, ProcessInfo;
 import 'dart:ui' show AppExitResponse;
@@ -142,6 +146,22 @@ void _registerTvosPlatformPlugins() {
 
 void main() {
   final binding = PlezyWidgetsBinding.ensureInitialized();
+  // Before anything resolves a path. The database, preferences and every
+  // cache read theirs once and keep them, so a portable copy that decided
+  // late would already have written to %APPDATA%.
+  PortableMode.initialize();
+  if (PortableMode.isActive) {
+    // The vendored Windows preferences plugin holds its own
+    // PathProviderWindows rather than going through the platform interface,
+    // so redirecting the app alone would leave settings behind.
+    final portablePaths = PortablePathProvider(PortableMode.root!.path);
+    final legacyStore = SharedPreferencesStorePlatform.instance;
+    if (legacyStore is SharedPreferencesWindows) legacyStore.pathProvider = portablePaths;
+    // The app reads through the async API; the legacy store above still backs
+    // the migration path, so both need redirecting or half the settings move.
+    final asyncStore = SharedPreferencesAsyncPlatform.instance;
+    if (asyncStore is SharedPreferencesAsyncWindows) asyncStore.pathProvider = portablePaths;
+  }
   if (agentControlEnabled) AgentControlService.instance.register();
   AndroidExitDiagnostics.markStartupPhase(AndroidStartupPhase.dartMain);
   // Keep the accessibility tree available to Maestro and other UI automation
