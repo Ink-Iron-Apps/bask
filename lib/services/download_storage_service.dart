@@ -1,3 +1,4 @@
+import 'portable_mode.dart';
 import 'dart:convert';
 import '../media/ids.dart';
 import 'dart:io';
@@ -145,6 +146,17 @@ class DownloadStorageService {
         return _baseDownloadsDir!;
       }
       // Fall through to default if custom path is not writable
+    }
+
+    // A portable copy downloads beside itself, on whatever drive it is run
+    // from: the point of portable is that the folder is the whole install,
+    // and media buried under `plexy-data/support` is neither obvious nor
+    // easy to prune by hand. An explicit custom path above still wins — that
+    // is the user pointing somewhere deliberately, including another drive.
+    final portableRoot = PortableMode.root;
+    if (portableRoot != null) {
+      _baseDownloadsDir = await _ensureDirectoryExists(Directory(path.join(portableRoot.path, 'downloads')));
+      return _baseDownloadsDir!;
     }
 
     final baseDir = await _getBaseAppDir();
