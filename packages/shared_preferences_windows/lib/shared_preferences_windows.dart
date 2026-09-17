@@ -42,7 +42,12 @@ class SharedPreferencesWindows extends SharedPreferencesStorePlatform {
   FileSystem fs = const LocalFileSystem();
 
   /// The path_provider_windows instance used to find the support directory.
-  @visibleForTesting
+  ///
+  /// Plezy fork: not test-only. A portable Windows copy keeps everything it
+  /// writes inside its own folder, and this plugin resolves its file through
+  /// its own PathProviderWindows rather than the platform interface — so
+  /// without replacing this, preferences alone would stay in %APPDATA% while
+  /// the database, caches and downloads moved.
   PathProviderWindows pathProvider = PathProviderWindows();
 
   /// Checks for cached preferences and returns them or loads preferences from
@@ -150,7 +155,9 @@ base class SharedPreferencesAsyncWindows extends SharedPreferencesAsyncPlatform 
   FileSystem fs = const LocalFileSystem();
 
   /// The path_provider_windows instance used to find the support directory.
-  @visibleForTesting
+  ///
+  /// Plezy fork: not test-only — see the note on the other implementation.
+  /// Portable mode replaces it so preferences land beside the executable.
   PathProviderWindows pathProvider = PathProviderWindows();
 
   @override
