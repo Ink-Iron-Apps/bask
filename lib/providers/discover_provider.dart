@@ -1,3 +1,4 @@
+import '../services/rewatch_source.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -482,6 +483,10 @@ class DiscoverProvider extends ChangeNotifier with DisposableChangeNotifierMixin
         _applyOnDeck(fetchedOnDeck.items);
         ++expectedCommitRevision;
         replacedOnDeck = true;
+        // Rewatches are appended afterwards, never awaited: they cost a
+        // library query per show library plus an episode list per show, and
+        // Continue Watching must not wait on them to appear.
+        unawaited(_appendRewatches());
         _onDeckState = DiscoverLoadState.loaded;
         _loadedOnDeckServerIds = _authoritativeSucceededServerIds(
           fetchedOnDeck.succeededServerIds,
@@ -885,6 +890,55 @@ class DiscoverProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   void _applyOnDeck(List<MediaItem> fetched) {
     final hasMore = fetched.length > continueWatchingPreviewLimit;
     _replaceOnDeck(hasMore ? fetched.take(continueWatchingPreviewLimit).toList() : fetched, hasMore: hasMore);
+  }
+
+  /// Add "where you left off" rows for shows the server will not offer.
+  ///
+  /// Plex's On Deck holds only the next *unwatched* episode, so a show that
+  /// has been finished once drops out of Continue Watching even while it is
+  /// being rewatched. These rows restore it without the user having to
+  /// unmark anything, and sit after the genuinely unfinished ones: something
+  /// never finished is the stronger claim on the shelf.
+  Future<void> _appendRewatches() async {
+    final revisionAtStart = _commitRevision;
+    try {
+      // The server's own answer wins for any show it already names, so the
+      // two never disagree about what is next.
+      final offered = <String>{
+        for (final item in _onDeck) ...[if (item.grandparentId != null) item.grandparentId!, item.id],
+      };
+
+      final libraries = _libraries.libraries;
+      final additions = <MediaItem>[];
+      for (final client in _onlineShelfSourceClients()) {
+        if (isDisposed) return;
+        final clientLibraries = libraries.where((library) => library.serverId == client.serverId.value).toList();
+        if (clientLibraries.isEmpty) continue;
+        final entries = await const RewatchSource().build(client, clientLibraries, alreadyOffered: offered);
+        for (final entry in entries) {
+          offered.add(entry.showKey);
+          additions.add(entry.next);
+        }
+      }
+
+      if (isDisposed || additions.isEmpty) return;
+      // A refresh that landed while this was running owns the shelf now;
+      // appending to it would mix rows from two different passes.
+      if (_commitRevision != revisionAtStart) return;
+
+      final combined = [..._onDeck, ...additions];
+      _replaceOnDeck(
+        combined.length > continueWatchingPreviewLimit
+            ? combined.take(continueWatchingPreviewLimit).toList()
+            : combined,
+        hasMore: _hasMoreContinueWatching || combined.length > continueWatchingPreviewLimit,
+      );
+      safeNotifyListeners();
+    } catch (e, stackTrace) {
+      // A convenience on top of the real shelf: its failure must not disturb
+      // what the server already answered.
+      appLogger.d('DiscoverProvider: could not append rewatches', error: e, stackTrace: stackTrace);
+    }
   }
 
   void _replaceOnDeck(List<MediaItem> onDeck, {required bool hasMore}) {
