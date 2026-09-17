@@ -48,6 +48,14 @@ dependencies:
   wakelock_plus:
     path: packages/wakelock_plus
   path_provider: ^2.1.0
+  # Runtime dependencies of portable mode on Windows: the app installs its own
+  # PathProviderWindows so nothing it writes escapes the program folder.
+  path_provider_platform_interface: ^2.1.0
+  path_provider_windows: ^2.3.0
+  # Portable mode redirects both preference stores as well, and the Windows
+  # plugin resolves its file itself rather than through path_provider.
+  shared_preferences_platform_interface: ^2.4.0
+  shared_preferences_windows: ^2.4.1
   path: ^1.9.0
   universal_gamepad: ^1.5.7
   drift: ^2.31.0
@@ -102,14 +110,10 @@ dev_dependencies:
   # Used by explicit check-unused CI steps; analyzer plugin disabled.
   dart_code_linter: ^4.1.8
   drift_dev: ^2.28.3
-  shared_preferences_platform_interface: ^2.4.0
-  path_provider_platform_interface: ^2.1.0
   # Exercise vendored desktop preference stores against real file I/O,
   # including #1732 repair and atomic writes.
   shared_preferences_linux: ^2.4.1
-  shared_preferences_windows: ^2.4.1
   path_provider_linux: ^2.2.1
-  path_provider_windows: ^2.3.0
   plugin_platform_interface: ^2.1.0
   freezed: ^3.2.5
   analyzer: 10.2.0
