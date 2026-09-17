@@ -287,7 +287,7 @@ jobs:
           # ./data instead of %APPDATA%, so the folder is the whole install.
           printf '%s\n' \
             'Delete this file to make this copy store its data in %APPDATA% instead.' \
-            'While it exists, everything Plexy writes stays in the data folder next to the executable.' \
+            'While it exists, everything Plexy writes stays in the plexy-data folder next to the executable.' \
             > "$bundle/portable.txt"
           rm -rf build/windows-portable && mkdir -p build/windows-portable
           cp -r "$bundle" "build/windows-portable/Plexy-${TAG}-windows-x64"

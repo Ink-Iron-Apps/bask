@@ -27,7 +27,13 @@ class PortableMode {
   static const String markerFileName = 'portable.txt';
 
   /// Subdirectory holding everything the app writes in portable mode.
-  static const String dataDirectoryName = 'data';
+  ///
+  /// Not `data`: a Flutter Windows bundle already ships a `data` folder next
+  /// to the executable holding flutter_assets and icudtl.dat. Writing the
+  /// database and caches in there would mix user state into the program's
+  /// own files, and an update that replaces the bundle would take them with
+  /// it.
+  static const String dataDirectoryName = 'plexy-data';
 
   static bool _initialized = false;
   static Directory? _root;
