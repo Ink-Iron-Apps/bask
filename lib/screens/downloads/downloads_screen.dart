@@ -1,3 +1,4 @@
+import '../../utils/formatters.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -258,6 +259,42 @@ class DownloadsScreenState extends State<DownloadsScreen>
                       ),
                     ),
                   ),
+                // What the library costs, above the list that itemises it.
+                // Sits outside the tabs because the number is about the
+                // device, not the tab being viewed.
+                Selector<DownloadProvider, int>(
+                  selector: (_, provider) => provider.downloadedBytesTotal,
+                  builder: (context, usedBytes, _) {
+                    if (usedBytes <= 0) return const SizedBox.shrink();
+                    final limitGB = SettingsService.instance.read(SettingsService.downloadStorageBudgetGB);
+                    final text = limitGB > 0
+                        ? t.downloads.storageUsedOfLimit(
+                            size: ByteFormatter.formatBytes(usedBytes),
+                            limit: '$limitGB GB',
+                          )
+                        : t.downloads.storageUsed(size: ByteFormatter.formatBytes(usedBytes));
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Row(
+                        children: [
+                          AppIcon(
+                            Symbols.database_rounded,
+                            fill: 1,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            text,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 Expanded(
                   child: TabBarView(
                     controller: tabController,
