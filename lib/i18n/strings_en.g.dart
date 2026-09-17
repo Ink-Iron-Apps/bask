@@ -4678,6 +4678,12 @@ class Translations$downloads$en {
 
 	/// en: '${done} of ${total} downloaded'
 	String playlistItemCountOf({required Object done, required Object total}) => '${done} of ${total} downloaded';
+
+	/// en: '${size} used'
+	String storageUsed({required Object size}) => '${size} used';
+
+	/// en: '${size} of ${limit} used'
+	String storageUsedOfLimit({required Object size, required Object limit}) => '${size} of ${limit} used';
 }
 
 // Path: shaders
@@ -9008,6 +9014,8 @@ extension on Translations {
 			'downloads.playlists' => 'Playlists',
 			'downloads.playlistItemCount' => ({required Object count}) => '${count} downloaded',
 			'downloads.playlistItemCountOf' => ({required Object done, required Object total}) => '${done} of ${total} downloaded',
+			'downloads.storageUsed' => ({required Object size}) => '${size} used',
+			'downloads.storageUsedOfLimit' => ({required Object size, required Object limit}) => '${size} of ${limit} used',
 			'shaders.title' => 'Shaders',
 			'shaders.noShaderDescription' => 'No video enhancement',
 			'shaders.nvscalerDescription' => 'NVIDIA image scaling for sharper video',
@@ -9367,10 +9375,10 @@ extension on Translations {
 			'services.oauthProxy.title' => ({required Object service}) => 'Sign in to ${service}',
 			'services.oauthProxy.body' => 'Scan this QR code or open the URL on any device.',
 			'services.oauthProxy.openToSignIn' => ({required Object service}) => 'Open ${service} to sign in',
-			'services.pendingAuth.copyUrl' => 'Copy sign-in URL',
-			'services.pendingAuth.urlCopied' => 'URL copied',
 			_ => null,
 		} ?? switch (path) {
+			'services.pendingAuth.copyUrl' => 'Copy sign-in URL',
+			'services.pendingAuth.urlCopied' => 'URL copied',
 			'services.libraryFilter.title' => 'Library filter',
 			'services.libraryFilter.subtitleAllSyncing' => 'Syncing all libraries',
 			'services.libraryFilter.subtitleNoneSyncing' => 'Nothing syncing',
