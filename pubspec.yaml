@@ -79,9 +79,12 @@ dependencies:
       # WorkManager foreground service, so a holding queue wider than one stops
       # cancelling its own workers. Upstream now points at 12ef3ff itself, which
       # this fork already contains. Also bounds Android reads, which otherwise
-      # have no timeout at all and let a silent transfer hang forever.
+      # have no timeout at all and let a silent transfer hang forever. Adds a
+      # database directory on LocalStorePersistentStorage, so a portable
+      # Windows copy keeps its task records in its own folder instead of
+      # %APPDATA% — the storage isolate cannot see a path_provider override.
       url: https://github.com/LightWraith8268/background_downloader
-      ref: 7118769ed28b0acf397222d28c7d05d8b52c24f4
+      ref: 63214f6fb498be0086bd8542535516e0ab42744c
   sentry_flutter: ^9.25.0
   auto_updater:
     git:

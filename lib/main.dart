@@ -5,6 +5,7 @@ import 'services/portable_mode.dart';
 import 'dart:async';
 import 'dart:io' show Directory, Platform, ProcessInfo;
 import 'dart:ui' show AppExitResponse;
+import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/foundation.dart';
 // ignore: depend_on_referenced_packages
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart';
@@ -161,6 +162,11 @@ void main() {
     // the migration path, so both need redirecting or half the settings move.
     final asyncStore = SharedPreferencesAsyncPlatform.instance;
     if (asyncStore is SharedPreferencesAsyncWindows) asyncStore.pathProvider = portablePaths;
+    // background_downloader keeps its task records on its own isolate, which
+    // has no path_provider override of ours, so it has to be told the folder.
+    // Constructing the singleton here is what makes it stick: every later
+    // FileDownloader() returns this one.
+    FileDownloader(persistentStorage: LocalStorePersistentStorage(databaseDirectory: PortableMode.supportPath));
   }
   if (agentControlEnabled) AgentControlService.instance.register();
   AndroidExitDiagnostics.markStartupPhase(AndroidStartupPhase.dartMain);
