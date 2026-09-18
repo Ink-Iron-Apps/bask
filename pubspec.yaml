@@ -84,7 +84,7 @@ dependencies:
       # Windows copy keeps its task records in its own folder instead of
       # %APPDATA% — the storage isolate cannot see a path_provider override.
       url: https://github.com/LightWraith8268/background_downloader
-      ref: 63214f6fb498be0086bd8542535516e0ab42744c
+      ref: f73f8d38f371765c9ec63f14a7a479a17cee481e
   sentry_flutter: ^9.25.0
   auto_updater:
     git:
