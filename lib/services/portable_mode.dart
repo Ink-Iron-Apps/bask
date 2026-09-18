@@ -43,6 +43,13 @@ class PortableMode {
 
   static bool get isActive => _root != null;
 
+  /// The portable application support folder, or null when not portable.
+  ///
+  /// The same folder [PortablePathProvider] answers with, resolved eagerly so
+  /// a caller outside path_provider — the downloader's storage isolate — can
+  /// be handed a path rather than a provider.
+  static String? get supportPath => _root == null ? null : PortablePathProvider(_root!.path)._ensure('support');
+
   /// Detect the marker and redirect path_provider at it.
   ///
   /// Must run before anything reads a path — the database, preferences and

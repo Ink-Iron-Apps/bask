@@ -35,6 +35,7 @@ void main() {
     if (!Platform.isWindows) {
       // Only Windows can be portable; elsewhere the call is inert by design.
       expect(PortableMode.isActive, isFalse);
+      expect(PortableMode.supportPath, isNull);
       return;
     }
 
@@ -51,6 +52,10 @@ void main() {
       expect(resolved, isNotNull);
       expect(p.isWithin(dir.path, resolved!), isTrue, reason: '$resolved escaped the program folder');
     }
+
+    // What the downloader's storage isolate is handed; it must be the same
+    // folder the rest of the app uses, not a second one beside it.
+    expect(PortableMode.supportPath, await paths.getApplicationSupportPath());
   });
 
   test('initialising twice does not re-detect', () {
