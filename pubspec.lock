@@ -105,8 +105,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "63214f6fb498be0086bd8542535516e0ab42744c"
-      resolved-ref: "63214f6fb498be0086bd8542535516e0ab42744c"
+      ref: f73f8d38f371765c9ec63f14a7a479a17cee481e
+      resolved-ref: f73f8d38f371765c9ec63f14a7a479a17cee481e
       url: "https://github.com/LightWraith8268/background_downloader"
     source: git
     version: "9.5.6"
