@@ -685,6 +685,20 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   /// All metadata for downloads
   Map<String, MediaItem> get metadata => _metadataStore.resolvedItems;
 
+  /// Everything finished on this device, for searching without a server.
+  ///
+  /// The playable items plus the shows and albums they belong to, so a query
+  /// for a series name finds both the show and its episodes — the same two
+  /// kinds of answer a server would give.
+  List<MediaItem> get downloadedSearchIndex {
+    final items = <MediaItem>[
+      for (final entry in _metadata.entries)
+        if (_ownsDownloadKey(entry.key) && _downloads[entry.key]?.status == DownloadStatus.completed)
+          _metadataStore.applyWatchState(entry.value),
+    ];
+    return [...items, ...downloadedShows, ...downloadedAlbums];
+  }
+
   /// Get unique TV shows that have downloaded episodes
   /// Returns stored show metadata, or synthesizes from episode metadata as fallback
   List<MediaItem> get downloadedShows {

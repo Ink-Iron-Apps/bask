@@ -102,7 +102,9 @@ const allNavigationTabs = [
     icon: Symbols.explore_rounded,
     getLabel: _getExploreLabel,
   ),
-  NavigationTab(id: NavigationTabId.search, onlineOnly: true, icon: Symbols.search_rounded, getLabel: _getSearchLabel),
+  // Not online-only: with no server, search falls back to what is downloaded,
+  // which is exactly the set that can still be played.
+  NavigationTab(id: NavigationTabId.search, onlineOnly: false, icon: Symbols.search_rounded, getLabel: _getSearchLabel),
   NavigationTab(
     id: NavigationTabId.downloads,
     onlineOnly: false,
