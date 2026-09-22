@@ -649,6 +649,14 @@ class SettingsService extends BaseSharedPreferencesService {
   /// device is full".
   static const downloadStorageBudgetGB = IntPref('download_storage_budget_gb');
 
+  /// How many episodes of what is being watched to keep downloaded, 0 for off.
+  ///
+  /// A sync rule does this already, but only for a show someone thought to set
+  /// one up for — so the next episode is on the device for the shows they
+  /// remembered and missing for the one they started last night. Continue
+  /// Watching says which shows are in flight; this says how far ahead to stay.
+  static const autoDownloadNextEpisodes = IntPref('auto_download_next_episodes');
+
   /// Set once the user has seen the pre-flight "background downloads are
   /// blocked" dialog. The persistent Downloads-screen banner covers repeat
   /// offenders, so the interrupting dialog is shown exactly once.
@@ -1467,6 +1475,7 @@ class SettingsService extends BaseSharedPreferencesService {
     creditsPattern,
     autoRemoveWatchedDownloads,
     downloadStorageBudgetGB,
+    autoDownloadNextEpisodes,
     defaultQualityPreset,
     cellularQualityPreset,
     musicQualityPreset,

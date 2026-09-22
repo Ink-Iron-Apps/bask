@@ -1002,6 +1002,18 @@ class Translations$settings$en {
 	/// en: 'No limit'
 	String get downloadStorageBudgetOff => 'No limit';
 
+	/// en: 'Keep what I am watching'
+	String get autoDownloadNextEpisodes => 'Keep what I am watching';
+
+	/// en: 'Download the next episodes of shows in Continue Watching, and drop them when the show leaves it'
+	String get autoDownloadNextEpisodesDescription => 'Download the next episodes of shows in Continue Watching, and drop them when the show leaves it';
+
+	/// en: 'Off'
+	String get autoDownloadNextEpisodesOff => 'Off';
+
+	/// en: '${count} episodes ahead'
+	String autoDownloadNextEpisodesCount({required Object count}) => '${count} episodes ahead';
+
 	/// en: '${size} GB'
 	String downloadStorageBudgetGB({required Object size}) => '${size} GB';
 
@@ -7634,6 +7646,10 @@ extension on Translations {
 			'settings.downloadStorageBudget' => 'Download Storage Limit',
 			'settings.downloadStorageBudgetDescription' => 'Delete the oldest watched downloads when the total passes this',
 			'settings.downloadStorageBudgetOff' => 'No limit',
+			'settings.autoDownloadNextEpisodes' => 'Keep what I am watching',
+			'settings.autoDownloadNextEpisodesDescription' => 'Download the next episodes of shows in Continue Watching, and drop them when the show leaves it',
+			'settings.autoDownloadNextEpisodesOff' => 'Off',
+			'settings.autoDownloadNextEpisodesCount' => ({required Object count}) => '${count} episodes ahead',
 			'settings.downloadStorageBudgetGB' => ({required Object size}) => '${size} GB',
 			'settings.cellularDownloadBlocked' => 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.',
 			'settings.maxVolume' => 'Maximum Volume',
@@ -7835,12 +7851,12 @@ extension on Translations {
 			'fileInfo.pixelFormat' => 'Pixel Format',
 			'fileInfo.colorSpace' => 'Color Space',
 			'fileInfo.colorRange' => 'Color Range',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.colorPrimaries' => 'Color Primaries',
 			'fileInfo.colorTransfer' => 'Color Transfer',
 			'fileInfo.chromaSubsampling' => 'Chroma Subsampling',
 			'fileInfo.chromaLocation' => 'Chroma Location',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.scanType' => 'Scan Type',
 			'fileInfo.interlaced' => 'Interlaced',
 			'fileInfo.anamorphic' => 'Anamorphic',
@@ -8349,12 +8365,12 @@ extension on Translations {
 			'discover.overview' => 'Overview',
 			'discover.cast' => 'Cast',
 			'discover.extras' => 'Trailers & Extras',
+			_ => null,
+		} ?? switch (path) {
 			'discover.studio' => 'Studio',
 			'discover.rating' => 'Rating',
 			'discover.director' => 'Director',
 			'discover.directors' => 'Directors',
-			_ => null,
-		} ?? switch (path) {
 			'discover.movie' => 'Movie',
 			'discover.tvShow' => 'TV Show',
 			'discover.minutesLeft' => ({required Object minutes}) => '${minutes} min left',
@@ -8863,12 +8879,12 @@ extension on Translations {
 			'watchTogether.pleaseEnterCode' => 'Please enter a session code',
 			'watchTogether.codeMustBe5Chars' => 'Session code must be 5 characters',
 			'watchTogether.joinInstructions' => 'Enter the host\'s session code to join.',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.failedToCreate' => 'Failed to create session',
 			'watchTogether.failedToJoin' => 'Failed to join session',
 			'watchTogether.sessionCodeCopied' => 'Session code copied to clipboard',
 			'watchTogether.relayUnreachable' => 'Relay server unreachable. ISP blocking may prevent Watch Together.',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.reconnectingToHost' => 'Reconnecting to host...',
 			'watchTogether.currentPlayback' => 'Current Playback',
 			'watchTogether.joinCurrentPlayback' => 'Join Current Playback',
@@ -9377,12 +9393,12 @@ extension on Translations {
 			'services.deviceCode.title' => ({required Object service}) => 'Activate Plezy on ${service}',
 			'services.deviceCode.instructions' => 'Scan the QR code, or visit the address below and enter this code:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Open ${service} to activate',
+			_ => null,
+		} ?? switch (path) {
 			'services.deviceCode.copyCode' => 'Copy activation code',
 			'services.deviceCode.waitingForAuthorization' => 'Waiting for authorization…',
 			'services.deviceCode.codeCopied' => 'Code copied',
 			'services.oauthProxy.title' => ({required Object service}) => 'Sign in to ${service}',
-			_ => null,
-		} ?? switch (path) {
 			'services.oauthProxy.body' => 'Scan this QR code or open the URL on any device.',
 			'services.oauthProxy.openToSignIn' => ({required Object service}) => 'Open ${service} to sign in',
 			'services.pendingAuth.copyUrl' => 'Copy sign-in URL',

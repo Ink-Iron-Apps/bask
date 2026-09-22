@@ -1559,6 +1559,9 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
           }
         }
       } else {
+        // Before the pass, so a show that entered Continue Watching since the
+        // last run is covered by this one rather than the next.
+        await downloadProvider.refreshAutoDownloadRules(_serverManager);
         final synced = await downloadProvider.executeSyncRules(_serverManager, force: force);
         if (synced.isNotEmpty) {
           showMainSnackBar(t.downloads.syncedNewEpisodes(count: synced.length.toString(), title: synced.first));
