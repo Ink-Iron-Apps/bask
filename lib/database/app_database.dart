@@ -366,7 +366,7 @@ class AppDatabase extends _$AppDatabase {
   static const FormatException _invalidRecoveryImage = FormatException('Invalid tvOS database recovery image');
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration {
@@ -747,6 +747,10 @@ class AppDatabase extends _$AppDatabase {
         if (from < 22) {
           appLogger.i('Adding MusicSessions table (v22 migration)');
           await _ignoreAlreadyExists('MusicSessions table', () => m.createTable(musicSessions));
+        }
+        if (from < 23) {
+          appLogger.i('Adding managed column to SyncRules (v23 migration)');
+          await _ignoreAlreadyExists('SyncRules.managed column', () => m.addColumn(syncRules, syncRules.managed));
         }
       },
     );
@@ -1269,6 +1273,7 @@ class AppDatabase extends _$AppDatabase {
     String downloadFilter = 'unwatched',
     bool includeSpecials = true,
     String? title,
+    bool managed = false,
   }) async {
     // [insertOnConflictUpdate] defaults the conflict target to the primary
     // key (`id`), which is auto-incremented — the conflict never triggers
@@ -1288,6 +1293,7 @@ class AppDatabase extends _$AppDatabase {
         downloadFilter: Value(downloadFilter),
         includeSpecials: Value(includeSpecials),
         title: Value(title),
+        managed: Value(managed),
       ),
       onConflict: DoUpdate(
         (_) => SyncRulesCompanion(
@@ -1302,6 +1308,7 @@ class AppDatabase extends _$AppDatabase {
           // Never clobber a stored title with null: a re-created rule may not
           // carry metadata, and the old name is better than a raw ratingKey.
           title: title != null ? Value(title) : const Value.absent(),
+          managed: Value(managed),
         ),
         target: [syncRules.globalKey],
       ),

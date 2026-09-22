@@ -120,6 +120,15 @@ class SyncRules extends Table {
   /// destructive cleanup. Show/season coverage is re-derived from
   /// [DownloadedMedia] ancestry at cleanup time regardless of this value.
   BoolColumn get downloadLinksInitialized => boolean().withDefault(const Constant(false))();
+
+  /// The app created this rule and the app removes it again.
+  ///
+  /// Managed rules follow what the user is actually watching: one appears
+  /// when a show reaches Continue Watching and goes when it leaves. They are
+  /// kept out of the Sync Rules screen, because a row the user cannot
+  /// meaningfully edit — the next pass would put it back — reads as a rule
+  /// they forgot making.
+  BoolColumn get managed => boolean().withDefault(const Constant(false))();
 }
 
 /// Downloads covered by a sync rule for one profile.

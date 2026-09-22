@@ -2765,6 +2765,17 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
     defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("download_links_initialized" IN (0, 1))'),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _managedMeta = const VerificationMeta('managed');
+  @override
+  late final GeneratedColumn<bool> managed = GeneratedColumn<bool>(
+    'managed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("managed" IN (0, 1))'),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2782,6 +2793,7 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
     downloadFilter,
     includeSpecials,
     downloadLinksInitialized,
+    managed,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2864,6 +2876,9 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
         ),
       );
     }
+    if (data.containsKey('managed')) {
+      context.handle(_managedMeta, managed.isAcceptableOrUnknown(data['managed']!, _managedMeta));
+    }
     return context;
   }
 
@@ -2897,6 +2912,7 @@ class $SyncRulesTable extends SyncRules with TableInfo<$SyncRulesTable, SyncRule
         DriftSqlType.bool,
         data['${effectivePrefix}download_links_initialized'],
       )!,
+      managed: attachedDatabase.typeMapping.read(DriftSqlType.bool, data['${effectivePrefix}managed'])!,
     );
   }
 
@@ -2933,6 +2949,15 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
   /// destructive cleanup. Show/season coverage is re-derived from
   /// [DownloadedMedia] ancestry at cleanup time regardless of this value.
   final bool downloadLinksInitialized;
+
+  /// The app created this rule and the app removes it again.
+  ///
+  /// Managed rules follow what the user is actually watching: one appears
+  /// when a show reaches Continue Watching and goes when it leaves. They are
+  /// kept out of the Sync Rules screen, because a row the user cannot
+  /// meaningfully edit — the next pass would put it back — reads as a rule
+  /// they forgot making.
+  final bool managed;
   const SyncRuleItem({
     required this.id,
     required this.profileId,
@@ -2949,6 +2974,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     required this.downloadFilter,
     required this.includeSpecials,
     required this.downloadLinksInitialized,
+    required this.managed,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2972,6 +2998,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     map['download_filter'] = Variable<String>(downloadFilter);
     map['include_specials'] = Variable<bool>(includeSpecials);
     map['download_links_initialized'] = Variable<bool>(downloadLinksInitialized);
+    map['managed'] = Variable<bool>(managed);
     return map;
   }
 
@@ -2992,6 +3019,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       downloadFilter: Value(downloadFilter),
       includeSpecials: Value(includeSpecials),
       downloadLinksInitialized: Value(downloadLinksInitialized),
+      managed: Value(managed),
     );
   }
 
@@ -3013,6 +3041,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       downloadFilter: serializer.fromJson<String>(json['downloadFilter']),
       includeSpecials: serializer.fromJson<bool>(json['includeSpecials']),
       downloadLinksInitialized: serializer.fromJson<bool>(json['downloadLinksInitialized']),
+      managed: serializer.fromJson<bool>(json['managed']),
     );
   }
   @override
@@ -3034,6 +3063,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       'downloadFilter': serializer.toJson<String>(downloadFilter),
       'includeSpecials': serializer.toJson<bool>(includeSpecials),
       'downloadLinksInitialized': serializer.toJson<bool>(downloadLinksInitialized),
+      'managed': serializer.toJson<bool>(managed),
     };
   }
 
@@ -3053,6 +3083,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     String? downloadFilter,
     bool? includeSpecials,
     bool? downloadLinksInitialized,
+    bool? managed,
   }) => SyncRuleItem(
     id: id ?? this.id,
     profileId: profileId ?? this.profileId,
@@ -3069,6 +3100,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     downloadFilter: downloadFilter ?? this.downloadFilter,
     includeSpecials: includeSpecials ?? this.includeSpecials,
     downloadLinksInitialized: downloadLinksInitialized ?? this.downloadLinksInitialized,
+    managed: managed ?? this.managed,
   );
   SyncRuleItem copyWithCompanion(SyncRulesCompanion data) {
     return SyncRuleItem(
@@ -3089,6 +3121,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
       downloadLinksInitialized: data.downloadLinksInitialized.present
           ? data.downloadLinksInitialized.value
           : this.downloadLinksInitialized,
+      managed: data.managed.present ? data.managed.value : this.managed,
     );
   }
 
@@ -3109,7 +3142,8 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
           ..write('mediaIndex: $mediaIndex, ')
           ..write('downloadFilter: $downloadFilter, ')
           ..write('includeSpecials: $includeSpecials, ')
-          ..write('downloadLinksInitialized: $downloadLinksInitialized')
+          ..write('downloadLinksInitialized: $downloadLinksInitialized, ')
+          ..write('managed: $managed')
           ..write(')'))
         .toString();
   }
@@ -3131,6 +3165,7 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
     downloadFilter,
     includeSpecials,
     downloadLinksInitialized,
+    managed,
   );
   @override
   bool operator ==(Object other) =>
@@ -3150,7 +3185,8 @@ class SyncRuleItem extends DataClass implements Insertable<SyncRuleItem> {
           other.mediaIndex == this.mediaIndex &&
           other.downloadFilter == this.downloadFilter &&
           other.includeSpecials == this.includeSpecials &&
-          other.downloadLinksInitialized == this.downloadLinksInitialized);
+          other.downloadLinksInitialized == this.downloadLinksInitialized &&
+          other.managed == this.managed);
 }
 
 class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
@@ -3169,6 +3205,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
   final Value<String> downloadFilter;
   final Value<bool> includeSpecials;
   final Value<bool> downloadLinksInitialized;
+  final Value<bool> managed;
   const SyncRulesCompanion({
     this.id = const Value.absent(),
     this.profileId = const Value.absent(),
@@ -3185,6 +3222,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     this.downloadFilter = const Value.absent(),
     this.includeSpecials = const Value.absent(),
     this.downloadLinksInitialized = const Value.absent(),
+    this.managed = const Value.absent(),
   });
   SyncRulesCompanion.insert({
     this.id = const Value.absent(),
@@ -3202,6 +3240,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     this.downloadFilter = const Value.absent(),
     this.includeSpecials = const Value.absent(),
     this.downloadLinksInitialized = const Value.absent(),
+    this.managed = const Value.absent(),
   }) : serverId = Value(serverId),
        ratingKey = Value(ratingKey),
        globalKey = Value(globalKey),
@@ -3224,6 +3263,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     Expression<String>? downloadFilter,
     Expression<bool>? includeSpecials,
     Expression<bool>? downloadLinksInitialized,
+    Expression<bool>? managed,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3241,6 +3281,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
       if (downloadFilter != null) 'download_filter': downloadFilter,
       if (includeSpecials != null) 'include_specials': includeSpecials,
       if (downloadLinksInitialized != null) 'download_links_initialized': downloadLinksInitialized,
+      if (managed != null) 'managed': managed,
     });
   }
 
@@ -3260,6 +3301,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     Value<String>? downloadFilter,
     Value<bool>? includeSpecials,
     Value<bool>? downloadLinksInitialized,
+    Value<bool>? managed,
   }) {
     return SyncRulesCompanion(
       id: id ?? this.id,
@@ -3277,6 +3319,7 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
       downloadFilter: downloadFilter ?? this.downloadFilter,
       includeSpecials: includeSpecials ?? this.includeSpecials,
       downloadLinksInitialized: downloadLinksInitialized ?? this.downloadLinksInitialized,
+      managed: managed ?? this.managed,
     );
   }
 
@@ -3328,6 +3371,9 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
     if (downloadLinksInitialized.present) {
       map['download_links_initialized'] = Variable<bool>(downloadLinksInitialized.value);
     }
+    if (managed.present) {
+      map['managed'] = Variable<bool>(managed.value);
+    }
     return map;
   }
 
@@ -3348,7 +3394,8 @@ class SyncRulesCompanion extends UpdateCompanion<SyncRuleItem> {
           ..write('mediaIndex: $mediaIndex, ')
           ..write('downloadFilter: $downloadFilter, ')
           ..write('includeSpecials: $includeSpecials, ')
-          ..write('downloadLinksInitialized: $downloadLinksInitialized')
+          ..write('downloadLinksInitialized: $downloadLinksInitialized, ')
+          ..write('managed: $managed')
           ..write(')'))
         .toString();
   }
@@ -6620,6 +6667,7 @@ typedef $$SyncRulesTableCreateCompanionBuilder =
       Value<String> downloadFilter,
       Value<bool> includeSpecials,
       Value<bool> downloadLinksInitialized,
+      Value<bool> managed,
     });
 typedef $$SyncRulesTableUpdateCompanionBuilder =
     SyncRulesCompanion Function({
@@ -6638,6 +6686,7 @@ typedef $$SyncRulesTableUpdateCompanionBuilder =
       Value<String> downloadFilter,
       Value<bool> includeSpecials,
       Value<bool> downloadLinksInitialized,
+      Value<bool> managed,
     });
 
 final class $$SyncRulesTableReferences extends BaseReferences<_$AppDatabase, $SyncRulesTable, SyncRuleItem> {
@@ -6713,6 +6762,9 @@ class $$SyncRulesTableFilterComposer extends Composer<_$AppDatabase, $SyncRulesT
   ColumnFilters<bool> get downloadLinksInitialized =>
       $composableBuilder(column: $table.downloadLinksInitialized, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<bool> get managed =>
+      $composableBuilder(column: $table.managed, builder: (column) => ColumnFilters(column));
+
   Expression<bool> syncRuleDownloadsRefs(Expression<bool> Function($$SyncRuleDownloadsTableFilterComposer f) f) {
     final $$SyncRuleDownloadsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -6783,6 +6835,9 @@ class $$SyncRulesTableOrderingComposer extends Composer<_$AppDatabase, $SyncRule
 
   ColumnOrderings<bool> get downloadLinksInitialized =>
       $composableBuilder(column: $table.downloadLinksInitialized, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get managed =>
+      $composableBuilder(column: $table.managed, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SyncRulesTableAnnotationComposer extends Composer<_$AppDatabase, $SyncRulesTable> {
@@ -6826,6 +6881,8 @@ class $$SyncRulesTableAnnotationComposer extends Composer<_$AppDatabase, $SyncRu
 
   GeneratedColumn<bool> get downloadLinksInitialized =>
       $composableBuilder(column: $table.downloadLinksInitialized, builder: (column) => column);
+
+  GeneratedColumn<bool> get managed => $composableBuilder(column: $table.managed, builder: (column) => column);
 
   Expression<T> syncRuleDownloadsRefs<T extends Object>(
     Expression<T> Function($$SyncRuleDownloadsTableAnnotationComposer a) f,
@@ -6888,6 +6945,7 @@ class $$SyncRulesTableTableManager
                 Value<String> downloadFilter = const Value.absent(),
                 Value<bool> includeSpecials = const Value.absent(),
                 Value<bool> downloadLinksInitialized = const Value.absent(),
+                Value<bool> managed = const Value.absent(),
               }) => SyncRulesCompanion(
                 id: id,
                 profileId: profileId,
@@ -6904,6 +6962,7 @@ class $$SyncRulesTableTableManager
                 downloadFilter: downloadFilter,
                 includeSpecials: includeSpecials,
                 downloadLinksInitialized: downloadLinksInitialized,
+                managed: managed,
               ),
           createCompanionCallback:
               ({
@@ -6922,6 +6981,7 @@ class $$SyncRulesTableTableManager
                 Value<String> downloadFilter = const Value.absent(),
                 Value<bool> includeSpecials = const Value.absent(),
                 Value<bool> downloadLinksInitialized = const Value.absent(),
+                Value<bool> managed = const Value.absent(),
               }) => SyncRulesCompanion.insert(
                 id: id,
                 profileId: profileId,
@@ -6938,6 +6998,7 @@ class $$SyncRulesTableTableManager
                 downloadFilter: downloadFilter,
                 includeSpecials: includeSpecials,
                 downloadLinksInitialized: downloadLinksInitialized,
+                managed: managed,
               ),
           withReferenceMapper: (p0) =>
               p0.map((e) => (e.readTable(table), $$SyncRulesTableReferences(db, table, e))).toList(),
