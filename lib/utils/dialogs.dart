@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import '../focus/focusable_text_field.dart';
 import '../focus/input_mode_tracker.dart';
 import '../i18n/strings.g.dart';
@@ -207,6 +208,45 @@ class ScopedLoadingDialogController {
     }
     _visible = false;
   }
+}
+
+/// Shows the id a diagnostic upload came back with, ready to be quoted.
+///
+/// The id is the only part worth keeping: the upload itself is text nobody
+/// reads on a phone, and quoting a short id is how it gets looked at. Shared
+/// by the log upload and the playback problem report so the two never drift
+/// into describing the same thing differently.
+Future<void> showDiagnosticIdDialog(BuildContext context, String id) async {
+  await showScopedDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(t.messages.logsUploaded),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${t.messages.logId}:'),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: SelectableText(
+                  id,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'monospace', fontSize: 18),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const AppIcon(Symbols.content_copy_rounded, size: 20),
+                onPressed: () => Clipboard.setData(ClipboardData(text: id)),
+              ),
+            ],
+          ),
+        ],
+      ),
+      actions: [DialogActionButton(autofocus: true, onPressed: () => Navigator.of(ctx).pop(), label: t.common.close)],
+    ),
+  );
 }
 
 /// Shows the server-side 500 modal (bandwidth/transcoding limit rejection).
