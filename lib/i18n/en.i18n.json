@@ -1949,7 +1949,9 @@
       "connectionLostAfterAttempts": "Connection lost after ${attempts} attempts",
       "connectionLost": "Connection lost"
     },
-    "closedBeforeAuth": "The connection closed before authentication"
+    "closedBeforeAuth": "The connection closed before authentication",
+    "playOnDevice": "Play on ${name}",
+    "playSentToDevice": "Sent to ${name}"
   },
   "videoSettings": {
     "playbackSpeed": "Playback Speed",

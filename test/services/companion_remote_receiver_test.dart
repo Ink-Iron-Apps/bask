@@ -58,4 +58,32 @@ void main() {
     expect(chromeController.controlsVisible, isFalse);
     expect(exits, 0);
   });
+
+  test('playMedia hands the host the item the phone picked', () {
+    final received = <(String, String)>[];
+    final receiver = CompanionRemoteReceiver.instance;
+    receiver.onPlayMedia = (serverId, ratingKey) => received.add((serverId, ratingKey));
+    addTearDown(() => receiver.onPlayMedia = null);
+
+    receiver.handleCommand(
+      const RemoteCommand(type: RemoteCommandType.playMedia, data: {'serverId': 'abc', 'ratingKey': '1234'}),
+      null,
+    );
+
+    expect(received, [('abc', '1234')]);
+  });
+
+  test('playMedia without an item is ignored rather than played', () {
+    // A malformed frame must not start something arbitrary on a screen the
+    // user is not holding.
+    var calls = 0;
+    final receiver = CompanionRemoteReceiver.instance;
+    receiver.onPlayMedia = (_, _) => calls++;
+    addTearDown(() => receiver.onPlayMedia = null);
+
+    receiver.handleCommand(const RemoteCommand(type: RemoteCommandType.playMedia), null);
+    receiver.handleCommand(const RemoteCommand(type: RemoteCommandType.playMedia, data: {'serverId': 'abc'}), null);
+
+    expect(calls, 0);
+  });
 }

@@ -544,6 +544,7 @@ extension _MediaDetailActionButtons on _MediaDetailScreenState {
       item: metadata,
       onRefresh: (source) => unawaited(_refreshItemInPlace(source)),
       onPlayTrailer: onPlayTrailer,
+      extraEntries: _playOnPairedDeviceEntries(metadata),
       child: Builder(
         builder: (buttonContext) => IconButton.filledTonal(
           onPressed: () {
@@ -560,6 +561,35 @@ extension _MediaDetailActionButtons on _MediaDetailScreenState {
         ),
       ),
     );
+  }
+
+  /// "Play on …" the paired device, when there is one and this item can go.
+  ///
+  /// Offered only from the controlling side of a companion session: the host
+  /// is the device already in front of the user, so sending it something to
+  /// play from its own screen would be a longer way to press Play. Nothing is
+  /// sent but the item's identity — the host reads the position from the
+  /// server, so it resumes wherever it was last watched.
+  List<MediaMenuExtraEntry> _playOnPairedDeviceEntries(MediaItem metadata) {
+    if (widget.isOffline) return const [];
+    if (!metadata.isMovie && !metadata.isEpisode) return const [];
+    final serverId = metadata.serverId;
+    if (serverId == null || serverId.isEmpty) return const [];
+
+    final remote = context.watch<CompanionRemoteProvider>();
+    if (!remote.isRemote || !remote.isConnected) return const [];
+    final deviceName = remote.connectedDevice?.name ?? t.companionRemote.unknownDevice;
+
+    return [
+      MediaMenuExtraEntry(
+        icon: Symbols.cast_rounded,
+        label: t.companionRemote.playOnDevice(name: deviceName),
+        onSelected: () {
+          remote.sendPlayMedia(serverId: serverId, ratingKey: metadata.id);
+          if (mounted) showAppSnackBar(context, t.companionRemote.playSentToDevice(name: deviceName));
+        },
+      ),
+    ];
   }
 
   /// Shared retry pipeline for failed/cancelled downloads: confirm download
