@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:plezy/widgets/app_icon.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
 
@@ -16,9 +18,12 @@ import '../../../models/shader_preset.dart';
 import '../../../media/playback_rate.dart';
 import '../../../mpv/mpv.dart';
 import '../../../mpv/player/player_native.dart';
+import '../widgets/performance_overlay/performance_stats_service.dart';
 import '../../../providers/shader_provider.dart';
 import '../../../services/file_picker_service.dart';
 import '../../../services/scoped_player_prefs.dart';
+import '../../../services/log_upload_service.dart';
+import '../../../services/playback_problem_report.dart';
 import '../../../services/settings_service.dart';
 import '../../../services/sleep_timer_service.dart';
 import '../../../services/video_filter_manager.dart';
@@ -26,8 +31,10 @@ import '../../../focus/focusable_wrapper.dart';
 import '../../../utils/dialogs.dart';
 import '../../../utils/app_logger.dart';
 import '../../../utils/formatters.dart';
+import '../../../utils/device_identity.dart';
 import '../../../utils/platform_detector.dart';
 import '../../../utils/quality_preset_labels.dart';
+import '../../../utils/storage_space.dart';
 import '../../../utils/latest_async_write.dart';
 import '../../../utils/snackbar_helper.dart';
 import '../../../theme/mono_tokens.dart';
@@ -944,6 +951,18 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           title: t.videoSettings.performanceOverlay,
         ),
 
+        // What the overlay shows, captured rather than watched: whatever is
+        // wrong is happening now, and none of it survives to be asked about
+        // later.
+        FocusableListTile(
+          leading: AppIcon(Symbols.bug_report_rounded, fill: 1, color: tokens(context).textMuted),
+          title: Text(t.videoSettings.reportPlaybackProblem),
+          onTap: () {
+            OverlaySheetController.of(context).close();
+            unawaited(_reportPlaybackProblem());
+          },
+        ),
+
         if (_showDebugDvConversionMode)
           _SettingsMenuItem(
             icon: Symbols.hdr_strong_rounded,
@@ -979,6 +998,49 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             ),
       ],
     );
+  }
+
+  /// Capture what the player is doing, with the log around it, and upload it.
+  ///
+  /// Asks first: this leaves the device, and a log carries titles and server
+  /// names even after redaction takes the credentials out. The id comes back
+  /// for the user to quote, which is the whole point — a stutter or a silent
+  /// dropout says nothing about itself an hour later.
+  Future<void> _reportPlaybackProblem() async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: t.videoSettings.reportPlaybackProblem,
+      message: t.videoSettings.reportPlaybackProblemDescription,
+      confirmText: t.videoSettings.reportPlaybackProblemSend,
+    );
+    if (!confirmed || !mounted) return;
+
+    showLoadingDialog(context);
+    try {
+      final stats = await PerformanceStatsService(widget.player).captureOnce();
+      final identity = await DeviceIdentityService.resolve();
+      final packageInfo = await PackageInfo.fromPlatform();
+      final report = buildPlaybackProblemReport(
+        now: DateTime.now(),
+        appVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
+        platform: identity.platform,
+        deviceModel: identity.deviceModel,
+        stats: stats,
+        item: _state.metadata,
+        storage: await StorageSpace.measure(await getApplicationSupportDirectory()),
+        logs: MemoryLogOutput.getLogs(),
+      );
+
+      final id = await uploadDiagnosticText(report);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      await showDiagnosticIdDialog(context, id);
+    } catch (e, stackTrace) {
+      appLogger.e('Could not report the playback problem', error: e, stackTrace: stackTrace);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      showErrorSnackBar(context, t.videoSettings.reportPlaybackProblemFailed);
+    }
   }
 
   Widget _buildDvConversionView() {

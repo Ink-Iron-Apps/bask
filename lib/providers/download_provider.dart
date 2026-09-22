@@ -26,6 +26,7 @@ import '../services/offline_mode_source.dart';
 import '../services/watch_state_resolver.dart';
 import 'watch_state_store.dart';
 import '../media/media_server_client.dart';
+import '../services/auto_download_planner.dart';
 import '../services/sync_rule_executor.dart';
 import '../utils/app_logger.dart';
 import '../utils/deletion_notifier.dart';
@@ -683,6 +684,20 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
 
   /// All metadata for downloads
   Map<String, MediaItem> get metadata => _metadataStore.resolvedItems;
+
+  /// Everything finished on this device, for searching without a server.
+  ///
+  /// The playable items plus the shows and albums they belong to, so a query
+  /// for a series name finds both the show and its episodes — the same two
+  /// kinds of answer a server would give.
+  List<MediaItem> get downloadedSearchIndex {
+    final items = <MediaItem>[
+      for (final entry in _metadata.entries)
+        if (_ownsDownloadKey(entry.key) && _downloads[entry.key]?.status == DownloadStatus.completed)
+          _metadataStore.applyWatchState(entry.value),
+    ];
+    return [...items, ...downloadedShows, ...downloadedAlbums];
+  }
 
   /// Get unique TV shows that have downloaded episodes
   /// Returns stored show metadata, or synthesizes from episode metadata as fallback
@@ -1970,8 +1985,18 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     return deletedTitles;
   }
 
-  /// All sync rules for the active profile (profile-scoped globalKey -> SyncRuleItem).
-  Map<String, SyncRuleItem> get syncRules => Map.unmodifiable(_syncRules);
+  /// Sync rules the user made, for the active profile (profile-scoped
+  /// globalKey -> SyncRuleItem).
+  ///
+  /// Managed rules are left out: they exist because a show is being watched,
+  /// and editing one would only last until the next pass rewrote it.
+  Map<String, SyncRuleItem> get syncRules => Map.unmodifiable({
+    for (final e in _syncRules.entries)
+      if (!e.value.managed) e.key: e.value,
+  });
+
+  /// Every rule, managed ones included — what the executor runs.
+  Map<String, SyncRuleItem> get allSyncRules => Map.unmodifiable(_syncRules);
 
   bool get syncRulesSupported => _downloadManager.downloadsSupported;
 
@@ -2076,6 +2101,8 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     String downloadFilter = SyncRuleFilter.unwatched,
     bool includeSpecials = true,
     MediaItem? targetMetadata,
+    bool managed = false,
+    String? title,
   }) async {
     final profileId = _requireActiveProfileId();
     final publicGlobalKey = buildGlobalKey(ServerId(serverId), ratingKey);
@@ -2090,7 +2117,8 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       mediaIndex: mediaIndex,
       downloadFilter: downloadFilter,
       includeSpecials: includeSpecials,
-      title: targetMetadata?.title,
+      title: targetMetadata?.title ?? title,
+      managed: managed,
     );
 
     if (targetMetadata != null) {
@@ -2168,9 +2196,8 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       // Every rule kind reads this filter, not just lists: SyncRuleExecutor
       // derives `syncAll` from it for show and season rules too, so an episode
       // rule can mirror a whole show rather than only what is unwatched.
-      if (downloadFilter != SyncRuleFilter.all && downloadFilter != SyncRuleFilter.unwatched) {
-        throw ArgumentError('Invalid sync rule filter');
-      }
+      const known = {SyncRuleFilter.all, SyncRuleFilter.unwatched, SyncRuleFilter.nextInOrder};
+      if (!known.contains(downloadFilter)) throw ArgumentError('Invalid sync rule filter');
     }
     if (includeSpecials != null && rule.targetType != ContentTypes.show) {
       throw UnsupportedError('Only show rules use includeSpecials');
@@ -2373,6 +2400,75 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
 
   /// Execute all sync rules: auto-delete watched + queue replacements.
   ///
+  /// Keep the managed rules matching what is actually being watched.
+  ///
+  /// Creates a rule for each show in Continue Watching and drops the ones for
+  /// shows that have left it, so the set follows the viewer around rather than
+  /// growing forever. Runs before [executeSyncRules]; the rules it writes are
+  /// ordinary rules from there on, and the pass that follows fills them.
+  ///
+  /// Silent on failure by design: this is a convenience nobody asked for at
+  /// the moment it runs, and a server that will not answer is not a reason to
+  /// interrupt anything.
+  Future<void> refreshAutoDownloadRules(MultiServerManager serverManager) async {
+    if (!_downloadManager.downloadsSupported) return;
+    if (_syncRuleCleanupInProgress) return;
+    final profileId = _activeProfileId;
+    if (profileId == null || profileId.isEmpty) return;
+
+    final settings = SettingsService.instanceOrNull;
+    if (settings == null) return;
+    final keepAhead = settings.read(SettingsService.autoDownloadNextEpisodes);
+
+    final managedKeys = _syncRules.values.where((rule) => rule.managed).map((rule) => rule.globalKey).toList();
+    if (keepAhead <= 0) {
+      // Turned off: take the rules with it. Downloads already on the device
+      // stay — deleting someone's episodes because a convenience was switched
+      // off is not what switching it off means.
+      for (final key in managedKeys) {
+        await deleteSyncRule(key);
+      }
+      return;
+    }
+
+    final continueWatching = <MediaItem>[];
+    for (final serverId in serverManager.onlineServerIds) {
+      final client = serverManager.getClient(ServerId(serverId));
+      if (client == null) continue;
+      try {
+        final items = await client.fetchContinueWatching(count: 20);
+        continueWatching.addAll(items.map((item) => item.serverId != null ? item : item.copyWith(serverId: serverId)));
+      } catch (e) {
+        appLogger.d('Auto-download: could not read Continue Watching from $serverId', error: e);
+      }
+    }
+
+    final plan = AutoDownloadPlanner.reconcile(
+      targets: AutoDownloadPlanner.showsInProgress(continueWatching),
+      existingRules: _syncRules.values,
+      keyFor: (serverId, ratingKey) => syncRuleKeyFor(serverId, ratingKey, profileId: profileId),
+    );
+    if (plan.isEmpty) return;
+
+    for (final key in plan.remove) {
+      await deleteSyncRule(key);
+    }
+    for (final target in plan.create) {
+      await createSyncRule(
+        serverId: target.serverId,
+        ratingKey: target.showId,
+        targetType: ContentTypes.show,
+        episodeCount: keepAhead,
+        // Position in the show, not watched state: a rewatch has no unwatched
+        // episodes left and would otherwise keep nothing.
+        downloadFilter: SyncRuleFilter.nextInOrder,
+        managed: true,
+        title: target.title,
+      );
+    }
+    appLogger.i('Auto-download: ${plan.create.length} shows added, ${plan.remove.length} dropped');
+  }
+
   /// Pass [force] `true` from user-initiated triggers (watch-state events,
   /// offline-sync drains) to bypass the executor's cooldown. Defaults to
   /// `false` for background probes (e.g. connectivity reconnects).

@@ -16,8 +16,10 @@ import '../mixins/mounted_set_state_mixin.dart';
 import '../mixins/refreshable.dart';
 import '../providers/hidden_libraries_provider.dart';
 import '../providers/libraries_provider.dart';
+import '../providers/download_provider.dart';
 import '../providers/multi_server_provider.dart';
 import '../services/data_aggregation_service.dart';
+import '../services/offline_search.dart';
 import '../utils/app_logger.dart';
 import '../utils/platform_detector.dart';
 import '../utils/snackbar_helper.dart';
@@ -56,6 +58,12 @@ class _SearchScreenState extends State<SearchScreen>
   List<MediaItem>? _rankedKindResults;
   late final FocusNode _allChipFocusNode = FocusNode(debugLabel: 'SearchKindChipAll');
   final Map<MediaKind, FocusNode> _kindChipFocusNodes = {};
+
+  /// Whether the results on screen came from this device rather than a server.
+  ///
+  /// Changes what a result opens: an offline card plays the downloaded file
+  /// instead of asking a server that is not there.
+  bool _resultsAreOffline = false;
 
   HiddenLibrariesProvider? _hiddenLibraries;
   Set<String> _lastSeenHiddenKeys = const {};
@@ -109,8 +117,17 @@ class _SearchScreenState extends State<SearchScreen>
   Future<List<MediaItem>> performSearchQuery(String query) async {
     final multiServerProvider = Provider.of<MultiServerProvider>(context, listen: false);
     if (!multiServerProvider.hasConnectedServers) {
-      throw const _SearchUnavailableException();
+      // Nothing to ask. The downloads are right here and are exactly what is
+      // playable in this state, so search them rather than report failure.
+      final downloads = context.read<DownloadProvider>();
+      final offlineResults = searchDownloadedItems(downloads.downloadedSearchIndex, query);
+      _resultsAreOffline = true;
+      if (offlineResults.isEmpty && downloads.downloadedSearchIndex.isEmpty) {
+        throw const _SearchUnavailableException();
+      }
+      return offlineResults;
     }
+    _resultsAreOffline = false;
 
     // Hidden-library keys must be hydrated before the first query, or a cold
     // start would filter nothing. Read before any await: the profile subtree
@@ -446,6 +463,7 @@ class _SearchScreenState extends State<SearchScreen>
           onNavigateLeft: _navigateToSidebar,
           onNavigateUp: index == 0 ? (_showKindChips ? _focusKindChips : focusSearchInput) : null,
           showServerName: showServerName,
+          isOffline: _resultsAreOffline,
           libraryName: libraries.libraryLabelFor(item),
         );
       },
