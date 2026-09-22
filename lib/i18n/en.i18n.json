@@ -449,7 +449,14 @@
     "content": "Content",
     "subtitlesAndConfig": "Subtitles & Configuration",
     "autoFetchSubtitles": "Fetch a Matching Subtitle",
-    "autoFetchSubtitlesDescription": "When a video has no subtitles, download the one timed to this exact file, if the provider has it"
+    "autoFetchSubtitlesDescription": "When a video has no subtitles, download the one timed to this exact file, if the provider has it",
+    "subtitleRateCorrection": "Fix subtitle frame rate",
+    "subtitleRateCorrectionOff": "Off",
+    "subtitleRateCorrectionOffDescription": "Leave the rate alone; set it by hand from the player",
+    "subtitleRateCorrectionCertain": "When certain",
+    "subtitleRateCorrectionCertainDescription": "Only when subtitles run past the end of the video, which correctly timed ones never do",
+    "subtitleRateCorrectionAlways": "Also when they stop short",
+    "subtitleRateCorrectionAlwaysDescription": "Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent"
   },
   "search": {
     "hint": "Search movies, shows, music...",
