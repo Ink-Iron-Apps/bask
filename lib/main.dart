@@ -2024,6 +2024,18 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
   // Per-server connection status: serverId -> (name, connected?)
   final Map<String, (String name, bool? connected)> _serverStatus = {};
 
+  /// When a server last reported, so the settled list can be held on screen.
+  DateTime? _lastServerStatusChange;
+
+  /// How long the finished list stays up before the home screen replaces it.
+  ///
+  /// Every dot flips inside the same microtask chain that ends in the
+  /// navigation, so on a quick connection the frame carrying the ticks is
+  /// never painted and the splash appears to go from "connecting" straight
+  /// to the home screen. Measured from the last report, so a slow connect —
+  /// where the ticks were on screen all along — adds nothing.
+  static const Duration _settledStatusDwell = Duration(milliseconds: 350);
+
   @override
   void initState() {
     super.initState();
@@ -2277,6 +2289,9 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
     // titles fill in behind the main screen rather than holding the splash up
     // after every server has already reported connected. A profile switch
     // mid-walk is handled by the pass's own staleness check.
+    await _letSettledStatusBeSeen();
+    if (!mounted) return;
+
     _setStatus(t.common.almostReady);
     unawaited(downloadProvider.refreshMetadataFromCache());
 
@@ -2304,6 +2319,7 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
       if (existing == null) return;
       setState(() {
         _serverStatus[progress.serverId] = (existing.$1, progress.online);
+        _lastServerStatusChange = DateTime.now();
       });
     });
     _statusSub = manager.statusStream.listen((status) {
@@ -2313,6 +2329,7 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
           final existing = _serverStatus[entry.key];
           if (existing != null) {
             _serverStatus[entry.key] = (existing.$1, entry.value);
+            _lastServerStatusChange = DateTime.now();
           }
         }
       });
@@ -2320,6 +2337,22 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
   }
 
   MultiServerManager _serverManagerFromContext() => context.read<MultiServerProvider>().serverManager;
+
+  /// Put the finished server list on screen before handing off.
+  ///
+  /// Waits for the frame carrying the last report to be painted, then holds
+  /// what is left of [_settledStatusDwell]. Without it the app reports it
+  /// connected to nothing: the list is still all grey dots at the moment the
+  /// home screen replaces it.
+  Future<void> _letSettledStatusBeSeen() async {
+    final reported = _serverStatus.values.where((status) => status.$2 != null).length;
+    appLogger.d('Splash: $reported of ${_serverStatus.length} servers reported before handoff');
+    final lastChange = _lastServerStatusChange;
+    if (lastChange == null) return;
+    await WidgetsBinding.instance.endOfFrame;
+    final remaining = _settledStatusDwell - DateTime.now().difference(lastChange);
+    if (remaining > Duration.zero) await Future.delayed(remaining);
+  }
 
   @override
   void dispose() {
