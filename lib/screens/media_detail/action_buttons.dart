@@ -576,8 +576,11 @@ extension _MediaDetailActionButtons on _MediaDetailScreenState {
     final serverId = metadata.serverId;
     if (serverId == null || serverId.isEmpty) return const [];
 
-    final remote = context.watch<CompanionRemoteProvider>();
-    if (!remote.isRemote || !remote.isConnected) return const [];
+    // Nullable lookup: the detail screen is also built outside the app's
+    // provider tree, and a missing companion session is "no entry", not a
+    // crash.
+    final remote = context.watch<CompanionRemoteProvider?>();
+    if (remote == null || !remote.isRemote || !remote.isConnected) return const [];
     final deviceName = remote.connectedDevice?.name ?? t.companionRemote.unknownDevice;
 
     return [
