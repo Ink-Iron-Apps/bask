@@ -39,6 +39,7 @@ class CompanionRemoteReceiver {
   VoidCallback? onVolumeUp;
   VoidCallback? onVolumeDown;
   VoidCallback? onVolumeMute;
+
   /// Start an item the paired phone picked. The host resolves the position
   /// from the server, which holds it for the same account.
   void Function(String serverId, String ratingKey)? onPlayMedia;

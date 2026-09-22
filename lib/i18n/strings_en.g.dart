@@ -4879,6 +4879,18 @@ class Translations$videoSettings$en {
 	/// en: 'Performance Overlay'
 	String get performanceOverlay => 'Performance Overlay';
 
+	/// en: 'Report a playback problem'
+	String get reportPlaybackProblem => 'Report a playback problem';
+
+	/// en: 'Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.'
+	String get reportPlaybackProblemDescription => 'Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.';
+
+	/// en: 'Upload'
+	String get reportPlaybackProblemSend => 'Upload';
+
+	/// en: 'Could not upload the report'
+	String get reportPlaybackProblemFailed => 'Could not upload the report';
+
 	/// en: 'Dolby Atmos'
 	String get audioOutputDolbyAtmos => 'Dolby Atmos';
 
@@ -9150,6 +9162,10 @@ extension on Translations {
 			'videoSettings.hdrToneMappingFailed' => 'Couldn\'t change HDR tone mapping — the previous mode is still active.',
 			'videoSettings.audioOutput' => 'Audio Output',
 			'videoSettings.performanceOverlay' => 'Performance Overlay',
+			'videoSettings.reportPlaybackProblem' => 'Report a playback problem',
+			'videoSettings.reportPlaybackProblemDescription' => 'Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.',
+			'videoSettings.reportPlaybackProblemSend' => 'Upload',
+			'videoSettings.reportPlaybackProblemFailed' => 'Could not upload the report',
 			'videoSettings.audioOutputDolbyAtmos' => 'Dolby Atmos',
 			'videoSettings.audioOutputDolbyAudio' => 'Dolby Audio',
 			'videoSettings.audioOutputSurround' => 'Surround',
@@ -9389,12 +9405,12 @@ extension on Translations {
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
+			_ => null,
+		} ?? switch (path) {
 			'services.names.mdblist' => 'MDBList',
 			'services.deviceCode.title' => ({required Object service}) => 'Activate Plezy on ${service}',
 			'services.deviceCode.instructions' => 'Scan the QR code, or visit the address below and enter this code:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Open ${service} to activate',
-			_ => null,
-		} ?? switch (path) {
 			'services.deviceCode.copyCode' => 'Copy activation code',
 			'services.deviceCode.waitingForAuthorization' => 'Waiting for authorization…',
 			'services.deviceCode.codeCopied' => 'Code copied',
