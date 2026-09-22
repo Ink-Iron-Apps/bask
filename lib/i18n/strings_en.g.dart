@@ -4764,6 +4764,12 @@ class Translations$companionRemote$en {
 
 	/// en: 'The connection closed before authentication'
 	String get closedBeforeAuth => 'The connection closed before authentication';
+
+	/// en: 'Play on ${name}'
+	String playOnDevice({required Object name}) => 'Play on ${name}';
+
+	/// en: 'Sent to ${name}'
+	String playSentToDevice({required Object name}) => 'Sent to ${name}';
 }
 
 // Path: videoSettings
@@ -9097,6 +9103,8 @@ extension on Translations {
 			'companionRemote.errors.connectionLostAfterAttempts' => ({required Object attempts}) => 'Connection lost after ${attempts} attempts',
 			'companionRemote.errors.connectionLost' => 'Connection lost',
 			'companionRemote.closedBeforeAuth' => 'The connection closed before authentication',
+			'companionRemote.playOnDevice' => ({required Object name}) => 'Play on ${name}',
+			'companionRemote.playSentToDevice' => ({required Object name}) => 'Sent to ${name}',
 			'videoSettings.playbackSpeed' => 'Playback Speed',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Active (${duration})',
@@ -9373,10 +9381,10 @@ extension on Translations {
 			'services.deviceCode.waitingForAuthorization' => 'Waiting for authorization…',
 			'services.deviceCode.codeCopied' => 'Code copied',
 			'services.oauthProxy.title' => ({required Object service}) => 'Sign in to ${service}',
-			'services.oauthProxy.body' => 'Scan this QR code or open the URL on any device.',
-			'services.oauthProxy.openToSignIn' => ({required Object service}) => 'Open ${service} to sign in',
 			_ => null,
 		} ?? switch (path) {
+			'services.oauthProxy.body' => 'Scan this QR code or open the URL on any device.',
+			'services.oauthProxy.openToSignIn' => ({required Object service}) => 'Open ${service} to sign in',
 			'services.pendingAuth.copyUrl' => 'Copy sign-in URL',
 			'services.pendingAuth.urlCopied' => 'URL copied',
 			'services.libraryFilter.title' => 'Library filter',

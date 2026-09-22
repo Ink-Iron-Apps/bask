@@ -39,6 +39,9 @@ class CompanionRemoteReceiver {
   VoidCallback? onVolumeUp;
   VoidCallback? onVolumeDown;
   VoidCallback? onVolumeMute;
+  /// Start an item the paired phone picked. The host resolves the position
+  /// from the server, which holds it for the same account.
+  void Function(String serverId, String ratingKey)? onPlayMedia;
   VoidCallback? onSubtitles;
   VoidCallback? onAudioTracks;
   VoidCallback? onFullscreen;
@@ -117,6 +120,15 @@ class CompanionRemoteReceiver {
       case RemoteCommandType.previousTrack:
         onPreviousTrack?.call();
 
+      case RemoteCommandType.playMedia:
+        final serverId = command.data?['serverId'] as String?;
+        final ratingKey = command.data?['ratingKey'] as String?;
+        if (serverId == null || ratingKey == null) {
+          appLogger.w('CompanionRemoteReceiver: playMedia without serverId/ratingKey');
+        } else {
+          onPlayMedia?.call(serverId, ratingKey);
+        }
+
       case RemoteCommandType.subtitles:
         onSubtitles?.call();
       case RemoteCommandType.audioTracks:
@@ -185,5 +197,6 @@ bool _isViewerInput(RemoteCommandType type) => switch (type) {
   RemoteCommandType.subtitles ||
   RemoteCommandType.audioTracks ||
   RemoteCommandType.qualitySettings ||
+  RemoteCommandType.playMedia ||
   RemoteCommandType.fullscreen => true,
 };
