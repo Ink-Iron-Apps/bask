@@ -19,6 +19,44 @@ class SyncRuleFilter {
   SyncRuleFilter._();
   static const String all = 'all';
   static const String unwatched = 'unwatched';
+
+  /// The episodes that follow the one most recently played, watched or not.
+  ///
+  /// [unwatched] cannot follow a rewatch: every episode of a show seen before
+  /// is watched, so the filter matches nothing and the device holds none of
+  /// it. Position in the show, rather than watched state, is what "what I am
+  /// about to watch" actually means — and on a first watch the two agree,
+  /// because the episodes after the last one played are the unwatched ones.
+  static const String nextInOrder = 'next_in_order';
+}
+
+/// Episodes that come after the most recently played one, in watch order.
+///
+/// Returns an empty list when the show has never been played: there is no
+/// "next" to keep ahead of, and filling a device with a show nobody started
+/// is not what was asked for.
+List<MediaItem> episodesAfterLastPlayed(List<MediaItem> episodes) {
+  final ordered = List<MediaItem>.of(episodes);
+  sortEpisodesByWatchOrder(ordered);
+
+  var lastPlayedIndex = -1;
+  var lastPlayedAt = 0;
+  for (var i = 0; i < ordered.length; i++) {
+    final viewedAt = ordered[i].lastViewedAt ?? 0;
+    // `>=` so that, among episodes sharing a timestamp — a binge the server
+    // stamped to the same second — the later one in watch order wins.
+    if (viewedAt > 0 && viewedAt >= lastPlayedAt) {
+      lastPlayedAt = viewedAt;
+      lastPlayedIndex = i;
+    }
+  }
+
+  if (lastPlayedIndex == -1) return const [];
+
+  // An episode left part-watched is still the one to hold: resuming it is the
+  // next thing that happens, and it may not be on the device yet.
+  final resumeInPlace = ordered[lastPlayedIndex].hasActiveProgress;
+  return ordered.sublist(resumeInPlace ? lastPlayedIndex : lastPlayedIndex + 1);
 }
 
 typedef AssociateSyncRuleDownload = Future<void> Function(SyncRuleItem rule, String downloadGlobalKey);
@@ -326,26 +364,31 @@ class SyncRuleExecutor {
     // from the server on each run, so episodes added after the rule was created
     // are picked up automatically.
     final syncAll = rule.downloadFilter == SyncRuleFilter.all;
+    final nextInOrder = rule.downloadFilter == SyncRuleFilter.nextInOrder;
 
     final fromServer = <MediaItem>[];
     final sourceMetadata = metadata[rule.globalKey];
     await collectEpisodes(
       client,
       rule.ratingKey,
-      unwatchedOnly: !syncAll,
+      // Watched episodes are part of the answer for [SyncRuleFilter.nextInOrder]:
+      // it needs the whole run to find where the viewer is in it.
+      unwatchedOnly: !syncAll && !nextInOrder,
       out: fromServer,
       fallback: sourceMetadata,
       includeSpecials: rule.targetType != ContentTypes.show || rule.includeSpecials,
     );
 
-    final candidateEpisodes = syncAll
-        ? fromServer
-        : await _excludeLocallyWatched(
-            episodes: fromServer,
-            serverId: ServerId(rule.serverId),
-            profileId: profileId,
-            clientScopeId: clientScopeId,
-          );
+    final candidateEpisodes = switch (rule.downloadFilter) {
+      SyncRuleFilter.all => fromServer,
+      SyncRuleFilter.nextInOrder => episodesAfterLastPlayed(fromServer),
+      _ => await _excludeLocallyWatched(
+        episodes: fromServer,
+        serverId: ServerId(rule.serverId),
+        profileId: profileId,
+        clientScopeId: clientScopeId,
+      ),
+    };
 
     if (candidateEpisodes.isEmpty) {
       appLogger.d('Sync rule ${rule.globalKey}: no candidate episodes available');
@@ -390,7 +433,9 @@ class SyncRuleExecutor {
 
     await _completeRuleExecution(rule.globalKey);
 
-    final displayTitle = metadata[rule.globalKey]?.title;
+    // The rule's stored name is the fallback: a managed rule's show is not a
+    // download, so nothing put it in the metadata map.
+    final displayTitle = metadata[rule.globalKey]?.title ?? rule.title;
     appLogger.i('Sync rule ${rule.globalKey}: queued $queued episodes (had $alreadyHave/$targetCount)');
 
     return SyncRuleResult(globalKey: rule.globalKey, title: displayTitle, queuedCount: queued);
@@ -448,7 +493,9 @@ class SyncRuleExecutor {
 
     await _completeRuleExecution(rule.globalKey);
 
-    final displayTitle = metadata[rule.globalKey]?.title;
+    // The rule's stored name is the fallback: a managed rule's show is not a
+    // download, so nothing put it in the metadata map.
+    final displayTitle = metadata[rule.globalKey]?.title ?? rule.title;
     appLogger.i('Sync rule ${rule.globalKey}: queued $queued items from ${candidates.length} candidates');
 
     return SyncRuleResult(globalKey: rule.globalKey, title: displayTitle, queuedCount: queued);

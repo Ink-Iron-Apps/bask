@@ -466,6 +466,25 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
               )
               .toList(),
         ),
+        SettingSelectionTile<int>(
+          pref: settings.SettingsService.autoDownloadNextEpisodes,
+          icon: Symbols.playlist_add_rounded,
+          title: t.settings.autoDownloadNextEpisodes,
+          subtitleBuilder: (v) => v == 0
+              ? t.settings.autoDownloadNextEpisodesDescription
+              : '${t.settings.autoDownloadNextEpisodesCount(count: v.toString())} · '
+                    '${t.settings.autoDownloadNextEpisodesDescription}',
+          options: const [0, 1, 2, 3, 5]
+              .map(
+                (count) => DialogOption(
+                  value: count,
+                  title: count == 0
+                      ? t.settings.autoDownloadNextEpisodesOff
+                      : t.settings.autoDownloadNextEpisodesCount(count: '$count'),
+                ),
+              )
+              .toList(),
+        ),
         if (_backgroundWorkDiagnostics.isSupported) _buildBackgroundDownloadsTile(),
         // TODO: "Remove orphaned downloads" toggle (#1413) goes here, next to
         // autoRemoveWatchedDownloads.

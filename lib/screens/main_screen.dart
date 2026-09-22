@@ -911,13 +911,23 @@ class _MainScreenState extends State<MainScreen>
     }
 
     final (serverId, ratingKey) = parsed;
+    await _playRemoteItem(serverId, ratingKey, source: 'System shelf');
+  }
+
+  /// Fetch an item by id on its own server and start playing it here.
+  ///
+  /// Shared by the launcher shelf and the companion remote: both name an item
+  /// this device was not showing, and neither carries a position — the server
+  /// holds that per account, so [navigateToVideoPlayer] resumes correctly.
+  Future<void> _playRemoteItem(ServerId serverId, String ratingKey, {String source = 'Companion remote'}) async {
+    if (!mounted) return;
 
     try {
       final multiServer = context.read<MultiServerProvider>();
       final client = multiServer.getClientForServer(serverId);
 
       if (client == null) {
-        appLogger.w('System shelf: server $serverId not available');
+        appLogger.w('$source: server $serverId not available');
         return;
       }
 
@@ -927,7 +937,7 @@ class _MainScreenState extends State<MainScreen>
 
       unawaited(navigateToVideoPlayer(context, metadata: metadata));
     } catch (e) {
-      appLogger.e('System shelf: failed to navigate to media', error: e);
+      appLogger.e('$source: failed to navigate to media', error: e);
     }
   }
 
@@ -1036,6 +1046,10 @@ class _MainScreenState extends State<MainScreen>
         if (mounted) _sideNavKey.currentState?.focusHomeItem();
       });
     };
+    // A phone can pick an item on its own screen and hand it to this device;
+    // the position comes from the server, which holds it per account, so the
+    // item starts where the user left it whichever device they left it on.
+    receiver.onPlayMedia = (serverId, ratingKey) => unawaited(_playRemoteItem(ServerId(serverId), ratingKey));
     receiver.onSearchAction = (query) {
       final trimmed = query?.trim() ?? '';
       final hasQuery = trimmed.isNotEmpty;
@@ -1099,6 +1113,7 @@ class _MainScreenState extends State<MainScreen>
         receiver.onTabSettings = null;
         receiver.onHome = null;
         receiver.onSearchAction = null;
+        receiver.onPlayMedia = null;
         receiver.navigationOwner = null;
       }
     }

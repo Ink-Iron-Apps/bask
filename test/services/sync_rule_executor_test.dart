@@ -679,6 +679,61 @@ void main() {
     );
     expect(unwatched.map((i) => i.id), ['album-track-1']);
   });
+
+  group('episodesAfterLastPlayed', () {
+    MediaItem episode(int number, {int? lastViewedAt, int? viewOffsetMs}) => testMediaItem(
+      id: 's1e$number',
+      backend: MediaBackend.plex,
+      kind: MediaKind.episode,
+      title: 's1e$number',
+      parentIndex: 1,
+      index: number,
+      lastViewedAt: lastViewedAt,
+      viewOffsetMs: viewOffsetMs,
+      durationMs: 1200000,
+    );
+
+    test('offers what comes after the episode played most recently', () {
+      final next = episodesAfterLastPlayed([
+        episode(1, lastViewedAt: 100),
+        episode(2, lastViewedAt: 200),
+        episode(3),
+        episode(4),
+      ]);
+
+      expect(next.map((e) => e.id), ['s1e3', 's1e4']);
+    });
+
+    test('keeps a part-watched episode, because resuming it happens next', () {
+      final next = episodesAfterLastPlayed([
+        episode(1, lastViewedAt: 100),
+        episode(2, lastViewedAt: 200, viewOffsetMs: 300000),
+        episode(3),
+      ]);
+
+      expect(next.map((e) => e.id), ['s1e2', 's1e3']);
+    });
+
+    test('follows a rewatch, where nothing is unwatched any more', () {
+      // The whole point of the filter: every episode is watched, so an
+      // "unwatched" rule would keep none of them.
+      final next = episodesAfterLastPlayed([
+        episode(1, lastViewedAt: 900),
+        episode(2, lastViewedAt: 1000),
+        episode(3, lastViewedAt: 100),
+      ]);
+
+      expect(next.map((e) => e.id), ['s1e3']);
+    });
+
+    test('offers nothing for a show never started', () {
+      expect(episodesAfterLastPlayed([episode(1), episode(2)]), isEmpty);
+    });
+
+    test('ends the run at the last episode rather than starting over', () {
+      expect(episodesAfterLastPlayed([episode(1, lastViewedAt: 100), episode(2, lastViewedAt: 200)]), isEmpty);
+    });
+  });
 }
 
 MediaItem _track(String id, {bool played = false}) {

@@ -321,6 +321,10 @@
     "downloadStorageBudget": "Download Storage Limit",
     "downloadStorageBudgetDescription": "Delete the oldest watched downloads when the total passes this",
     "downloadStorageBudgetOff": "No limit",
+    "autoDownloadNextEpisodes": "Keep what I am watching",
+    "autoDownloadNextEpisodesDescription": "Download the next episodes of shows in Continue Watching, and drop them when the show leaves it",
+    "autoDownloadNextEpisodesOff": "Off",
+    "autoDownloadNextEpisodesCount": "${count} episodes ahead",
     "downloadStorageBudgetGB": "${size} GB",
     "cellularDownloadBlocked": "Downloads are blocked on cellular. Use Wi-Fi or change the setting.",
     "maxVolume": "Maximum Volume",
@@ -445,7 +449,14 @@
     "content": "Content",
     "subtitlesAndConfig": "Subtitles & Configuration",
     "autoFetchSubtitles": "Fetch a Matching Subtitle",
-    "autoFetchSubtitlesDescription": "When a video has no subtitles, download the one timed to this exact file, if the provider has it"
+    "autoFetchSubtitlesDescription": "When a video has no subtitles, download the one timed to this exact file, if the provider has it",
+    "subtitleRateCorrection": "Fix subtitle frame rate",
+    "subtitleRateCorrectionOff": "Off",
+    "subtitleRateCorrectionOffDescription": "Leave the rate alone; set it by hand from the player",
+    "subtitleRateCorrectionCertain": "When certain",
+    "subtitleRateCorrectionCertainDescription": "Only when subtitles run past the end of the video, which correctly timed ones never do",
+    "subtitleRateCorrectionAlways": "Also when they stop short",
+    "subtitleRateCorrectionAlwaysDescription": "Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent"
   },
   "search": {
     "hint": "Search movies, shows, music...",
@@ -1949,7 +1960,9 @@
       "connectionLostAfterAttempts": "Connection lost after ${attempts} attempts",
       "connectionLost": "Connection lost"
     },
-    "closedBeforeAuth": "The connection closed before authentication"
+    "closedBeforeAuth": "The connection closed before authentication",
+    "playOnDevice": "Play on ${name}",
+    "playSentToDevice": "Sent to ${name}"
   },
   "videoSettings": {
     "playbackSpeed": "Playback Speed",
@@ -1981,6 +1994,10 @@
     "hdrToneMappingFailed": "Couldn't change HDR tone mapping — the previous mode is still active.",
     "audioOutput": "Audio Output",
     "performanceOverlay": "Performance Overlay",
+    "reportPlaybackProblem": "Report a playback problem",
+    "reportPlaybackProblemDescription": "Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.",
+    "reportPlaybackProblemSend": "Upload",
+    "reportPlaybackProblemFailed": "Could not upload the report",
     "audioOutputDolbyAtmos": "Dolby Atmos",
     "audioOutputDolbyAudio": "Dolby Audio",
     "audioOutputSurround": "Surround",

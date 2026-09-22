@@ -52,6 +52,10 @@ enum RemoteCommandType {
   disconnect,
   ack,
   syncState,
+
+  // Appended, never reordered: the wire format is the enum index.
+  /// Play an item on the host. `d` carries `serverId` and `ratingKey`.
+  playMedia,
 }
 
 class _RemoteCommandTypeConverter extends IndexedEnumConverter<RemoteCommandType> {

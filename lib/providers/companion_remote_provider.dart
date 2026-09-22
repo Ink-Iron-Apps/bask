@@ -985,6 +985,15 @@ class CompanionRemoteProvider with ChangeNotifier, DisposableChangeNotifierMixin
     _peerService!.sendCommand(RemoteCommand(type: type, data: data));
   }
 
+  /// Ask the paired host to play an item.
+  ///
+  /// Only the item's identity travels. Both devices are signed in as the same
+  /// user, so the host reads the position from the server rather than trusting
+  /// a number from the phone, and the two cannot disagree about it.
+  void sendPlayMedia({required String serverId, required String ratingKey}) {
+    sendCommand(RemoteCommandType.playMedia, data: {'serverId': serverId, 'ratingKey': ratingKey});
+  }
+
   void _scheduleReconnect(int generation) {
     if (generation != _remoteGeneration || isDisposed) return;
     if (_appBackgrounded) {

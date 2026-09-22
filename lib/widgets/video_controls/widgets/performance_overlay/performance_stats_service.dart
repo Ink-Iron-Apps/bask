@@ -67,6 +67,21 @@ class PerformanceStatsService {
     _pollingTimer = Timer.periodic(pollInterval, (_) => _fetchStats());
   }
 
+  /// One snapshot, for a caller that is not drawing an overlay.
+  ///
+  /// Returns null when the player answers with nothing before [timeout] —
+  /// which is itself worth reporting, since a player that has stopped
+  /// answering is a good description of several playback faults.
+  Future<PerformanceStats?> captureOnce({Duration timeout = const Duration(seconds: 3)}) async {
+    final first = _statsController.stream.first.timeout(timeout, onTimeout: () => throw TimeoutException('stats'));
+    unawaited(_fetchStats());
+    try {
+      return await first;
+    } on TimeoutException {
+      return null;
+    }
+  }
+
   /// Update the runtime player type by querying the native layer.
   Future<void> _updateRuntimePlayerType() async {
     _runtimePlayerType = await player.runtimePlayerType();

@@ -10,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../focus/focusable_action_bar.dart';
-import '../../widgets/dialog_action_button.dart';
 import '../../widgets/app_icon.dart';
 import '../../focus/key_event_utils.dart';
 import '../../i18n/strings.g.dart';
@@ -272,43 +271,7 @@ class _LogsScreenState extends State<LogsScreen> with MountedSetStateMixin {
       if (!mounted) return;
       Navigator.of(context).pop(); // dismiss loading
 
-      unawaited(
-        showScopedDialog<void>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(t.messages.logsUploaded),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${t.messages.logId}:'),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SelectableText(
-                        id,
-                        style: const TextStyle(fontWeight: .bold, fontFamily: 'monospace', fontSize: 18),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const AppIcon(Symbols.content_copy_rounded, size: 20),
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: id));
-                        showSuccessSnackBar(context, t.messages.logsCopied);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              DialogActionButton(autofocus: true, onPressed: () => Navigator.of(ctx).pop(), label: t.common.close),
-            ],
-          ),
-        ),
-      );
+      await showDiagnosticIdDialog(context, id);
     } catch (_) {
       if (!mounted) return;
       Navigator.of(context).pop(); // dismiss loading

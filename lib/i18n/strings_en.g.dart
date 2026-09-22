@@ -1002,6 +1002,18 @@ class Translations$settings$en {
 	/// en: 'No limit'
 	String get downloadStorageBudgetOff => 'No limit';
 
+	/// en: 'Keep what I am watching'
+	String get autoDownloadNextEpisodes => 'Keep what I am watching';
+
+	/// en: 'Download the next episodes of shows in Continue Watching, and drop them when the show leaves it'
+	String get autoDownloadNextEpisodesDescription => 'Download the next episodes of shows in Continue Watching, and drop them when the show leaves it';
+
+	/// en: 'Off'
+	String get autoDownloadNextEpisodesOff => 'Off';
+
+	/// en: '${count} episodes ahead'
+	String autoDownloadNextEpisodesCount({required Object count}) => '${count} episodes ahead';
+
 	/// en: '${size} GB'
 	String downloadStorageBudgetGB({required Object size}) => '${size} GB';
 
@@ -1376,6 +1388,27 @@ class Translations$settings$en {
 
 	/// en: 'When a video has no subtitles, download the one timed to this exact file, if the provider has it'
 	String get autoFetchSubtitlesDescription => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it';
+
+	/// en: 'Fix subtitle frame rate'
+	String get subtitleRateCorrection => 'Fix subtitle frame rate';
+
+	/// en: 'Off'
+	String get subtitleRateCorrectionOff => 'Off';
+
+	/// en: 'Leave the rate alone; set it by hand from the player'
+	String get subtitleRateCorrectionOffDescription => 'Leave the rate alone; set it by hand from the player';
+
+	/// en: 'When certain'
+	String get subtitleRateCorrectionCertain => 'When certain';
+
+	/// en: 'Only when subtitles run past the end of the video, which correctly timed ones never do'
+	String get subtitleRateCorrectionCertainDescription => 'Only when subtitles run past the end of the video, which correctly timed ones never do';
+
+	/// en: 'Also when they stop short'
+	String get subtitleRateCorrectionAlways => 'Also when they stop short';
+
+	/// en: 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent'
+	String get subtitleRateCorrectionAlwaysDescription => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent';
 }
 
 // Path: search
@@ -4764,6 +4797,12 @@ class Translations$companionRemote$en {
 
 	/// en: 'The connection closed before authentication'
 	String get closedBeforeAuth => 'The connection closed before authentication';
+
+	/// en: 'Play on ${name}'
+	String playOnDevice({required Object name}) => 'Play on ${name}';
+
+	/// en: 'Sent to ${name}'
+	String playSentToDevice({required Object name}) => 'Sent to ${name}';
 }
 
 // Path: videoSettings
@@ -4860,6 +4899,18 @@ class Translations$videoSettings$en {
 
 	/// en: 'Performance Overlay'
 	String get performanceOverlay => 'Performance Overlay';
+
+	/// en: 'Report a playback problem'
+	String get reportPlaybackProblem => 'Report a playback problem';
+
+	/// en: 'Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.'
+	String get reportPlaybackProblemDescription => 'Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.';
+
+	/// en: 'Upload'
+	String get reportPlaybackProblemSend => 'Upload';
+
+	/// en: 'Could not upload the report'
+	String get reportPlaybackProblemFailed => 'Could not upload the report';
 
 	/// en: 'Dolby Atmos'
 	String get audioOutputDolbyAtmos => 'Dolby Atmos';
@@ -7628,6 +7679,10 @@ extension on Translations {
 			'settings.downloadStorageBudget' => 'Download Storage Limit',
 			'settings.downloadStorageBudgetDescription' => 'Delete the oldest watched downloads when the total passes this',
 			'settings.downloadStorageBudgetOff' => 'No limit',
+			'settings.autoDownloadNextEpisodes' => 'Keep what I am watching',
+			'settings.autoDownloadNextEpisodesDescription' => 'Download the next episodes of shows in Continue Watching, and drop them when the show leaves it',
+			'settings.autoDownloadNextEpisodesOff' => 'Off',
+			'settings.autoDownloadNextEpisodesCount' => ({required Object count}) => '${count} episodes ahead',
 			'settings.downloadStorageBudgetGB' => ({required Object size}) => '${size} GB',
 			'settings.cellularDownloadBlocked' => 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.',
 			'settings.maxVolume' => 'Maximum Volume',
@@ -7753,6 +7808,13 @@ extension on Translations {
 			'settings.subtitlesAndConfig' => 'Subtitles & Configuration',
 			'settings.autoFetchSubtitles' => 'Fetch a Matching Subtitle',
 			'settings.autoFetchSubtitlesDescription' => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it',
+			'settings.subtitleRateCorrection' => 'Fix subtitle frame rate',
+			'settings.subtitleRateCorrectionOff' => 'Off',
+			'settings.subtitleRateCorrectionOffDescription' => 'Leave the rate alone; set it by hand from the player',
+			'settings.subtitleRateCorrectionCertain' => 'When certain',
+			'settings.subtitleRateCorrectionCertainDescription' => 'Only when subtitles run past the end of the video, which correctly timed ones never do',
+			'settings.subtitleRateCorrectionAlways' => 'Also when they stop short',
+			'settings.subtitleRateCorrectionAlwaysDescription' => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent',
 			'search.hint' => 'Search movies, shows, music...',
 			'search.tryDifferentTerm' => 'Try a different search term',
 			'search.searchYourMedia' => 'Search your media',
@@ -7822,6 +7884,8 @@ extension on Translations {
 			'fileInfo.previewFailureCode' => 'Preview Failure Code',
 			'fileInfo.previewRetries' => 'Preview Retries',
 			'fileInfo.aspectRatio' => 'Aspect Ratio',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.pixelAspectRatio' => 'Pixel Aspect Ratio',
 			'fileInfo.profile' => 'Profile',
 			'fileInfo.level' => 'Level',
@@ -7833,8 +7897,6 @@ extension on Translations {
 			'fileInfo.colorTransfer' => 'Color Transfer',
 			'fileInfo.chromaSubsampling' => 'Chroma Subsampling',
 			'fileInfo.chromaLocation' => 'Chroma Location',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.scanType' => 'Scan Type',
 			'fileInfo.interlaced' => 'Interlaced',
 			'fileInfo.anamorphic' => 'Anamorphic',
@@ -8336,6 +8398,8 @@ extension on Translations {
 			'discover.nextUpIn' => ({required Object library}) => 'Next Up in ${library}',
 			'discover.recentlyAdded' => 'Recently Added',
 			'discover.recentlyAddedIn' => ({required Object library}) => 'Recently Added in ${library}',
+			_ => null,
+		} ?? switch (path) {
 			'discover.latestAlbumsIn' => ({required Object library}) => 'Latest Albums in ${library}',
 			'discover.recentlyPlayedIn' => ({required Object library}) => 'Recently Played in ${library}',
 			'discover.mostPlayedIn' => ({required Object library}) => 'Most Played in ${library}',
@@ -8347,8 +8411,6 @@ extension on Translations {
 			'discover.rating' => 'Rating',
 			'discover.director' => 'Director',
 			'discover.directors' => 'Directors',
-			_ => null,
-		} ?? switch (path) {
 			'discover.movie' => 'Movie',
 			'discover.tvShow' => 'TV Show',
 			'discover.minutesLeft' => ({required Object minutes}) => '${minutes} min left',
@@ -8850,6 +8912,8 @@ extension on Translations {
 			'watchTogether.leaveSessionConfirmOverlay' => 'You will be disconnected from the watch session.',
 			'watchTogether.end' => 'End',
 			'watchTogether.leave' => 'Leave',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.syncing' => 'Syncing...',
 			'watchTogether.joinWatchSession' => 'Join Watch Session',
 			'watchTogether.enterCodeHint' => 'Enter 5-character code',
@@ -8861,8 +8925,6 @@ extension on Translations {
 			'watchTogether.failedToJoin' => 'Failed to join session',
 			'watchTogether.sessionCodeCopied' => 'Session code copied to clipboard',
 			'watchTogether.relayUnreachable' => 'Relay server unreachable. ISP blocking may prevent Watch Together.',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.reconnectingToHost' => 'Reconnecting to host...',
 			'watchTogether.currentPlayback' => 'Current Playback',
 			'watchTogether.joinCurrentPlayback' => 'Join Current Playback',
@@ -9097,6 +9159,8 @@ extension on Translations {
 			'companionRemote.errors.connectionLostAfterAttempts' => ({required Object attempts}) => 'Connection lost after ${attempts} attempts',
 			'companionRemote.errors.connectionLost' => 'Connection lost',
 			'companionRemote.closedBeforeAuth' => 'The connection closed before authentication',
+			'companionRemote.playOnDevice' => ({required Object name}) => 'Play on ${name}',
+			'companionRemote.playSentToDevice' => ({required Object name}) => 'Sent to ${name}',
 			'videoSettings.playbackSpeed' => 'Playback Speed',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Active (${duration})',
@@ -9126,6 +9190,10 @@ extension on Translations {
 			'videoSettings.hdrToneMappingFailed' => 'Couldn\'t change HDR tone mapping — the previous mode is still active.',
 			'videoSettings.audioOutput' => 'Audio Output',
 			'videoSettings.performanceOverlay' => 'Performance Overlay',
+			'videoSettings.reportPlaybackProblem' => 'Report a playback problem',
+			'videoSettings.reportPlaybackProblemDescription' => 'Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.',
+			'videoSettings.reportPlaybackProblemSend' => 'Upload',
+			'videoSettings.reportPlaybackProblemFailed' => 'Could not upload the report',
 			'videoSettings.audioOutputDolbyAtmos' => 'Dolby Atmos',
 			'videoSettings.audioOutputDolbyAudio' => 'Dolby Audio',
 			'videoSettings.audioOutputSurround' => 'Surround',
@@ -9358,6 +9426,8 @@ extension on Translations {
 			'services.connectedAs' => ({required Object username}) => 'Connected as @${username}',
 			'services.scrobble' => 'Track progress automatically',
 			'services.scrobbleDescription' => 'Update your list when you finish an episode or movie.',
+			_ => null,
+		} ?? switch (path) {
 			'services.disconnectConfirm' => ({required Object service}) => 'Disconnect ${service}?',
 			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezy will stop updating ${service}. Reconnect any time.',
 			'services.connectFailed' => ({required Object service}) => 'Couldn\'t connect to ${service}. Try again.',
@@ -9375,8 +9445,6 @@ extension on Translations {
 			'services.oauthProxy.title' => ({required Object service}) => 'Sign in to ${service}',
 			'services.oauthProxy.body' => 'Scan this QR code or open the URL on any device.',
 			'services.oauthProxy.openToSignIn' => ({required Object service}) => 'Open ${service} to sign in',
-			_ => null,
-		} ?? switch (path) {
 			'services.pendingAuth.copyUrl' => 'Copy sign-in URL',
 			'services.pendingAuth.urlCopied' => 'URL copied',
 			'services.libraryFilter.title' => 'Library filter',

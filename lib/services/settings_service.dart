@@ -115,6 +115,23 @@ enum SkipMarkerMode {
   auto,
 }
 
+/// How hard the player tries to fix a subtitle timed for another frame rate.
+enum SubtitleRateCorrection {
+  /// Never touch the rate; the Subtitle Rate control still works by hand.
+  off,
+
+  /// Only when the subtitles run past the end of the video, which a correctly
+  /// timed file never does.
+  certain,
+
+  /// Also when the subtitles stop short by exactly one of the known frame-rate
+  /// conversions. That shape is also what a film whose credits carry no
+  /// dialogue looks like, so this trades a rare wrong correction — undone per
+  /// file from the Subtitle Rate control — for catching the common case,
+  /// 25 fps subtitles over a 23.976 fps film.
+  always,
+}
+
 enum SubAssOverride { no, yes, scale, force, strip }
 
 /// Resolution ASS/image subtitles are rasterized at.
@@ -572,6 +589,16 @@ class SettingsService extends BaseSharedPreferencesService {
   /// video run 4.27% fast — eight seconds out at three minutes, over two
   /// minutes out at fifty — and only a rate correction closes that.
   static const subtitleSpeed = DoublePref('subtitle_speed', defaultValue: 1.0);
+
+  /// Whether the player works the rate out for itself, and how boldly.
+  ///
+  /// The measurement is the subtitle file's own span against the video's
+  /// duration; see [SubtitleRateCorrection] for what each setting acts on.
+  static const subtitleRateCorrection = EnumPref<SubtitleRateCorrection>(
+    'subtitle_rate_correction',
+    values: SubtitleRateCorrection.values,
+    defaultValue: SubtitleRateCorrection.certain,
+  );
   static const subtitleSearchLanguage = NullableStringPref('subtitle_search_language');
 
   /// Fetch a hash-matched subtitle for a video that has none.
@@ -648,6 +675,14 @@ class SettingsService extends BaseSharedPreferencesService {
   /// actually needed, which is the difference between "I finished it" and "the
   /// device is full".
   static const downloadStorageBudgetGB = IntPref('download_storage_budget_gb');
+
+  /// How many episodes of what is being watched to keep downloaded, 0 for off.
+  ///
+  /// A sync rule does this already, but only for a show someone thought to set
+  /// one up for — so the next episode is on the device for the shows they
+  /// remembered and missing for the one they started last night. Continue
+  /// Watching says which shows are in flight; this says how far ahead to stay.
+  static const autoDownloadNextEpisodes = IntPref('auto_download_next_episodes');
 
   /// Set once the user has seen the pre-flight "background downloads are
   /// blocked" dialog. The persistent Downloads-screen banner covers repeat
@@ -1350,6 +1385,7 @@ class SettingsService extends BaseSharedPreferencesService {
     audioSyncOffset,
     subtitleSyncOffset,
     subtitleSpeed,
+    subtitleRateCorrection,
     subtitleSearchLanguage,
     autoFetchExactSubtitles,
     volume,
@@ -1467,6 +1503,7 @@ class SettingsService extends BaseSharedPreferencesService {
     creditsPattern,
     autoRemoveWatchedDownloads,
     downloadStorageBudgetGB,
+    autoDownloadNextEpisodes,
     defaultQualityPreset,
     cellularQualityPreset,
     musicQualityPreset,
