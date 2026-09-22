@@ -40,6 +40,18 @@ class SubtitleStylingScreen extends StatelessWidget {
     };
   }
 
+  String _rateCorrectionLabel(SubtitleRateCorrection value) => switch (value) {
+    SubtitleRateCorrection.off => t.settings.subtitleRateCorrectionOff,
+    SubtitleRateCorrection.certain => t.settings.subtitleRateCorrectionCertain,
+    SubtitleRateCorrection.always => t.settings.subtitleRateCorrectionAlways,
+  };
+
+  String _rateCorrectionDescription(SubtitleRateCorrection value) => switch (value) {
+    SubtitleRateCorrection.off => t.settings.subtitleRateCorrectionOffDescription,
+    SubtitleRateCorrection.certain => t.settings.subtitleRateCorrectionCertainDescription,
+    SubtitleRateCorrection.always => t.settings.subtitleRateCorrectionAlwaysDescription,
+  };
+
   @override
   Widget build(BuildContext context) {
     // Each backend exposes its own text-subtitle placement preference.
@@ -55,6 +67,23 @@ class SubtitleStylingScreen extends StatelessWidget {
               icon: Symbols.subtitles_rounded,
               title: t.settings.autoFetchSubtitles,
               subtitle: t.settings.autoFetchSubtitlesDescription,
+            ),
+            // Sits with the fetch rather than the styling: both are about a
+            // subtitle being right for this file, not how it looks.
+            SettingSelectionTile<SubtitleRateCorrection>(
+              pref: SettingsService.subtitleRateCorrection,
+              icon: Symbols.av_timer_rounded,
+              title: t.settings.subtitleRateCorrection,
+              subtitleBuilder: _rateCorrectionDescription,
+              options: SubtitleRateCorrection.values
+                  .map(
+                    (value) => DialogOption(
+                      value: value,
+                      title: _rateCorrectionLabel(value),
+                      subtitle: _rateCorrectionDescription(value),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ),

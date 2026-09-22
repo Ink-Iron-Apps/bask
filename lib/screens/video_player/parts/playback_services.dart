@@ -173,6 +173,9 @@ extension _VideoPlayerPlaybackServiceMethods on VideoPlayerScreenState {
         _resetLiveLadderOnPlaybackRestart();
         final markFirstFrameReady = _markFirstFrameReady(currentPlayer, settingsService);
         _trackManager?.onPlaybackRestart();
+        // Tracks and duration are both known by now, which is what measuring
+        // a subtitle's own timing against the video needs.
+        unawaited(_correctSubtitleRateIfMistimed(currentPlayer));
         await markFirstFrameReady;
       }),
     );
@@ -327,6 +330,33 @@ extension _VideoPlayerPlaybackServiceMethods on VideoPlayerScreenState {
   /// The caller is responsible for ensuring `player != null` and (if the
   /// media-controls metadata refresh should run) for having created
   /// [_mediaControlsManager] before the first call.
+  /// Fix a subtitle file authored against another frame rate.
+  ///
+  /// An offset cannot: the error grows with the runtime, so a file that is
+  /// eight seconds out three minutes in is two minutes out by the end. The
+  /// drift is measurable from the subtitle's own timestamps against the
+  /// video's duration, so the player works it out rather than asking the
+  /// viewer to notice it, diagnose it and set it per file.
+  ///
+  /// External text subtitles only — an embedded track has no file to read —
+  /// and never over a rate already chosen for this item.
+  Future<void> _correctSubtitleRateIfMistimed(Player currentPlayer) async {
+    final track = currentPlayer.state.track.subtitle;
+    final uri = track?.uri;
+    if (track == null || uri == null || uri.isEmpty || !track.isExternal) return;
+
+    final duration = currentPlayer.state.duration;
+    if (duration <= Duration.zero) return;
+
+    final speed = await SubtitleRateGuard.applyIfMistimed(
+      metadata: _currentMetadata,
+      subtitleUri: uri,
+      videoDuration: duration,
+    );
+    if (speed == null || !mounted || player != currentPlayer) return;
+    await currentPlayer.setProperty('sub-speed', speed.toStringAsFixed(5));
+  }
+
   void _wirePerItemPlaybackServices({
     required MediaItem metadata,
     required MediaServerClient? mediaClient,

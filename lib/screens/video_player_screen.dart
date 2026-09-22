@@ -1,5 +1,6 @@
 import '../widgets/video_controls/sheets/subtitle_search_sheet.dart';
 import '../services/exact_subtitle_fetcher.dart';
+import '../services/subtitle_rate_guard.dart';
 import 'dart:async';
 import '../services/playback_launch_observer.dart';
 import '../media/ids.dart';

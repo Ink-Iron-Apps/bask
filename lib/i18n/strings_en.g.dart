@@ -1388,6 +1388,27 @@ class Translations$settings$en {
 
 	/// en: 'When a video has no subtitles, download the one timed to this exact file, if the provider has it'
 	String get autoFetchSubtitlesDescription => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it';
+
+	/// en: 'Fix subtitle frame rate'
+	String get subtitleRateCorrection => 'Fix subtitle frame rate';
+
+	/// en: 'Off'
+	String get subtitleRateCorrectionOff => 'Off';
+
+	/// en: 'Leave the rate alone; set it by hand from the player'
+	String get subtitleRateCorrectionOffDescription => 'Leave the rate alone; set it by hand from the player';
+
+	/// en: 'When certain'
+	String get subtitleRateCorrectionCertain => 'When certain';
+
+	/// en: 'Only when subtitles run past the end of the video, which correctly timed ones never do'
+	String get subtitleRateCorrectionCertainDescription => 'Only when subtitles run past the end of the video, which correctly timed ones never do';
+
+	/// en: 'Also when they stop short'
+	String get subtitleRateCorrectionAlways => 'Also when they stop short';
+
+	/// en: 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent'
+	String get subtitleRateCorrectionAlwaysDescription => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent';
 }
 
 // Path: search
@@ -7787,6 +7808,13 @@ extension on Translations {
 			'settings.subtitlesAndConfig' => 'Subtitles & Configuration',
 			'settings.autoFetchSubtitles' => 'Fetch a Matching Subtitle',
 			'settings.autoFetchSubtitlesDescription' => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it',
+			'settings.subtitleRateCorrection' => 'Fix subtitle frame rate',
+			'settings.subtitleRateCorrectionOff' => 'Off',
+			'settings.subtitleRateCorrectionOffDescription' => 'Leave the rate alone; set it by hand from the player',
+			'settings.subtitleRateCorrectionCertain' => 'When certain',
+			'settings.subtitleRateCorrectionCertainDescription' => 'Only when subtitles run past the end of the video, which correctly timed ones never do',
+			'settings.subtitleRateCorrectionAlways' => 'Also when they stop short',
+			'settings.subtitleRateCorrectionAlwaysDescription' => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent',
 			'search.hint' => 'Search movies, shows, music...',
 			'search.tryDifferentTerm' => 'Try a different search term',
 			'search.searchYourMedia' => 'Search your media',
@@ -7856,6 +7884,8 @@ extension on Translations {
 			'fileInfo.previewFailureCode' => 'Preview Failure Code',
 			'fileInfo.previewRetries' => 'Preview Retries',
 			'fileInfo.aspectRatio' => 'Aspect Ratio',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.pixelAspectRatio' => 'Pixel Aspect Ratio',
 			'fileInfo.profile' => 'Profile',
 			'fileInfo.level' => 'Level',
@@ -7863,8 +7893,6 @@ extension on Translations {
 			'fileInfo.pixelFormat' => 'Pixel Format',
 			'fileInfo.colorSpace' => 'Color Space',
 			'fileInfo.colorRange' => 'Color Range',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.colorPrimaries' => 'Color Primaries',
 			'fileInfo.colorTransfer' => 'Color Transfer',
 			'fileInfo.chromaSubsampling' => 'Chroma Subsampling',
@@ -8370,6 +8398,8 @@ extension on Translations {
 			'discover.nextUpIn' => ({required Object library}) => 'Next Up in ${library}',
 			'discover.recentlyAdded' => 'Recently Added',
 			'discover.recentlyAddedIn' => ({required Object library}) => 'Recently Added in ${library}',
+			_ => null,
+		} ?? switch (path) {
 			'discover.latestAlbumsIn' => ({required Object library}) => 'Latest Albums in ${library}',
 			'discover.recentlyPlayedIn' => ({required Object library}) => 'Recently Played in ${library}',
 			'discover.mostPlayedIn' => ({required Object library}) => 'Most Played in ${library}',
@@ -8377,8 +8407,6 @@ extension on Translations {
 			'discover.overview' => 'Overview',
 			'discover.cast' => 'Cast',
 			'discover.extras' => 'Trailers & Extras',
-			_ => null,
-		} ?? switch (path) {
 			'discover.studio' => 'Studio',
 			'discover.rating' => 'Rating',
 			'discover.director' => 'Director',
@@ -8884,6 +8912,8 @@ extension on Translations {
 			'watchTogether.leaveSessionConfirmOverlay' => 'You will be disconnected from the watch session.',
 			'watchTogether.end' => 'End',
 			'watchTogether.leave' => 'Leave',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.syncing' => 'Syncing...',
 			'watchTogether.joinWatchSession' => 'Join Watch Session',
 			'watchTogether.enterCodeHint' => 'Enter 5-character code',
@@ -8891,8 +8921,6 @@ extension on Translations {
 			'watchTogether.pleaseEnterCode' => 'Please enter a session code',
 			'watchTogether.codeMustBe5Chars' => 'Session code must be 5 characters',
 			'watchTogether.joinInstructions' => 'Enter the host\'s session code to join.',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.failedToCreate' => 'Failed to create session',
 			'watchTogether.failedToJoin' => 'Failed to join session',
 			'watchTogether.sessionCodeCopied' => 'Session code copied to clipboard',
@@ -9398,6 +9426,8 @@ extension on Translations {
 			'services.connectedAs' => ({required Object username}) => 'Connected as @${username}',
 			'services.scrobble' => 'Track progress automatically',
 			'services.scrobbleDescription' => 'Update your list when you finish an episode or movie.',
+			_ => null,
+		} ?? switch (path) {
 			'services.disconnectConfirm' => ({required Object service}) => 'Disconnect ${service}?',
 			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezy will stop updating ${service}. Reconnect any time.',
 			'services.connectFailed' => ({required Object service}) => 'Couldn\'t connect to ${service}. Try again.',
@@ -9405,8 +9435,6 @@ extension on Translations {
 			'services.names.anilist' => 'AniList',
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
-			_ => null,
-		} ?? switch (path) {
 			'services.names.mdblist' => 'MDBList',
 			'services.deviceCode.title' => ({required Object service}) => 'Activate Plezy on ${service}',
 			'services.deviceCode.instructions' => 'Scan the QR code, or visit the address below and enter this code:',

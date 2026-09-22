@@ -115,6 +115,23 @@ enum SkipMarkerMode {
   auto,
 }
 
+/// How hard the player tries to fix a subtitle timed for another frame rate.
+enum SubtitleRateCorrection {
+  /// Never touch the rate; the Subtitle Rate control still works by hand.
+  off,
+
+  /// Only when the subtitles run past the end of the video, which a correctly
+  /// timed file never does.
+  certain,
+
+  /// Also when the subtitles stop short by exactly one of the known frame-rate
+  /// conversions. That shape is also what a film whose credits carry no
+  /// dialogue looks like, so this trades a rare wrong correction — undone per
+  /// file from the Subtitle Rate control — for catching the common case,
+  /// 25 fps subtitles over a 23.976 fps film.
+  always,
+}
+
 enum SubAssOverride { no, yes, scale, force, strip }
 
 /// Resolution ASS/image subtitles are rasterized at.
@@ -572,6 +589,16 @@ class SettingsService extends BaseSharedPreferencesService {
   /// video run 4.27% fast — eight seconds out at three minutes, over two
   /// minutes out at fifty — and only a rate correction closes that.
   static const subtitleSpeed = DoublePref('subtitle_speed', defaultValue: 1.0);
+
+  /// Whether the player works the rate out for itself, and how boldly.
+  ///
+  /// The measurement is the subtitle file's own span against the video's
+  /// duration; see [SubtitleRateCorrection] for what each setting acts on.
+  static const subtitleRateCorrection = EnumPref<SubtitleRateCorrection>(
+    'subtitle_rate_correction',
+    values: SubtitleRateCorrection.values,
+    defaultValue: SubtitleRateCorrection.certain,
+  );
   static const subtitleSearchLanguage = NullableStringPref('subtitle_search_language');
 
   /// Fetch a hash-matched subtitle for a video that has none.
@@ -1358,6 +1385,7 @@ class SettingsService extends BaseSharedPreferencesService {
     audioSyncOffset,
     subtitleSyncOffset,
     subtitleSpeed,
+    subtitleRateCorrection,
     subtitleSearchLanguage,
     autoFetchExactSubtitles,
     volume,
