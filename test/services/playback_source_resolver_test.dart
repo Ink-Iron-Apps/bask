@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:plezy/media/ids.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,11 +9,15 @@ import 'package:plezy/media/media_backend.dart';
 
 import 'package:plezy/media/media_kind.dart';
 import 'package:plezy/media/media_server_client.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:plezy/models/download_models.dart';
 import 'package:plezy/models/transcode_quality_preset.dart';
+import 'package:plezy/services/download_storage_service.dart';
 import 'package:plezy/services/multi_server_manager.dart';
 import 'package:plezy/services/playback_context.dart';
 import 'package:plezy/services/playback_initialization_types.dart';
 import 'package:plezy/services/playback_source_resolver.dart';
+import '../test_helpers/io_fakes.dart';
 import '../test_helpers/media_items.dart';
 
 class _PlaybackClient implements MediaServerClient {
@@ -45,6 +52,62 @@ class _PlaybackClient implements MediaServerClient {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('a downloaded copy plays from disk whatever the quality preset says', () async {
+    // A preset caps what to ask the server for, and local playback asks for
+    // nothing — so a device set to 1080p used to stream a file it already
+    // had, at a cost in bandwidth and a server transcode.
+    final tmpRoot = await Directory.systemTemp.createTemp('playback_resolver_test_');
+    final videoFile = File('${tmpRoot.path}/movie-1.mkv');
+    await videoFile.writeAsString('video');
+    final previousPathProvider = PathProviderPlatform.instance;
+    PathProviderPlatform.instance = FakePathProvider(tmpRoot);
+    DownloadStorageService.resetForTesting();
+
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    final manager = MultiServerManager();
+    addTearDown(() async {
+      manager.dispose();
+      await db.close();
+      PathProviderPlatform.instance = previousPathProvider;
+      DownloadStorageService.resetForTesting();
+      if (await tmpRoot.exists()) await tmpRoot.delete(recursive: true);
+    });
+
+    await db
+        .into(db.downloadedMedia)
+        .insert(
+          DownloadedMediaCompanion.insert(
+            serverId: ServerId('srv'),
+            ratingKey: 'movie-1',
+            globalKey: 'srv:movie-1',
+            type: 'movie',
+            status: DownloadStatus.completed.index,
+            videoFilePath: Value(videoFile.path),
+            mediaIndex: const Value(0),
+          ),
+        );
+
+    final client = _PlaybackClient();
+    manager.debugRegisterClientForTesting(client, online: true);
+
+    final context = await PlaybackSourceResolver(serverManager: manager, database: db).resolve(
+      PlaybackInitializationOptions(
+        metadata: testMediaItem(id: 'movie-1', backend: MediaBackend.plex, kind: MediaKind.movie, serverId: 'srv'),
+        selectedMediaIndex: 0,
+        qualityPreset: TranscodeQualityPreset.p1080_10mbps,
+      ),
+      offlineLibraryMode: false,
+    );
+
+    expect(context.sourceKind, PlaybackSourceKind.localFile);
+    expect(context.result.videoUrl, contains('movie-1.mkv'));
+    // Still an online session: progress and watched state go to the server,
+    // with the offline queue only as a fallback.
+    expect(context.reportingMode, PlaybackReportingMode.onlineWithOfflineFallback);
+  });
+
   test('online playback uses registered client even when status is stale offline', () async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final manager = MultiServerManager();
