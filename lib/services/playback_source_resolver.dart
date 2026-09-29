@@ -12,17 +12,20 @@ class PlaybackSourceResolver {
 
   const PlaybackSourceResolver({required this.serverManager, required this.database});
 
-  /// Prefers a downloaded copy when in offline library mode or when the
-  /// requested quality preset is original (an omitted preset keeps it on).
+  /// Always prefers a downloaded copy of the requested version.
+  ///
+  /// The quality preset used to gate this, so a device set to anything but
+  /// Original streamed a file it already had. A preset is a cap on what to
+  /// ask the server for, and local playback asks for nothing: it costs no
+  /// bandwidth, needs no transcode, and works when the server does not. The
+  /// version match is still strict — an explicitly requested version that was
+  /// never downloaded streams (issue #1440) — so this only ever substitutes
+  /// the same file the user would have been sent.
   Future<PlaybackContext> resolve(PlaybackInitializationOptions options, {required bool offlineLibraryMode}) async {
     final metadata = options.metadata;
     final reportingClient = _playbackClient(serverIdOrNull(metadata.serverId), offlineLibraryMode: offlineLibraryMode);
     final service = PlaybackInitializationService(client: reportingClient, database: database);
-    final result = await service.getPlaybackData(
-      options,
-      preferOffline: offlineLibraryMode || options.qualityPreset.isOriginal,
-      requireOffline: offlineLibraryMode,
-    );
+    final result = await service.getPlaybackData(options, preferOffline: true, requireOffline: offlineLibraryMode);
 
     final sourceKind = result.usesLocalMedia
         ? PlaybackSourceKind.localFile
