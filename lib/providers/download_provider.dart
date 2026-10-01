@@ -1894,6 +1894,78 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   ///
   /// Only deletes individual episodes and movies, never show/season containers.
   /// [activeGlobalKey] is excluded from deletion to protect the currently playing item.
+  /// Re-read the watch state of downloaded items from their servers.
+  ///
+  /// Watching an episode on another device — the TV, a browser — leaves the
+  /// phone holding a copy it will never delete: the watched sweep reads this
+  /// device's cached metadata, and nothing had re-asked the server about an
+  /// item the user was not looking at. Each download is one item fetch, which
+  /// is cheap enough once the set is narrowed to the copies that could
+  /// actually have changed.
+  ///
+  /// Only items this device still believes are unwatched are asked about: a
+  /// watched one has nothing left to learn, and one watched here already went
+  /// through [WatchStateNotifier]. Returns how many flipped to watched.
+  ///
+  /// Cooldown-limited because the triggers are coarse — app resume, a
+  /// reconnect — and a sweep that re-asks about thirty items every time a
+  /// desktop window regains focus is a worse citizen than a slightly stale
+  /// one.
+  Future<int> refreshDownloadWatchStateFromServers({
+    bool force = false,
+    DateTime? now,
+    @visibleForTesting Future<MediaItem?> Function(String serverId, String ratingKey)? fetchOverride,
+  }) async {
+    if (!_downloadManager.downloadsSupported) return 0;
+    if (_offlineSource?.isOffline ?? false) return 0;
+    final profileId = _activeProfileId;
+    if (profileId == null || profileId.isEmpty) return 0;
+
+    final at = now ?? DateTime.now();
+    final last = _lastWatchStateRefreshAt;
+    if (!force && last != null && at.difference(last) < watchStateRefreshCooldown) return 0;
+    _lastWatchStateRefreshAt = at;
+
+    final candidates = <String>[];
+    for (final entry in _downloads.entries) {
+      if (!_ownsDownloadKey(entry.key)) continue;
+      if (entry.value.status != DownloadStatus.completed) continue;
+      final meta = _resolvedMetadata(entry.key);
+      if (meta == null || meta.isWatched) continue;
+      candidates.add(entry.key);
+      if (candidates.length >= watchStateRefreshBudget) break;
+    }
+    if (candidates.isEmpty) return 0;
+
+    final generation = _profileGeneration;
+    var flipped = 0;
+    for (final globalKey in candidates) {
+      if (isDisposed || generation != _profileGeneration) return flipped;
+      final parsed = parseGlobalKey(globalKey);
+      if (parsed == null) continue;
+
+      final fresh = await (fetchOverride == null
+          ? _downloadManager.fetchAndPinMetadata(
+              parsed.serverId,
+              parsed.ratingKey,
+              preferActiveScope: true,
+              activeProfileId: profileId,
+            )
+          : fetchOverride(parsed.serverId, parsed.ratingKey));
+      if (fresh == null) continue;
+      if (isDisposed || generation != _profileGeneration) return flipped;
+
+      _metadata[globalKey] = fresh;
+      if (_resolvedMetadata(globalKey)?.isWatched ?? false) flipped++;
+    }
+
+    if (flipped > 0) {
+      appLogger.i('Watch state: $flipped downloaded item(s) were watched on another device');
+      safeNotifyListeners();
+    }
+    return flipped;
+  }
+
   Future<List<String>> autoDeleteWatchedDownloads({String? activeGlobalKey}) async {
     final deletedTitles = <String>[];
 
@@ -1920,6 +1992,20 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
 
     return deletedTitles;
   }
+
+  /// How long [refreshDownloadWatchStateFromServers] waits between passes.
+  @visibleForTesting
+  static const Duration watchStateRefreshCooldown = Duration(minutes: 5);
+
+  /// Most items one pass will ask about.
+  ///
+  /// A bound on the burst, not on correctness: whatever is left over is picked
+  /// up by the next pass, and the items that matter — the ones about to be
+  /// watched — are the ones a viewer keeps few of.
+  @visibleForTesting
+  static const int watchStateRefreshBudget = 40;
+
+  DateTime? _lastWatchStateRefreshAt;
 
   /// Total bytes of this profile's completed downloads.
   int get downloadedBytesTotal => _downloads.entries

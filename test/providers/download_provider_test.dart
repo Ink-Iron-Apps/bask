@@ -375,6 +375,105 @@ void main() {
     });
   });
 
+  group('cross-device watched refresh', () {
+    DownloadProgress completed(String key) =>
+        DownloadProgress(globalKey: key, status: DownloadStatus.completed, progress: 100);
+
+    test('learns an episode was watched elsewhere, and only asks about the ones that could change', () async {
+      // The sweep reads this device's cached watch state, so an episode
+      // watched on the TV would otherwise sit on the phone forever.
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      addTearDown(p.dispose);
+      await p.ensureInitialized();
+
+      p.debugSeedState(
+        downloads: {'srv:ep-1': completed('srv:ep-1'), 'srv:ep-2': completed('srv:ep-2')},
+        metadata: {
+          'srv:ep-1': testMediaItem(id: 'ep-1', kind: MediaKind.episode, title: 'One'),
+          // Already watched here: nothing left to learn about it.
+          'srv:ep-2': testMediaItem(id: 'ep-2', kind: MediaKind.episode, title: 'Two', viewCount: 1),
+        },
+        ownedDownloadKeys: {'srv:ep-1', 'srv:ep-2'},
+      );
+
+      final asked = <String>[];
+      final flipped = await p.refreshDownloadWatchStateFromServers(
+        fetchOverride: (serverId, ratingKey) async {
+          asked.add(ratingKey);
+          return testMediaItem(id: ratingKey, kind: MediaKind.episode, title: 'One', viewCount: 1);
+        },
+      );
+
+      expect(asked, ['ep-1']);
+      expect(flipped, 1);
+      expect(p.getMetadata('srv:ep-1')?.isWatched, isTrue);
+    });
+
+    test('holds off until the cooldown passes, unless forced', () async {
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      addTearDown(p.dispose);
+      await p.ensureInitialized();
+
+      p.debugSeedState(
+        downloads: {'srv:ep-1': completed('srv:ep-1')},
+        metadata: {'srv:ep-1': testMediaItem(id: 'ep-1', kind: MediaKind.episode, title: 'One')},
+        ownedDownloadKeys: {'srv:ep-1'},
+      );
+
+      var calls = 0;
+      Future<MediaItem?> fetch(String serverId, String ratingKey) async {
+        calls++;
+        return null; // The server had nothing new to say.
+      }
+
+      final start = DateTime(2026, 9, 30, 12);
+      await p.refreshDownloadWatchStateFromServers(now: start, fetchOverride: fetch);
+      expect(calls, 1);
+
+      // A desktop window regaining focus should not re-ask about everything.
+      await p.refreshDownloadWatchStateFromServers(now: start.add(const Duration(minutes: 1)), fetchOverride: fetch);
+      expect(calls, 1);
+
+      await p.refreshDownloadWatchStateFromServers(
+        now: start.add(const Duration(minutes: 1)),
+        force: true,
+        fetchOverride: fetch,
+      );
+      expect(calls, 2);
+
+      // The forced pass counts as a pass: the cooldown runs from it, not from
+      // the last unforced one.
+      await p.refreshDownloadWatchStateFromServers(
+        now: start.add(const Duration(minutes: 1) + DownloadProvider.watchStateRefreshCooldown),
+        fetchOverride: fetch,
+      );
+      expect(calls, 3);
+    });
+
+    test('asks about nothing when every download is already watched', () async {
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      addTearDown(p.dispose);
+      await p.ensureInitialized();
+
+      p.debugSeedState(
+        downloads: {'srv:ep-1': completed('srv:ep-1')},
+        metadata: {'srv:ep-1': testMediaItem(id: 'ep-1', kind: MediaKind.episode, title: 'One', viewCount: 1)},
+        ownedDownloadKeys: {'srv:ep-1'},
+      );
+
+      var calls = 0;
+      final flipped = await p.refreshDownloadWatchStateFromServers(
+        fetchOverride: (_, _) async {
+          calls++;
+          return null;
+        },
+      );
+
+      expect(calls, 0);
+      expect(flipped, 0);
+    });
+  });
+
   group('DownloadProvider — initial state', () {
     test('starts with empty downloads/metadata maps and no sync rules', () async {
       final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
