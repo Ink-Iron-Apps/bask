@@ -1276,6 +1276,9 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
   late final AppDatabase _appDatabase;
   late final DownloadManagerService _downloadManager;
   late final OfflineWatchSyncService _offlineWatchSyncService;
+
+  /// The downloads provider, for triggers that fire outside a build.
+  DownloadProvider? _sweepDownloadProvider;
   late final AppLifecycleListener _appLifecycleListener;
   StreamSubscription<WatchStateEvent>? _watchStateSubscription;
 
@@ -1531,6 +1534,11 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
       final activeGlobalKey = VideoPlayerScreenState.activeGlobalKey;
       final settings = SettingsService.instanceOrNull;
       if (settings != null && settings.read(SettingsService.autoRemoveWatchedDownloads)) {
+        // Before the sweep, because the sweep reads this device's idea of what
+        // is watched: an episode watched on the TV only becomes deletable once
+        // the server has been re-asked about it. Cooldown-limited inside, and
+        // a failure just leaves the copy for the next pass.
+        await downloadProvider.refreshDownloadWatchStateFromServers(force: force);
         final deleted = await downloadProvider.autoDeleteWatchedDownloads(activeGlobalKey: activeGlobalKey);
         if (deleted.isNotEmpty) {
           final msg = deleted.length == 1
@@ -1605,6 +1613,11 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
             await _serverManager.checkServerHealth();
             await _serverManager.reconnectOfflineServers();
             await _serverManager.reoptimizeDemotedServers(reason: 'resume');
+            // After the servers are back, so the watch-state re-read has
+            // something to ask. This is what catches an episode watched on
+            // another device while this one was in someone's pocket.
+            final provider = _sweepDownloadProvider;
+            if (provider != null) await _autoDeleteAndSync(provider);
           }());
         }
       case AppLifecycleState.paused:
@@ -1776,6 +1789,8 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
             });
 
             _startConnectivitySyncTrigger(downloadProvider, offlineModeProvider);
+            // Held for the resume trigger, which runs outside any build.
+            _sweepDownloadProvider = downloadProvider;
 
             // Thread the offline flag into services so queue/resume paths can
             // short-circuit instead of hitting the network and failing.
