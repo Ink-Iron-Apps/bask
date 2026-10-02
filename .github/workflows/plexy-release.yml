@@ -34,7 +34,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FLUTTER_VERSION: "3.47.0"
+  # 3.47.1 because the Windows build needs the patched engine below, which is
+  # built from 3.47.1's engine revision and refuses to install into any other
+  # SDK. The Android build is indifferent; upstream ships both from 3.47.1.
+  FLUTTER_VERSION: "3.47.1"
   # Pinned by android/app/build.gradle.kts; the runner image ships neither.
   ANDROID_NDK_VERSION: "29.0.14206865"
   ANDROID_CMAKE_VERSION: "4.1.2"
@@ -260,12 +263,32 @@ jobs:
             --dart-define=UPDATE_READ_TOKEN=${{ secrets.UPDATE_READ_TOKEN }} \
             --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
 
+      - name: Install the patched Windows engine
+        # Plezy cannot composite on a stock engine. The video is a child HWND
+        # inside the Flutter view; what puts the UI above it is the patched
+        # engine presenting the UI on a topmost DirectComposition visual when
+        # FLUTTER_WINDOWS_DCOMP is set (windows/runner/main.cpp). On a stock
+        # engine that flag does nothing, the video window covers everything,
+        # and the player's controls are present and clickable but invisible —
+        # which is exactly what v2.33.0 and earlier shipped.
+        #
+        # The script asserts the SDK's engine.stamp matches the artifacts, so a
+        # Flutter bump that moves the revision fails here rather than producing
+        # another build with no visible controls.
+        id: windows_engine
+        if: ${{ runner.os == 'Windows' }}
+        continue-on-error: true
+        run: |
+          flutter precache --windows
+          powershell -NoProfile -ExecutionPolicy Bypass -File windows/tool/install-patched-engine.ps1
+          echo "installed=true" >> "$GITHUB_OUTPUT"
+
       - name: Build the portable Windows app
         # Windows only, and only where the runner can actually build it: the
         # self-hosted runner is Windows, GitHub's default here is Linux. A
         # missing Windows build is not worth failing the Android release over,
         # so this reports and continues.
-        if: ${{ runner.os == 'Windows' }}
+        if: ${{ runner.os == 'Windows' && steps.windows_engine.outputs.installed == 'true' }}
         continue-on-error: true
         shell: bash
         run: |
@@ -274,7 +297,7 @@ jobs:
             --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
 
       - name: Package the portable Windows app
-        if: ${{ runner.os == 'Windows' }}
+        if: ${{ runner.os == 'Windows' && steps.windows_engine.outputs.installed == 'true' }}
         continue-on-error: true
         shell: bash
         env:
