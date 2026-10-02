@@ -317,7 +317,7 @@
     "downloadOnWifiOnly": "Download on Wi-Fi only",
     "downloadOnWifiOnlyDescription": "Prevent downloads when on cellular data",
     "autoRemoveWatchedDownloads": "Auto-remove watched downloads",
-    "autoRemoveWatchedDownloadsDescription": "Delete watched downloads automatically",
+    "autoRemoveWatchedDownloadsDescription": "Delete watched downloads automatically. Sync rules already decide for the items they cover: an unwatched rule drops them, a rule mirroring everything keeps them.",
     "downloadStorageBudget": "Download Storage Limit",
     "downloadStorageBudgetDescription": "Delete the oldest watched downloads when the total passes this",
     "downloadStorageBudgetOff": "No limit",

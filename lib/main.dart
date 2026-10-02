@@ -1533,13 +1533,22 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
       await downloadProvider.refreshMetadataFromCache();
       final activeGlobalKey = VideoPlayerScreenState.activeGlobalKey;
       final settings = SettingsService.instanceOrNull;
-      if (settings != null && settings.read(SettingsService.autoRemoveWatchedDownloads)) {
-        // Before the sweep, because the sweep reads this device's idea of what
-        // is watched: an episode watched on the TV only becomes deletable once
-        // the server has been re-asked about it. Cooldown-limited inside, and
-        // a failure just leaves the copy for the next pass.
+      if (settings != null) {
+        // Unconditional, because the setting is no longer the only thing that
+        // can ask for a removal: an "unwatched" sync rule wants its watched
+        // copies gone whatever the preference says, and the sweep itself
+        // decides per item. With nothing to remove it walks the list and ends.
+        //
+        // The re-read comes first because the sweep reads this device's idea
+        // of what is watched: an episode watched on the TV only becomes
+        // deletable once the server has been re-asked about it.
+        // Cooldown-limited inside, and a failure just leaves the copy for the
+        // next pass.
         await downloadProvider.refreshDownloadWatchStateFromServers(force: force);
-        final deleted = await downloadProvider.autoDeleteWatchedDownloads(activeGlobalKey: activeGlobalKey);
+        final deleted = await downloadProvider.autoDeleteWatchedDownloads(
+          activeGlobalKey: activeGlobalKey,
+          removeWatchedDownloads: settings.read(SettingsService.autoRemoveWatchedDownloads),
+        );
         if (deleted.isNotEmpty) {
           final msg = deleted.length == 1
               ? t.messages.autoRemovedWatchedDownload(title: deleted.first)
