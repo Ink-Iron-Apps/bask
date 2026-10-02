@@ -990,8 +990,8 @@ class Translations$settings$en {
 	/// en: 'Auto-remove watched downloads'
 	String get autoRemoveWatchedDownloads => 'Auto-remove watched downloads';
 
-	/// en: 'Delete watched downloads automatically'
-	String get autoRemoveWatchedDownloadsDescription => 'Delete watched downloads automatically';
+	/// en: 'Delete watched downloads automatically. Sync rules already decide for the items they cover: an unwatched rule drops them, a rule mirroring everything keeps them.'
+	String get autoRemoveWatchedDownloadsDescription => 'Delete watched downloads automatically. Sync rules already decide for the items they cover: an unwatched rule drops them, a rule mirroring everything keeps them.';
 
 	/// en: 'Download Storage Limit'
 	String get downloadStorageBudget => 'Download Storage Limit';
@@ -7675,7 +7675,7 @@ extension on Translations {
 			'settings.downloadOnWifiOnly' => 'Download on Wi-Fi only',
 			'settings.downloadOnWifiOnlyDescription' => 'Prevent downloads when on cellular data',
 			'settings.autoRemoveWatchedDownloads' => 'Auto-remove watched downloads',
-			'settings.autoRemoveWatchedDownloadsDescription' => 'Delete watched downloads automatically',
+			'settings.autoRemoveWatchedDownloadsDescription' => 'Delete watched downloads automatically. Sync rules already decide for the items they cover: an unwatched rule drops them, a rule mirroring everything keeps them.',
 			'settings.downloadStorageBudget' => 'Download Storage Limit',
 			'settings.downloadStorageBudgetDescription' => 'Delete the oldest watched downloads when the total passes this',
 			'settings.downloadStorageBudgetOff' => 'No limit',

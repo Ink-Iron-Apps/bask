@@ -22,6 +22,7 @@ import 'package:plezy/providers/download_provider.dart';
 import 'package:plezy/services/download_manager_service.dart';
 import 'package:plezy/services/api_cache.dart';
 import 'package:plezy/services/multi_server_manager.dart';
+import 'package:plezy/services/sync_rule_executor.dart';
 import 'package:plezy/services/download_storage_service.dart';
 import 'package:plezy/services/jellyfin_api_cache.dart';
 import 'package:plezy/services/plex_api_cache.dart';
@@ -372,6 +373,80 @@ void main() {
       await p.ensureInitialized();
 
       expect(await p.enforceDownloadStorageBudget(), isEmpty);
+    });
+  });
+
+  group('watched downloads under a sync rule', () {
+    test("an unwatched show rule removes its watched episode with the preference off", () async {
+      // What the user asked for is a rolling window of what is still to
+      // watch; the episode they finished is outside it either way.
+      final provider = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      addTearDown(provider.dispose);
+      await provider.ensureInitialized();
+
+      final episode = testMediaItem(
+        id: 'ep-1',
+        backend: MediaBackend.plex,
+        kind: MediaKind.episode,
+        title: 'Watched episode',
+        serverId: 'srv',
+        grandparentId: 'show-1',
+        viewCount: 1,
+      );
+
+      await provider.createSyncRule(
+        serverId: ServerId('srv'),
+        ratingKey: 'show-1',
+        targetType: 'show',
+        episodeCount: 2,
+        downloadFilter: SyncRuleFilter.unwatched,
+      );
+
+      provider.debugSeedState(
+        downloads: {
+          episode.globalKey: DownloadProgress(globalKey: episode.globalKey, status: DownloadStatus.completed),
+        },
+        metadata: {episode.globalKey: episode},
+        ownedDownloadKeys: {episode.globalKey},
+      );
+
+      expect(provider.syncRuleFiltersCovering(episode.globalKey), {SyncRuleFilter.unwatched});
+      expect(await provider.autoDeleteWatchedDownloads(removeWatchedDownloads: false), ['Watched episode']);
+    });
+
+    test('a rule mirroring the whole show keeps it with the preference on', () async {
+      final provider = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      addTearDown(provider.dispose);
+      await provider.ensureInitialized();
+
+      final episode = testMediaItem(
+        id: 'ep-2',
+        backend: MediaBackend.plex,
+        kind: MediaKind.episode,
+        title: 'Kept episode',
+        serverId: 'srv',
+        grandparentId: 'show-2',
+        viewCount: 1,
+      );
+
+      await provider.createSyncRule(
+        serverId: ServerId('srv'),
+        ratingKey: 'show-2',
+        targetType: 'show',
+        episodeCount: 0,
+        downloadFilter: SyncRuleFilter.all,
+      );
+
+      provider.debugSeedState(
+        downloads: {
+          episode.globalKey: DownloadProgress(globalKey: episode.globalKey, status: DownloadStatus.completed),
+        },
+        metadata: {episode.globalKey: episode},
+        ownedDownloadKeys: {episode.globalKey},
+      );
+
+      expect(await provider.autoDeleteWatchedDownloads(removeWatchedDownloads: true), isEmpty);
+      expect(provider.downloads.containsKey(episode.globalKey), isTrue);
     });
   });
 
@@ -2924,7 +2999,10 @@ void main() {
         ownedDownloadKeys: {itemA.globalKey, itemB.globalKey},
       );
 
-      expect(await provider.autoDeleteWatchedDownloads(activeGlobalKey: itemA.globalKey), ['B watched']);
+      expect(
+        await provider.autoDeleteWatchedDownloads(activeGlobalKey: itemA.globalKey, removeWatchedDownloads: true),
+        ['B watched'],
+      );
       expect(provider.downloads.keys, [itemA.globalKey]);
       expect(await db.getDownloadedMedia(itemA.globalKey), isNotNull);
       expect(await db.getDownloadedMedia(itemB.globalKey), isNull);
@@ -2967,7 +3045,10 @@ void main() {
         ownedDownloadKeys: {itemA.globalKey, itemB.globalKey},
       );
 
-      expect((await provider.autoDeleteWatchedDownloads()).toSet(), {'A watched', 'B watched'});
+      expect((await provider.autoDeleteWatchedDownloads(removeWatchedDownloads: true)).toSet(), {
+        'A watched',
+        'B watched',
+      });
       expect(provider.downloads, isEmpty);
       expect(await db.getDownloadedMedia(itemA.globalKey), isNull);
       expect(await db.getDownloadedMedia(itemB.globalKey), isNull);
