@@ -666,6 +666,11 @@ class SettingsService extends BaseSharedPreferencesService {
   static const creditsPattern = StringPref('credits_pattern', defaultValue: defaultCreditsPattern);
   static const customDownloadPathType = NullableStringPref('custom_download_path_type');
   static const downloadOnWifiOnly = BoolPref('download_on_wifi_only');
+
+  /// Delete a downloaded title once it is watched.
+  ///
+  /// Only decides the downloads no sync rule covers. A rule states what it
+  /// wants kept, so it answers for its own: see [decideWatchedDownload].
   static const autoRemoveWatchedDownloads = BoolPref('auto_remove_watched_downloads');
 
   /// Gigabytes of downloads to keep, or 0 for no limit.

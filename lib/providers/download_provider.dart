@@ -28,6 +28,7 @@ import 'watch_state_store.dart';
 import '../media/media_server_client.dart';
 import '../services/auto_download_planner.dart';
 import '../services/sync_rule_executor.dart';
+import '../services/watched_download_policy.dart';
 import '../utils/app_logger.dart';
 import '../utils/deletion_notifier.dart';
 import '../media/episode_collection.dart';
@@ -1962,12 +1963,48 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     return flipped;
   }
 
+  /// The `downloadFilter` of every sync rule that covers [globalKey].
+  ///
+  /// Two ways a rule covers a download. A show or season rule covers the
+  /// episodes under it, which the item's own parent chain names; a collection
+  /// or playlist rule covers whatever it queued, which only the membership
+  /// table records.
+  Set<String> syncRuleFiltersCovering(String globalKey) {
+    final meta = _resolvedMetadata(globalKey);
+    final filters = <String>{};
+
+    final serverId = meta?.serverId;
+    if (meta != null && serverId != null && serverId.isNotEmpty) {
+      for (final ratingKey in [meta.id, meta.parentId, meta.grandparentId]) {
+        if (ratingKey == null || ratingKey.isEmpty) continue;
+        final rule = _syncRules[syncRuleKeyFor(ServerId(serverId), ratingKey)];
+        if (rule != null && rule.enabled) filters.add(rule.downloadFilter);
+      }
+    }
+
+    for (final entry in _syncRuleDownloadKeys.entries) {
+      if (!entry.value.contains(globalKey)) continue;
+      final rule = _syncRules[entry.key];
+      if (rule != null && rule.enabled) filters.add(rule.downloadFilter);
+    }
+
+    return filters;
+  }
+
   /// Auto-delete downloaded episodes/movies that are now marked as watched.
   ///
   /// Only deletes individual episodes and movies, never show/season containers.
   /// [activeGlobalKey] is excluded from deletion to protect the currently
   /// playing item.
-  Future<List<String>> autoDeleteWatchedDownloads({String? activeGlobalKey}) async {
+  ///
+  /// [removeWatchedDownloads] is the global preference, which decides the
+  /// downloads no rule covers. A covering rule decides its own — see
+  /// [decideWatchedDownload] — because a rule already says whether a watched
+  /// copy is something it wants.
+  Future<List<String>> autoDeleteWatchedDownloads({
+    String? activeGlobalKey,
+    required bool removeWatchedDownloads,
+  }) async {
     final deletedTitles = <String>[];
 
     final completedKeys = _downloads.entries
@@ -1979,6 +2016,12 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       final meta = _resolvedMetadata(globalKey);
       if (meta == null) continue;
       if (!meta.isWatched) continue;
+
+      final verdict = decideWatchedDownload(
+        coveringFilters: syncRuleFiltersCovering(globalKey),
+        removeWatchedDownloads: removeWatchedDownloads,
+      );
+      if (verdict == WatchedDownloadVerdict.keep) continue;
 
       // Don't delete the episode that's currently playing
       if (activeGlobalKey != null && meta.globalKey == activeGlobalKey) continue;
