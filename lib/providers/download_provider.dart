@@ -1890,10 +1890,6 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     return meta.title ?? t.common.unknown;
   }
 
-  /// Auto-delete downloaded episodes/movies that are now marked as watched.
-  ///
-  /// Only deletes individual episodes and movies, never show/season containers.
-  /// [activeGlobalKey] is excluded from deletion to protect the currently playing item.
   /// Re-read the watch state of downloaded items from their servers.
   ///
   /// Watching an episode on another device — the TV, a browser — leaves the
@@ -1966,6 +1962,11 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     return flipped;
   }
 
+  /// Auto-delete downloaded episodes/movies that are now marked as watched.
+  ///
+  /// Only deletes individual episodes and movies, never show/season containers.
+  /// [activeGlobalKey] is excluded from deletion to protect the currently
+  /// playing item.
   Future<List<String>> autoDeleteWatchedDownloads({String? activeGlobalKey}) async {
     final deletedTitles = <String>[];
 
