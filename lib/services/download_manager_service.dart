@@ -259,10 +259,20 @@ class DownloadManagerService {
   int _consecutiveQueueFailures = 0;
   static const _maxConsecutiveFailures = 3;
 
-  static bool get platformDownloadsSupported => downloadsSupportedFor(tvosBuild: _tvosBuild);
+  static bool get platformDownloadsSupported =>
+      downloadsSupportedFor(tvosBuild: _tvosBuild, hasDownloadsUi: PlatformDetector.supportsDownloads());
 
+  /// Whether this device may download at all.
+  ///
+  /// Two reasons it may not. A tvOS build has no downloader. And a device with
+  /// no Downloads UI — an Android TV — had a fully working engine behind a
+  /// hidden tab: a sync rule made there, or the keep-ahead setting switched on
+  /// there, filled a 4 GB data partition with episodes no screen in the app
+  /// could open, play or delete. Starting a download nobody can reach is not
+  /// a feature worth keeping for the one case where someone wanted it.
   @visibleForTesting
-  static bool downloadsSupportedFor({required bool tvosBuild}) => !tvosBuild;
+  static bool downloadsSupportedFor({required bool tvosBuild, required bool hasDownloadsUi}) =>
+      !tvosBuild && hasDownloadsUi;
 
   /// Cancels native work and discards resumable partial files so startup can
   /// recover enough space to reopen the application database.
