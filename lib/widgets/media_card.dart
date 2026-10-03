@@ -229,6 +229,11 @@ class MediaCard extends StatefulWidget {
   /// Library name to attribute the item with in list view, resolved by the
   /// caller (see `LibrariesProvider.libraryLabelFor`). Null renders nothing.
   final String? libraryName;
+
+  /// A short note from the surface that built the card, drawn with the
+  /// server/library footer. Continue Watching uses it to say a position was
+  /// made on another device, which the item itself cannot know.
+  final String? noteText;
   final EpisodePosterMode? episodePosterModeOverride;
   final bool fullBleedImage;
 
@@ -266,6 +271,7 @@ class MediaCard extends StatefulWidget {
     this.mixedHubContext = false,
     this.showServerName = false,
     this.libraryName,
+    this.noteText,
     this.episodePosterModeOverride,
     this.fullBleedImage = false,
     this.showTitleImplied = false,
@@ -474,6 +480,7 @@ class MediaCardState extends State<MediaCard> with ContextMenuTapMixin<MediaCard
             localPosterPath: localPosterPath,
             showServerName: widget.showServerName,
             libraryName: widget.libraryName,
+            noteText: widget.noteText,
             episodePosterModeOverride: widget.episodePosterModeOverride,
             cardShapeOverride: widget.cardShapeOverride,
             catalogItem: _catalogItem,
@@ -726,6 +733,7 @@ class _MediaCardList extends StatelessWidget {
   final String? localPosterPath;
   final bool showServerName;
   final String? libraryName;
+  final String? noteText;
   final EpisodePosterMode? episodePosterModeOverride;
   final CardShape? cardShapeOverride;
   final bool enableDetailLinks;
@@ -743,6 +751,7 @@ class _MediaCardList extends StatelessWidget {
     this.localPosterPath,
     this.showServerName = false,
     this.libraryName,
+    this.noteText,
     this.episodePosterModeOverride,
     this.cardShapeOverride,
     this.catalogItem,
@@ -781,7 +790,7 @@ class _MediaCardList extends StatelessWidget {
   bool get _showsSource {
     final it = item;
     if (it is! MediaItem) return false;
-    return (showServerName && it.serverName != null) || libraryName != null;
+    return (showServerName && it.serverName != null) || libraryName != null || noteText != null;
   }
 
   String _buildMetadataLine() {
@@ -994,7 +1003,10 @@ class _MediaCardList extends StatelessWidget {
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
-                                [?(item as MediaItem).serverName, ?libraryName].join(' • '),
+                                // serverName stays unconditional: a row that
+                                // names its library must still say whose
+                                // library it is (#1970).
+                                [?(item as MediaItem).serverName, ?libraryName, ?noteText].join(' • '),
                                 maxLines: 1,
                                 overflow: .ellipsis,
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(

@@ -39,6 +39,7 @@ import '../profiles/profile.dart';
 import '../profiles/profile_activation.dart';
 import '../profiles/profile_avatar.dart';
 import '../services/settings_service.dart';
+import '../services/resume_elsewhere.dart';
 import '../widgets/settings_builder.dart';
 import '../widgets/fitting_title_text.dart';
 import '../widgets/tv_browse_rail.dart';
@@ -86,6 +87,18 @@ class _DiscoverScreenState extends State<DiscoverScreen>
   int _seenLoadGeneration = 0;
 
   List<MediaItem> get _onDeck => _discover.onDeck;
+
+  /// The handoff note for a Continue Watching card, or null.
+  ///
+  /// Says a position was made somewhere else and how long ago, which is what
+  /// makes resuming it a decision rather than a guess about whose progress
+  /// bar this is.
+  String? _resumeElsewhereNote(Object item) {
+    if (item is! MediaItem) return null;
+    final entry = _discover.resumeElsewhere[item.globalKey];
+    return entry == null ? null : formatResumeElsewhereAge(entry.age);
+  }
+
   List<MediaHub> get _hubs => _discover.hubs;
   bool get _hasMoreContinueWatching => _discover.hasMoreContinueWatching;
   bool get _isLoading => _discover.isLoading;
@@ -979,6 +992,7 @@ class _DiscoverScreenState extends State<DiscoverScreen>
                       onRefresh: _discover.updateItem,
                       onRemoveFromContinueWatching: _discover.refreshContinueWatching,
                       isInContinueWatching: true,
+                      noteForItem: _resumeElsewhereNote,
                       loadMoreItems: _discover.loadAllContinueWatching,
                       onVerticalNavigation: (isUp) => _handleVerticalNavigation(0, isUp),
                       onNavigateUp: _focusTopBoundary,

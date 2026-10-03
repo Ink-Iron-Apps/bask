@@ -1133,7 +1133,11 @@
     "titleCount": {
       "one": "${n} title",
       "other": "${n} titles"
-    }
+    },
+    "watchedElsewhere": "Watched elsewhere ${when}",
+    "watchedElsewhereJustNow": "Watched elsewhere just now",
+    "watchedElsewhereMinutes": "Watched elsewhere ${count} min ago",
+    "watchedElsewhereHours": "Watched elsewhere ${count} h ago"
   },
   "errors": {
     "searchFailed": "Search failed: ${error}",

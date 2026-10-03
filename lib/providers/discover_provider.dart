@@ -1,4 +1,3 @@
-import '../services/rewatch_source.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -26,6 +25,9 @@ import 'hidden_libraries_provider.dart';
 import 'libraries_provider.dart';
 import 'multi_server_provider.dart';
 import 'watch_state_store.dart';
+import '../services/local_playback_history.dart';
+import '../services/resume_elsewhere.dart';
+import '../services/rewatch_source.dart';
 
 enum DiscoverLoadState { initial, loading, loaded, error }
 
@@ -259,6 +261,32 @@ class DiscoverProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   List<MediaItem>? _pendingSystemShelfItems;
 
   List<MediaItem> get onDeck => _onDeck;
+
+  /// Continue Watching items whose position was made on another device, by
+  /// global key.
+  ///
+  /// The pull half of the handoff: the position is already here, and this is
+  /// what says it is not yours from this morning. Recomputed whenever the rail
+  /// is, from the server's own timestamps against this device's history.
+  Map<String, ResumeElsewhere> get resumeElsewhere => Map.unmodifiable(_resumeElsewhere);
+  final Map<String, ResumeElsewhere> _resumeElsewhere = {};
+
+  /// Refresh [resumeElsewhere] for the current rail.
+  ///
+  /// Not awaited by the rail: a missing badge is a smaller cost than a slower
+  /// Continue Watching, and the history read is a preference lookup.
+  Future<void> _refreshResumeElsewhere() async {
+    final revision = _commitRevision;
+    final history = await LocalPlaybackHistory.snapshot();
+    if (isDisposed || revision != _commitRevision) return;
+
+    final detected = ResumeElsewhereDetector.detect(items: _onDeck, localLastPlayedAt: history);
+    _resumeElsewhere
+      ..clear()
+      ..addEntries(detected.map((entry) => MapEntry(entry.globalKey, entry)));
+    if (detected.isNotEmpty) safeNotifyListeners();
+  }
+
   List<MediaHub> get hubs => _hubs;
   bool get hasMoreContinueWatching => _hasMoreContinueWatching;
 
@@ -487,6 +515,7 @@ class DiscoverProvider extends ChangeNotifier with DisposableChangeNotifierMixin
         // library query per show library plus an episode list per show, and
         // Continue Watching must not wait on them to appear.
         unawaited(_appendRewatches());
+        unawaited(_refreshResumeElsewhere());
         _onDeckState = DiscoverLoadState.loaded;
         _loadedOnDeckServerIds = _authoritativeSucceededServerIds(
           fetchedOnDeck.succeededServerIds,

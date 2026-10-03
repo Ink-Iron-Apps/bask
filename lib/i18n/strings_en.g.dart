@@ -3201,6 +3201,18 @@ class Translations$discover$en {
 		one: '${n} title',
 		other: '${n} titles',
 	);
+
+	/// en: 'Watched elsewhere ${when}'
+	String watchedElsewhere({required Object when}) => 'Watched elsewhere ${when}';
+
+	/// en: 'Watched elsewhere just now'
+	String get watchedElsewhereJustNow => 'Watched elsewhere just now';
+
+	/// en: 'Watched elsewhere ${count} min ago'
+	String watchedElsewhereMinutes({required Object count}) => 'Watched elsewhere ${count} min ago';
+
+	/// en: 'Watched elsewhere ${count} h ago'
+	String watchedElsewhereHours({required Object count}) => 'Watched elsewhere ${count} h ago';
 }
 
 // Path: errors
@@ -8561,6 +8573,10 @@ extension on Translations {
 			'discover.minutesLeft' => ({required Object minutes}) => '${minutes} min left',
 			'discover.moreLikeThis' => 'More Like This',
 			'discover.titleCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} title', other: '${n} titles', ), 
+			'discover.watchedElsewhere' => ({required Object when}) => 'Watched elsewhere ${when}',
+			'discover.watchedElsewhereJustNow' => 'Watched elsewhere just now',
+			'discover.watchedElsewhereMinutes' => ({required Object count}) => 'Watched elsewhere ${count} min ago',
+			'discover.watchedElsewhereHours' => ({required Object count}) => 'Watched elsewhere ${count} h ago',
 			'errors.searchFailed' => ({required Object error}) => 'Search failed: ${error}',
 			'errors.searchUnavailable' => 'Search could not reach any media server.',
 			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
@@ -9041,12 +9057,12 @@ extension on Translations {
 			'watchTogether.youAreHost' => 'You are the host',
 			'watchTogether.makeHost' => 'Make host',
 			'watchTogether.makeHostQuestion' => 'Transfer host?',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.makeHostConfirm' => ({required Object name}) => '${name} will control playback and drive the session for everyone.',
 			'watchTogether.transfer' => 'Transfer',
 			'watchTogether.hostChangedTo' => ({required Object name}) => '${name} is now the host',
 			'watchTogether.youAreNowHost' => 'You are now the host',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.hostTransferFailed' => ({required Object name}) => 'Couldn\'t make ${name} the host',
 			'watchTogether.watchingWithOthers' => 'Watching with others',
 			'watchTogether.endSession' => 'End Session',
@@ -9555,12 +9571,12 @@ extension on Translations {
 			'seerr.requestsLoadFailed' => 'Couldn\'t load request options',
 			'seerr.nothingToRequest' => 'Everything is already available or requested.',
 			'seerr.statusAvailable' => 'Available',
+			_ => null,
+		} ?? switch (path) {
 			'seerr.statusPartiallyAvailable' => 'Partially available',
 			'seerr.statusRequested' => 'Requested',
 			'seerr.statusProcessing' => 'Processing',
 			'seerr.statusBlocklisted' => 'Blocklisted',
-			_ => null,
-		} ?? switch (path) {
 			'seerr.couldNotReach' => ({required Object url, required Object error}) => 'Could not reach ${url}: ${error}',
 			'seerr.noInstanceAtUrl' => ({required Object url, required Object status}) => 'No Seerr instance at ${url} (HTTP ${status})',
 			'seerr.behindAuthProxy' => 'An authenticating reverse proxy (SSO or HTTP auth) answered instead of Seerr. Plezy cannot sign in through it: let Seerr\'s /api/v1 path bypass the proxy for this app, or use an address that reaches Seerr directly.',
