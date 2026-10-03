@@ -279,6 +279,22 @@ class DownloadManagerService {
     }
   }
 
+  /// Preferences, or null when the store cannot answer.
+  ///
+  /// A download gate must not be stricter than the preferences it enforces:
+  /// if they cannot be read, nothing has been forbidden. The platform channel
+  /// is missing in unit tests and can fail on a desktop host, and the old
+  /// behavior — connectivity throwing before the gate ever reached the
+  /// settings — had the same effect by accident.
+  static Future<SettingsService?> _settingsOrNull() async {
+    try {
+      return await SettingsService.getInstance();
+    } catch (e) {
+      appLogger.d('Download gates: preferences unavailable, nothing is being enforced', error: e);
+      return null;
+    }
+  }
+
   /// Current link types, or an empty snapshot where the platform refuses.
   ///
   /// connectivity_plus throws PlatformException on some Windows setups, and an
@@ -299,7 +315,8 @@ class DownloadManagerService {
   /// connectivity result so callers that already queried connectivity don't
   /// pay for a second platform round-trip.
   static Future<bool> shouldBlockDownloadOnCellularWith(List<ConnectivityResult> connectivity) async {
-    final settings = await SettingsService.getInstance();
+    final settings = await _settingsOrNull();
+    if (settings == null) return false;
     if (!settings.read(SettingsService.downloadOnWifiOnly)) return false;
 
     // The platform's own answer first. connectivity_plus reports transports,
@@ -329,7 +346,8 @@ class DownloadManagerService {
   /// not an error and leaves the queue intact, so the only thing that must not
   /// happen is starting a transfer.
   static Future<DownloadHoldReason?> downloadHoldReason({DateTime? now}) async {
-    final settings = await SettingsService.getInstance();
+    final settings = await _settingsOrNull();
+    if (settings == null) return null;
     final at = now ?? DateTime.now();
 
     if (!isWithinDownloadWindow(
@@ -371,7 +389,8 @@ class DownloadManagerService {
   /// midnight on the first.
   static Future<void> recordMeteredDownloadBytes(int bytes, {DateTime? now}) async {
     if (bytes <= 0) return;
-    final settings = await SettingsService.getInstance();
+    final settings = await _settingsOrNull();
+    if (settings == null) return;
     final at = now ?? DateTime.now();
     final period = meteredUsagePeriod(at);
     final used = meteredUsageForPeriod(
@@ -387,7 +406,8 @@ class DownloadManagerService {
 
   /// This month's metered download total, in bytes.
   static Future<int> meteredDownloadBytesThisMonth({DateTime? now}) async {
-    final settings = await SettingsService.getInstance();
+    final settings = await _settingsOrNull();
+    if (settings == null) return 0;
     final at = now ?? DateTime.now();
     return meteredUsageForPeriod(
       storedPeriod: settings.read(SettingsService.meteredDownloadPeriod),
