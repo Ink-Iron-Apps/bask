@@ -16,6 +16,12 @@ class SubtitleSyncSolution {
 
   final double speed;
   final int delayMs;
+
+  /// Where this correction puts a line authored at [subtitleMs].
+  ///
+  /// The inverse of what the solver fits: mpv shows a line at
+  /// `authored / speed + delay`, so this is what the viewer will see.
+  int displayedTime(int subtitleMs) => (subtitleMs / speed).round() + delayMs;
 }
 
 /// Why a pair of anchors could not be turned into a correction.
@@ -79,10 +85,3 @@ enum SubtitleSyncRejection {
 
   return (solution: SubtitleSyncSolution(speed: speed, delayMs: delayMs), rejection: null);
 }
-
-/// Where a correction puts a line authored at [subtitleMs].
-///
-/// The inverse of what the solver fits, so a test — or a caller checking its
-/// own work — can ask what the viewer will see.
-int displayedSubtitleTime(SubtitleSyncSolution solution, int subtitleMs) =>
-    (subtitleMs / solution.speed).round() + solution.delayMs;
