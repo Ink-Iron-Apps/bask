@@ -45,6 +45,7 @@ import '../models/media_grab_operation.dart';
 import '../models/media_subscription.dart';
 import '../models/transcode_quality_preset.dart';
 import '../media/media_source_info.dart';
+import '../media/transcode_explanation.dart';
 import '../media/media_sort.dart';
 import '../media/media_version.dart';
 import '../utils/app_logger.dart';
