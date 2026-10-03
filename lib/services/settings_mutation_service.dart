@@ -5,6 +5,7 @@ import '../i18n/app_locale_utils.dart';
 import '../i18n/strings.g.dart';
 import '../profiles/active_profile_provider.dart';
 import '../providers/companion_remote_provider.dart';
+import '../providers/download_provider.dart';
 import '../providers/multi_server_provider.dart';
 import '../utils/platform_detector.dart';
 import 'device_performance.dart';
@@ -73,6 +74,11 @@ class SettingsMutationService {
           settings.read(SettingsService.musicVolume),
           persist: false,
         );
+      case 'download_on_wifi_only':
+        // Every queued task carries the old answer until something reschedules
+        // it, and the queue is normally filled long before the user leaves
+        // WiFi.
+        await context.read<DownloadProvider?>()?.applyWifiOnlyRequirement();
       case 'enable_trakt_scrobble':
         await TraktTracker.instance.setEnabled(settings.read(pref) as bool);
       case 'enable_companion_remote_server':
@@ -119,6 +125,7 @@ class SettingsMutationService {
       SettingsService.enableTraktWatchedSync,
       for (final service in TrackerService.values) SettingsService.scrobblePref(service),
       SettingsService.enableCompanionRemoteServer,
+      SettingsService.downloadOnWifiOnly,
     ];
     for (final pref in effectPrefs) {
       if (!context.mounted) return;
