@@ -55,6 +55,12 @@ class HubSection extends StatefulWidget {
   final void Function(MediaItem source)? onRefresh;
   final VoidCallback? onRemoveFromContinueWatching;
   final bool isInContinueWatching;
+
+  /// A short note for one item, from the surface that owns the row.
+  ///
+  /// Continue Watching uses it to mark a position made on another device —
+  /// something the item cannot know about itself.
+  final String? Function(Object item)? noteForItem;
   final bool usesContinueWatchingAction;
   final bool showServerName;
   final Future<List<MediaItem>> Function()? loadMoreItems;
@@ -107,6 +113,7 @@ class HubSection extends StatefulWidget {
     this.onRefresh,
     this.onRemoveFromContinueWatching,
     this.isInContinueWatching = false,
+    this.noteForItem,
     bool? usesContinueWatchingAction,
     this.showServerName = false,
     this.loadMoreItems,
@@ -776,6 +783,7 @@ class HubSectionState extends State<HubSection> with MountedSetStateMixin, Skele
                                     usesContinueWatchingAction: widget.usesContinueWatchingAction,
                                     mixedHubContext: isMixedHub,
                                     episodePosterModeOverride: episodePosterMode,
+                                    noteText: widget.noteForItem?.call(item),
                                   ),
                                 ),
                               ),
