@@ -13,6 +13,7 @@ import '../exceptions/media_server_exceptions.dart';
 import 'jellyfin_client.dart';
 import 'jellyfin_endpoint_discovery.dart';
 import 'plex_client.dart';
+import 'server_health.dart';
 import '../models/plex/plex_config.dart';
 import '../utils/app_logger.dart';
 import '../utils/media_server_timeouts.dart';
@@ -298,6 +299,75 @@ class MultiServerManager {
       _authErrorServers.add(id);
     }
     _emitStatus();
+  }
+
+  /// What the app currently knows about every server it holds a client for.
+  ///
+  /// Assembled from state the manager already keeps and never showed: the
+  /// endpoint that won the race, whether it is a relay, whether a relay escape
+  /// is pending, whether the token was rejected. A relay is the case worth
+  /// surfacing — a capped path that looks exactly like a bad connection.
+  List<ServerHealth> describeServerHealth() {
+    final out = <ServerHealth>[];
+    for (final entry in _clients.entries) {
+      final serverId = entry.key;
+      final client = entry.value;
+      final plexServer = _plexServers[serverId];
+      // No backend-neutral accessor: Plex carries its endpoint on the client
+      // config, MediaBrowser on the connection it was built from.
+      final endpoint = switch (client) {
+        PlexClient() => client.config.baseUrl,
+        JellyfinClient() => client.connection.baseUrl,
+        _ => null,
+      };
+
+      out.add(
+        ServerHealth(
+          serverId: serverId,
+          name: serverDisplayName(ServerId(serverId)),
+          backend: client.backend,
+          online: _serverStatus[serverId] ?? false,
+          visible: isServerVisible(ServerId(serverId)),
+          authError: _authErrorServers.contains(serverId),
+          link: endpoint == null ? ServerLinkKind.unknown : _linkKindFor(plexServer, endpoint),
+          endpoint: redactEndpoint(endpoint),
+          relayEscapePending: _relayEscapeTimers.containsKey(serverId),
+        ),
+      );
+    }
+    out.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return out;
+  }
+
+  ServerLinkKind _linkKindFor(PlexServer? server, String endpoint) {
+    if (server == null) return ServerLinkKind.unknown;
+    return switch (server.networkClassForUrl(endpoint)) {
+      PlexNetworkClass.local => ServerLinkKind.local,
+      PlexNetworkClass.remote => ServerLinkKind.remote,
+      PlexNetworkClass.relay => ServerLinkKind.relay,
+      PlexNetworkClass.unknown => ServerLinkKind.unknown,
+    };
+  }
+
+  /// Time a health probe against one server.
+  ///
+  /// The probe is the same one the automatic health check uses, so a result
+  /// here means what the app itself means by "online". Returns null when the
+  /// server has no client, or when the probe failed — a failure is reported
+  /// through the status, not as a latency of zero.
+  Future<Duration?> measureServerLatency(ServerId serverId) async {
+    final client = _clients[serverId];
+    if (client == null) return null;
+    final stopwatch = Stopwatch()..start();
+    try {
+      final status = await client.checkHealth();
+      _applyHealth(serverId, status);
+      if (status != HealthStatus.online) return null;
+      return stopwatch.elapsed;
+    } catch (e) {
+      appLogger.d('Latency probe failed for $serverId', error: e);
+      return null;
+    }
   }
 
   String serverDisplayName(ServerId serverId) =>
