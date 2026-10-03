@@ -1014,11 +1014,44 @@ class Translations$settings$en {
 	/// en: '${count} episodes ahead'
 	String autoDownloadNextEpisodesCount({required Object count}) => '${count} episodes ahead';
 
+	/// en: 'Download only between'
+	String get downloadWindow => 'Download only between';
+
+	/// en: 'Any time'
+	String get downloadWindowOff => 'Any time';
+
+	/// en: '${start} to ${end}'
+	String downloadWindowRange({required Object start, required Object end}) => '${start} to ${end}';
+
+	/// en: 'Hold the queue outside these hours'
+	String get downloadWindowDescription => 'Hold the queue outside these hours';
+
+	/// en: 'Mobile data allowance'
+	String get meteredDownloadBudget => 'Mobile data allowance';
+
+	/// en: 'No limit'
+	String get meteredDownloadBudgetOff => 'No limit';
+
+	/// en: '${size} GB per month'
+	String meteredDownloadBudgetValue({required Object size}) => '${size} GB per month';
+
+	/// en: 'A backstop for when the connection does not admit it is mobile'
+	String get meteredDownloadBudgetDescription => 'A backstop for when the connection does not admit it is mobile';
+
+	/// en: '${used} used this month'
+	String meteredDownloadBudgetUsed({required Object used}) => '${used} used this month';
+
 	/// en: '${size} GB'
 	String downloadStorageBudgetGB({required Object size}) => '${size} GB';
 
 	/// en: 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.'
 	String get cellularDownloadBlocked => 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.';
+
+	/// en: 'Downloads wait until ${start}'
+	String downloadHeldOutsideWindow({required Object start}) => 'Downloads wait until ${start}';
+
+	/// en: 'This month’s mobile data allowance for downloads is used up'
+	String get downloadHeldBudgetSpent => 'This month’s mobile data allowance for downloads is used up';
 
 	/// en: 'Maximum Volume'
 	String get maxVolume => 'Maximum Volume';
@@ -7683,8 +7716,19 @@ extension on Translations {
 			'settings.autoDownloadNextEpisodesDescription' => 'Download the next episodes of shows in Continue Watching, and drop them when the show leaves it',
 			'settings.autoDownloadNextEpisodesOff' => 'Off',
 			'settings.autoDownloadNextEpisodesCount' => ({required Object count}) => '${count} episodes ahead',
+			'settings.downloadWindow' => 'Download only between',
+			'settings.downloadWindowOff' => 'Any time',
+			'settings.downloadWindowRange' => ({required Object start, required Object end}) => '${start} to ${end}',
+			'settings.downloadWindowDescription' => 'Hold the queue outside these hours',
+			'settings.meteredDownloadBudget' => 'Mobile data allowance',
+			'settings.meteredDownloadBudgetOff' => 'No limit',
+			'settings.meteredDownloadBudgetValue' => ({required Object size}) => '${size} GB per month',
+			'settings.meteredDownloadBudgetDescription' => 'A backstop for when the connection does not admit it is mobile',
+			'settings.meteredDownloadBudgetUsed' => ({required Object used}) => '${used} used this month',
 			'settings.downloadStorageBudgetGB' => ({required Object size}) => '${size} GB',
 			'settings.cellularDownloadBlocked' => 'Downloads are blocked on cellular. Use Wi-Fi or change the setting.',
+			'settings.downloadHeldOutsideWindow' => ({required Object start}) => 'Downloads wait until ${start}',
+			'settings.downloadHeldBudgetSpent' => 'This month’s mobile data allowance for downloads is used up',
 			'settings.maxVolume' => 'Maximum Volume',
 			'settings.maxVolumeDescription' => 'Allow volume boost above 100% for quiet media',
 			'settings.maxVolumePercent' => ({required Object percent}) => '${percent}%',
@@ -7873,6 +7917,8 @@ extension on Translations {
 			'fileInfo.resolution' => 'Resolution',
 			'fileInfo.codedResolution' => 'Coded Resolution',
 			'fileInfo.bitrate' => 'Bitrate',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.frameRate' => 'Frame Rate',
 			'fileInfo.rotation' => 'Rotation',
 			'fileInfo.comment' => 'Comment',
@@ -7884,8 +7930,6 @@ extension on Translations {
 			'fileInfo.previewFailureCode' => 'Preview Failure Code',
 			'fileInfo.previewRetries' => 'Preview Retries',
 			'fileInfo.aspectRatio' => 'Aspect Ratio',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.pixelAspectRatio' => 'Pixel Aspect Ratio',
 			'fileInfo.profile' => 'Profile',
 			'fileInfo.level' => 'Level',
@@ -8387,6 +8431,8 @@ extension on Translations {
 			'accountPreferences.mediaReviewsVisibility' => 'Ratings & reviews',
 			'accountPreferences.mediaReviewsOptions.usersAndCritics' => 'Users and critics',
 			'accountPreferences.mediaReviewsOptions.usersOnly' => 'Users only',
+			_ => null,
+		} ?? switch (path) {
 			'accountPreferences.mediaReviewsOptions.criticsOnly' => 'Critics only',
 			'accountPreferences.mediaReviewsOptions.nobody' => 'Hidden',
 			'discover.title' => 'Discover',
@@ -8398,8 +8444,6 @@ extension on Translations {
 			'discover.nextUpIn' => ({required Object library}) => 'Next Up in ${library}',
 			'discover.recentlyAdded' => 'Recently Added',
 			'discover.recentlyAddedIn' => ({required Object library}) => 'Recently Added in ${library}',
-			_ => null,
-		} ?? switch (path) {
 			'discover.latestAlbumsIn' => ({required Object library}) => 'Latest Albums in ${library}',
 			'discover.recentlyPlayedIn' => ({required Object library}) => 'Recently Played in ${library}',
 			'discover.mostPlayedIn' => ({required Object library}) => 'Most Played in ${library}',
@@ -8901,6 +8945,8 @@ extension on Translations {
 			'watchTogether.hostChangedTo' => ({required Object name}) => '${name} is now the host',
 			'watchTogether.youAreNowHost' => 'You are now the host',
 			'watchTogether.hostTransferFailed' => ({required Object name}) => 'Couldn\'t make ${name} the host',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.watchingWithOthers' => 'Watching with others',
 			'watchTogether.endSession' => 'End Session',
 			'watchTogether.leaveSession' => 'Leave Session',
@@ -8912,8 +8958,6 @@ extension on Translations {
 			'watchTogether.leaveSessionConfirmOverlay' => 'You will be disconnected from the watch session.',
 			'watchTogether.end' => 'End',
 			'watchTogether.leave' => 'Leave',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.syncing' => 'Syncing...',
 			'watchTogether.joinWatchSession' => 'Join Watch Session',
 			'watchTogether.enterCodeHint' => 'Enter 5-character code',
@@ -9415,6 +9459,8 @@ extension on Translations {
 			'seerr.signInRejected' => 'Sign-in was rejected',
 			'seerr.noSessionCookie' => 'Seerr did not issue a session cookie',
 			'seerr.freshCookieRejected' => 'Seerr rejected the new session cookie',
+			_ => null,
+		} ?? switch (path) {
 			'seerr.noUserInformation' => 'Seerr did not return user information',
 			'seerr.sessionRejectedAfterReauth' => 'The session was rejected after signing in again',
 			'seerr.permissionDenied' => 'Seerr denied this action: your account no longer has the required permission',
@@ -9426,8 +9472,6 @@ extension on Translations {
 			'services.connectedAs' => ({required Object username}) => 'Connected as @${username}',
 			'services.scrobble' => 'Track progress automatically',
 			'services.scrobbleDescription' => 'Update your list when you finish an episode or movie.',
-			_ => null,
-		} ?? switch (path) {
 			'services.disconnectConfirm' => ({required Object service}) => 'Disconnect ${service}?',
 			'services.disconnectConfirmBody' => ({required Object service}) => 'Plezy will stop updating ${service}. Reconnect any time.',
 			'services.connectFailed' => ({required Object service}) => 'Couldn\'t connect to ${service}. Try again.',
