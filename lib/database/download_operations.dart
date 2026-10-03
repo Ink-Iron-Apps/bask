@@ -590,6 +590,10 @@ extension DownloadDatabaseOperations on AppDatabase {
     await (delete(downloadQueue)..where((t) => t.mediaGlobalKey.equals(mediaGlobalKey))).go();
   }
 
+  /// Every download row, for the sweeps that are about the device rather than
+  /// about one item.
+  Future<List<DownloadedMediaItem>> allDownloadedMedia() => select(downloadedMedia).get();
+
   Future<DownloadedMediaItem?> getDownloadedMedia(String globalKey) {
     return (select(downloadedMedia)..where((t) => t.globalKey.equals(globalKey))).getSingleOrNull();
   }

@@ -1330,9 +1330,13 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
     );
     // Keep the awaitable assigned synchronously, but do not let recovery's
     // Drift/native work compete with SetupScreen's first frame.
-    _downloadManager.recoveryFuture = WidgetsBinding.instance.endOfFrame.then(
-      (_) => _downloadManager.recoverInterruptedDownloads(),
-    );
+    _downloadManager.recoveryFuture = WidgetsBinding.instance.endOfFrame.then((_) async {
+      // A device that cannot download may still be holding files from before
+      // it could not: a TV that downloaded freely before downloads were gated
+      // off it has no UI left that can reach them.
+      await _downloadManager.reclaimUnsupportedDownloads();
+      await _downloadManager.recoverInterruptedDownloads();
+    });
 
     _offlineWatchSyncService = OfflineWatchSyncService(database: _appDatabase, serverManager: _serverManager);
 
