@@ -800,6 +800,15 @@ class _PlexVideoControlsState extends State<PlexVideoControls>
   bool _showLockIcon = false; // Whether to show the lock overlay icon
   Timer? _lockIconTimer;
   bool get _clickVideoTogglesPlayback => _settings.read(SettingsService.clickVideoTogglesPlayback);
+
+  /// Whether a *touch* tap plays and pauses.
+  ///
+  /// A mouse click means "do the thing", so on a pointer it plays and pauses
+  /// by default. A tap on a phone means "show me the controls", and with no
+  /// mouse to move there is nothing else that raises them — so touch keeps
+  /// revealing the controls until the viewer turns this on themselves.
+  bool get _tapTogglesPlayback =>
+      _clickVideoTogglesPlayback && _settings.prefs.containsKey(SettingsService.clickVideoTogglesPlayback.key);
   bool get _showChapterMarkersOnTimeline => _settings.read(SettingsService.showChapterMarkersOnTimeline);
   int _trafficLightVisibilityGeneration = 0;
 
