@@ -55,16 +55,11 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
   }
 
   Future<void> _togglePIPMode() async {
-    // Windows and Linux have no picture-in-picture to ask for, so the same
-    // button shrinks the window and pins it above everything instead. The
-    // picture keeps playing in the surface it was already in.
-    if (DesktopMiniPlayer.isSupported) {
-      final dims = await _getVideoDimensions();
-      final width = dims.$1;
-      final height = dims.$2;
-      // Shape it to the video when the player knows; 16:9 until it does.
-      final ratio = (width != null && height != null && height > 0) ? width / height : 16 / 9;
-      await DesktopMiniPlayer.toggle(aspectRatio: ratio);
+    // Desktop has no picture-in-picture to ask the system for, so the same
+    // button hands the picture to a corner window inside the app instead and
+    // steps this route out of the way.
+    if (PlatformDetector.isDesktopOS()) {
+      _enterInAppMiniPlayer();
       return;
     }
 
@@ -93,6 +88,38 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
     final dims = await _getVideoDimensions();
     final result = await PipService.enter(width: dims.$1, height: dims.$2);
     if (!result.$1) _onPipRequestFailed(result.$2);
+  }
+
+  /// Hand the picture to the corner window and take this route off stage.
+  ///
+  /// Offstage rather than popped: the route keeps its state, its player and
+  /// its progress reporting, stops painting, and — the point — stops
+  /// swallowing the clicks meant for the library underneath. The overlay above
+  /// the navigator draws the same player, which on a native video surface is
+  /// all it takes to move the picture into the corner.
+  void _enterInAppMiniPlayer() {
+    final currentPlayer = player;
+    final route = ModalRoute.of(context);
+    if (currentPlayer == null || route == null) return;
+
+    VideoMiniPlayerController.instance.enter(
+      player: currentPlayer,
+      metadata: _currentMetadata,
+      onExpand: _exitInAppMiniPlayer,
+      onClose: () {
+        _exitInAppMiniPlayer();
+        _handleScreenPlayerNavigation(PlayerNavigationKey.back);
+      },
+    );
+    route.offstage = true;
+  }
+
+  /// Bring the full-screen player back.
+  void _exitInAppMiniPlayer() {
+    if (!VideoMiniPlayerController.instance.isActive) return;
+    VideoMiniPlayerController.instance.clear();
+    if (!mounted) return;
+    ModalRoute.of(context)?.offstage = false;
   }
 
   void _onPipRequestFailed(String? error) {
