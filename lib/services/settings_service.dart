@@ -649,7 +649,18 @@ class SettingsService extends BaseSharedPreferencesService {
   /// selections instead of carrying the current choice over (#1717).
   static const followServerTrackSelections = BoolPref('follow_server_track_selections');
   static const showChapterMarkersOnTimeline = BoolPref('show_chapter_markers_on_timeline', defaultValue: true);
-  static const clickVideoTogglesPlayback = BoolPref('click_video_toggles_playback');
+
+  /// A click or tap on the picture plays and pauses, as every web player
+  /// does, rather than revealing the controls.
+  ///
+  /// Default on, and on a mouse that is what takes effect: it is what people
+  /// arrive expecting, the controls still come up on mouse movement, and a
+  /// second click within the double-click window still toggles fullscreen.
+  /// Touch is different — a tap there means "show me the controls" and
+  /// nothing else raises them — so a phone honours this only once the viewer
+  /// has set it themselves. The double-tap skip zones are unaffected either
+  /// way.
+  static const clickVideoTogglesPlayback = BoolPref('click_video_toggles_playback', defaultValue: true);
   static const skipIntroMode = _SkipMarkerModePref('skip_intro_mode', legacyKey: _legacyAutoSkipIntroKey);
   static const skipCreditsMode = _SkipMarkerModePref('skip_credits_mode', legacyKey: _legacyAutoSkipCreditsKey);
 

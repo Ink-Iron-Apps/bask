@@ -180,7 +180,12 @@ extension _PlexVideoControlsTrackMethods on _PlexVideoControlsState {
       isRotationLocked: _isRotationLocked,
       isFullscreen: _isFullscreen,
       isAlwaysOnTop: _isAlwaysOnTop,
-      onTogglePIPMode: (_isPipSupported && !PlatformDetector.isTV()) ? widget.onTogglePIPMode : null,
+      // Desktop has no native picture-in-picture; there the same button hands
+      // the picture to a corner window inside the app, so it is offered on
+      // both.
+      onTogglePIPMode: ((_isPipSupported || PlatformDetector.isDesktopOS()) && !PlatformDetector.isTV())
+          ? widget.onTogglePIPMode
+          : null,
       onCycleBoxFitMode: widget.onCycleBoxFitMode,
       onVideoZoomChanged: widget.onVideoZoomChanged,
       onVideoEqualizerChanged: widget.onVideoEqualizerChanged,

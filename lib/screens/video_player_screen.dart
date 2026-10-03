@@ -79,6 +79,7 @@ import '../services/track_selection_service.dart';
 import '../services/ambient_lighting_service.dart';
 import '../services/video_filter_manager.dart';
 import '../services/video_volume_controller.dart';
+import '../services/video_mini_player.dart';
 import '../services/pip_service.dart';
 import '../services/shader_service.dart';
 import '../providers/shader_provider.dart';
@@ -2357,6 +2358,9 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
       unawaited(_restoreSystemUiAndOrientation());
     }
 
+    // Before the player is disposed: an overlay bound to a dead surface would
+    // paint black and offer buttons that do nothing.
+    VideoMiniPlayerController.instance.clear();
     Sentry.addBreadcrumb(Breadcrumb(message: 'Player dispose', category: 'player'));
     final volumeController = _volumeController;
     _volumeController = null;
@@ -2860,6 +2864,13 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
         onSystemBack: () {
           if (BackKeyCoordinator.consumeIfHandled()) return;
           BackKeyCoordinator.markHandled();
+          // While the picture is in the corner, back belongs to the mini
+          // player: bring it back up rather than ending something the viewer
+          // deliberately put aside.
+          if (VideoMiniPlayerController.instance.isActive) {
+            _exitInAppMiniPlayer();
+            return;
+          }
           _handleScreenPlayerNavigation(PlayerNavigationKey.back);
         },
         child: Builder(
