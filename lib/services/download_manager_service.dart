@@ -1087,7 +1087,10 @@ class DownloadManagerService {
     // Deliver status updates from iOS background-to-foreground transitions
     await FileDownloader().resumeFromBackground();
 
-    await applyWifiOnlyRequirement();
+    // Startup, so nothing running is interrupted: a transfer already moving on
+    // this link does not need rescheduling, and rescheduling it cancels and
+    // re-enqueues it — which the stall watchdog then has to reason about.
+    await applyWifiOnlyRequirement(rescheduleRunningTasks: false);
 
     _fileDownloaderInitialized = true;
   }
@@ -1105,15 +1108,20 @@ class DownloadManagerService {
   /// `asSetByTask` rather than `forNoTasks` when the preference is off: off
   /// means "no opinion", and a task queued with its own requirement — a
   /// future per-item choice — keeps it.
-  Future<void> applyWifiOnlyRequirement() async {
+  /// [rescheduleRunningTasks] interrupts transfers that are already moving.
+  /// Right when the user changes the preference, wrong at startup, where the
+  /// preference has not changed and the interruption is pure cost.
+  Future<void> applyWifiOnlyRequirement({bool rescheduleRunningTasks = true}) async {
     if (_skipDownloadsUnsupported('WiFi-only requirement')) return;
     try {
       final settings = await SettingsService.getInstance();
       final wifiOnly = settings.read(SettingsService.downloadOnWifiOnly);
-      await FileDownloader().requireWiFi(
-        wifiOnly ? RequireWiFi.forAllTasks : RequireWiFi.asSetByTask,
-        rescheduleRunningTasks: true,
-      );
+      final wanted = wifiOnly ? RequireWiFi.forAllTasks : RequireWiFi.asSetByTask;
+      // Nothing to do is the common case at startup, and applying it anyway
+      // reschedules the whole queue for no reason.
+      final current = await FileDownloader().getRequireWiFiSetting();
+      if (current == wanted) return;
+      await FileDownloader().requireWiFi(wanted, rescheduleRunningTasks: rescheduleRunningTasks);
       appLogger.i('Downloads: WiFi-only requirement is now ${wifiOnly ? 'forAllTasks' : 'asSetByTask'}');
     } catch (e, stackTrace) {
       // Platform-dependent: the desktop implementations have no such
@@ -1856,11 +1864,27 @@ class DownloadManagerService {
   /// Idempotent; safe to call from any terminal/pause path.
   /// Restarts a download whose transfer went silent while its socket stayed
   /// open. See [DownloadStallWatchdog] for why the platform cannot report this.
+  @visibleForTesting
+  Future<void> debugHandleDownloadStalled(String globalKey) => _onDownloadStalled(globalKey);
+
   Future<void> _onDownloadStalled(String globalKey) async {
     if (_disposed) return;
     final row = await _database.getDownloadedMedia(globalKey);
     if (row == null || row.status != DownloadStatus.downloading.index) {
       _stallWatchdog.forget(globalKey);
+      return;
+    }
+
+    // Silence is only evidence when the transfer was supposed to be moving.
+    // A download marked `downloading` may be sitting behind the holding
+    // queue's concurrency limit, or waiting on the WiFi requirement, and the
+    // native layer reports nothing while it waits. Restarting it then
+    // cancelled a perfectly good queue entry, re-queued it, and did the same
+    // thing two minutes later while the one actually transferring carried on.
+    final waiting = await _nativeTaskIsWaiting(globalKey);
+    if (waiting) {
+      appLogger.d('Download $globalKey has reported nothing but is still waiting its turn; leaving it alone');
+      _stallWatchdog.markAlive(globalKey);
       return;
     }
 
@@ -2122,6 +2146,39 @@ class DownloadManagerService {
 
   Future<void> _cancelNativeTask(String globalKey, String taskId, {required String reason}) =>
       _cancelNativeTaskIds(globalKey, [taskId], reason: reason);
+
+  /// Replaces the native lookup in [_nativeTaskIsWaiting] under test.
+  @visibleForTesting
+  Future<bool> Function(String globalKey)? debugNativeWaitingProbe;
+
+  /// Whether the native layer is holding a task for [globalKey] that has not
+  /// started yet.
+  ///
+  /// `enqueued` is background_downloader's "accepted, not running": behind the
+  /// concurrency limit, or held by a constraint such as requiring WiFi. Such a
+  /// task reports no progress by design, so it must not be read as a stall.
+  /// An error here answers false, which keeps the old behavior of restarting
+  /// rather than waiting forever on a task nobody can see.
+  Future<bool> _nativeTaskIsWaiting(String globalKey) async {
+    final probe = debugNativeWaitingProbe;
+    if (probe != null) return probe(globalKey);
+    if (!downloadsSupported || !_fileDownloaderInitialized) return false;
+    try {
+      final tasks = await FileDownloader().allTasks(group: _downloadGroup, includeTasksWaitingToRetry: true);
+      for (final task in tasks) {
+        if (task.metaData != globalKey) continue;
+        final record = await FileDownloader().database.recordForId(task.taskId);
+        final status = record?.status;
+        // No record yet is the earliest form of waiting: the task was accepted
+        // and has not reported anything, which is exactly the case this
+        // guards.
+        if (status == null || status == TaskStatus.enqueued || status == TaskStatus.waitingToRetry) return true;
+      }
+    } catch (e) {
+      appLogger.d('Could not read the native status of $globalKey', error: e);
+    }
+    return false;
+  }
 
   Future<void> _cancelNativeTasksForGlobalKey(
     String globalKey, {
