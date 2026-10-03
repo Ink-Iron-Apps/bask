@@ -39,7 +39,9 @@ import '../utils/codec_utils.dart';
 import '../utils/connectivity_link_type.dart';
 import '../utils/global_key_utils.dart';
 import '../utils/network_failure.dart';
+import 'download_schedule.dart';
 import 'download_stall_watchdog.dart';
+import 'network_metered_probe.dart';
 import '../utils/storage_failure.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -277,25 +279,141 @@ class DownloadManagerService {
     }
   }
 
-  static Future<bool> shouldBlockDownloadOnCellular() async {
-    final List<ConnectivityResult> connectivity;
+  /// Preferences, or null when the store cannot answer.
+  ///
+  /// A download gate must not be stricter than the preferences it enforces:
+  /// if they cannot be read, nothing has been forbidden. The platform channel
+  /// is missing in unit tests and can fail on a desktop host, and the old
+  /// behavior — connectivity throwing before the gate ever reached the
+  /// settings — had the same effect by accident.
+  static Future<SettingsService?> _settingsOrNull() async {
     try {
-      connectivity = await Connectivity().checkConnectivity();
+      return await SettingsService.getInstance();
     } catch (e) {
-      // connectivity_plus can throw PlatformException on Windows — don't block
-      return false;
+      appLogger.d('Download gates: preferences unavailable, nothing is being enforced', error: e);
+      return null;
     }
-    return shouldBlockDownloadOnCellularWith(connectivity);
+  }
+
+  /// Current link types, or an empty snapshot where the platform refuses.
+  ///
+  /// connectivity_plus throws PlatformException on some Windows setups, and an
+  /// empty snapshot reads as "unknown" everywhere it is used.
+  static Future<List<ConnectivityResult>> _readConnectivity() async {
+    try {
+      return await Connectivity().checkConnectivity();
+    } catch (e) {
+      return const [];
+    }
+  }
+
+  static Future<bool> shouldBlockDownloadOnCellular() async {
+    return shouldBlockDownloadOnCellularWith(await _readConnectivity());
   }
 
   /// Same check as [shouldBlockDownloadOnCellular] but uses a pre-read
   /// connectivity result so callers that already queried connectivity don't
   /// pay for a second platform round-trip.
   static Future<bool> shouldBlockDownloadOnCellularWith(List<ConnectivityResult> connectivity) async {
-    final settings = await SettingsService.getInstance();
+    final settings = await _settingsOrNull();
+    if (settings == null) return false;
     if (!settings.read(SettingsService.downloadOnWifiOnly)) return false;
+
+    // The platform's own answer first. connectivity_plus reports transports,
+    // which a VPN hides — a tunnel over cellular arrives as neither WiFi nor
+    // cellular — so reasoning from transports let a WiFi-only device download
+    // over data for as long as the tunnel was up.
+    final platform = await NetworkMeteredProbe.read();
+    if (platform?.metered != null) {
+      if (platform!.metered!) {
+        appLogger.i('Downloads: blocked, the platform reports a metered link ($platform)');
+        return true;
+      }
+      return false;
+    }
+
     // An empty snapshot is not cellular-only, so it needs no separate guard.
-    return connectivity.isCellularOnly;
+    final blocked = connectivity.isCellularOnly;
+    if (!blocked) {
+      appLogger.d('Downloads: WiFi-only is on and the link reads as ${connectivity.map((c) => c.name).toList()}');
+    }
+    return blocked;
+  }
+
+  /// Why downloads are being held back right now, or null when they are not.
+  ///
+  /// Checked beside the WiFi-only gate by every path that queues: a hold is
+  /// not an error and leaves the queue intact, so the only thing that must not
+  /// happen is starting a transfer.
+  static Future<DownloadHoldReason?> downloadHoldReason({DateTime? now}) async {
+    final settings = await _settingsOrNull();
+    if (settings == null) return null;
+    final at = now ?? DateTime.now();
+
+    if (!isWithinDownloadWindow(
+      enabled: settings.read(SettingsService.downloadWindowEnabled),
+      startHour: settings.read(SettingsService.downloadWindowStart),
+      endHour: settings.read(SettingsService.downloadWindowEnd),
+      now: at,
+    )) {
+      return DownloadHoldReason.outsideWindow;
+    }
+
+    final budget = settings.read(SettingsService.meteredDownloadBudgetMB);
+    if (budget > 0) {
+      final used = meteredUsageForPeriod(
+        storedPeriod: settings.read(SettingsService.meteredDownloadPeriod),
+        storedBytes: settings.read(SettingsService.meteredDownloadBytes),
+        now: at,
+      );
+      if (isMeteredBudgetSpent(budgetMegabytes: budget, usedBytes: used)) {
+        // Only on a metered link: the allowance is about the bill, and WiFi
+        // does not touch it.
+        final platform = await NetworkMeteredProbe.read();
+        final metered = platform?.metered;
+        if (metered == true) return DownloadHoldReason.meteredBudgetSpent;
+        if (metered == null) {
+          final connectivity = await _readConnectivity();
+          if (connectivity.isCellularOnly) return DownloadHoldReason.meteredBudgetSpent;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /// Add [bytes] to this month's metered total.
+  ///
+  /// Called with the delta of a transfer that ran on a metered link. Rolls the
+  /// counter over when the month label changes, so nothing has to run at
+  /// midnight on the first.
+  static Future<void> recordMeteredDownloadBytes(int bytes, {DateTime? now}) async {
+    if (bytes <= 0) return;
+    final settings = await _settingsOrNull();
+    if (settings == null) return;
+    final at = now ?? DateTime.now();
+    final period = meteredUsagePeriod(at);
+    final used = meteredUsageForPeriod(
+      storedPeriod: settings.read(SettingsService.meteredDownloadPeriod),
+      storedBytes: settings.read(SettingsService.meteredDownloadBytes),
+      now: at,
+    );
+    await settings.write(SettingsService.meteredDownloadBytes, used + bytes);
+    if (settings.read(SettingsService.meteredDownloadPeriod) != period) {
+      await settings.write(SettingsService.meteredDownloadPeriod, period);
+    }
+  }
+
+  /// This month's metered download total, in bytes.
+  static Future<int> meteredDownloadBytesThisMonth({DateTime? now}) async {
+    final settings = await _settingsOrNull();
+    if (settings == null) return 0;
+    final at = now ?? DateTime.now();
+    return meteredUsageForPeriod(
+      storedPeriod: settings.read(SettingsService.meteredDownloadPeriod),
+      storedBytes: settings.read(SettingsService.meteredDownloadBytes),
+      now: at,
+    );
   }
 
   /// Future that completes when interrupted download recovery finishes.
@@ -969,7 +1087,39 @@ class DownloadManagerService {
     // Deliver status updates from iOS background-to-foreground transitions
     await FileDownloader().resumeFromBackground();
 
+    await applyWifiOnlyRequirement();
+
     _fileDownloaderInitialized = true;
+  }
+
+  /// Push the WiFi-only preference down as a global requirement.
+  ///
+  /// Each task already carries the preference as it stood when it was queued,
+  /// which is not the same thing: a queue filled on WiFi keeps permission to
+  /// run on cellular, so turning the setting on changed nothing for anything
+  /// already waiting — the usual case, since a sync rule fills the queue long
+  /// before someone leaves the house. The global requirement reschedules what
+  /// is enqueued and applies to what is running, so the answer to "may this
+  /// use cellular" is read now rather than remembered from queue time.
+  ///
+  /// `asSetByTask` rather than `forNoTasks` when the preference is off: off
+  /// means "no opinion", and a task queued with its own requirement — a
+  /// future per-item choice — keeps it.
+  Future<void> applyWifiOnlyRequirement() async {
+    if (_skipDownloadsUnsupported('WiFi-only requirement')) return;
+    try {
+      final settings = await SettingsService.getInstance();
+      final wifiOnly = settings.read(SettingsService.downloadOnWifiOnly);
+      await FileDownloader().requireWiFi(
+        wifiOnly ? RequireWiFi.forAllTasks : RequireWiFi.asSetByTask,
+        rescheduleRunningTasks: true,
+      );
+      appLogger.i('Downloads: WiFi-only requirement is now ${wifiOnly ? 'forAllTasks' : 'asSetByTask'}');
+    } catch (e, stackTrace) {
+      // Platform-dependent: the desktop implementations have no such
+      // constraint. The per-task flag and the queue-time gate still stand.
+      appLogger.w('Could not apply the WiFi-only download requirement', error: e, stackTrace: stackTrace);
+    }
   }
 
   /// Recover downloads that were interrupted when the app was killed.
@@ -2346,6 +2496,8 @@ class DownloadManagerService {
 
     _stallWatchdog.markAlive(globalKey);
 
+    unawaited(_accountMeteredProgress(globalKey, downloadedBytes));
+
     // Debounce DB writes — only the latest progress value is persisted after
     // a 2-second settle period. The stream above provides real-time UI updates;
     // the DB write is only for crash-recovery state.
@@ -2356,6 +2508,34 @@ class DownloadManagerService {
         appLogger.w('Failed to update download progress in DB', error: e);
       });
     });
+  }
+
+  /// Bytes already counted toward the metered allowance, per download.
+  ///
+  /// Progress reports a running total, so the increment is the difference;
+  /// keyed per download because several run at once and each reports its own.
+  final Map<String, int> _meteredCountedBytes = {};
+
+  /// Count the part of this download that crossed a metered link.
+  ///
+  /// Only the growth since the last report, and only while the platform says
+  /// the link is metered — a transfer that starts on data and finishes on WiFi
+  /// contributes the first half and no more. Best-effort by nature: it samples
+  /// at progress callbacks rather than counting packets, which is the right
+  /// resolution for a monthly allowance and the wrong one for a bill dispute.
+  Future<void> _accountMeteredProgress(String globalKey, int downloadedBytes) async {
+    if (downloadedBytes <= 0) return;
+    final previous = _meteredCountedBytes[globalKey] ?? 0;
+    final delta = downloadedBytes - previous;
+    if (delta <= 0) return;
+    _meteredCountedBytes[globalKey] = downloadedBytes;
+
+    final platform = await NetworkMeteredProbe.read();
+    final metered = platform?.metered;
+    final onMetered = metered ?? (await _readConnectivity()).isCellularOnly;
+    if (!onMetered) return;
+
+    await recordMeteredDownloadBytes(delta);
   }
 
   /// Callback: background_downloader status change
@@ -3069,6 +3249,9 @@ class DownloadManagerService {
   ///
   /// Default progress is 0 for most statuses, 100 for completed.
   Future<void> _transitionStatus(String globalKey, DownloadStatus status, {int? progress, String? errorMessage}) async {
+    // A download that is no longer transferring has nothing left to count,
+    // and a retry starts its byte total over from zero.
+    if (status != DownloadStatus.downloading) _meteredCountedBytes.remove(globalKey);
     await _database.updateDownloadStatus(globalKey, status.index);
     if (status == DownloadStatus.failed && errorMessage != null) {
       await _database.updateDownloadError(globalKey, errorMessage);

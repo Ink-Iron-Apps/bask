@@ -17,6 +17,7 @@ import '../database/app_database.dart';
 import '../database/download_operations.dart';
 import '../services/background_work_diagnostics_service.dart';
 import '../services/download_manager_service.dart';
+import '../services/download_schedule.dart';
 import '../services/api_cache.dart';
 import '../services/download_artwork_service.dart';
 import '../services/download_storage_service.dart';
@@ -1127,6 +1128,8 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       if (await DownloadManagerService.shouldBlockDownloadOnCellular()) {
         throw CellularDownloadBlockedException();
       }
+      final hold = await DownloadManagerService.downloadHoldReason();
+      if (hold != null) throw DownloadHeldException(hold);
       if (!_isQueueOwnershipCurrent(ownership)) return 0;
       // The queueing claim above remains held while Android's permission
       // dialog is open, so a second tap cannot launch duplicate expansion.
@@ -1218,6 +1221,8 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     if (await DownloadManagerService.shouldBlockDownloadOnCellular()) {
       throw CellularDownloadBlockedException();
     }
+    final hold = await DownloadManagerService.downloadHoldReason();
+    if (hold != null) throw DownloadHeldException(hold);
     if (!_isQueueOwnershipCurrent(ownership)) return 0;
 
     final unwatchedOnly = filter == DownloadFilter.unwatched;
@@ -2115,6 +2120,13 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     return deletedTitles;
   }
 
+  /// Re-apply the WiFi-only preference to queued and running downloads.
+  ///
+  /// Called when the preference changes: the per-task flag is fixed at queue
+  /// time, so without this a queue filled on WiFi keeps permission to run on
+  /// cellular after the user says not to.
+  Future<void> applyWifiOnlyRequirement() => _downloadManager.applyWifiOnlyRequirement();
+
   /// Sync rules the user made, for the active profile (profile-scoped
   /// globalKey -> SyncRuleItem).
   ///
@@ -2732,6 +2744,27 @@ class SyncRuleCleanupUnavailableException implements Exception {
 }
 
 /// Exception thrown when download is blocked due to cellular-only setting
+/// Downloads are held by a schedule or an allowance, not by a failure.
+///
+/// Separate from [CellularDownloadBlockedException] because the remedy is
+/// different: there is nothing to change about the connection, the queue is
+/// intact, and the answer is either to wait or to raise the limit.
+class DownloadHeldException implements Exception {
+  DownloadHeldException(this.reason);
+
+  final DownloadHoldReason reason;
+
+  String get message => switch (reason) {
+    DownloadHoldReason.outsideWindow => t.settings.downloadHeldOutsideWindow(
+      start: formatDownloadWindowHour(SettingsService.instance.read(SettingsService.downloadWindowStart)),
+    ),
+    DownloadHoldReason.meteredBudgetSpent => t.settings.downloadHeldBudgetSpent,
+  };
+
+  @override
+  String toString() => message;
+}
+
 class CellularDownloadBlockedException implements Exception {
   String get message => t.settings.cellularDownloadBlocked;
 
