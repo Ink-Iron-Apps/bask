@@ -286,9 +286,14 @@ void main() {
   });
 
   group('DownloadManagerService — platform support', () {
-    test('disables downloads only for tvOS builds', () {
-      expect(DownloadManagerService.downloadsSupportedFor(tvosBuild: true), isFalse);
-      expect(DownloadManagerService.downloadsSupportedFor(tvosBuild: false), isTrue);
+    test('downloads need a downloader and a screen to reach them', () {
+      // The TV case: the engine used to stand down only on tvOS, so an
+      // Android TV kept a working downloader behind a hidden tab and could
+      // fill its own storage with episodes nothing could open or delete.
+      expect(DownloadManagerService.downloadsSupportedFor(tvosBuild: false, hasDownloadsUi: true), isTrue);
+      expect(DownloadManagerService.downloadsSupportedFor(tvosBuild: true, hasDownloadsUi: true), isFalse);
+      expect(DownloadManagerService.downloadsSupportedFor(tvosBuild: false, hasDownloadsUi: false), isFalse);
+      expect(DownloadManagerService.downloadsSupportedFor(tvosBuild: true, hasDownloadsUi: false), isFalse);
     });
 
     test('recovery is a no-op when downloads are unsupported', () async {
