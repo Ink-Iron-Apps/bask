@@ -615,7 +615,7 @@ extension _PlexVideoControlsPlaybackInputMethods on _PlexVideoControlsState {
       if (_isTouchTapSuppressed) return;
       // Mobile taps get the single-tap action only; the skip zones own touch
       // double taps.
-      if (widget.canControl && _clickVideoTogglesPlayback) {
+      if (widget.canControl && _tapTogglesPlayback) {
         _playOrPause();
       } else {
         _toggleControls();
