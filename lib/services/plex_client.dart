@@ -49,6 +49,7 @@ import '../models/plex/play_queue_response.dart';
 import '../media/media_file_info.dart';
 import '../media/media_filter.dart';
 import '../media/media_source_info.dart';
+import '../media/transcode_explanation.dart';
 import '../models/plex/plex_subtitle_search_result.dart';
 import '../models/plex/plex_match_result.dart';
 import '../utils/codec_utils.dart';
@@ -2804,7 +2805,7 @@ class PlexClient
   /// couple of seconds. PMS can leave the segment response that races such a
   /// restart open without data or error, which the player waits out as
   /// endless buffering (#1859).
-  Future<({String? startPath, TranscodeDecisionOutcome outcome})> buildTranscodeStartPath({
+  Future<({String? startPath, TranscodeDecisionOutcome outcome, String? decisionText})> buildTranscodeStartPath({
     required String ratingKey,
     required int mediaIndex,
     int partIndex = 0,
@@ -2836,7 +2837,7 @@ class PlexClient
         requiredContainer: _plexHlsVodContainer,
       );
       if (primary.containerHonored) {
-        return (startPath: primary.startPath, outcome: primary.outcome);
+        return (startPath: primary.startPath, outcome: primary.outcome, decisionText: primary.decisionText);
       }
 
       // The decision succeeded but ignored the fMP4 target. Never hand the
@@ -2851,13 +2852,13 @@ class PlexClient
         requiredContainer: _plexHlsVodTsContainer,
       );
       if (fallback.containerHonored) {
-        return (startPath: fallback.startPath, outcome: fallback.outcome);
+        return (startPath: fallback.startPath, outcome: fallback.outcome, decisionText: fallback.decisionText);
       }
       appLogger.w('Transcode decision honoured neither requested container; falling back to direct play');
-      return (startPath: null, outcome: TranscodeDecisionOutcome.failed);
+      return (startPath: null, outcome: TranscodeDecisionOutcome.failed, decisionText: fallback.decisionText);
     } catch (e, st) {
       appLogger.e('Failed to build transcode start path', error: e, stackTrace: st);
-      return (startPath: null, outcome: TranscodeDecisionOutcome.failed);
+      return (startPath: null, outcome: TranscodeDecisionOutcome.failed, decisionText: null);
     }
   }
 
@@ -2938,7 +2939,8 @@ class PlexClient
   /// otherwise. PMS applies whatever transcode target the client profile
   /// names, so a mismatch means the server substituted a container the
   /// player never negotiated — the caller must not open that stream.
-  Future<({String? startPath, TranscodeDecisionOutcome outcome, bool containerHonored})> _runTranscodeDecision({
+  Future<({String? startPath, TranscodeDecisionOutcome outcome, bool containerHonored, String? decisionText})>
+  _runTranscodeDecision({
     required String startEndpoint,
     required Map<String, String> allParams,
     required bool isOriginal,
@@ -2960,12 +2962,16 @@ class PlexClient
 
     if (decisionResponse.statusCode != 200) {
       appLogger.w('Transcode decision returned ${decisionResponse.statusCode}');
-      return (startPath: null, outcome: TranscodeDecisionOutcome.failed, containerHonored: true);
+      return (startPath: null, outcome: TranscodeDecisionOutcome.failed, containerHonored: true, decisionText: null);
     }
+
+    // Plex explains itself here in prose, and the app used to read it only
+    // into the log. It is the answer to "why is this transcoding".
+    final decisionText = plexDecisionTextFrom(decisionResponse.data);
 
     final outcome = _parseTranscodeDecisionOutcome(decisionResponse.data, isOriginal: isOriginal);
     if (outcome == TranscodeDecisionOutcome.failed) {
-      return (startPath: null, outcome: outcome, containerHonored: true);
+      return (startPath: null, outcome: outcome, containerHonored: true, decisionText: decisionText);
     }
 
     var containerHonored = true;
@@ -2981,6 +2987,7 @@ class PlexClient
       startPath: _buildTranscodeStartPathFromParams(allParams, endpoint: startEndpoint),
       outcome: outcome,
       containerHonored: containerHonored,
+      decisionText: decisionText,
     );
   }
 
@@ -3742,6 +3749,11 @@ class PlexClient
             playMethod: 'Transcode',
             playSessionId: options.sessionIdentifier,
             selectedMediaIndex: data.selectedMediaIndex,
+            transcodeExplanation: TranscodeExplanation(
+              reasons: parsePlexDecisionText(result.decisionText),
+              serverText: result.decisionText,
+              playMethod: 'Transcode',
+            ),
           );
         }
 

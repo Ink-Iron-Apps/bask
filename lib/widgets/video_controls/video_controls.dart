@@ -1,4 +1,5 @@
 import '../../media/media_item_types.dart';
+import '../../media/transcode_explanation.dart';
 import 'dart:async' show StreamSubscription, Timer, unawaited;
 import 'dart:io' show Platform;
 
@@ -562,6 +563,9 @@ class PlexVideoControls extends StatefulWidget {
   final TranscodeQualityPreset selectedQualityPreset;
   final bool serverSupportsTranscoding;
   final bool isTranscoding;
+
+  /// Why the server is transcoding, as it explained it.
+  final TranscodeExplanation? transcodeExplanation;
   final bool isOfflinePlayback;
   final List<MediaAudioTrack> sourceAudioTracks;
   final int? selectedAudioStreamId;
@@ -705,6 +709,7 @@ class PlexVideoControls extends StatefulWidget {
     this.selectedQualityPreset = TranscodeQualityPreset.original,
     this.serverSupportsTranscoding = false,
     this.isTranscoding = false,
+    this.transcodeExplanation,
     this.isOfflinePlayback = false,
     this.sourceAudioTracks = const [],
     this.selectedAudioStreamId,

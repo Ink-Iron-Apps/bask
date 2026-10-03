@@ -1,4 +1,5 @@
 import '../media/media_item.dart';
+import '../media/transcode_explanation.dart';
 import '../media/media_server_client.dart';
 import '../media/media_source_info.dart';
 import '../media/media_version.dart';
@@ -74,6 +75,9 @@ class PlaybackSession {
   MediaServerClient? get reportingClient => context.reportingClient;
 
   bool get isTranscoding => context.result.isTranscoding;
+
+  /// Why the server is transcoding, when it said so.
+  TranscodeExplanation? get transcodeExplanation => context.result.transcodeExplanation;
 
   bool get isOffline => context.result.isOffline;
 

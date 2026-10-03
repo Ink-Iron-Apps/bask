@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../media/media_item.dart';
 import '../../../media/media_version.dart';
 import '../../../media/media_source_info.dart';
+import '../../../media/transcode_explanation.dart';
 import '../../../models/transcode_quality_preset.dart';
 import '../../../mpv/mpv.dart';
 import '../../../services/playback_initialization_types.dart';
@@ -20,6 +21,10 @@ class TrackControlsState {
   final TranscodeQualityPreset selectedQualityPreset;
   final bool serverSupportsTranscoding;
   final bool isTranscoding;
+
+  /// Why the server is transcoding, when it said so. Null when nothing is
+  /// transcoding, or when the backend gave no reason.
+  final TranscodeExplanation? transcodeExplanation;
   final List<MediaAudioTrack> sourceAudioTracks;
   final int? selectedAudioStreamId;
   final List<MediaSubtitleTrack> sourceSubtitleTracks;
@@ -93,6 +98,7 @@ class TrackControlsState {
     this.availableVersions = const [],
     this.selectedMediaIndex = 0,
     this.selectedQualityPreset = TranscodeQualityPreset.original,
+    this.transcodeExplanation,
     this.serverSupportsTranscoding = false,
     this.isTranscoding = false,
     this.sourceAudioTracks = const [],

@@ -257,6 +257,7 @@ mixin _JellyfinPlaybackMethods on _JellyfinClientInternals {
     String? playSessionId;
     var playMethod = 'DirectPlay';
     var isTranscoding = false;
+    var transcodeReasons = const <String>[];
     TranscodeFallbackReason? fallbackReason;
 
     // Tracks negotiate with the audio device profile and ignore the
@@ -369,6 +370,14 @@ mixin _JellyfinPlaybackMethods on _JellyfinClientInternals {
         videoUrl = _withApiKey(transcodingUrl);
         playMethod = 'Transcode';
         isTranscoding = true;
+        // The server says why in a list of stable reason names, which until
+        // now went nowhere. It is the answer to "why is this transcoding".
+        final rawReasons = chosenSource['TranscodeReasons'];
+        transcodeReasons = switch (rawReasons) {
+          List() => rawReasons.whereType<String>().toList(),
+          String() => rawReasons.split(',').map((reason) => reason.trim()).where((r) => r.isNotEmpty).toList(),
+          _ => const <String>[],
+        };
       } else if (!wantsOriginal) {
         fallbackReason = TranscodeFallbackReason.directPlayOnly;
       }
@@ -421,6 +430,13 @@ mixin _JellyfinPlaybackMethods on _JellyfinClientInternals {
       playSessionId: playSessionId,
       playMethod: playMethod,
       selectedMediaIndex: bundle.selectedSourceIndex,
+      transcodeExplanation: isTranscoding
+          ? TranscodeExplanation(
+              reasons: parseMediaBrowserTranscodeReasons(transcodeReasons),
+              serverText: transcodeReasons.isEmpty ? null : transcodeReasons.join(', '),
+              playMethod: playMethod,
+            )
+          : null,
     );
   }
 
