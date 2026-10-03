@@ -62,6 +62,7 @@ import 'appearance_settings_screen.dart';
 import 'general_settings_screen.dart';
 import 'keyboard_shortcuts_screen.dart';
 import 'logs_screen.dart';
+import 'server_health_screen.dart';
 import 'playback_settings_screen.dart';
 import '../profile/profile_switch_screen.dart';
 import 'services_settings_screen.dart';
@@ -116,6 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   static const _kDebugLogging = 'debug_logging';
   static const _kAutoHidePerformanceOverlay = 'auto_hide_performance_overlay';
   static const _kViewLogs = 'view_logs';
+  static const _kServerHealth = 'server_health';
   static const _kClearImageCache = 'clear_image_cache';
   static const _kResetSettings = 'reset_settings';
   static const _kCheckForUpdates = 'check_for_updates';
@@ -698,6 +700,13 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           icon: Symbols.speed_rounded,
           title: t.settings.autoHidePerformanceOverlay,
           subtitle: t.settings.autoHidePerformanceOverlayDescription,
+        ),
+        SettingNavigationTile(
+          focusNode: _focusTracker.get(_kServerHealth),
+          icon: Symbols.dns_rounded,
+          title: t.serverHealth.title,
+          subtitle: t.serverHealth.subtitle,
+          destinationBuilder: (context) => const ServerHealthScreen(),
         ),
         SettingNavigationTile(
           focusNode: _focusTracker.get(_kViewLogs),
