@@ -4919,6 +4919,27 @@ class Translations$videoSettings$en {
 	/// en: 'Subtitles timed for a 23.976 fps release, running behind'
 	String get subtitleRateFasterDescription => 'Subtitles timed for a 23.976 fps release, running behind';
 
+	/// en: 'Sync by marking two lines'
+	String get subtitleMarkSync => 'Sync by marking two lines';
+
+	/// en: 'Mark a line now, then one near the end'
+	String get subtitleMarkSyncFirst => 'Mark a line now, then one near the end';
+
+	/// en: 'First line marked · mark a second one later'
+	String get subtitleMarkSyncSecond => 'First line marked · mark a second one later';
+
+	/// en: 'No subtitle is showing right now'
+	String get subtitleMarkSyncNoLine => 'No subtitle is showing right now';
+
+	/// en: 'Subtitles aligned to the two lines you marked'
+	String get subtitleMarkSyncApplied => 'Subtitles aligned to the two lines you marked';
+
+	/// en: 'Those marks are too close together — try one near the end'
+	String get subtitleMarkSyncTooClose => 'Those marks are too close together — try one near the end';
+
+	/// en: 'That pair does not describe a timing error; start again'
+	String get subtitleMarkSyncImplausible => 'That pair does not describe a timing error; start again';
+
 	/// en: 'HDR'
 	String get hdr => 'HDR';
 
@@ -9341,6 +9362,13 @@ extension on Translations {
 			'videoSettings.subtitleRateSlowerDescription' => 'Subtitles timed for a 25 fps release, running ahead of the film',
 			'videoSettings.subtitleRateFaster' => '23.976 → 25 fps',
 			'videoSettings.subtitleRateFasterDescription' => 'Subtitles timed for a 23.976 fps release, running behind',
+			'videoSettings.subtitleMarkSync' => 'Sync by marking two lines',
+			'videoSettings.subtitleMarkSyncFirst' => 'Mark a line now, then one near the end',
+			'videoSettings.subtitleMarkSyncSecond' => 'First line marked · mark a second one later',
+			'videoSettings.subtitleMarkSyncNoLine' => 'No subtitle is showing right now',
+			'videoSettings.subtitleMarkSyncApplied' => 'Subtitles aligned to the two lines you marked',
+			'videoSettings.subtitleMarkSyncTooClose' => 'Those marks are too close together — try one near the end',
+			'videoSettings.subtitleMarkSyncImplausible' => 'That pair does not describe a timing error; start again',
 			'videoSettings.hdr' => 'HDR',
 			'videoSettings.hdrUnsupported' => 'HDR isn\'t available here — this desktop compositor or video output can\'t carry it.',
 			'videoSettings.hdrToneMapping' => 'HDR Tone Mapping',
@@ -9564,6 +9592,8 @@ extension on Translations {
 			'seerr.languageProfile' => 'Language profile',
 			'seerr.tags' => 'Tags',
 			'seerr.noTags' => 'No tags',
+			_ => null,
+		} ?? switch (path) {
 			'seerr.defaultOption' => ({required Object name}) => '${name} (Default)',
 			'seerr.animeNote' => 'This series is an anime.',
 			'seerr.requestSubmitted' => 'Request submitted',
@@ -9571,8 +9601,6 @@ extension on Translations {
 			'seerr.requestsLoadFailed' => 'Couldn\'t load request options',
 			'seerr.nothingToRequest' => 'Everything is already available or requested.',
 			'seerr.statusAvailable' => 'Available',
-			_ => null,
-		} ?? switch (path) {
 			'seerr.statusPartiallyAvailable' => 'Partially available',
 			'seerr.statusRequested' => 'Requested',
 			'seerr.statusProcessing' => 'Processing',

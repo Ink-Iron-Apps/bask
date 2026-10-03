@@ -27,6 +27,7 @@ import '../../../services/scoped_player_prefs.dart';
 import '../../../services/log_upload_service.dart';
 import '../../../services/playback_problem_report.dart';
 import '../../../services/settings_service.dart';
+import '../../../services/subtitle_two_point_sync.dart';
 import '../../../services/sleep_timer_service.dart';
 import '../../../services/video_filter_manager.dart';
 import '../../../focus/focusable_wrapper.dart';
@@ -880,6 +881,19 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           onTap: () => _navigateTo(_SettingsView.subtitleRate),
         ),
 
+        // Two points fix a shift and a rate together, which is what a
+        // subtitle from a different release usually needs.
+        _SettingsMenuItem(
+          icon: Symbols.ads_click_rounded,
+          title: t.videoSettings.subtitleMarkSync,
+          valueText: _pendingSyncAnchor == null
+              ? t.videoSettings.subtitleMarkSyncFirst
+              : t.videoSettings.subtitleMarkSyncSecond,
+          isHighlighted: _pendingSyncAnchor != null,
+          allowValueOverflow: true,
+          onTap: () => unawaited(_markSubtitleSyncLine()),
+        ),
+
         if (_supportsHdrControl)
           _SettingsToggleItem(
             pref: SettingsService.enableHDR,
@@ -1170,6 +1184,74 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     if ((speed - _subtitleRateFaster).abs() < 0.0005) return t.videoSettings.subtitleRateFaster;
     if (speed == 1.0) return t.videoSettings.subtitleRateNormal;
     return '${(speed * 100).toStringAsFixed(1)}%';
+  }
+
+  /// The first marked line, while waiting for its pair.
+  SubtitleSyncAnchor? _pendingSyncAnchor;
+
+  /// Mark the line showing now, and solve once there are two.
+  ///
+  /// Two points fix a shift and a rate at once, which is the case neither
+  /// existing control can handle alone: a subtitle for a release with a
+  /// different intro length is both shifted and, if it came from another
+  /// transfer, running at the wrong rate. The viewer marks a line near the
+  /// start and one near the end and the line through them is the answer —
+  /// no guessing about the cause, and no reliance on a frame-rate ratio the
+  /// file may not have.
+  Future<void> _markSubtitleSyncLine() async {
+    final player = widget.player;
+    final subStartSeconds = double.tryParse(await player.getProperty('sub-start') ?? '');
+    final positionMs = player.state.position.inMilliseconds;
+
+    if (subStartSeconds == null) {
+      // Nothing on screen to mark. Marking the gap between lines would anchor
+      // to whatever happened to be nearest, which is how a sync tool earns
+      // its reputation.
+      if (mounted) showAppSnackBar(context, t.videoSettings.subtitleMarkSyncNoLine);
+      return;
+    }
+
+    // Where the line's own timestamp puts it, before any correction in force,
+    // so a second pass over an already-adjusted file still solves correctly.
+    final authoredMs = ((subStartSeconds - _subtitleSyncOffset / 1000.0) * _subtitleSpeed * 1000).round();
+    final anchor = SubtitleSyncAnchor(subtitleMs: authoredMs, actualMs: positionMs);
+
+    final pending = _pendingSyncAnchor;
+    if (pending == null) {
+      setState(() => _pendingSyncAnchor = anchor);
+      if (mounted) showAppSnackBar(context, t.videoSettings.subtitleMarkSyncSecond);
+      return;
+    }
+
+    final result = solveSubtitleSync(pending, anchor);
+    final solution = result.solution;
+    if (solution == null) {
+      setState(() => _pendingSyncAnchor = null);
+      if (!mounted) return;
+      showErrorSnackBar(
+        context,
+        result.rejection == SubtitleSyncRejection.tooClose
+            ? t.videoSettings.subtitleMarkSyncTooClose
+            : t.videoSettings.subtitleMarkSyncImplausible,
+      );
+      return;
+    }
+
+    setState(() => _pendingSyncAnchor = null);
+    await _setSubtitleRate(solution.speed);
+    await _setSubtitleOffsetMs(solution.delayMs);
+    if (mounted) showAppSnackBar(context, t.videoSettings.subtitleMarkSyncApplied);
+  }
+
+  /// Apply and persist a subtitle delay, the way the sync bar does.
+  Future<void> _setSubtitleOffsetMs(int offsetMs) async {
+    setState(() => _subtitleSyncOffset = offsetMs);
+    await ScopedPlayerPrefs.write(ScopedPlayerPrefs.subtitleSyncOffset, _state.metadata, offsetMs);
+    try {
+      await widget.player.setProperty('sub-delay', (offsetMs / 1000.0).toString());
+    } catch (e) {
+      appLogger.w('Could not apply the subtitle offset', error: e);
+    }
   }
 
   Future<void> _setSubtitleRate(double speed) async {
