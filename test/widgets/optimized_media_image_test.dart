@@ -307,8 +307,10 @@ void main() {
     );
 
     expect(find.byIcon(Symbols.image_not_supported_rounded), findsNothing);
-    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-    await tester.pump();
+    // The miss is settled by a real filesystem probe, so waiting one
+    // microtask turn is a race: it holds on an idle machine and loses on a
+    // loaded CI runner, which is how this test failed a release.
+    await _pumpUntilFound(tester, find.byIcon(Symbols.image_not_supported_rounded));
     expect(find.byIcon(Symbols.image_not_supported_rounded), findsOneWidget);
 
     file.writeAsBytesSync(
@@ -319,9 +321,7 @@ void main() {
     await tester.pump();
 
     expect(find.byIcon(Symbols.image_not_supported_rounded), findsNothing);
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-    await tester.pump();
-    await tester.pump();
+    await _pumpUntilFound(tester, find.byType(Image));
     expect(file.existsSync(), isTrue);
     expect(find.byIcon(Symbols.image_not_supported_rounded), findsNothing);
     expect(find.byType(Image), findsOneWidget);
@@ -334,4 +334,17 @@ void main() {
     expect(localProvider.file.path, file.path);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+}
+
+/// Pump until [finder] matches, giving real asynchronous work a chance to run.
+///
+/// The local-artwork resolver settles on a filesystem probe, which a single
+/// pump may or may not outlast depending on how busy the machine is. Polling
+/// is what makes the assertion about behavior rather than about timing.
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder, {int attempts = 40}) async {
+  for (var attempt = 0; attempt < attempts; attempt++) {
+    if (finder.evaluate().isNotEmpty) return;
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
+    await tester.pump();
+  }
 }

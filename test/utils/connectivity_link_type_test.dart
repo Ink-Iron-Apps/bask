@@ -29,6 +29,24 @@ void main() {
       expect(const [ConnectivityResult.other].isCellularOnly, isFalse);
     });
 
+    test('cellular under a VPN still reads as metered when the transport shows', () {
+      // Android reports the VPN alongside its underlying transport on most
+      // devices; when it does, a tunnel must not launder a data connection
+      // into an unmetered one.
+      expect(const [ConnectivityResult.mobile, ConnectivityResult.vpn].isCellularOnly, isTrue);
+      expect(const [ConnectivityResult.wifi, ConnectivityResult.vpn].isCellularOnly, isFalse);
+    });
+
+    test('a VPN on its own is an unknown link, not an unmetered one', () {
+      // Some devices report only the tunnel, which says nothing about what
+      // carries it. This reads as unknown here, so the WiFi-only gate lets the
+      // queue through and the platform's own WiFi requirement — applied
+      // globally by DownloadManagerService.applyWifiOnlyRequirement — is what
+      // holds the transfer.
+      expect(const [ConnectivityResult.vpn].isCellularOnly, isFalse);
+      expect(const [ConnectivityResult.vpn].hasWifiOrEthernet, isFalse);
+    });
+
     test('a WiFi-only link is unmetered', () {
       expect(const [ConnectivityResult.wifi].hasWifiOrEthernet, isTrue);
       expect(const [ConnectivityResult.wifi].isCellularOnly, isFalse);

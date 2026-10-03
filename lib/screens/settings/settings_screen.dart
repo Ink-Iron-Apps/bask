@@ -33,6 +33,7 @@ import '../../providers/seerr_account_provider.dart';
 import '../../services/account_preferences_accounts.dart';
 import '../../services/keyboard_shortcuts_service.dart';
 import '../../services/background_work_diagnostics_service.dart';
+import '../../services/download_schedule.dart';
 import '../../services/settings_service.dart' as settings;
 import '../../services/settings_mutation_service.dart';
 import '../../widgets/background_download_warning_banner.dart';
@@ -481,6 +482,60 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
                   title: count == 0
                       ? t.settings.autoDownloadNextEpisodesOff
                       : t.settings.autoDownloadNextEpisodesCount(count: '$count'),
+                ),
+              )
+              .toList(),
+        ),
+        SettingSwitchTile(
+          pref: settings.SettingsService.downloadWindowEnabled,
+          icon: Symbols.schedule_rounded,
+          title: t.settings.downloadWindow,
+          subtitle: t.settings.downloadWindowDescription,
+        ),
+        if (settings.SettingsService.instance.read(settings.SettingsService.downloadWindowEnabled)) ...[
+          SettingSelectionTile<int>(
+            pref: settings.SettingsService.downloadWindowStart,
+            icon: Symbols.bedtime_rounded,
+            title: t.settings.downloadWindowRange(
+              start: formatDownloadWindowHour(
+                settings.SettingsService.instance.read(settings.SettingsService.downloadWindowStart),
+              ),
+              end: formatDownloadWindowHour(
+                settings.SettingsService.instance.read(settings.SettingsService.downloadWindowEnd),
+              ),
+            ),
+            subtitleBuilder: (hour) => formatDownloadWindowHour(hour),
+            options: [
+              for (var hour = 0; hour < 24; hour++) DialogOption(value: hour, title: formatDownloadWindowHour(hour)),
+            ],
+          ),
+          SettingSelectionTile<int>(
+            pref: settings.SettingsService.downloadWindowEnd,
+            icon: Symbols.wb_twilight_rounded,
+            title: t.settings.downloadWindowOff,
+            subtitleBuilder: (hour) => formatDownloadWindowHour(hour),
+            options: [
+              for (var hour = 0; hour < 24; hour++) DialogOption(value: hour, title: formatDownloadWindowHour(hour)),
+            ],
+          ),
+        ],
+        SettingSelectionTile<int>(
+          pref: settings.SettingsService.meteredDownloadBudgetMB,
+          icon: Symbols.data_usage_rounded,
+          title: t.settings.meteredDownloadBudget,
+          subtitleBuilder: (mb) => mb == 0
+              ? t.settings.meteredDownloadBudgetDescription
+              : '${t.settings.meteredDownloadBudgetValue(size: (mb / 1024).toStringAsFixed(mb % 1024 == 0 ? 0 : 1))} · '
+                    '${t.settings.meteredDownloadBudgetDescription}',
+          options: const [0, 512, 1024, 2048, 5120, 10240]
+              .map(
+                (mb) => DialogOption(
+                  value: mb,
+                  title: mb == 0
+                      ? t.settings.meteredDownloadBudgetOff
+                      : t.settings.meteredDownloadBudgetValue(
+                          size: (mb / 1024).toStringAsFixed(mb % 1024 == 0 ? 0 : 1),
+                        ),
                 ),
               )
               .toList(),
