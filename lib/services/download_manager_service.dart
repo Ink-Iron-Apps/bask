@@ -39,6 +39,7 @@ import '../utils/codec_utils.dart';
 import '../utils/connectivity_link_type.dart';
 import '../utils/global_key_utils.dart';
 import '../utils/network_failure.dart';
+import '../utils/platform_detector.dart';
 import 'download_schedule.dart';
 import 'download_stall_watchdog.dart';
 import 'network_metered_probe.dart';
@@ -1128,6 +1129,75 @@ class DownloadManagerService {
       // constraint. The per-task flag and the queue-time gate still stand.
       appLogger.w('Could not apply the WiFi-only download requirement', error: e, stackTrace: stackTrace);
     }
+  }
+
+  /// Delete download files and rows on a device that cannot download.
+  ///
+  /// A TV downloaded freely before downloads were gated off it, and the files
+  /// stayed: the Downloads tab is hidden on a TV, every manager operation
+  /// short-circuits, and nothing has been able to reach them since. On a 4 GB
+  /// data partition that is the difference between a working set-top box and
+  /// one that cannot buffer. Nothing can play them either, since the only UI
+  /// that opens a downloaded item is gone, so there is nothing to lose by
+  /// reclaiming the space.
+  ///
+  /// Runs once per launch, before recovery, and only where
+  /// [downloadsSupported] is false. Reports what it reclaimed, because space
+  /// vanishing is the symptom people notice and this is the explanation.
+  Future<int> reclaimUnsupportedDownloads() async {
+    // Deliberately the UI capability, not [downloadsSupported]: the engine
+    // only stands down on a tvOS build, while an Android TV keeps a working
+    // download engine and no screen that can reach it. The device that
+    // strands files is the one with no Downloads tab.
+    if (PlatformDetector.supportsDownloads()) return 0;
+
+    var reclaimed = 0;
+    try {
+      final rows = await _database.allDownloadedMedia();
+      for (final row in rows) {
+        final path = row.videoFilePath;
+        if (path != null && path.isNotEmpty && !_storageService.isSafUri(path)) {
+          try {
+            final file = File(await _storageService.getReadablePath(path));
+            if (file.existsSync()) {
+              reclaimed += file.lengthSync();
+              file.deleteSync();
+            }
+          } on FileSystemException catch (e) {
+            appLogger.d('Could not delete the stranded download at $path', error: e);
+          }
+        }
+        await _database.deleteDownload(row.globalKey);
+      }
+
+      // The directory itself, plus anything in it the rows did not name: a
+      // partial transfer, a sidecar subtitle, an artwork file.
+      final directory = await _storageService.getDownloadsDirectory();
+      if (directory.existsSync()) {
+        for (final entity in directory.listSync(recursive: true).reversed) {
+          try {
+            if (entity is File) {
+              reclaimed += entity.lengthSync();
+              entity.deleteSync();
+            } else if (entity is Directory && entity.listSync().isEmpty) {
+              entity.deleteSync();
+            }
+          } on FileSystemException catch (e) {
+            appLogger.d('Could not clear ${entity.path}', error: e);
+          }
+        }
+      }
+    } catch (e, stackTrace) {
+      appLogger.w('Could not reclaim downloads on a device that cannot download', error: e, stackTrace: stackTrace);
+    }
+
+    if (reclaimed > 0) {
+      appLogger.i(
+        'Reclaimed ${(reclaimed / (1024 * 1024)).toStringAsFixed(1)} MB of downloads '
+        'left behind on a device that cannot download',
+      );
+    }
+    return reclaimed;
   }
 
   /// Recover downloads that were interrupted when the app was killed.
