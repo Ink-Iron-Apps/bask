@@ -681,6 +681,37 @@ class SettingsService extends BaseSharedPreferencesService {
   /// device is full".
   static const downloadStorageBudgetGB = IntPref('download_storage_budget_gb');
 
+  /// Hold downloads outside a window of hours.
+  ///
+  /// An unattended queue is otherwise unattended all day, competing with
+  /// whatever else the connection is doing — felt by other people on a shared
+  /// line.
+  static const downloadWindowEnabled = BoolPref('download_window_enabled');
+
+  /// Local hour the window opens, inclusive.
+  static const downloadWindowStart = IntPref('download_window_start', defaultValue: 1);
+
+  /// Local hour the window closes, exclusive. May be lower than the start,
+  /// which is how an overnight window is expressed.
+  static const downloadWindowEnd = IntPref('download_window_end', defaultValue: 7);
+
+  /// Megabytes of metered data downloads may use per calendar month, 0 for no
+  /// limit.
+  ///
+  /// A backstop rather than a preference: "download on WiFi only" states the
+  /// intent, and this is what survives the intent being defeated — a hidden
+  /// link type, a hotspot the device calls WiFi, a tunnel. Twelve gigabytes of
+  /// overage in one day is what a missing backstop costs.
+  static const meteredDownloadBudgetMB = IntPref('metered_download_budget_mb');
+
+  /// Metered bytes spent in [meteredDownloadPeriod]. Written by the download
+  /// manager; not a user preference.
+  static const meteredDownloadBytes = IntPref('metered_download_bytes');
+
+  /// The `yyyy-mm` the counter above belongs to, so a new month resets it
+  /// without a scheduled job.
+  static const meteredDownloadPeriod = NullableStringPref('metered_download_period');
+
   /// How many episodes of what is being watched to keep downloaded, 0 for off.
   ///
   /// A sync rule does this already, but only for a show someone thought to set
@@ -1509,6 +1540,10 @@ class SettingsService extends BaseSharedPreferencesService {
     autoRemoveWatchedDownloads,
     downloadStorageBudgetGB,
     autoDownloadNextEpisodes,
+    downloadWindowEnabled,
+    downloadWindowStart,
+    downloadWindowEnd,
+    meteredDownloadBudgetMB,
     defaultQualityPreset,
     cellularQualityPreset,
     musicQualityPreset,
