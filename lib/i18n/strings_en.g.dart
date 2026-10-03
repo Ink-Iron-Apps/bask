@@ -91,6 +91,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$seerr$en seerr = Translations$seerr$en.internal(_root);
 	late final Translations$services$en services = Translations$services$en.internal(_root);
 	late final Translations$addServer$en addServer = Translations$addServer$en.internal(_root);
+	late final Translations$serverHealth$en serverHealth = Translations$serverHealth$en.internal(_root);
 }
 
 // Path: app
@@ -356,6 +357,9 @@ class Translations$screens$en {
 
 	/// en: 'Logs'
 	String get logs => 'Logs';
+
+	/// en: 'Server health'
+	String get serverHealth => 'Server health';
 }
 
 // Path: update
@@ -5879,6 +5883,72 @@ class Translations$addServer$en {
 	String redirectUnsupportedEnterFinal({required Object product}) => 'The server redirected to an unsupported URL. Enter the final ${product} URL directly.';
 }
 
+// Path: serverHealth
+class Translations$serverHealth$en {
+	Translations$serverHealth$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Server health'
+	String get title => 'Server health';
+
+	/// en: 'Which endpoint each server is on, and how it is answering'
+	String get subtitle => 'Which endpoint each server is on, and how it is answering';
+
+	/// en: 'On your network'
+	String get linkLocal => 'On your network';
+
+	/// en: 'Direct, over the internet'
+	String get linkRemote => 'Direct, over the internet';
+
+	/// en: 'Through the Plex relay'
+	String get linkRelay => 'Through the Plex relay';
+
+	/// en: 'Relayed streams are capped around 2 Mbps, which looks like a bad connection'
+	String get linkRelayWarning => 'Relayed streams are capped around 2 Mbps, which looks like a bad connection';
+
+	/// en: 'Endpoint not described by the account'
+	String get linkUnknown => 'Endpoint not described by the account';
+
+	/// en: 'Answering'
+	String get statusOnline => 'Answering';
+
+	/// en: 'Not answering'
+	String get statusOffline => 'Not answering';
+
+	/// en: 'Sign-in rejected'
+	String get statusAuthError => 'Sign-in rejected';
+
+	/// en: 'Hidden from this profile'
+	String get statusHidden => 'Hidden from this profile';
+
+	/// en: 'Waiting to retry a better endpoint'
+	String get relayEscapePending => 'Waiting to retry a better endpoint';
+
+	/// en: 'Round trip ${ms} ms'
+	String latency({required Object ms}) => 'Round trip ${ms} ms';
+
+	/// en: 'Probe failed'
+	String get latencyFailed => 'Probe failed';
+
+	/// en: 'Measure'
+	String get measure => 'Measure';
+
+	/// en: 'Re-race endpoints'
+	String get reRace => 'Re-race endpoints';
+
+	/// en: 'Racing endpoints…'
+	String get reRaceRunning => 'Racing endpoints…';
+
+	/// en: 'Endpoints re-raced'
+	String get reRaceDone => 'Endpoints re-raced';
+
+	/// en: 'No servers are connected'
+	String get empty => 'No servers are connected';
+}
+
 // Path: common.ratingSource
 class Translations$common$ratingSource$en {
 	Translations$common$ratingSource$en.internal(this._root);
@@ -7503,6 +7573,7 @@ extension on Translations {
 			'screens.subtitleStyling' => 'Subtitle Styling',
 			'screens.mpvConfig' => 'mpv.conf',
 			'screens.logs' => 'Logs',
+			'screens.serverHealth' => 'Server health',
 			'update.available' => 'Update Available',
 			'update.versionAvailable' => ({required Object version}) => 'Version ${version} is available',
 			'update.currentVersion' => ({required Object version}) => 'Current: ${version}',
@@ -7916,9 +7987,9 @@ extension on Translations {
 			'fileInfo.codecTag' => 'Codec Tag',
 			'fileInfo.resolution' => 'Resolution',
 			'fileInfo.codedResolution' => 'Coded Resolution',
-			'fileInfo.bitrate' => 'Bitrate',
 			_ => null,
 		} ?? switch (path) {
+			'fileInfo.bitrate' => 'Bitrate',
 			'fileInfo.frameRate' => 'Frame Rate',
 			'fileInfo.rotation' => 'Rotation',
 			'fileInfo.comment' => 'Comment',
@@ -8430,9 +8501,9 @@ extension on Translations {
 			'accountPreferences.watchedIndicatorOptions.shows' => 'TV shows only',
 			'accountPreferences.mediaReviewsVisibility' => 'Ratings & reviews',
 			'accountPreferences.mediaReviewsOptions.usersAndCritics' => 'Users and critics',
-			'accountPreferences.mediaReviewsOptions.usersOnly' => 'Users only',
 			_ => null,
 		} ?? switch (path) {
+			'accountPreferences.mediaReviewsOptions.usersOnly' => 'Users only',
 			'accountPreferences.mediaReviewsOptions.criticsOnly' => 'Critics only',
 			'accountPreferences.mediaReviewsOptions.nobody' => 'Hidden',
 			'discover.title' => 'Discover',
@@ -8944,9 +9015,9 @@ extension on Translations {
 			'watchTogether.transfer' => 'Transfer',
 			'watchTogether.hostChangedTo' => ({required Object name}) => '${name} is now the host',
 			'watchTogether.youAreNowHost' => 'You are now the host',
-			'watchTogether.hostTransferFailed' => ({required Object name}) => 'Couldn\'t make ${name} the host',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.hostTransferFailed' => ({required Object name}) => 'Couldn\'t make ${name} the host',
 			'watchTogether.watchingWithOthers' => 'Watching with others',
 			'watchTogether.endSession' => 'End Session',
 			'watchTogether.leaveSession' => 'Leave Session',
@@ -9458,9 +9529,9 @@ extension on Translations {
 			'seerr.noStoredCredentials' => 'No stored credentials are available to sign in again',
 			'seerr.signInRejected' => 'Sign-in was rejected',
 			'seerr.noSessionCookie' => 'Seerr did not issue a session cookie',
-			'seerr.freshCookieRejected' => 'Seerr rejected the new session cookie',
 			_ => null,
 		} ?? switch (path) {
+			'seerr.freshCookieRejected' => 'Seerr rejected the new session cookie',
 			'seerr.noUserInformation' => 'Seerr did not return user information',
 			'seerr.sessionRejectedAfterReauth' => 'The session was rejected after signing in again',
 			'seerr.permissionDenied' => 'Seerr denied this action: your account no longer has the required permission',
@@ -9550,6 +9621,25 @@ extension on Translations {
 			'addServer.redirectDifferentHost' => ({required Object product}) => 'The server redirected to a different host. Enter the final ${product} URL directly.',
 			'addServer.redirectInsecure' => 'The server redirected from HTTPS to an insecure URL',
 			'addServer.redirectUnsupportedEnterFinal' => ({required Object product}) => 'The server redirected to an unsupported URL. Enter the final ${product} URL directly.',
+			'serverHealth.title' => 'Server health',
+			'serverHealth.subtitle' => 'Which endpoint each server is on, and how it is answering',
+			'serverHealth.linkLocal' => 'On your network',
+			'serverHealth.linkRemote' => 'Direct, over the internet',
+			'serverHealth.linkRelay' => 'Through the Plex relay',
+			'serverHealth.linkRelayWarning' => 'Relayed streams are capped around 2 Mbps, which looks like a bad connection',
+			'serverHealth.linkUnknown' => 'Endpoint not described by the account',
+			'serverHealth.statusOnline' => 'Answering',
+			'serverHealth.statusOffline' => 'Not answering',
+			'serverHealth.statusAuthError' => 'Sign-in rejected',
+			'serverHealth.statusHidden' => 'Hidden from this profile',
+			'serverHealth.relayEscapePending' => 'Waiting to retry a better endpoint',
+			'serverHealth.latency' => ({required Object ms}) => 'Round trip ${ms} ms',
+			'serverHealth.latencyFailed' => 'Probe failed',
+			'serverHealth.measure' => 'Measure',
+			'serverHealth.reRace' => 'Re-race endpoints',
+			'serverHealth.reRaceRunning' => 'Racing endpoints…',
+			'serverHealth.reRaceDone' => 'Endpoints re-raced',
+			'serverHealth.empty' => 'No servers are connected',
 			_ => null,
 		};
 	}

@@ -107,7 +107,8 @@
     "switchProfile": "Switch Profile",
     "subtitleStyling": "Subtitle Styling",
     "mpvConfig": "mpv.conf",
-    "logs": "Logs"
+    "logs": "Logs",
+    "serverHealth": "Server health"
   },
   "update": {
     "available": "Update Available",
@@ -2347,5 +2348,26 @@
     "redirectDifferentHost": "The server redirected to a different host. Enter the final ${product} URL directly.",
     "redirectInsecure": "The server redirected from HTTPS to an insecure URL",
     "redirectUnsupportedEnterFinal": "The server redirected to an unsupported URL. Enter the final ${product} URL directly."
+  },
+  "serverHealth": {
+    "title": "Server health",
+    "subtitle": "Which endpoint each server is on, and how it is answering",
+    "linkLocal": "On your network",
+    "linkRemote": "Direct, over the internet",
+    "linkRelay": "Through the Plex relay",
+    "linkRelayWarning": "Relayed streams are capped around 2 Mbps, which looks like a bad connection",
+    "linkUnknown": "Endpoint not described by the account",
+    "statusOnline": "Answering",
+    "statusOffline": "Not answering",
+    "statusAuthError": "Sign-in rejected",
+    "statusHidden": "Hidden from this profile",
+    "relayEscapePending": "Waiting to retry a better endpoint",
+    "latency": "Round trip ${ms} ms",
+    "latencyFailed": "Probe failed",
+    "measure": "Measure",
+    "reRace": "Re-race endpoints",
+    "reRaceRunning": "Racing endpoints…",
+    "reRaceDone": "Endpoints re-raced",
+    "empty": "No servers are connected"
   }
 }
