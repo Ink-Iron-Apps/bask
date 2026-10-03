@@ -55,6 +55,19 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
   }
 
   Future<void> _togglePIPMode() async {
+    // Windows and Linux have no picture-in-picture to ask for, so the same
+    // button shrinks the window and pins it above everything instead. The
+    // picture keeps playing in the surface it was already in.
+    if (DesktopMiniPlayer.isSupported) {
+      final dims = await _getVideoDimensions();
+      final width = dims.$1;
+      final height = dims.$2;
+      // Shape it to the video when the player knows; 16:9 until it does.
+      final ratio = (width != null && height != null && height > 0) ? width / height : 16 / 9;
+      await DesktopMiniPlayer.toggle(aspectRatio: ratio);
+      return;
+    }
+
     if (!_pipInitialized) return;
 
     final supported = await PipService.isSupported();
