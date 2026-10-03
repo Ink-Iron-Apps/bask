@@ -41,7 +41,7 @@ void main() {
     expect(result.solution!.speed, closeTo(ratio, 0.001));
     expect(result.solution!.delayMs, closeTo(shift, 60));
     // What the viewer will actually see, end to end.
-    expect(displayedSubtitleTime(result.solution!, ((4500000 - shift) * ratio).round()), closeTo(4500000, 100));
+    expect(result.solution!.displayedTime(((4500000 - shift) * ratio).round()), closeTo(4500000, 100));
   });
 
   test('marks given in either order solve the same', () {
