@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.AudioManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -310,6 +312,40 @@ class MainActivity : FlutterActivity() {
   }
 
   /** Hardware capability signals used by Dart to pick the visual-effects tier. */
+  /**
+   * Whether the active network charges for data, and what carries it.
+   *
+   * connectivity_plus reports transports, which a VPN hides: a tunnel over
+   * cellular can come back as neither WiFi nor cellular, and the app's
+   * "download on WiFi only" gate then saw an unknown link and allowed the
+   * queue through. [ConnectivityManager.isActiveNetworkMetered] is the signal
+   * WorkManager's own UNMETERED constraint uses, and Android derives it for a
+   * VPN from the network underneath, so it answers the question the gate is
+   * actually asking.
+   *
+   * Transports are reported alongside it for diagnosis only.
+   */
+  private fun getNetworkMeteredState(): Map<String, Any?> {
+    val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+      ?: return mapOf("available" to false)
+
+    return try {
+      val caps = cm.activeNetwork?.let { cm.getNetworkCapabilities(it) }
+      mapOf(
+        "available" to true,
+        "metered" to cm.isActiveNetworkMetered,
+        "hasWifi" to (caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true),
+        "hasCellular" to (caps?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true),
+        "hasEthernet" to (caps?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true),
+        "hasVpn" to (caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true),
+        "connected" to (caps != null),
+      )
+    } catch (e: Exception) {
+      Log.w(TAG, "Could not read the network metered state", e)
+      mapOf("available" to false)
+    }
+  }
+
   private fun getPerformanceSignals(): Map<String, Any> {
     val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     val memoryInfo = ActivityManager.MemoryInfo()
@@ -748,6 +784,7 @@ class MainActivity : FlutterActivity() {
         // actually runs rather than guessing from the release's asset list.
         "getSupportedAbis" -> result.success(android.os.Build.SUPPORTED_ABIS.toList())
         "getPerformanceSignals" -> result.success(getPerformanceSignals())
+        "getNetworkMeteredState" -> result.success(getNetworkMeteredState())
         "getVideoDecodeCapabilities" -> result.success(MediaCodecQuery.hardwareVideoDecodeSupport())
         "getBackgroundWorkSignals" -> result.success(
           BackgroundWorkClassifier.toMap(BackgroundWorkDiagnostics.read(this))

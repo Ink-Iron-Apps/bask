@@ -2115,6 +2115,13 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     return deletedTitles;
   }
 
+  /// Re-apply the WiFi-only preference to queued and running downloads.
+  ///
+  /// Called when the preference changes: the per-task flag is fixed at queue
+  /// time, so without this a queue filled on WiFi keeps permission to run on
+  /// cellular after the user says not to.
+  Future<void> applyWifiOnlyRequirement() => _downloadManager.applyWifiOnlyRequirement();
+
   /// Sync rules the user made, for the active profile (profile-scoped
   /// globalKey -> SyncRuleItem).
   ///

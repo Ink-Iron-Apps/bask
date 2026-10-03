@@ -40,6 +40,7 @@ import '../utils/connectivity_link_type.dart';
 import '../utils/global_key_utils.dart';
 import '../utils/network_failure.dart';
 import 'download_stall_watchdog.dart';
+import 'network_metered_probe.dart';
 import '../utils/storage_failure.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -294,8 +295,26 @@ class DownloadManagerService {
   static Future<bool> shouldBlockDownloadOnCellularWith(List<ConnectivityResult> connectivity) async {
     final settings = await SettingsService.getInstance();
     if (!settings.read(SettingsService.downloadOnWifiOnly)) return false;
+
+    // The platform's own answer first. connectivity_plus reports transports,
+    // which a VPN hides — a tunnel over cellular arrives as neither WiFi nor
+    // cellular — so reasoning from transports let a WiFi-only device download
+    // over data for as long as the tunnel was up.
+    final platform = await NetworkMeteredProbe.read();
+    if (platform?.metered != null) {
+      if (platform!.metered!) {
+        appLogger.i('Downloads: blocked, the platform reports a metered link ($platform)');
+        return true;
+      }
+      return false;
+    }
+
     // An empty snapshot is not cellular-only, so it needs no separate guard.
-    return connectivity.isCellularOnly;
+    final blocked = connectivity.isCellularOnly;
+    if (!blocked) {
+      appLogger.d('Downloads: WiFi-only is on and the link reads as ${connectivity.map((c) => c.name).toList()}');
+    }
+    return blocked;
   }
 
   /// Future that completes when interrupted download recovery finishes.
@@ -969,7 +988,39 @@ class DownloadManagerService {
     // Deliver status updates from iOS background-to-foreground transitions
     await FileDownloader().resumeFromBackground();
 
+    await applyWifiOnlyRequirement();
+
     _fileDownloaderInitialized = true;
+  }
+
+  /// Push the WiFi-only preference down as a global requirement.
+  ///
+  /// Each task already carries the preference as it stood when it was queued,
+  /// which is not the same thing: a queue filled on WiFi keeps permission to
+  /// run on cellular, so turning the setting on changed nothing for anything
+  /// already waiting — the usual case, since a sync rule fills the queue long
+  /// before someone leaves the house. The global requirement reschedules what
+  /// is enqueued and applies to what is running, so the answer to "may this
+  /// use cellular" is read now rather than remembered from queue time.
+  ///
+  /// `asSetByTask` rather than `forNoTasks` when the preference is off: off
+  /// means "no opinion", and a task queued with its own requirement — a
+  /// future per-item choice — keeps it.
+  Future<void> applyWifiOnlyRequirement() async {
+    if (_skipDownloadsUnsupported('WiFi-only requirement')) return;
+    try {
+      final settings = await SettingsService.getInstance();
+      final wifiOnly = settings.read(SettingsService.downloadOnWifiOnly);
+      await FileDownloader().requireWiFi(
+        wifiOnly ? RequireWiFi.forAllTasks : RequireWiFi.asSetByTask,
+        rescheduleRunningTasks: true,
+      );
+      appLogger.i('Downloads: WiFi-only requirement is now ${wifiOnly ? 'forAllTasks' : 'asSetByTask'}');
+    } catch (e, stackTrace) {
+      // Platform-dependent: the desktop implementations have no such
+      // constraint. The per-task flag and the queue-time gate still stand.
+      appLogger.w('Could not apply the WiFi-only download requirement', error: e, stackTrace: stackTrace);
+    }
   }
 
   /// Recover downloads that were interrupted when the app was killed.
