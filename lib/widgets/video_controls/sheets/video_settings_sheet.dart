@@ -16,6 +16,8 @@ import 'package:provider/provider.dart';
 
 import '../../../models/shader_preset.dart';
 import '../../../media/playback_rate.dart';
+import '../../../media/transcode_explanation.dart';
+import '../../../models/transcode_quality_preset.dart';
 import '../../../mpv/mpv.dart';
 import '../../../mpv/player/player_native.dart';
 import '../widgets/performance_overlay/performance_stats_service.dart';
@@ -734,6 +736,45 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     return t.videoControls.versionColumnHeader;
   }
 
+  /// The reason line, or null when there is nothing to explain.
+  String? _transcodeExplanationLine() {
+    if (!_state.isTranscoding) return null;
+    final explanation = _state.transcodeExplanation;
+    if (explanation == null || explanation.isEmpty) return null;
+
+    final reasons = explanation.reasons.map(_transcodeReasonLabel).toList();
+    final serverText = explanation.serverText;
+    return [
+      if (reasons.isNotEmpty) reasons.join(', '),
+      // Verbatim, below the classification: Plex answers in prose and a
+      // sentence this build cannot parse is the one most worth reading.
+      if (serverText != null && serverText.isNotEmpty) serverText,
+    ].join('\n');
+  }
+
+  String _transcodeReasonLabel(TranscodeReasonKind kind) => switch (kind) {
+    TranscodeReasonKind.videoCodec => t.videoSettings.transcodeReasonVideoCodec,
+    TranscodeReasonKind.audioCodec => t.videoSettings.transcodeReasonAudioCodec,
+    TranscodeReasonKind.container => t.videoSettings.transcodeReasonContainer,
+    TranscodeReasonKind.bitrate => t.videoSettings.transcodeReasonBitrate,
+    TranscodeReasonKind.resolution => t.videoSettings.transcodeReasonResolution,
+    TranscodeReasonKind.subtitleBurnIn => t.videoSettings.transcodeReasonSubtitleBurnIn,
+    TranscodeReasonKind.unknown => t.videoSettings.transcodeReasonUnknown,
+  };
+
+  /// Whether switching to the original would actually help.
+  ///
+  /// Only when the cap is ours to lift: a transcode forced by an unsupported
+  /// codec happens at Original too, and offering it there would be advice
+  /// that does not work.
+  bool _canPlayOriginalInstead() {
+    final explanation = _state.transcodeExplanation;
+    return explanation != null &&
+        explanation.causedOnlyByOurCap &&
+        !_state.selectedQualityPreset.isOriginal &&
+        _state.onSwitchQualityPreset != null;
+  }
+
   Widget _buildMenuView() {
     final sleepTimer = SleepTimerService();
     final isDesktop = PlatformDetector.isDesktop(context);
@@ -942,6 +983,29 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
               _state.onToggleAmbientLighting?.call();
               OverlaySheetController.of(context).close();
             },
+          ),
+
+        // Why the server is re-encoding, and the one remedy that lives in the
+        // app: the quality cap. The server's own words are shown underneath
+        // whatever this build could classify, because a reason it does not
+        // recognize is still worth reading.
+        if (_transcodeExplanationLine() case final String line)
+          FocusableListTile(
+            leading: AppIcon(Symbols.info_rounded, fill: 1, color: tokens(context).textMuted),
+            title: Text(t.videoSettings.transcodeWhy),
+            subtitle: Text(line, style: TextStyle(color: tokens(context).textMuted, fontSize: 12)),
+            onTap: _canPlayOriginalInstead()
+                ? () {
+                    OverlaySheetController.of(context).close();
+                    _state.onSwitchQualityPreset?.call(TranscodeQualityPreset.original);
+                  }
+                : null,
+            trailing: _canPlayOriginalInstead()
+                ? Text(
+                    t.videoSettings.transcodePlayOriginal,
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 12),
+                  )
+                : null,
           ),
 
         // Performance Overlay Toggle

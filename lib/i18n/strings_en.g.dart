@@ -4949,6 +4949,36 @@ class Translations$videoSettings$en {
 	/// en: 'Could not upload the report'
 	String get reportPlaybackProblemFailed => 'Could not upload the report';
 
+	/// en: 'Why this is transcoding'
+	String get transcodeWhy => 'Why this is transcoding';
+
+	/// en: 'the video codec is not supported here'
+	String get transcodeReasonVideoCodec => 'the video codec is not supported here';
+
+	/// en: 'the audio codec is not supported here'
+	String get transcodeReasonAudioCodec => 'the audio codec is not supported here';
+
+	/// en: 'the file container is not supported here'
+	String get transcodeReasonContainer => 'the file container is not supported here';
+
+	/// en: 'your quality setting caps the bitrate'
+	String get transcodeReasonBitrate => 'your quality setting caps the bitrate';
+
+	/// en: 'the resolution is above what this device asked for'
+	String get transcodeReasonResolution => 'the resolution is above what this device asked for';
+
+	/// en: 'the subtitle has to be burned into the picture'
+	String get transcodeReasonSubtitleBurnIn => 'the subtitle has to be burned into the picture';
+
+	/// en: 'the server did not say'
+	String get transcodeReasonUnknown => 'the server did not say';
+
+	/// en: 'Playing the original file'
+	String get transcodeDirectPlay => 'Playing the original file';
+
+	/// en: 'Play the original instead'
+	String get transcodePlayOriginal => 'Play the original instead';
+
 	/// en: 'Dolby Atmos'
 	String get audioOutputDolbyAtmos => 'Dolby Atmos';
 
@@ -9309,6 +9339,16 @@ extension on Translations {
 			'videoSettings.reportPlaybackProblemDescription' => 'Uploads what the player is doing right now — codecs, dropped frames, buffer state — along with the recent log, and gives you an ID to quote.',
 			'videoSettings.reportPlaybackProblemSend' => 'Upload',
 			'videoSettings.reportPlaybackProblemFailed' => 'Could not upload the report',
+			'videoSettings.transcodeWhy' => 'Why this is transcoding',
+			'videoSettings.transcodeReasonVideoCodec' => 'the video codec is not supported here',
+			'videoSettings.transcodeReasonAudioCodec' => 'the audio codec is not supported here',
+			'videoSettings.transcodeReasonContainer' => 'the file container is not supported here',
+			'videoSettings.transcodeReasonBitrate' => 'your quality setting caps the bitrate',
+			'videoSettings.transcodeReasonResolution' => 'the resolution is above what this device asked for',
+			'videoSettings.transcodeReasonSubtitleBurnIn' => 'the subtitle has to be burned into the picture',
+			'videoSettings.transcodeReasonUnknown' => 'the server did not say',
+			'videoSettings.transcodeDirectPlay' => 'Playing the original file',
+			'videoSettings.transcodePlayOriginal' => 'Play the original instead',
 			'videoSettings.audioOutputDolbyAtmos' => 'Dolby Atmos',
 			'videoSettings.audioOutputDolbyAudio' => 'Dolby Audio',
 			'videoSettings.audioOutputSurround' => 'Surround',
@@ -9519,6 +9559,8 @@ extension on Translations {
 			'seerr.statusRequested' => 'Requested',
 			'seerr.statusProcessing' => 'Processing',
 			'seerr.statusBlocklisted' => 'Blocklisted',
+			_ => null,
+		} ?? switch (path) {
 			'seerr.couldNotReach' => ({required Object url, required Object error}) => 'Could not reach ${url}: ${error}',
 			'seerr.noInstanceAtUrl' => ({required Object url, required Object status}) => 'No Seerr instance at ${url} (HTTP ${status})',
 			'seerr.behindAuthProxy' => 'An authenticating reverse proxy (SSO or HTTP auth) answered instead of Seerr. Plezy cannot sign in through it: let Seerr\'s /api/v1 path bypass the proxy for this app, or use an address that reaches Seerr directly.',
@@ -9529,8 +9571,6 @@ extension on Translations {
 			'seerr.noStoredCredentials' => 'No stored credentials are available to sign in again',
 			'seerr.signInRejected' => 'Sign-in was rejected',
 			'seerr.noSessionCookie' => 'Seerr did not issue a session cookie',
-			_ => null,
-		} ?? switch (path) {
 			'seerr.freshCookieRejected' => 'Seerr rejected the new session cookie',
 			'seerr.noUserInformation' => 'Seerr did not return user information',
 			'seerr.sessionRejectedAfterReauth' => 'The session was rejected after signing in again',

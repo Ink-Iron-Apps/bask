@@ -1,6 +1,7 @@
 import '../exceptions/media_server_exceptions.dart';
 import '../i18n/strings.g.dart';
 import '../media/media_item.dart';
+import '../media/transcode_explanation.dart';
 import '../media/media_source_info.dart';
 import '../media/media_version.dart';
 import '../models/audio_quality_preset.dart';
@@ -132,6 +133,13 @@ class PlaybackInitializationResult {
   /// Effective media version after backend clamping/fallback.
   final int selectedMediaIndex;
 
+  /// Why the server is transcoding, when it said.
+  ///
+  /// Both backends explain themselves and the app used to discard it: Plex in
+  /// prose on its decision response, MediaBrowser as a list of reasons on the
+  /// playback info. Null when nothing is transcoding or the server was silent.
+  final TranscodeExplanation? transcodeExplanation;
+
   /// Stable source id of the effective media version, when known without a
   /// version list. Set by the offline path (where [availableVersions] is
   /// empty) so the session reflects the downloaded version actually played,
@@ -165,6 +173,7 @@ class PlaybackInitializationResult {
     this.playMethod,
     this.selectedMediaIndex = 0,
     this.selectedMediaSourceId,
+    this.transcodeExplanation,
   });
 }
 
