@@ -323,7 +323,7 @@ extension _PlexVideoControlsKeyEventMethods on _PlexVideoControlsState {
       // key into nothing. This is the same key that just switched the app into
       // keyboard mode, so focus has to become visible or the two diverge.
       if (_focusNode.hasPrimaryFocus) {
-        _desktopControlsKey.currentState?.requestPlayPauseFocus();
+        _focusChromeEntryPoint();
       }
       return KeyEventResult.handled;
     }
