@@ -35,10 +35,7 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
     if (!videoPlayerNavigationPreference()) return false;
     final isMobile = PlatformDetector.isMobile(context) && !PlatformDetector.isTV();
     if (isMobile || !InputModeTracker.isKeyboardMode(context, listen: false)) return false;
-    final controls = _desktopControlsKey.currentState;
-    if (controls == null) return false;
-    controls.requestPlayPauseFocus();
-    return true;
+    return _focusChromeEntryPoint();
   }
 
   /// Listen to playback state changes to manage auto-hide timer
@@ -239,13 +236,40 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
   }
 
   /// Show controls and optionally focus play/pause on keyboard input (desktop only)
+  /// Where focus lands when the chrome comes up on its own — a D-pad press, a
+  /// Tab, a remote OK.
+  ///
+  /// The skip button takes it whenever it is showing. It is the only control
+  /// in the chrome with a deadline on it, and a viewer whose skip button hid
+  /// before they got to it is raising the chrome precisely to get it back;
+  /// landing on Play/Pause instead means arrowing across the OSD while the
+  /// intro plays on. Everything else still starts on Play/Pause.
+  ///
+  /// Returns false when nothing in the chrome could take focus, so callers can
+  /// fall back the way they did before.
+  bool _focusChromeEntryPoint() {
+    final playNext = widget.playNextFocusNode;
+    if (playNext != null) {
+      playNext.requestFocus();
+      return true;
+    }
+    if (_isSkipMarkerButtonVisible) {
+      _skipMarkerFocusNode.requestFocus();
+      return true;
+    }
+    final controls = _desktopControlsKey.currentState;
+    if (controls == null) return false;
+    controls.requestPlayPauseFocus();
+    return true;
+  }
+
   void _showControlsWithFocus({bool requestFocus = true}) {
     widget.chromeController.show();
 
     if (requestFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _desktopControlsKey.currentState?.requestPlayPauseFocus();
+        _focusChromeEntryPoint();
       });
     } else {
       // When not requesting focus on play/pause, ensure main focus node keeps focus
