@@ -126,6 +126,20 @@ void main() {
       await settings.resetAllSettings();
       expect(settings.read(SettingsService.episodeAction), EpisodeAction.play);
     });
+
+    test('defaults to details on a TV, where no long press is discoverable', () async {
+      addTearDown(TvDetectionService.debugReset);
+      await TvDetectionService.getInstance(forceTv: true);
+      final settings = await SettingsService.getInstance();
+
+      expect(settings.read(SettingsService.episodeAction), EpisodeAction.details);
+
+      await settings.write(SettingsService.episodeAction, EpisodeAction.play);
+      expect(settings.read(SettingsService.episodeAction), EpisodeAction.play);
+
+      await settings.resetAllSettings();
+      expect(settings.read(SettingsService.episodeAction), EpisodeAction.details);
+    });
   });
 
   group('SettingsService skip marker modes', () {

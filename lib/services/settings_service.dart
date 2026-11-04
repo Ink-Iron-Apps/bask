@@ -979,10 +979,17 @@ class SettingsService extends BaseSharedPreferencesService {
     values: ContinueWatchingAction.values,
     defaultValue: ContinueWatchingAction.play,
   );
+
+  /// A remote has no long-press affordance a viewer can see, so on TV an
+  /// episode opens its own screen — where play, the watched toggle and the
+  /// rest are focusable buttons. Pointer platforms keep playing on activation;
+  /// right-click and long-press already reach the same actions there.
+  static EpisodeAction _tvAwareEpisodeActionDefault() =>
+      PlatformDetector.isTV() ? EpisodeAction.details : EpisodeAction.play;
   static const episodeAction = EnumPref<EpisodeAction>(
     'episode_action',
     values: EpisodeAction.values,
-    defaultValue: EpisodeAction.play,
+    defaultValueProvider: _tvAwareEpisodeActionDefault,
   );
   static const mpvConfigText = _MpvConfigTextPref();
 
