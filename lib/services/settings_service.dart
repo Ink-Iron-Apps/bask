@@ -979,6 +979,7 @@ class SettingsService extends BaseSharedPreferencesService {
     values: ContinueWatchingAction.values,
     defaultValue: ContinueWatchingAction.play,
   );
+
   /// A remote has no long-press affordance a viewer can see, so on TV an
   /// episode opens its own screen — where play, the watched toggle and the
   /// rest are focusable buttons. Pointer platforms keep playing on activation;
