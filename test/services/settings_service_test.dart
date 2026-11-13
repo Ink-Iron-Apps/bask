@@ -115,21 +115,7 @@ void main() {
   });
 
   group('SettingsService episode action', () {
-    test('defaults to play and resets to play', () async {
-      final settings = await SettingsService.getInstance();
-
-      expect(settings.read(SettingsService.episodeAction), EpisodeAction.play);
-
-      await settings.write(SettingsService.episodeAction, EpisodeAction.details);
-      expect(settings.read(SettingsService.episodeAction), EpisodeAction.details);
-
-      await settings.resetAllSettings();
-      expect(settings.read(SettingsService.episodeAction), EpisodeAction.play);
-    });
-
-    test('defaults to details on a TV, where no long press is discoverable', () async {
-      addTearDown(TvDetectionService.debugReset);
-      await TvDetectionService.getInstance(forceTv: true);
+    test('defaults to details and resets to details', () async {
       final settings = await SettingsService.getInstance();
 
       expect(settings.read(SettingsService.episodeAction), EpisodeAction.details);
@@ -138,6 +124,14 @@ void main() {
       expect(settings.read(SettingsService.episodeAction), EpisodeAction.play);
 
       await settings.resetAllSettings();
+      expect(settings.read(SettingsService.episodeAction), EpisodeAction.details);
+    });
+
+    test('keeps the details default on a TV, where no long press is discoverable', () async {
+      addTearDown(TvDetectionService.debugReset);
+      await TvDetectionService.getInstance(forceTv: true);
+      final settings = await SettingsService.getInstance();
+
       expect(settings.read(SettingsService.episodeAction), EpisodeAction.details);
     });
   });
