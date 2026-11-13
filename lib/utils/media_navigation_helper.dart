@@ -183,7 +183,7 @@ Future<MediaNavigationResult> navigateToMediaItem(
   }
   final settings = SettingsService.instanceOrNull;
   final continueWatchingAction = settings?.read(SettingsService.continueWatchingAction) ?? ContinueWatchingAction.play;
-  final episodeAction = settings?.read(SettingsService.episodeAction) ?? EpisodeAction.play;
+  final episodeAction = settings?.read(SettingsService.episodeAction) ?? EpisodeAction.details;
   final shouldOpenContinueWatchingDetails = playDirectly && continueWatchingAction == ContinueWatchingAction.details;
   final shouldOpenEpisodeDetails = shouldOpenEpisodeDetailsForActivation(
     playDirectly: playDirectly,

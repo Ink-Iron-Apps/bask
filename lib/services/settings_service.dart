@@ -980,16 +980,16 @@ class SettingsService extends BaseSharedPreferencesService {
     defaultValue: ContinueWatchingAction.play,
   );
 
-  /// A remote has no long-press affordance a viewer can see, so on TV an
-  /// episode opens its own screen — where play, the watched toggle and the
-  /// rest are focusable buttons. Pointer platforms keep playing on activation;
-  /// right-click and long-press already reach the same actions there.
-  static EpisodeAction _tvAwareEpisodeActionDefault() =>
-      PlatformDetector.isTV() ? EpisodeAction.details : EpisodeAction.play;
+  /// Activating an episode opens its own screen, where play, the watched
+  /// toggle and the rest are focusable buttons, rather than starting playback
+  /// outright. A remote has no long-press affordance a viewer can see, and on
+  /// a pointer platform the per-episode screen is what viewers coming from
+  /// Plex expect, so it is the default everywhere. Right-click and long-press
+  /// still reach the same actions directly from the card.
   static const episodeAction = EnumPref<EpisodeAction>(
     'episode_action',
     values: EpisodeAction.values,
-    defaultValueProvider: _tvAwareEpisodeActionDefault,
+    defaultValue: EpisodeAction.details,
   );
   static const mpvConfigText = _MpvConfigTextPref();
 
