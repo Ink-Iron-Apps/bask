@@ -114,6 +114,22 @@ void main() {
     });
   });
 
+  group('SettingsService audio normalization', () {
+    test('defaults on, because a cinema mix buries dialogue under the effects', () async {
+      final settings = await SettingsService.getInstance();
+
+      expect(settings.read(SettingsService.audioNormalization), isTrue);
+
+      // Off has to stick: it is the escape hatch for a receiver that wants the
+      // bitstream, which normalization force-decodes.
+      await settings.write(SettingsService.audioNormalization, false);
+      expect(settings.read(SettingsService.audioNormalization), isFalse);
+
+      await settings.resetAllSettings();
+      expect(settings.read(SettingsService.audioNormalization), isTrue);
+    });
+  });
+
   group('SettingsService episode action', () {
     test('defaults to details and resets to details', () async {
       final settings = await SettingsService.getInstance();
