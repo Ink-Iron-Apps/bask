@@ -376,6 +376,8 @@
     "audioPassthrough": "Audio Passthrough",
     "audioPassthroughDescription": "Send Dolby/DTS audio to your receiver or TV without re-encoding, preserving surround sound. Turn off if you have no sound.",
     "audioPassthroughDescriptionAppleTv": "Use Apple's native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.",
+    "audioNormalization": "Normalize Loudness",
+    "audioNormalizationDescription": "Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.",
     "audioDownmix": "Downmix to Stereo",
     "audioDownmixDescription": "Mix surround audio down to two channels for stereo speakers or headphones",
     "downmixCenterBoost": "Center Channel Boost",
