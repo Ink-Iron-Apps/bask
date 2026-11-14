@@ -72,6 +72,7 @@ import '../utils/formatters.dart';
 import '../utils/scroll_utils.dart';
 import '../utils/dialogs.dart';
 import '../utils/snackbar_helper.dart';
+import '../utils/media_navigation_helper.dart';
 import '../utils/video_player_navigation.dart';
 import '../widgets/app_bar_back_button.dart';
 import '../widgets/desktop_app_bar.dart';
@@ -1167,7 +1168,20 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       ));
     }
 
-    if (metadata.year != null) addTextChip('${metadata.year}', 0);
+    // An episode's own screen: the title is the episode, so the show name and
+    // the season/episode number identify it from the chip strip. Both are
+    // priority 0 — the strip may shed a rating before it sheds what the
+    // viewer is looking at.
+    if (metadata.isEpisode) {
+      if (metadata.grandparentTitle != null) addTextChip(metadata.grandparentTitle!, 0);
+      final episodeLabel = formatSeasonEpisodeLabel(metadata.parentIndex, metadata.index);
+      if (episodeLabel != null) addTextChip(episodeLabel, 0);
+    }
+    if (metadata.isEpisode && metadata.originallyAvailableAt != null) {
+      addTextChip(formatAbbreviatedDate(metadata.originallyAvailableAt!), 1);
+    } else if (metadata.year != null) {
+      addTextChip('${metadata.year}', 0);
+    }
     if (metadata case PlexMediaItem(:final editionTitle?)) addTextChip(editionTitle, 3);
     if (metadata.contentRating != null) addTextChip(formatContentRating(metadata.contentRating!), 2);
     if (metadata.durationMs != null) addTextChip(formatDurationTextual(metadata.durationMs!), 1);
@@ -2837,6 +2851,21 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
               : null,
           localPosterPath: localPosterPath,
           onTap: () async {
+            // The list is where episodes are actually activated, so this is
+            // where the Episode Action setting has to be read. It used to play
+            // unconditionally, which left the setting with no effect on the
+            // one surface that matters (#2338).
+            final episodeAction =
+                SettingsService.instanceOrNull?.read(SettingsService.episodeAction) ?? EpisodeAction.details;
+            if (episodeAction == EpisodeAction.details) {
+              await navigateToMediaItemDetails(
+                context,
+                episode,
+                isOffline: widget.isOffline,
+                onRefresh: (source) => unawaited(_refreshItemInPlace(source)),
+              );
+              return;
+            }
             await navigateToVideoPlayerWithRefresh(
               context,
               metadata: episode,
@@ -3652,7 +3681,9 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final spotlightTop = (size.height * 0.08).clamp(56.0 * detailScale, 110.0 * detailScale).toDouble();
     final rawRailHeight = _estimateTvDetailRailHeight(size, detailHubs);
     if (!_tvDetailRevealed && _isTvDetailReadyToReveal(metadata)) {
-      _scheduleTvDetailReveal(rawRailHeight, focusPrimaryAction: metadata.isMovie);
+      // An episode's own screen has no season or episode rail to land on, so
+      // focus belongs on Play exactly as it does for a movie.
+      _scheduleTvDetailReveal(rawRailHeight, focusPrimaryAction: metadata.isMovie || metadata.isEpisode);
     }
     final stableRailHeight = _tvDetailStableRailHeight;
     final railHeight = stableRailHeight == null || rawRailHeight > stableRailHeight ? rawRailHeight : stableRailHeight;
@@ -3994,6 +4025,12 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final lineMetadata = _tvDetailFocusedEpisode.value ?? metadata;
     final parts = <MetadataLinePart>[];
 
+    // Gated on the subject, not on [lineMetadata]: a show's hero already has
+    // the show name as its title, and only an episode's own screen has given
+    // that slot to the episode.
+    if (metadata.isEpisode && metadata.grandparentTitle != null) {
+      parts.add(MetadataLineText(metadata.grandparentTitle!, dropPriority: 0));
+    }
     final episodeLabel = formatSeasonEpisodeLabel(lineMetadata.parentIndex, lineMetadata.index);
     if (lineMetadata.isEpisode && episodeLabel != null) parts.add(MetadataLineText(episodeLabel, dropPriority: 0));
     if (lineMetadata.isEpisode && lineMetadata.originallyAvailableAt != null) {
@@ -4062,7 +4099,13 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     required Widget Function(BuildContext context, String title) titleBuilder,
     Alignment alignment = Alignment.centerLeft,
   }) {
-    Widget titleFallback(BuildContext context) => titleBuilder(context, metadata.displayTitle);
+    // On an episode's own screen the headline is the episode. `displayTitle`
+    // resolves to the show name for an episode, and the show's clear logo
+    // would crowd the episode out of its own hero entirely, so both are
+    // skipped here — the show name rides the metadata line instead.
+    final isEpisodeSubject = metadata.isEpisode;
+    final headline = isEpisodeSubject ? (metadata.title ?? metadata.displayTitle) : metadata.displayTitle;
+    Widget titleFallback(BuildContext context) => titleBuilder(context, headline);
     // The hero scrim washes the backdrop toward the scaffold background, so a
     // light theme needs light-toned clear logos recolored to stay visible.
     final theme = Theme.of(context);
@@ -4071,7 +4114,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       foreground: theme.colorScheme.onSurface,
     );
 
-    if (metadata.clearLogoPath == null) {
+    if (isEpisodeSubject || metadata.clearLogoPath == null) {
       return SizedBox(width: width, height: height, child: titleFallback(context));
     }
 
