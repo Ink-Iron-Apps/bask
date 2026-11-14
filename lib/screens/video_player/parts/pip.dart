@@ -112,6 +112,10 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
       },
     );
     route.offstage = true;
+    // Rebuilt explicitly rather than leaning on the route's own setState: the
+    // full-screen Video has to stop claiming the native plane in the same
+    // frame the overlay starts claiming it.
+    setStateIfMounted(() {});
   }
 
   /// Bring the full-screen player back.
@@ -120,6 +124,7 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
     VideoMiniPlayerController.instance.clear();
     if (!mounted) return;
     ModalRoute.of(context)?.offstage = false;
+    setStateIfMounted(() {});
   }
 
   void _onPipRequestFailed(String? error) {
