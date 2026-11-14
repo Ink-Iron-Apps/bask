@@ -29,6 +29,65 @@ void main() {
     expect(target.initialEpisodeId, 'episode-1');
   });
 
+  test('opening an episode as its own subject keeps the episode', () {
+    final episode = testMediaItem(
+      id: 'episode-1',
+      backend: MediaBackend.plex,
+      kind: MediaKind.episode,
+      title: 'Episode 1',
+      parentId: 'season-2',
+      parentIndex: 2,
+      grandparentId: 'show-1',
+      grandparentTitle: 'The Show',
+      serverId: 'server-1',
+    );
+
+    final target = detailSubjectTargetFor(episode);
+
+    expect(target.metadata, same(episode));
+    expect(target.initialSeasonId, isNull);
+    expect(target.initialSeasonIndex, isNull);
+    expect(target.initialEpisodeId, isNull);
+  });
+
+  test('an explicit metadata override outranks the episode subject rule', () {
+    final episode = testMediaItem(
+      id: 'episode-1',
+      backend: MediaBackend.plex,
+      kind: MediaKind.episode,
+      title: 'Episode 1',
+      parentId: 'season-2',
+      parentIndex: 2,
+      grandparentId: 'show-1',
+      grandparentTitle: 'The Show',
+      serverId: 'server-1',
+    );
+    final show = testMediaItem(id: 'show-1', backend: MediaBackend.plex, kind: MediaKind.show, title: 'The Show');
+
+    final target = detailSubjectTargetFor(episode, metadataOverride: show);
+
+    expect(target.metadata, same(show));
+    expect(target.initialEpisodeId, 'episode-1');
+  });
+
+  test('a season opened as its own subject still resolves to its show', () {
+    final season = testMediaItem(
+      id: 'season-3',
+      backend: MediaBackend.jellyfin,
+      kind: MediaKind.season,
+      title: 'Season 3',
+      index: 3,
+      parentId: 'show-1',
+      parentTitle: 'The Show',
+      serverId: 'server-1',
+    );
+
+    final target = detailSubjectTargetFor(season);
+
+    expect(target.metadata.id, 'show-1');
+    expect(target.initialSeasonId, 'season-3');
+  });
+
   test('season detail target opens parent show and focuses season', () {
     final season = testMediaItem(
       id: 'season-3',
