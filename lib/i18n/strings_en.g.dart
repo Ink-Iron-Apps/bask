@@ -1169,6 +1169,12 @@ class Translations$settings$en {
 	/// en: 'Use Apple's native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.'
 	String get audioPassthroughDescriptionAppleTv => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.';
 
+	/// en: 'Normalize Loudness'
+	String get audioNormalization => 'Normalize Loudness';
+
+	/// en: 'Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.'
+	String get audioNormalizationDescription => 'Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.';
+
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
 
@@ -8030,6 +8036,8 @@ extension on Translations {
 			'settings.audioPassthrough' => 'Audio Passthrough',
 			'settings.audioPassthroughDescription' => 'Send Dolby/DTS audio to your receiver or TV without re-encoding, preserving surround sound. Turn off if you have no sound.',
 			'settings.audioPassthroughDescriptionAppleTv' => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.',
+			'settings.audioNormalization' => 'Normalize Loudness',
+			'settings.audioNormalizationDescription' => 'Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.',
 			'settings.audioDownmix' => 'Downmix to Stereo',
 			'settings.audioDownmixDescription' => 'Mix surround audio down to two channels for stereo speakers or headphones',
 			'settings.downmixCenterBoost' => 'Center Channel Boost',
@@ -8178,10 +8186,10 @@ extension on Translations {
 			'fileInfo.subtitles' => 'Subtitles',
 			'fileInfo.images' => 'Embedded Images',
 			'fileInfo.dataStreams' => 'Data Streams',
-			'fileInfo.lyrics' => 'Lyrics',
-			'fileInfo.file' => 'File',
 			_ => null,
 		} ?? switch (path) {
+			'fileInfo.lyrics' => 'Lyrics',
+			'fileInfo.file' => 'File',
 			'fileInfo.attachments' => 'Attachments',
 			'fileInfo.delivery' => 'Delivery',
 			'fileInfo.versionCounter' => ({required Object index, required Object count}) => 'Version ${index} of ${count}',
@@ -8692,10 +8700,10 @@ extension on Translations {
 			'accountPreferences.forcedSubtitleOptions.onlyNonForced' => 'Only non-forced subtitles',
 			'accountPreferences.displayMissingEpisodes' => 'Show missing episodes',
 			'accountPreferences.displayMissingEpisodesDescription' => 'List episodes the server knows about but has no file for.',
-			'accountPreferences.hidePlayedInLatest' => 'Hide watched items in Latest',
-			'accountPreferences.hidePlayedInLatestDescription' => 'Leave items you have already watched out of the server\'s Latest rows.',
 			_ => null,
 		} ?? switch (path) {
+			'accountPreferences.hidePlayedInLatest' => 'Hide watched items in Latest',
+			'accountPreferences.hidePlayedInLatestDescription' => 'Leave items you have already watched out of the server\'s Latest rows.',
 			'accountPreferences.displayCollectionsView' => 'Show the Collections view',
 			'accountPreferences.displayCollectionsViewDescription' => 'Offer the server\'s Collections view alongside your libraries.',
 			'accountPreferences.rewatchingInNextUp' => 'Keep rewatched shows in Next Up',
@@ -9206,10 +9214,10 @@ extension on Translations {
 			'watchTogether.anyone' => 'Anyone',
 			'watchTogether.hostingSession' => 'Hosting Session',
 			'watchTogether.inSession' => 'In Session',
-			'watchTogether.sessionCode' => 'Session Code',
-			'watchTogether.openSessionControls' => 'Open Watch Together session controls',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.sessionCode' => 'Session Code',
+			'watchTogether.openSessionControls' => 'Open Watch Together session controls',
 			'watchTogether.copySessionCode' => 'Copy session code',
 			'watchTogether.hostControlsPlayback' => 'Host controls playback',
 			'watchTogether.anyoneCanControl' => 'Anyone can control playback',
@@ -9720,10 +9728,10 @@ extension on Translations {
 			'seerr.email' => 'Email',
 			'seerr.noSignInMethods' => 'This Seerr instance offers no sign-in method Plezy supports.',
 			'seerr.instance' => 'Instance',
-			'seerr.disconnectConfirm' => 'Disconnect Seerr?',
-			'seerr.disconnectConfirmBody' => 'Plezy will forget this Seerr instance. Reconnect any time.',
 			_ => null,
 		} ?? switch (path) {
+			'seerr.disconnectConfirm' => 'Disconnect Seerr?',
+			'seerr.disconnectConfirmBody' => 'Plezy will forget this Seerr instance. Reconnect any time.',
 			'seerr.request' => 'Request',
 			'seerr.request4k' => 'Request in 4K',
 			'seerr.seasons' => 'Seasons',
