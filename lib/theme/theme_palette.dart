@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 /// role stays mapped to the text colour. Every other value tints the surfaces
 /// and gives the accent roles a hue, while leaving the mode in charge of
 /// brightness — "dark + plum" is still a dark theme.
-enum ThemePalette { neutral, indigo, teal, plum, forest, amber, crimson, slate }
+enum ThemePalette { neutral, navy, indigo, teal, plum, forest, amber, crimson, slate }
 
 /// The colours a palette contributes to one brightness of the theme.
 @immutable
@@ -82,6 +82,10 @@ extension ThemePaletteColors on ThemePalette {
   /// saturated background fights the artwork the app exists to show.
   ({double hue, double saturation})? get _tint => switch (this) {
     ThemePalette.neutral => null,
+    // True navy: bluer and less violet than [indigo], and the most saturated
+    // of the surface tints, because blue at this lightness reads as grey
+    // sooner than any other hue.
+    ThemePalette.navy => (hue: 217, saturation: 0.60),
     ThemePalette.indigo => (hue: 231, saturation: 0.45),
     ThemePalette.teal => (hue: 187, saturation: 0.45),
     ThemePalette.plum => (hue: 287, saturation: 0.42),
@@ -98,6 +102,7 @@ extension ThemePaletteColors on ThemePalette {
   /// 0.70 glares where blue at 0.70 reads as mid-tone.
   ({double saturation, double lightness})? get _accentTone => switch (this) {
     ThemePalette.neutral => null,
+    ThemePalette.navy => (saturation: 0.90, lightness: 0.62),
     ThemePalette.indigo => (saturation: 0.88, lightness: 0.70),
     ThemePalette.teal => (saturation: 0.85, lightness: 0.56),
     ThemePalette.plum => (saturation: 0.80, lightness: 0.70),
