@@ -7,6 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import '../models/hotkey_model.dart';
+import '../theme/theme_palette.dart';
+
+// Re-exported so `themePalette`'s type is reachable wherever the pref is, the
+// way [ThemeMode] is declared here.
+export '../theme/theme_palette.dart' show ThemePalette;
 import 'image_cache_service.dart';
 import 'package:plezy/utils/app_logger.dart';
 import '../i18n/app_locale_utils.dart';
@@ -941,6 +946,15 @@ class SettingsService extends BaseSharedPreferencesService {
     values: ThemeMode.values,
     defaultValueProvider: _tvAwareThemeModeDefault,
   );
+
+  /// Colour identity layered over [themeMode]. Defaults to
+  /// [ThemePalette.neutral], the monochrome look the app has always had, so an
+  /// existing install looks untouched until someone picks a palette.
+  static const themePalette = EnumPref<ThemePalette>(
+    'theme_palette',
+    values: ThemePalette.values,
+    defaultValue: ThemePalette.neutral,
+  );
   static const videoPlayerNavigationEnabled = BoolPref(
     'video_player_navigation_enabled',
     defaultValueProvider: PlatformDetector.isTV,
@@ -1513,6 +1527,7 @@ class SettingsService extends BaseSharedPreferencesService {
     syncOffsetScope,
     scopedPlayerPrefValues,
     themeMode,
+    themePalette,
     videoPlayerNavigationEnabled,
     diskCacheSizeGB,
     videoBrightness,
