@@ -25,6 +25,17 @@ String themeModeLabel(settings.ThemeMode mode) => switch (mode) {
   settings.ThemeMode.oled => t.settings.oledTheme,
 };
 
+String themePaletteLabel(settings.ThemePalette palette) => switch (palette) {
+  settings.ThemePalette.neutral => t.settings.paletteNeutral,
+  settings.ThemePalette.indigo => t.settings.paletteIndigo,
+  settings.ThemePalette.teal => t.settings.paletteTeal,
+  settings.ThemePalette.plum => t.settings.palettePlum,
+  settings.ThemePalette.forest => t.settings.paletteForest,
+  settings.ThemePalette.amber => t.settings.paletteAmber,
+  settings.ThemePalette.crimson => t.settings.paletteCrimson,
+  settings.ThemePalette.slate => t.settings.paletteSlate,
+};
+
 /// Model for option selection dialogs.
 class DialogOption<T> {
   final T value;

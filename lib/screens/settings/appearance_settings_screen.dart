@@ -34,6 +34,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
           title: t.settings.display,
           children: [
             _themeSelector(),
+            _themePaletteSelector(),
             if (PlatformDetector.isAutomotive()) _displayScaleSelector(),
             if (Platform.isAndroid) _visualEffectsSelector(context),
           ],
@@ -193,6 +194,17 @@ class AppearanceSettingsScreen extends StatelessWidget {
       },
     );
   }
+
+  /// Colour identity, separate from the light/dark/OLED mode above: the mode
+  /// owns brightness and this owns hue, so "dark" and "plum" compose instead of
+  /// multiplying into one list of eight.
+  Widget _themePaletteSelector() => SettingSelectionTile<ThemePalette>(
+    pref: SettingsService.themePalette,
+    icon: Symbols.palette_rounded,
+    title: t.settings.themePalette,
+    subtitleBuilder: (palette) => '${themePaletteLabel(palette)} · ${t.settings.themePaletteDescription}',
+    options: ThemePalette.values.map((p) => DialogOption(value: p, title: themePaletteLabel(p))).toList(),
+  );
 
   // Same label-row-plus-control layout as SegmentedSetting so slider and
   // button-group tiles read as one family inside a SettingsGroup.
