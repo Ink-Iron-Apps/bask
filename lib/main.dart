@@ -235,7 +235,8 @@ Future<StartupThemeResolution> _resolveStartupTheme() async {
   final settings = await SettingsService.getInstance();
   await TvDetectionService.getInstance(forceTv: settings.read(SettingsService.forceTvMode));
   final mode = settings.read(SettingsService.themeMode);
-  return (themeMode: ThemeProvider.materialThemeModeFor(mode), darkTheme: ThemeProvider.darkThemeFor(mode));
+  final palette = settings.read(SettingsService.themePalette);
+  return (themeMode: ThemeProvider.materialThemeModeFor(mode), darkTheme: ThemeProvider.darkThemeFor(mode, palette));
 }
 
 /// Wraps [step] so a failure names the gate phase it came from.

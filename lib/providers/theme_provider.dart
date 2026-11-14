@@ -7,10 +7,12 @@ import '../mixins/disposable_change_notifier_mixin.dart';
 import '../services/settings_binding_owner.dart';
 import '../services/settings_service.dart' as settings;
 import '../theme/mono_theme.dart';
+import '../theme/theme_palette.dart';
 
 class ThemeProvider extends ChangeNotifier with DisposableChangeNotifierMixin, WidgetsBindingObserver {
   late final SettingsBindingOwner _settingsBinding;
   settings.ThemeMode _themeMode = settings.ThemeMode.system;
+  ThemePalette _themePalette = ThemePalette.neutral;
   late Brightness _systemBrightness;
 
   ThemeProvider() {
@@ -19,10 +21,16 @@ class ThemeProvider extends ChangeNotifier with DisposableChangeNotifierMixin, W
     // them before runApp) so the first frame paints the persisted theme; the
     // async path below lands a microtask too late for the first build.
     final loaded = settings.SettingsService.instanceOrNull;
-    if (loaded != null) _themeMode = loaded.read(settings.SettingsService.themeMode);
+    if (loaded != null) {
+      _themeMode = loaded.read(settings.SettingsService.themeMode);
+      _themePalette = loaded.read(settings.SettingsService.themePalette);
+    }
     _settingsBinding = SettingsBindingOwner(
-      prefs: const [settings.SettingsService.themeMode],
-      onRefresh: (service) => _syncThemeMode(service.read(settings.SettingsService.themeMode)),
+      prefs: const [settings.SettingsService.themeMode, settings.SettingsService.themePalette],
+      onRefresh: (service) => _syncTheme(
+        service.read(settings.SettingsService.themeMode),
+        service.read(settings.SettingsService.themePalette),
+      ),
     );
     unawaited(_settingsBinding.bind());
     WidgetsBinding.instance.addObserver(this);
@@ -43,22 +51,27 @@ class ThemeProvider extends ChangeNotifier with DisposableChangeNotifierMixin, W
     super.dispose();
   }
 
-  void _syncThemeMode(settings.ThemeMode mode, {bool forceNotify = false}) {
-    final changed = _themeMode != mode;
+  void _syncTheme(settings.ThemeMode mode, ThemePalette palette, {bool forceNotify = false}) {
+    final changed = _themeMode != mode || _themePalette != palette;
     _themeMode = mode;
+    _themePalette = palette;
+    // The Android splash only has mode-named themes; a palette cannot reach it,
+    // so the launch screen stays neutral and the palette appears with the
+    // first Flutter frame.
     _updateSplashTheme(mode);
     if (changed || forceNotify) safeNotifyListeners();
   }
 
   settings.ThemeMode get themeMode => _themeMode;
+  ThemePalette get themePalette => _themePalette;
 
   /// Dark palette for [mode], honouring the OLED variant.
   ///
   /// Static so the pre-provider startup frame can resolve the same theme this
   /// provider will settle on, instead of guessing from platform brightness
   /// and flashing when the two disagree (#1833).
-  static ThemeData darkThemeFor(settings.ThemeMode mode) =>
-      monoTheme(dark: true, oled: mode == settings.ThemeMode.oled);
+  static ThemeData darkThemeFor(settings.ThemeMode mode, [ThemePalette palette = ThemePalette.neutral]) =>
+      monoTheme(dark: true, oled: mode == settings.ThemeMode.oled, palette: palette);
 
   /// Material equivalent of the app's own [settings.ThemeMode].
   static ThemeMode materialThemeModeFor(settings.ThemeMode mode) => switch (mode) {
@@ -68,8 +81,8 @@ class ThemeProvider extends ChangeNotifier with DisposableChangeNotifierMixin, W
     settings.ThemeMode.system => ThemeMode.system,
   };
 
-  ThemeData get lightTheme => monoTheme(dark: false);
-  ThemeData get darkTheme => darkThemeFor(_themeMode);
+  ThemeData get lightTheme => monoTheme(dark: false, palette: _themePalette);
+  ThemeData get darkTheme => darkThemeFor(_themeMode, _themePalette);
 
   ThemeMode get materialThemeMode => materialThemeModeFor(_themeMode);
 
@@ -93,13 +106,19 @@ class ThemeProvider extends ChangeNotifier with DisposableChangeNotifierMixin, W
     if (_themeMode == mode) return;
     final service = _settingsBinding.settings ?? await settings.SettingsService.getInstance();
     await service.write(settings.SettingsService.themeMode, mode);
-    if (_settingsBinding.settings == null) _syncThemeMode(mode);
+    if (_settingsBinding.settings == null) _syncTheme(mode, _themePalette);
   }
 
   Future<void> reload() async {
     await _settingsBinding.bind();
     final service = _settingsBinding.settings;
-    if (service != null) _syncThemeMode(service.read(settings.SettingsService.themeMode), forceNotify: true);
+    if (service != null) {
+      _syncTheme(
+        service.read(settings.SettingsService.themeMode),
+        service.read(settings.SettingsService.themePalette),
+        forceNotify: true,
+      );
+    }
   }
 
   void _updateSplashTheme(settings.ThemeMode mode) {
