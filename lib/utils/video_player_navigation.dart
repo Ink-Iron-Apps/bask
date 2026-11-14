@@ -49,6 +49,31 @@ class VideoPlayerRoute extends PageRouteBuilder<bool> {
         reverseTransitionDuration: Duration.zero,
       );
 
+  /// Whether the corner mini player is painting this session instead of the
+  /// full-screen route.
+  ///
+  /// Taking the route offstage is not enough on its own: Flutter assigns the
+  /// overlay entry's opacity from [opaque] alone, with no `offstage` term
+  /// (`TransitionRoute._handleStatusChanged`), so an offstage-but-opaque entry
+  /// stops painting *and* goes on suppressing every route below it. The result
+  /// is a window with nothing in it at all — not the library the mini player
+  /// exists to let you browse.
+  bool get handedToMiniPlayer => _handedToMiniPlayer;
+  bool _handedToMiniPlayer = false;
+  set handedToMiniPlayer(bool value) {
+    if (_handedToMiniPlayer == value) return;
+    _handedToMiniPlayer = value;
+    // Assigned directly rather than waiting for a status change, which is the
+    // only other thing that ever refreshes it, and never comes for a route
+    // that is already settled.
+    if (overlayEntries.isNotEmpty) overlayEntries.first.opaque = opaque;
+  }
+
+  /// False while the mini player has the picture, so the routes underneath are
+  /// painted and can be used.
+  @override
+  bool get opaque => !_handedToMiniPlayer;
+
   // Reserve at route commit, not screen initState: another launch can arrive
   // before the first frame. Navigator identity also isolates profile sessions.
   static final _activeRoutes = Expando<VideoPlayerRoute>();
