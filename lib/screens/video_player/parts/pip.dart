@@ -111,6 +111,10 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
         _handleScreenPlayerNavigation(PlayerNavigationKey.back);
       },
     );
+    // Order matters: hand the route's opacity over *before* taking it
+    // offstage, so the routes below are already allowed to paint in the frame
+    // this route stops painting. The other way round leaves one blank frame.
+    if (route is VideoPlayerRoute) route.handedToMiniPlayer = true;
     route.offstage = true;
     // Rebuilt explicitly rather than leaning on the route's own setState: the
     // full-screen Video has to stop claiming the native plane in the same
@@ -123,7 +127,9 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
     if (!VideoMiniPlayerController.instance.isActive) return;
     VideoMiniPlayerController.instance.clear();
     if (!mounted) return;
-    ModalRoute.of(context)?.offstage = false;
+    final route = ModalRoute.of(context);
+    route?.offstage = false;
+    if (route is VideoPlayerRoute) route.handedToMiniPlayer = false;
     setStateIfMounted(() {});
   }
 
