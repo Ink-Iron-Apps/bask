@@ -27,6 +27,7 @@ String themeModeLabel(settings.ThemeMode mode) => switch (mode) {
 
 String themePaletteLabel(settings.ThemePalette palette) => switch (palette) {
   settings.ThemePalette.neutral => t.settings.paletteNeutral,
+  settings.ThemePalette.navy => t.settings.paletteNavy,
   settings.ThemePalette.indigo => t.settings.paletteIndigo,
   settings.ThemePalette.teal => t.settings.paletteTeal,
   settings.ThemePalette.plum => t.settings.palettePlum,

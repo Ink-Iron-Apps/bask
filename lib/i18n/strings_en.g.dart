@@ -92,6 +92,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$services$en services = Translations$services$en.internal(_root);
 	late final Translations$addServer$en addServer = Translations$addServer$en.internal(_root);
 	late final Translations$serverHealth$en serverHealth = Translations$serverHealth$en.internal(_root);
+	late final Translations$serverActivity$en serverActivity = Translations$serverActivity$en.internal(_root);
 }
 
 // Path: app
@@ -477,6 +478,9 @@ class Translations$settings$en {
 
 	/// en: 'Neutral'
 	String get paletteNeutral => 'Neutral';
+
+	/// en: 'Navy'
+	String get paletteNavy => 'Navy';
 
 	/// en: 'Indigo'
 	String get paletteIndigo => 'Indigo';
@@ -6042,6 +6046,102 @@ class Translations$serverHealth$en {
 	String get empty => 'No servers are connected';
 }
 
+// Path: serverActivity
+class Translations$serverActivity$en {
+	Translations$serverActivity$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Now playing'
+	String get title => 'Now playing';
+
+	/// en: 'What is streaming from your servers right now'
+	String get subtitle => 'What is streaming from your servers right now';
+
+	/// en: 'Nothing is playing right now'
+	String get empty => 'Nothing is playing right now';
+
+	/// en: 'Only a server owner can see what others are watching'
+	String get notAdmin => 'Only a server owner can see what others are watching';
+
+	/// en: 'Could not read sessions from $server'
+	String loadFailed({required Object server}) => 'Could not read sessions from ${server}';
+
+	/// en: 'Refresh'
+	String get refresh => 'Refresh';
+
+	/// en: 'Paused'
+	String get paused => 'Paused';
+
+	/// en: 'Direct play'
+	String get directPlay => 'Direct play';
+
+	/// en: 'Direct stream'
+	String get directStream => 'Direct stream';
+
+	/// en: 'Transcoding'
+	String get transcoding => 'Transcoding';
+
+	/// en: 'Video'
+	String get videoLabel => 'Video';
+
+	/// en: 'Audio'
+	String get audioLabel => 'Audio';
+
+	/// en: '$kbps kbps'
+	String bandwidth({required Object kbps}) => '${kbps} kbps';
+
+	/// en: 'Off your network'
+	String get remote => 'Off your network';
+
+	/// en: 'Stop playback'
+	String get stop => 'Stop playback';
+
+	/// en: 'Stop $user?'
+	String stopTitle({required Object user}) => 'Stop ${user}?';
+
+	/// en: 'Playback stops immediately.'
+	String get stopBody => 'Playback stops immediately.';
+
+	/// en: 'Reason to show the viewer (optional)'
+	String get stopReasonHint => 'Reason to show the viewer (optional)';
+
+	/// en: 'This client cannot be shown a reason'
+	String get stopReasonUnsupportedHere => 'This client cannot be shown a reason';
+
+	/// en: 'Stop'
+	String get stopConfirm => 'Stop';
+
+	/// en: 'Playback stopped'
+	String get stopped => 'Playback stopped';
+
+	/// en: 'Could not stop playback: $error'
+	String stopFailed({required Object error}) => 'Could not stop playback: ${error}';
+
+	/// en: 'This client does not accept remote commands'
+	String get stopUnsupported => 'This client does not accept remote commands';
+
+	/// en: 'Send a message'
+	String get message => 'Send a message';
+
+	/// en: 'Message $user'
+	String messageTitle({required Object user}) => 'Message ${user}';
+
+	/// en: 'Message'
+	String get messageHint => 'Message';
+
+	/// en: 'Send'
+	String get messageSend => 'Send';
+
+	/// en: 'Message sent'
+	String get messageSent => 'Message sent';
+
+	/// en: 'Could not send the message: $error'
+	String messageFailed({required Object error}) => 'Could not send the message: ${error}';
+}
+
 // Path: common.ratingSource
 class Translations$common$ratingSource$en {
 	Translations$common$ratingSource$en.internal(this._root);
@@ -7700,6 +7800,7 @@ extension on Translations {
 			'settings.themePalette' => 'Colour',
 			'settings.themePaletteDescription' => 'Tints the theme and its accents',
 			'settings.paletteNeutral' => 'Neutral',
+			'settings.paletteNavy' => 'Navy',
 			'settings.paletteIndigo' => 'Indigo',
 			'settings.paletteTeal' => 'Teal',
 			'settings.palettePlum' => 'Plum',
@@ -8079,9 +8180,9 @@ extension on Translations {
 			'fileInfo.dataStreams' => 'Data Streams',
 			'fileInfo.lyrics' => 'Lyrics',
 			'fileInfo.file' => 'File',
-			'fileInfo.attachments' => 'Attachments',
 			_ => null,
 		} ?? switch (path) {
+			'fileInfo.attachments' => 'Attachments',
 			'fileInfo.delivery' => 'Delivery',
 			'fileInfo.versionCounter' => ({required Object index, required Object count}) => 'Version ${index} of ${count}',
 			'fileInfo.fileCounter' => ({required Object index, required Object count}) => 'File ${index} of ${count}',
@@ -8593,9 +8694,9 @@ extension on Translations {
 			'accountPreferences.displayMissingEpisodesDescription' => 'List episodes the server knows about but has no file for.',
 			'accountPreferences.hidePlayedInLatest' => 'Hide watched items in Latest',
 			'accountPreferences.hidePlayedInLatestDescription' => 'Leave items you have already watched out of the server\'s Latest rows.',
-			'accountPreferences.displayCollectionsView' => 'Show the Collections view',
 			_ => null,
 		} ?? switch (path) {
+			'accountPreferences.displayCollectionsView' => 'Show the Collections view',
 			'accountPreferences.displayCollectionsViewDescription' => 'Offer the server\'s Collections view alongside your libraries.',
 			'accountPreferences.rewatchingInNextUp' => 'Keep rewatched shows in Next Up',
 			'accountPreferences.rewatchingInNextUpDescription' => 'Once you finish a show, start it again and Next Up follows the rewatch instead of dropping the show.',
@@ -9107,9 +9208,9 @@ extension on Translations {
 			'watchTogether.inSession' => 'In Session',
 			'watchTogether.sessionCode' => 'Session Code',
 			'watchTogether.openSessionControls' => 'Open Watch Together session controls',
-			'watchTogether.copySessionCode' => 'Copy session code',
 			_ => null,
 		} ?? switch (path) {
+			'watchTogether.copySessionCode' => 'Copy session code',
 			'watchTogether.hostControlsPlayback' => 'Host controls playback',
 			'watchTogether.anyoneCanControl' => 'Anyone can control playback',
 			'watchTogether.hostControls' => 'Host controls',
@@ -9621,9 +9722,9 @@ extension on Translations {
 			'seerr.instance' => 'Instance',
 			'seerr.disconnectConfirm' => 'Disconnect Seerr?',
 			'seerr.disconnectConfirmBody' => 'Plezy will forget this Seerr instance. Reconnect any time.',
-			'seerr.request' => 'Request',
 			_ => null,
 		} ?? switch (path) {
+			'seerr.request' => 'Request',
 			'seerr.request4k' => 'Request in 4K',
 			'seerr.seasons' => 'Seasons',
 			'seerr.allSeasons' => 'All seasons',
@@ -9764,6 +9865,35 @@ extension on Translations {
 			'serverHealth.reRaceRunning' => 'Racing endpoints…',
 			'serverHealth.reRaceDone' => 'Endpoints re-raced',
 			'serverHealth.empty' => 'No servers are connected',
+			'serverActivity.title' => 'Now playing',
+			'serverActivity.subtitle' => 'What is streaming from your servers right now',
+			'serverActivity.empty' => 'Nothing is playing right now',
+			'serverActivity.notAdmin' => 'Only a server owner can see what others are watching',
+			'serverActivity.loadFailed' => ({required Object server}) => 'Could not read sessions from ${server}',
+			'serverActivity.refresh' => 'Refresh',
+			'serverActivity.paused' => 'Paused',
+			'serverActivity.directPlay' => 'Direct play',
+			'serverActivity.directStream' => 'Direct stream',
+			'serverActivity.transcoding' => 'Transcoding',
+			'serverActivity.videoLabel' => 'Video',
+			'serverActivity.audioLabel' => 'Audio',
+			'serverActivity.bandwidth' => ({required Object kbps}) => '${kbps} kbps',
+			'serverActivity.remote' => 'Off your network',
+			'serverActivity.stop' => 'Stop playback',
+			'serverActivity.stopTitle' => ({required Object user}) => 'Stop ${user}?',
+			'serverActivity.stopBody' => 'Playback stops immediately.',
+			'serverActivity.stopReasonHint' => 'Reason to show the viewer (optional)',
+			'serverActivity.stopReasonUnsupportedHere' => 'This client cannot be shown a reason',
+			'serverActivity.stopConfirm' => 'Stop',
+			'serverActivity.stopped' => 'Playback stopped',
+			'serverActivity.stopFailed' => ({required Object error}) => 'Could not stop playback: ${error}',
+			'serverActivity.stopUnsupported' => 'This client does not accept remote commands',
+			'serverActivity.message' => 'Send a message',
+			'serverActivity.messageTitle' => ({required Object user}) => 'Message ${user}',
+			'serverActivity.messageHint' => 'Message',
+			'serverActivity.messageSend' => 'Send',
+			'serverActivity.messageSent' => 'Message sent',
+			'serverActivity.messageFailed' => ({required Object error}) => 'Could not send the message: ${error}',
 			_ => null,
 		};
 	}
