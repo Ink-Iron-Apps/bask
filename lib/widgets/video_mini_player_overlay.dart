@@ -60,9 +60,15 @@ class _MiniVideoCard extends StatelessWidget {
     final controller = VideoMiniPlayerController.instance;
     final monoTokens = tokens(context);
 
+    // Transparent, not black. On Windows and Linux the picture is a native
+    // child window composited *below* the engine's UI visual, so anything
+    // Flutter paints over that rectangle hides it — a black card is an opaque
+    // lid on the video. The Video widget paints its own background until the
+    // first frame lands and then goes transparent, which is exactly the hole
+    // the plane needs; the title row below brings its own fill.
     return Material(
       elevation: 8,
-      color: Colors.black,
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -86,44 +92,47 @@ class _MiniVideoCard extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: monoTokens.textMuted),
+          ColoredBox(
+            color: monoTokens.surface,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: monoTokens.textMuted),
+                    ),
                   ),
-                ),
-                // Pause belongs here: the whole point of the corner window is
-                // that the rest of the app is in use, and expanding back to
-                // full screen just to pause defeats it.
-                StreamBuilder<bool>(
-                  stream: player.streams.playing,
-                  initialData: player.state.playing,
-                  builder: (context, snapshot) {
-                    final playing = snapshot.data ?? false;
-                    return IconButton(
-                      icon: AppIcon(playing ? Symbols.pause_rounded : Symbols.play_arrow_rounded, fill: 1, size: 20),
-                      tooltip: playing ? t.videoControls.pauseButton : t.videoControls.playButton,
-                      onPressed: () => playing ? player.pause() : player.play(),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const AppIcon(Symbols.fullscreen_rounded, fill: 1, size: 20),
-                  tooltip: t.videoControls.fullscreenButton,
-                  onPressed: controller.expand,
-                ),
-                IconButton(
-                  icon: const AppIcon(Symbols.close_rounded, fill: 1, size: 20),
-                  tooltip: t.common.close,
-                  onPressed: controller.close,
-                ),
-              ],
+                  // Pause belongs here: the whole point of the corner window is
+                  // that the rest of the app is in use, and expanding back to
+                  // full screen just to pause defeats it.
+                  StreamBuilder<bool>(
+                    stream: player.streams.playing,
+                    initialData: player.state.playing,
+                    builder: (context, snapshot) {
+                      final playing = snapshot.data ?? false;
+                      return IconButton(
+                        icon: AppIcon(playing ? Symbols.pause_rounded : Symbols.play_arrow_rounded, fill: 1, size: 20),
+                        tooltip: playing ? t.videoControls.pauseButton : t.videoControls.playButton,
+                        onPressed: () => playing ? player.pause() : player.play(),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const AppIcon(Symbols.fullscreen_rounded, fill: 1, size: 20),
+                    tooltip: t.videoControls.fullscreenButton,
+                    onPressed: controller.expand,
+                  ),
+                  IconButton(
+                    icon: const AppIcon(Symbols.close_rounded, fill: 1, size: 20),
+                    tooltip: t.common.close,
+                    onPressed: controller.close,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
