@@ -469,6 +469,36 @@ class Translations$settings$en {
 	/// en: 'OLED'
 	String get oledTheme => 'OLED';
 
+	/// en: 'Colour'
+	String get themePalette => 'Colour';
+
+	/// en: 'Tints the theme and its accents'
+	String get themePaletteDescription => 'Tints the theme and its accents';
+
+	/// en: 'Neutral'
+	String get paletteNeutral => 'Neutral';
+
+	/// en: 'Indigo'
+	String get paletteIndigo => 'Indigo';
+
+	/// en: 'Teal'
+	String get paletteTeal => 'Teal';
+
+	/// en: 'Plum'
+	String get palettePlum => 'Plum';
+
+	/// en: 'Forest'
+	String get paletteForest => 'Forest';
+
+	/// en: 'Amber'
+	String get paletteAmber => 'Amber';
+
+	/// en: 'Crimson'
+	String get paletteCrimson => 'Crimson';
+
+	/// en: 'Slate'
+	String get paletteSlate => 'Slate';
+
 	/// en: 'Library Density'
 	String get libraryDensity => 'Library Density';
 
@@ -7667,6 +7697,16 @@ extension on Translations {
 			'settings.lightTheme' => 'Light',
 			'settings.darkTheme' => 'Dark',
 			'settings.oledTheme' => 'OLED',
+			'settings.themePalette' => 'Colour',
+			'settings.themePaletteDescription' => 'Tints the theme and its accents',
+			'settings.paletteNeutral' => 'Neutral',
+			'settings.paletteIndigo' => 'Indigo',
+			'settings.paletteTeal' => 'Teal',
+			'settings.palettePlum' => 'Plum',
+			'settings.paletteForest' => 'Forest',
+			'settings.paletteAmber' => 'Amber',
+			'settings.paletteCrimson' => 'Crimson',
+			'settings.paletteSlate' => 'Slate',
 			'settings.libraryDensity' => 'Library Density',
 			'settings.displayScale' => 'Display Scale',
 			'settings.compact' => 'Compact',
@@ -8040,6 +8080,8 @@ extension on Translations {
 			'fileInfo.lyrics' => 'Lyrics',
 			'fileInfo.file' => 'File',
 			'fileInfo.attachments' => 'Attachments',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.delivery' => 'Delivery',
 			'fileInfo.versionCounter' => ({required Object index, required Object count}) => 'Version ${index} of ${count}',
 			'fileInfo.fileCounter' => ({required Object index, required Object count}) => 'File ${index} of ${count}',
@@ -8050,8 +8092,6 @@ extension on Translations {
 			'fileInfo.codecTag' => 'Codec Tag',
 			'fileInfo.resolution' => 'Resolution',
 			'fileInfo.codedResolution' => 'Coded Resolution',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.bitrate' => 'Bitrate',
 			'fileInfo.frameRate' => 'Frame Rate',
 			'fileInfo.rotation' => 'Rotation',
@@ -8554,6 +8594,8 @@ extension on Translations {
 			'accountPreferences.hidePlayedInLatest' => 'Hide watched items in Latest',
 			'accountPreferences.hidePlayedInLatestDescription' => 'Leave items you have already watched out of the server\'s Latest rows.',
 			'accountPreferences.displayCollectionsView' => 'Show the Collections view',
+			_ => null,
+		} ?? switch (path) {
 			'accountPreferences.displayCollectionsViewDescription' => 'Offer the server\'s Collections view alongside your libraries.',
 			'accountPreferences.rewatchingInNextUp' => 'Keep rewatched shows in Next Up',
 			'accountPreferences.rewatchingInNextUpDescription' => 'Once you finish a show, start it again and Next Up follows the rewatch instead of dropping the show.',
@@ -8564,8 +8606,6 @@ extension on Translations {
 			'accountPreferences.watchedIndicatorOptions.shows' => 'TV shows only',
 			'accountPreferences.mediaReviewsVisibility' => 'Ratings & reviews',
 			'accountPreferences.mediaReviewsOptions.usersAndCritics' => 'Users and critics',
-			_ => null,
-		} ?? switch (path) {
 			'accountPreferences.mediaReviewsOptions.usersOnly' => 'Users only',
 			'accountPreferences.mediaReviewsOptions.criticsOnly' => 'Critics only',
 			'accountPreferences.mediaReviewsOptions.nobody' => 'Hidden',
@@ -9068,6 +9108,8 @@ extension on Translations {
 			'watchTogether.sessionCode' => 'Session Code',
 			'watchTogether.openSessionControls' => 'Open Watch Together session controls',
 			'watchTogether.copySessionCode' => 'Copy session code',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.hostControlsPlayback' => 'Host controls playback',
 			'watchTogether.anyoneCanControl' => 'Anyone can control playback',
 			'watchTogether.hostControls' => 'Host controls',
@@ -9078,8 +9120,6 @@ extension on Translations {
 			'watchTogether.youAreHost' => 'You are the host',
 			'watchTogether.makeHost' => 'Make host',
 			'watchTogether.makeHostQuestion' => 'Transfer host?',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.makeHostConfirm' => ({required Object name}) => '${name} will control playback and drive the session for everyone.',
 			'watchTogether.transfer' => 'Transfer',
 			'watchTogether.hostChangedTo' => ({required Object name}) => '${name} is now the host',
@@ -9582,6 +9622,8 @@ extension on Translations {
 			'seerr.disconnectConfirm' => 'Disconnect Seerr?',
 			'seerr.disconnectConfirmBody' => 'Plezy will forget this Seerr instance. Reconnect any time.',
 			'seerr.request' => 'Request',
+			_ => null,
+		} ?? switch (path) {
 			'seerr.request4k' => 'Request in 4K',
 			'seerr.seasons' => 'Seasons',
 			'seerr.allSeasons' => 'All seasons',
@@ -9592,8 +9634,6 @@ extension on Translations {
 			'seerr.languageProfile' => 'Language profile',
 			'seerr.tags' => 'Tags',
 			'seerr.noTags' => 'No tags',
-			_ => null,
-		} ?? switch (path) {
 			'seerr.defaultOption' => ({required Object name}) => '${name} (Default)',
 			'seerr.animeNote' => 'This series is an anime.',
 			'seerr.requestSubmitted' => 'Request submitted',

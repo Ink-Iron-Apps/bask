@@ -2,23 +2,29 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'gapped_track_shape.dart';
 import 'mono_tokens.dart';
+import 'theme_palette.dart';
 
-final Map<({bool dark, bool oled, TargetPlatform platform}), ThemeData> _monoThemeCache = {};
+final Map<({bool dark, bool oled, ThemePalette palette, TargetPlatform platform}), ThemeData> _monoThemeCache = {};
 
-ThemeData monoTheme({required bool dark, bool oled = false}) {
+ThemeData monoTheme({required bool dark, bool oled = false, ThemePalette palette = ThemePalette.neutral}) {
   // ThemeData derives several defaults from defaultTargetPlatform.
-  final key = (dark: dark || oled, oled: oled, platform: defaultTargetPlatform);
+  final key = (dark: dark || oled, oled: oled, palette: palette, platform: defaultTargetPlatform);
   final cached = _monoThemeCache[key];
   if (cached != null) return cached;
 
-  final theme = _buildMonoTheme(dark: key.dark, oled: key.oled, platform: key.platform);
+  final theme = _buildMonoTheme(dark: key.dark, oled: key.oled, palette: key.palette, platform: key.platform);
   _monoThemeCache[key] = theme;
   return theme;
 }
 
-ThemeData _buildMonoTheme({required bool dark, required bool oled, required TargetPlatform platform}) {
+ThemeData _buildMonoTheme({
+  required bool dark,
+  required bool oled,
+  required ThemePalette palette,
+  required TargetPlatform platform,
+}) {
   // neutral greys tuned for crisp contrast
-  final ({Color bg, Color surface, Color outline, Color text, Color textMuted}) c;
+  ({Color bg, Color surface, Color outline, Color text, Color textMuted}) c;
   if (oled) {
     c = (
       bg: const Color(0xFF000000), // Pure black for OLED
@@ -46,6 +52,24 @@ ThemeData _buildMonoTheme({required bool dark, required bool oled, required Targ
   }
 
   final isDark = dark || oled;
+
+  // A palette repaints the surfaces and hands over an accent; `neutral`
+  // contributes nothing and leaves the accent equal to the text colour, which
+  // is what every role was already mapped to. So the neutral themes come out
+  // of this exactly as they did before palettes existed.
+  final paletteColors = palette.colorsFor(dark: dark, oled: oled);
+  if (paletteColors != null) {
+    c = (
+      bg: paletteColors.bg,
+      surface: paletteColors.surface,
+      outline: c.outline,
+      text: c.text,
+      textMuted: c.textMuted,
+    );
+  }
+  final accent = paletteColors?.accent ?? c.text;
+  final onAccent = paletteColors?.onAccent ?? (isDark ? c.bg : Colors.white);
+
   final clickableCursor = WidgetStateProperty.resolveWith<MouseCursor>(
     (states) => states.contains(WidgetState.disabled) ? MouseCursor.defer : SystemMouseCursors.click,
   );
@@ -54,8 +78,8 @@ ThemeData _buildMonoTheme({required bool dark, required bool oled, required Targ
     mouseCursor: clickableCursor,
     padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 18, vertical: 14)),
     elevation: const WidgetStatePropertyAll(0),
-    backgroundColor: WidgetStatePropertyAll(c.text),
-    foregroundColor: WidgetStatePropertyAll(isDark ? c.bg : Colors.white),
+    backgroundColor: WidgetStatePropertyAll(accent),
+    foregroundColor: WidgetStatePropertyAll(onAccent),
     shape: const WidgetStatePropertyAll(StadiumBorder()),
   );
 
@@ -65,16 +89,16 @@ ThemeData _buildMonoTheme({required bool dark, required bool oled, required Targ
     brightness: isDark ? Brightness.dark : Brightness.light,
     colorScheme: ColorScheme(
       brightness: isDark ? Brightness.dark : Brightness.light,
-      primary: c.text,
-      onPrimary: isDark ? c.bg : Colors.white,
-      secondary: c.text,
-      onSecondary: c.bg,
+      primary: accent,
+      onPrimary: onAccent,
+      secondary: accent,
+      onSecondary: onAccent,
       surface: c.surface,
       onSurface: c.text,
       error: const Color(0xFFB00020),
       onError: Colors.white,
-      tertiary: c.text,
-      onTertiary: c.bg,
+      tertiary: accent,
+      onTertiary: onAccent,
       primaryContainer: c.surface,
       onPrimaryContainer: c.text,
       secondaryContainer: c.surface,
@@ -95,7 +119,10 @@ ThemeData _buildMonoTheme({required bool dark, required bool oled, required Targ
     highlightColor: Colors.transparent,
     // Explicit mono-derived tile highlights: ListTile's native focus/hover
     // fill is the dpad focus visual inside M3E grouped-list cards.
-    focusColor: c.text.withValues(alpha: 0.12),
+    // Focus is the most-seen surface on a TV, so it takes the accent. Hover
+    // stays on the text colour: a tinted hover on every row reads as the row
+    // being selected.
+    focusColor: accent.withValues(alpha: 0.16),
     hoverColor: c.text.withValues(alpha: 0.05),
     dividerColor: c.outline,
     scaffoldBackgroundColor: c.bg,
