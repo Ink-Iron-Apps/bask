@@ -98,6 +98,21 @@ class _MiniVideoCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(color: monoTokens.textMuted),
                   ),
                 ),
+                // Pause belongs here: the whole point of the corner window is
+                // that the rest of the app is in use, and expanding back to
+                // full screen just to pause defeats it.
+                StreamBuilder<bool>(
+                  stream: player.streams.playing,
+                  initialData: player.state.playing,
+                  builder: (context, snapshot) {
+                    final playing = snapshot.data ?? false;
+                    return IconButton(
+                      icon: AppIcon(playing ? Symbols.pause_rounded : Symbols.play_arrow_rounded, fill: 1, size: 20),
+                      tooltip: playing ? t.videoControls.pauseButton : t.videoControls.playButton,
+                      onPressed: () => playing ? player.pause() : player.play(),
+                    );
+                  },
+                ),
                 IconButton(
                   icon: const AppIcon(Symbols.fullscreen_rounded, fill: 1, size: 20),
                   tooltip: t.videoControls.fullscreenButton,
