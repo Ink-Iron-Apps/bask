@@ -27,12 +27,24 @@ class Video extends StatefulWidget {
   final Color backgroundColor;
   final ValueListenable<bool>? hasFirstFrame;
 
+  /// Whether this widget may position the native video plane.
+  ///
+  /// Two [Video] widgets can be bound to one player at the same time: the
+  /// full-screen route goes offstage while the corner mini player paints. On
+  /// Windows and Linux the picture is a single native plane placed by whoever
+  /// reported its geometry last, and an offstage route is still laid out — so
+  /// without this the plane's position is settled by post-frame callback order
+  /// and moves again on any relayout. The widget actually on screen claims the
+  /// plane; the other stands down.
+  final bool claimsVideoSurface;
+
   const Video({
     super.key,
     required this.player,
     this.controls,
     this.backgroundColor = Colors.black,
     this.hasFirstFrame,
+    this.claimsVideoSurface = true,
   });
 
   @override
@@ -79,6 +91,15 @@ class _VideoState extends State<Video> {
       // fallback left to cover for it.
       _hasSentRect = false;
     }
+    if (oldWidget.claimsVideoSurface && !widget.claimsVideoSurface) {
+      // Standing down. The cache has to go with the claim: the widget taking
+      // over will send its own rect, and when this one claims again its
+      // geometry may be byte-identical to what it last sent — which would
+      // short-circuit as "unchanged" and leave the plane wherever the other
+      // widget parked it. That is the mini player that never gives the picture
+      // back on expand.
+      _hasSentRect = false;
+    }
   }
 
   @override
@@ -123,7 +144,7 @@ class _VideoState extends State<Video> {
   }
 
   Widget _buildVideoSurface() {
-    if (widget.player is VideoRectSupport) {
+    if (widget.player is VideoRectSupport && widget.claimsVideoSurface) {
       return LayoutBuilder(
         builder: (context, constraints) {
           WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -87,6 +87,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
               title: t.settings.audio,
               children: [
                 if (PlatformDetector.supportsAudioPassthrough()) _audioPassthroughTile(),
+                _audioNormalizationTile(),
                 _audioDownmixTile(),
                 if (downmixOn) _downmixCenterBoostTile(),
                 if (downmixOn) _downmixNormalizeTile(),
@@ -478,6 +479,19 @@ class PlaybackSettingsScreen extends StatelessWidget {
     subtitle: PlatformDetector.isAppleTV()
         ? t.settings.audioPassthroughDescriptionAppleTv
         : t.settings.audioPassthroughDescription,
+  );
+
+  /// The same global pref the player's own settings sheet writes, mirrored
+  /// here the way downmix already is. Living only inside playback is what made
+  /// a global setting read as a per-video one.
+  Widget _audioNormalizationTile() => SettingSwitchTile(
+    pref: SettingsService.audioNormalization,
+    // Not graphic_eq, which the downmix normalize tile below already uses:
+    // compression is what loudnorm does, and two identical icons in one group
+    // read as one setting split in half.
+    icon: Symbols.compress_rounded,
+    title: t.settings.audioNormalization,
+    subtitle: t.settings.audioNormalizationDescription,
   );
 
   Widget _audioDownmixTile() => SettingSwitchTile(

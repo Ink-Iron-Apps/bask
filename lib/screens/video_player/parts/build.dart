@@ -286,6 +286,10 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
                     return Video(
                       player: player!,
                       hasFirstFrame: _firstFrame.uiReady,
+                      // Offstage is not enough on Windows and Linux: this
+                      // route is still laid out while the corner mini player
+                      // paints, and both would place the one native plane.
+                      claimsVideoSurface: !VideoMiniPlayerController.instance.isActive,
                       controls: (context) => PlexVideoControls(
                         player: player!,
                         volumeController: _volumeController!,
