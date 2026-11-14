@@ -14,6 +14,7 @@ import '../media/library_query.dart';
 import '../media/live_tv_support.dart';
 import '../media/lyrics.dart';
 import '../media/media_backend.dart';
+import '../media/playback_session.dart';
 import '../media/media_hub.dart';
 import '../media/media_item.dart';
 import '../media/media_kind.dart';
@@ -86,6 +87,7 @@ part 'plex_client/parts/playlists.dart';
 part 'plex_client/parts/collections.dart';
 part 'plex_client/parts/play_queues.dart';
 part 'plex_client/parts/metadata_edit.dart';
+part 'plex_client/parts/activity.dart';
 
 const _plexVideoTranscodeBaseEndpoint = '/video/:/transcode/universal';
 const _plexVideoHlsStartEndpoint = '$_plexVideoTranscodeBaseEndpoint/start.m3u8';
@@ -375,8 +377,14 @@ class PlexClient
         _PlexPlaylistMethods,
         _PlexCollectionMethods,
         _PlexPlayQueueMethods,
-        _PlexMetadataEditMethods
-    implements MediaServerClient, SeasonEpisodePagingClient, ScopedMediaServerClient, GracefullyCloseable {
+        _PlexMetadataEditMethods,
+        _PlexActivityMethods
+    implements
+        MediaServerClient,
+        SeasonEpisodePagingClient,
+        ScopedMediaServerClient,
+        MediaServerActivityClient,
+        GracefullyCloseable {
   @override
   PlexConfig config;
 
