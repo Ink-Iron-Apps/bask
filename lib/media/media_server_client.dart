@@ -12,6 +12,7 @@ import 'download_resolution.dart';
 import 'ids.dart';
 import 'library_filter_result.dart';
 import 'library_change_event.dart';
+import 'playback_session.dart';
 import 'library_first_character.dart';
 import 'library_query.dart';
 import 'live_tv_support.dart';
@@ -936,6 +937,36 @@ abstract interface class SeasonEpisodePagingClient {
 /// which a client can reproduce. Plex exposes no per-item delete permission,
 /// so it deliberately does not implement this and callers keep using their
 /// account-level owner/admin gate for it.
+/// Server-wide "what is playing right now", plus the admin actions on it.
+///
+/// Implemented only where the signed-in user can actually see other people's
+/// sessions, so callers gate on [MultiServerManager.isOwnerOrAdmin] before
+/// reaching for it: a non-admin gets its own session back at best, and a 403
+/// at worst.
+abstract interface class MediaServerActivityClient {
+  /// Sessions playing right now, newest first is not guaranteed — the caller
+  /// orders them.
+  ///
+  /// Returns an empty list when nothing is playing. Throws on transport or
+  /// permission failure rather than swallowing it, so the screen can tell
+  /// "nobody is watching" apart from "we could not ask".
+  Future<List<PlaybackSession>> fetchActiveSessions();
+
+  /// Ends [session], optionally telling the viewer why.
+  ///
+  /// Plex terminates server-side and shows [reason] to clients that implement
+  /// the termination message; the stream stops either way. Jellyfin asks the
+  /// client to stop, which only works for a session reporting
+  /// [PlaybackSession.canStop], and delivers [reason] as a separate message
+  /// first.
+  Future<void> stopSession(PlaybackSession session, {String? reason});
+
+  /// Shows [message] to the viewer without interrupting playback.
+  ///
+  /// Only for a session reporting [PlaybackSession.canMessage].
+  Future<void> messageSession(PlaybackSession session, {required String message, String? header});
+}
+
 abstract interface class MediaDeletionPermissionClient {
   /// `true`/`false` as reported by the server for [item], or `null` when the
   /// server did not answer (item not visible to this user, unexpected shape).

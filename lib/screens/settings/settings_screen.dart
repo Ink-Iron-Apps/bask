@@ -59,6 +59,7 @@ import 'about_screen.dart';
 import 'add_connection_screen.dart';
 import 'account_preferences_screen.dart';
 import 'appearance_settings_screen.dart';
+import 'server_activity_screen.dart';
 import 'general_settings_screen.dart';
 import 'keyboard_shortcuts_screen.dart';
 import 'logs_screen.dart';
@@ -118,6 +119,7 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   static const _kAutoHidePerformanceOverlay = 'auto_hide_performance_overlay';
   static const _kViewLogs = 'view_logs';
   static const _kServerHealth = 'server_health';
+  static const _kServerActivity = 'server_activity';
   static const _kClearImageCache = 'clear_image_cache';
   static const _kResetSettings = 'reset_settings';
   static const _kCheckForUpdates = 'check_for_updates';
@@ -700,6 +702,13 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           icon: Symbols.speed_rounded,
           title: t.settings.autoHidePerformanceOverlay,
           subtitle: t.settings.autoHidePerformanceOverlayDescription,
+        ),
+        SettingNavigationTile(
+          focusNode: _focusTracker.get(_kServerActivity),
+          icon: Symbols.play_circle_rounded,
+          title: t.serverActivity.title,
+          subtitle: t.serverActivity.subtitle,
+          destinationBuilder: (context) => const ServerActivityScreen(),
         ),
         SettingNavigationTile(
           focusNode: _focusTracker.get(_kServerHealth),

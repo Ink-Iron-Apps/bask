@@ -21,6 +21,7 @@ import '../media/media_filter.dart';
 import '../media/live_tv_support.dart';
 import '../media/lyrics.dart';
 import '../media/media_backend.dart';
+import '../media/playback_session.dart';
 import '../media/media_browser_dialect.dart';
 import '../media/library_change_event.dart';
 import 'library_events/media_browser_library_event_socket.dart';
@@ -97,6 +98,7 @@ part 'jellyfin_client/parts/live_tv.dart';
 part 'jellyfin_client/parts/live_tv_dvr.dart';
 part 'jellyfin_client/parts/images_downloads.dart';
 part 'jellyfin_client/parts/metadata_edit.dart';
+part 'jellyfin_client/parts/activity.dart';
 
 /// Canonical declarations of the [JellyfinClient] internals that the `part`
 /// mixins call into.
@@ -242,12 +244,14 @@ class JellyfinClient
         _JellyfinFileInfoMethods,
         _JellyfinLiveTvMethods,
         _JellyfinImageDownloadMethods,
-        _JellyfinMetadataEditMethods
+        _JellyfinMetadataEditMethods,
+        _JellyfinActivityMethods
     implements
         MediaServerClient,
         SeasonEpisodePagingClient,
         MediaDeletionPermissionClient,
         ScopedMediaServerClient,
+        MediaServerActivityClient,
         GracefullyCloseable {
   JellyfinClient._({required this._connection, required this._http, FavoriteChannelsRepository? favoritesRepository})
     : _favoritesRepository = favoritesRepository ?? const SharedPreferencesFavoriteChannelsRepository(),
