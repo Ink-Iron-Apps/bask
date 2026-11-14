@@ -879,7 +879,19 @@ class SettingsService extends BaseSharedPreferencesService {
   );
   static const ambientLighting = BoolPref('ambient_lighting');
   static const audioPassthrough = _AudioPassthroughPref();
-  static const audioNormalization = BoolPref('audio_normalization');
+
+  /// On by default: a film mixed for a cinema puts dialogue far below the
+  /// effects, and `loudnorm=I=-14:TP=-3:LRA=4` is the fix — it compresses the
+  /// loudness range to 4 LU and holds the true peak at -3 dBTP, so speech
+  /// comes up without the loud passages clipping.
+  ///
+  /// The cost is bitstream output. The filter needs PCM, so enabling it
+  /// force-decodes encoded audio and turns tunneling off
+  /// (`ExoPlayerCore.setAudioNormalization`), and it is applied after
+  /// passthrough, so it wins. Anyone feeding Dolby or DTS to a receiver turns
+  /// this off; everyone playing to TV speakers or a stereo soundbar is better
+  /// off with it on, which is the common case and so the default.
+  static const audioNormalization = BoolPref('audio_normalization', defaultValue: true);
   static const audioDownmix = BoolPref('audio_downmix');
   static const audioDownmixNormalize = BoolPref('audio_downmix_normalize', defaultValue: true);
   static const liveTvDefaultFavorites = BoolPref('live_tv_default_favorites');
