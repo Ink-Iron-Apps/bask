@@ -260,6 +260,24 @@ Future<MediaNavigationResult> navigateToMediaItem(
   }
 }
 
+/// The target for opening [mi] on its own detail screen.
+///
+/// An episode is its own subject here, the way a movie is: the hero describes
+/// the episode and the action row plays it. Resolving it through
+/// [mediaDetailNavigationTargetFor] instead would open the containing season
+/// focused on that row — usually the very screen the episode was activated
+/// from, so it reads as nothing having happened. A season still resolves to
+/// its show, because the show screen with that season selected *is* the season
+/// view; and "Go to series" wants the containing show, so it calls
+/// [mediaDetailNavigationTargetFor] directly.
+///
+/// [metadataOverride] means the caller has already fetched the subject it
+/// wants shown, so it is honoured ahead of the episode rule.
+MediaDetailNavigationTarget detailSubjectTargetFor(MediaItem mi, {MediaItem? metadataOverride}) =>
+    mi.isEpisode && metadataOverride == null
+    ? MediaDetailNavigationTarget(metadata: mi)
+    : mediaDetailNavigationTargetFor(mi, metadataOverride: metadataOverride);
+
 Future<MediaNavigationResult> navigateToMediaItemDetails(
   BuildContext context,
   MediaItem mi, {
@@ -277,7 +295,7 @@ Future<MediaNavigationResult> navigateToMediaItemDetails(
     return MediaNavigationResult.navigated;
   }
 
-  final target = mediaDetailNavigationTargetFor(mi, metadataOverride: metadataOverride);
+  final target = detailSubjectTargetFor(mi, metadataOverride: metadataOverride);
   final result = await Navigator.push<bool>(
     context,
     mediaDetailRoute(
