@@ -1263,19 +1263,66 @@ abstract class PlayerBase with PlayerStreamControllersMixin implements Player {
 
   /// mpv loudnorm targeting streaming-style loudness; mirrored by the
   /// Android ExoPlayer effect parameters in AudioNormalizationEffect.kt.
+  static const _loudnormFilter = 'loudnorm=I=-14:TP=-3:LRA=4';
+
+  /// Speech-band lift plus a compressor, as one `af` entry pair.
   ///
-  /// Dynamic-mode loudnorm always outputs float64 at 192 kHz, which made the
-  /// AO open at f64/192k and forced the OS mixer to convert/resample on the
-  /// deadline-critical path (~4x the per-cycle DSP work), underrunning during
-  /// playback startup (#1720). The trailing mpv-native format filter pins the
-  /// chain back to 48 kHz float, so the conversion runs once on the buffered
-  /// decode side. mpv's own `format` filter is used instead of lavfi
-  /// `aformat` because the bundled Linux ffmpeg prunes lavfi filters.
-  static const _loudnormFilter = 'loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp';
+  /// 2.2 kHz with a 1.8 kHz-wide bell covers consonants and sibilance, which
+  /// is where intelligibility lives; the fundamentals below it are rarely what
+  /// is missing, and lifting them muddies the mix. +5 dB is enough to hear and
+  /// small enough to leave headroom for the compressor behind it, which pulls
+  /// the loud passages down (threshold -24 dBFS, 4:1) rather than pushing the
+  /// quiet ones up, so the gap between an explosion and a whisper closes from
+  /// the top. Attack is slow enough (20 ms) not to dull transients and release
+  /// long enough (250 ms) not to pump on dialogue.
+  ///
+  /// Both are lavfi filters, like `loudnorm` itself.
+  static const _dialogueBoostFilter =
+      'equalizer=f=2200:t=h:w=1800:g=5,acompressor=threshold=0.0625:ratio=4:attack=20:release=250';
+
+  /// Pins the chain's output format. Dynamic-mode `loudnorm` always outputs
+  /// float64 at 192 kHz, which made the AO open at f64/192k and forced the OS
+  /// mixer to convert/resample on the deadline-critical path (~4x the
+  /// per-cycle DSP work), underrunning during playback startup (#1720). This
+  /// moves the conversion to the buffered decode side. mpv's own `format`
+  /// filter is used instead of lavfi `aformat` because the bundled Linux
+  /// ffmpeg prunes lavfi filters.
+  static const _audioChainFormat = 'format=srate=48000:format=floatp';
+
+  /// The `af` value for a given pair of audio features.
+  ///
+  /// Dialogue boost precedes `loudnorm` so normalization measures the signal
+  /// that will actually be heard; the other order would have loudnorm hit its
+  /// target and the boost then push past it, which is both louder than asked
+  /// for and no clearer.
+  static String _audioFilterChainFor({required bool normalization, required bool dialogueBoost}) {
+    final filters = [if (dialogueBoost) _dialogueBoostFilter, if (normalization) _loudnormFilter];
+    if (filters.isEmpty) return '';
+    return [...filters, _audioChainFormat].join(',');
+  }
+
+  bool _normalizationFilterRequested = false;
+  bool _dialogueBoostFilterRequested = false;
 
   @override
-  Future<void> setAudioNormalization(bool enabled) async {
-    await setProperty('af', enabled ? _loudnormFilter : '');
+  Future<void> setAudioNormalization(bool enabled) =>
+      setAudioFilterChain(normalization: enabled, dialogueBoost: _dialogueBoostFilterRequested);
+
+  @override
+  Future<void> setDialogueBoost(bool enabled) =>
+      setAudioFilterChain(normalization: _normalizationFilterRequested, dialogueBoost: enabled);
+
+  /// Write both features in one property set.
+  ///
+  /// `af` is the whole chain, not a list to append to, so the two features
+  /// cannot each own it — setting one would drop the other. Callers that know
+  /// both answers (PlayerNative's audio-state reconciliation) apply them
+  /// together; the single-feature setters above remember the other's last
+  /// request.
+  Future<void> setAudioFilterChain({required bool normalization, required bool dialogueBoost}) async {
+    _normalizationFilterRequested = normalization;
+    _dialogueBoostFilterRequested = dialogueBoost;
+    await setProperty('af', _audioFilterChainFor(normalization: normalization, dialogueBoost: dialogueBoost));
   }
 
   @override

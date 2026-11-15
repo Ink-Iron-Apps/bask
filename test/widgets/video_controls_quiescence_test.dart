@@ -217,6 +217,15 @@ class _IdlePlayer implements Player {
     backendSwitched: const Stream<void>.empty(),
   );
 
+  // Asked only on a Linux host: the settings sheet probes the video plane's
+  // HDR capability as it opens, and PlayerNative.usesLinuxVideoPlane is
+  // Platform.isLinux. Without an answer here the sheet's first build threw,
+  // so this file passed on Windows and failed on Linux. Answering false keeps
+  // the sheet identical on both, which is what the frame-scheduling
+  // assertions below are actually about.
+  @override
+  Future<bool> isHdrOutputSupported() async => false;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

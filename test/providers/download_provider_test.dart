@@ -835,6 +835,58 @@ void main() {
       p.dispose();
     });
 
+    test('the v24 cap gives unbounded unwatched rules a window and leaves the rest alone', () async {
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      await p.ensureInitialized();
+
+      Future<void> seed(
+        String ratingKey, {
+        required String targetType,
+        required int episodeCount,
+        required String downloadFilter,
+        bool managed = false,
+      }) => p.createSyncRule(
+        serverId: ServerId('srv'),
+        ratingKey: ratingKey,
+        targetType: targetType,
+        episodeCount: episodeCount,
+        downloadFilter: downloadFilter,
+        managed: managed,
+      );
+
+      // Capped: an unwatched show or season rule that never stored a number.
+      await seed('show-0', targetType: 'show', episodeCount: 0, downloadFilter: 'unwatched');
+      await seed('season-0', targetType: 'season', episodeCount: 0, downloadFilter: 'unwatched');
+      // Kept: an explicit window, a rule told to mirror the whole show, a list
+      // rule that has no episode window, and a managed rule whose count is
+      // recomputed from the keep-ahead setting on every pass.
+      await seed('show-5', targetType: 'show', episodeCount: 5, downloadFilter: 'unwatched');
+      await seed('show-all', targetType: 'show', episodeCount: 0, downloadFilter: 'all');
+      await seed('playlist-0', targetType: 'playlist', episodeCount: 0, downloadFilter: 'unwatched');
+      await seed('collection-0', targetType: 'collection', episodeCount: 0, downloadFilter: 'unwatched');
+      await seed('managed-0', targetType: 'show', episodeCount: 0, downloadFilter: 'unwatched', managed: true);
+
+      final capped = await db.capUnboundedUnwatchedSyncRules();
+      expect(capped, 2);
+
+      Future<int> countFor(String ratingKey) async =>
+          (await db.getSyncRule(p.syncRuleKeyFor(ServerId('srv'), ratingKey)))!.episodeCount;
+
+      expect(await countFor('show-0'), defaultUnwatchedSyncCount);
+      expect(await countFor('season-0'), defaultUnwatchedSyncCount);
+      expect(await countFor('show-5'), 5);
+      expect(await countFor('show-all'), 0);
+      expect(await countFor('playlist-0'), 0);
+      expect(await countFor('collection-0'), 0);
+      expect(await countFor('managed-0'), 0);
+
+      // Runs at a version boundary, so a second pass must find nothing left to
+      // change rather than re-capping a 0 the viewer has since chosen.
+      expect(await db.capUnboundedUnwatchedSyncRules(), 0);
+
+      p.dispose();
+    });
+
     test('updateSyncRuleCount mutates rule and notifies', () async {
       final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
       await p.ensureInitialized();
