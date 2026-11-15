@@ -1175,6 +1175,12 @@ class Translations$settings$en {
 	/// en: 'Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.'
 	String get audioNormalizationDescription => 'Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.';
 
+	/// en: 'Dialogue Boost'
+	String get dialogueBoost => 'Dialogue Boost';
+
+	/// en: 'Lift the speech frequencies and hold the loud scenes down, so dialogue is clear without turning everything up. Needs decoded audio, so it turns off bitstream passthrough to a receiver.'
+	String get dialogueBoostDescription => 'Lift the speech frequencies and hold the loud scenes down, so dialogue is clear without turning everything up. Needs decoded audio, so it turns off bitstream passthrough to a receiver.';
+
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
 
@@ -1465,6 +1471,15 @@ class Translations$settings$en {
 
 	/// en: 'When a video has no subtitles, download the one timed to this exact file, if the provider has it'
 	String get autoFetchSubtitlesDescription => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it';
+
+	/// en: 'Subtitle Search Language'
+	String get subtitleSearchLanguage => 'Subtitle Search Language';
+
+	/// en: 'The language to look for when searching or fetching subtitles'
+	String get subtitleSearchLanguageDescription => 'The language to look for when searching or fetching subtitles';
+
+	/// en: 'Follow the account, then the device'
+	String get subtitleSearchLanguageAutomatic => 'Follow the account, then the device';
 
 	/// en: 'Fix subtitle frame rate'
 	String get subtitleRateCorrection => 'Fix subtitle frame rate';
@@ -5070,6 +5085,9 @@ class Translations$videoSettings$en {
 	/// en: 'Normalize Loudness'
 	String get audioNormalization => 'Normalize Loudness';
 
+	/// en: 'Dialogue Boost'
+	String get dialogueBoost => 'Dialogue Boost';
+
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
 
@@ -8038,6 +8056,8 @@ extension on Translations {
 			'settings.audioPassthroughDescriptionAppleTv' => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.',
 			'settings.audioNormalization' => 'Normalize Loudness',
 			'settings.audioNormalizationDescription' => 'Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.',
+			'settings.dialogueBoost' => 'Dialogue Boost',
+			'settings.dialogueBoostDescription' => 'Lift the speech frequencies and hold the loud scenes down, so dialogue is clear without turning everything up. Needs decoded audio, so it turns off bitstream passthrough to a receiver.',
 			'settings.audioDownmix' => 'Downmix to Stereo',
 			'settings.audioDownmixDescription' => 'Mix surround audio down to two channels for stereo speakers or headphones',
 			'settings.downmixCenterBoost' => 'Center Channel Boost',
@@ -8135,6 +8155,9 @@ extension on Translations {
 			'settings.subtitlesAndConfig' => 'Subtitles & Configuration',
 			'settings.autoFetchSubtitles' => 'Fetch a Matching Subtitle',
 			'settings.autoFetchSubtitlesDescription' => 'When a video has no subtitles, download the one timed to this exact file, if the provider has it',
+			'settings.subtitleSearchLanguage' => 'Subtitle Search Language',
+			'settings.subtitleSearchLanguageDescription' => 'The language to look for when searching or fetching subtitles',
+			'settings.subtitleSearchLanguageAutomatic' => 'Follow the account, then the device',
 			'settings.subtitleRateCorrection' => 'Fix subtitle frame rate',
 			'settings.subtitleRateCorrectionOff' => 'Off',
 			'settings.subtitleRateCorrectionOffDescription' => 'Leave the rate alone; set it by hand from the player',
@@ -8181,13 +8204,13 @@ extension on Translations {
 			'hotkeys.actions.frameStepBackward' => 'Step Back One Frame',
 			'fileInfo.title' => 'File Info',
 			'fileInfo.overview' => 'Overview',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.video' => 'Video',
 			'fileInfo.audio' => 'Audio',
 			'fileInfo.subtitles' => 'Subtitles',
 			'fileInfo.images' => 'Embedded Images',
 			'fileInfo.dataStreams' => 'Data Streams',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.lyrics' => 'Lyrics',
 			'fileInfo.file' => 'File',
 			'fileInfo.attachments' => 'Attachments',
@@ -8695,13 +8718,13 @@ extension on Translations {
 			'accountPreferences.subtitleAccessibilityOptions.onlyNonSdh' => 'Only non-SDH subtitles',
 			'accountPreferences.forcedSubtitles' => 'Forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.preferNonForced' => 'Prefer non-forced subtitles',
+			_ => null,
+		} ?? switch (path) {
 			'accountPreferences.forcedSubtitleOptions.preferForced' => 'Prefer forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.onlyForced' => 'Only forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.onlyNonForced' => 'Only non-forced subtitles',
 			'accountPreferences.displayMissingEpisodes' => 'Show missing episodes',
 			'accountPreferences.displayMissingEpisodesDescription' => 'List episodes the server knows about but has no file for.',
-			_ => null,
-		} ?? switch (path) {
 			'accountPreferences.hidePlayedInLatest' => 'Hide watched items in Latest',
 			'accountPreferences.hidePlayedInLatestDescription' => 'Leave items you have already watched out of the server\'s Latest rows.',
 			'accountPreferences.displayCollectionsView' => 'Show the Collections view',
@@ -9209,13 +9232,13 @@ extension on Translations {
 			'watchTogether.joinSession' => 'Join Session',
 			'watchTogether.joining' => 'Joining...',
 			'watchTogether.controlMode' => 'Control Mode',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.controlModeQuestion' => 'Who can control playback?',
 			'watchTogether.hostOnly' => 'Host Only',
 			'watchTogether.anyone' => 'Anyone',
 			'watchTogether.hostingSession' => 'Hosting Session',
 			'watchTogether.inSession' => 'In Session',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.sessionCode' => 'Session Code',
 			'watchTogether.openSessionControls' => 'Open Watch Together session controls',
 			'watchTogether.copySessionCode' => 'Copy session code',
@@ -9548,6 +9571,7 @@ extension on Translations {
 			'videoSettings.audioOutputSpatial' => 'Spatial Audio',
 			'videoSettings.audioOutputStereo' => 'Stereo',
 			'videoSettings.audioNormalization' => 'Normalize Loudness',
+			'videoSettings.dialogueBoost' => 'Dialogue Boost',
 			'videoSettings.audioDownmix' => 'Downmix to Stereo',
 			'videoSettings.pictureAdjustments' => 'Picture',
 			'videoSettings.pictureBrightness' => 'Brightness',
@@ -9722,14 +9746,14 @@ extension on Translations {
 			'seerr.serverUrl' => 'Server URL',
 			'seerr.serverUrlHelper' => 'The address of your Seerr instance',
 			'seerr.checkServer' => 'Continue',
+			_ => null,
+		} ?? switch (path) {
 			'seerr.signInWithJellyfin' => 'Sign in with Jellyfin',
 			'seerr.signInWithEmby' => 'Sign in with Emby',
 			'seerr.signInWithLocal' => 'Use a local account',
 			'seerr.email' => 'Email',
 			'seerr.noSignInMethods' => 'This Seerr instance offers no sign-in method Plezy supports.',
 			'seerr.instance' => 'Instance',
-			_ => null,
-		} ?? switch (path) {
 			'seerr.disconnectConfirm' => 'Disconnect Seerr?',
 			'seerr.disconnectConfirmBody' => 'Plezy will forget this Seerr instance. Reconnect any time.',
 			'seerr.request' => 'Request',

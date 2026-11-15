@@ -5,10 +5,20 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../services/settings_service.dart';
+import '../../utils/language_codes.dart';
 import '../../widgets/setting_tile.dart';
 import '../../widgets/settings_page.dart';
 import '../../widgets/settings_section.dart';
 import 'settings_utils.dart';
+
+/// Every ISO 639-1 language, plus the automatic choice, built once:
+/// [LanguageCodes.getAllLanguages] allocates and sorts a fresh copy per call
+/// and the page rebuilds after every write. The names come from the generated
+/// ISO table rather than translations, so caching survives a locale change.
+final _searchLanguageOptions = <DialogOption<String?>>[
+  DialogOption(value: null, title: t.settings.subtitleSearchLanguageAutomatic),
+  for (final language in LanguageCodes.getAllLanguages()) DialogOption(value: language.code, title: language.name),
+];
 
 class SubtitleStylingScreen extends StatelessWidget {
   const SubtitleStylingScreen({super.key});
@@ -67,6 +77,19 @@ class SubtitleStylingScreen extends StatelessWidget {
               icon: Symbols.subtitles_rounded,
               title: t.settings.autoFetchSubtitles,
               subtitle: t.settings.autoFetchSubtitlesDescription,
+            ),
+            // The one knob both subtitle searches read, and until now it had
+            // no tile: the value was only ever written by picking a language
+            // inside the in-player search sheet, so whatever was searched last
+            // silently became the default for the automatic fetch above.
+            SettingSelectionTile<String?>(
+              pref: SettingsService.subtitleSearchLanguage,
+              icon: Symbols.translate_rounded,
+              title: t.settings.subtitleSearchLanguage,
+              subtitleBuilder: (code) => code == null
+                  ? t.settings.subtitleSearchLanguageAutomatic
+                  : LanguageCodes.getLanguageName(code) ?? code,
+              options: _searchLanguageOptions,
             ),
             // Sits with the fetch rather than the styling: both are about a
             // subtitle being right for this file, not how it looks.
