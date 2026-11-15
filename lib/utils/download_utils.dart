@@ -10,6 +10,7 @@ import '../media/media_kind.dart';
 import '../media/media_playlist.dart';
 import '../media/media_server_client.dart';
 import '../database/app_database.dart';
+import '../models/download_models.dart';
 import '../providers/download_provider.dart';
 import '../providers/multi_server_provider.dart';
 import '../services/playlist_items_loader.dart';
@@ -251,17 +252,6 @@ Future<void> queueDownloadWithFeedback(
     }
   }
 }
-
-/// How many unwatched episodes a new rule keeps when the viewer did not say.
-///
-/// "Unwatched" describes which episodes qualify, not how many to hold, and the
-/// two were conflated: picking it with Keep synced stored a count of 0, which
-/// the executor reads as "every episode matching the filter". A show with four
-/// unwatched seasons therefore downloaded four seasons and kept doing it as
-/// episodes aired — on a TV with a few hundred MB free that is the whole disk
-/// for one show. A window is what the rule is for; the next ten episodes is
-/// more than anyone watches before the next sync pass.
-const int defaultUnwatchedSyncCount = 10;
 
 /// The episode window to store on a new sync rule.
 ///

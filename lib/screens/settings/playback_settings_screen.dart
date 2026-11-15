@@ -88,6 +88,10 @@ class PlaybackSettingsScreen extends StatelessWidget {
               children: [
                 if (PlatformDetector.supportsAudioPassthrough()) _audioPassthroughTile(),
                 _audioNormalizationTile(),
+                // mpv-only, like deinterlace above: ExoPlayer has no filter
+                // chain, and a switch that does nothing is worse than no
+                // switch.
+                if (!exoActive) _dialogueBoostTile(),
                 _audioDownmixTile(),
                 if (downmixOn) _downmixCenterBoostTile(),
                 if (downmixOn) _downmixNormalizeTile(),
@@ -492,6 +496,13 @@ class PlaybackSettingsScreen extends StatelessWidget {
     icon: Symbols.compress_rounded,
     title: t.settings.audioNormalization,
     subtitle: t.settings.audioNormalizationDescription,
+  );
+
+  Widget _dialogueBoostTile() => SettingSwitchTile(
+    pref: SettingsService.dialogueBoost,
+    icon: Symbols.record_voice_over_rounded,
+    title: t.settings.dialogueBoost,
+    subtitle: t.settings.dialogueBoostDescription,
   );
 
   Widget _audioDownmixTile() => SettingSwitchTile(

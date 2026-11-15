@@ -16,20 +16,37 @@ import '../../../utils/provider_extensions.dart';
 import '../../../utils/snackbar_helper.dart';
 import '../../../widgets/app_icon.dart';
 import '../../../widgets/focusable_list_tile.dart';
+import 'package:provider/provider.dart';
+
+import '../../../providers/account_preferences_controller.dart';
 import '../../../widgets/overlay_sheet.dart';
 import '../../../widgets/pill_input_decoration.dart';
 import 'base_video_control_sheet.dart';
 import '../../loading_indicator_box.dart';
 import '../models/track_controls_state.dart';
 
-/// The language to search subtitles in: the saved choice, else the system
-/// language, else English.
+/// The language to search subtitles in: the saved choice, else the account's
+/// preferred subtitle language, else the system language, else English.
 ///
 /// Used by the auto-fetch path too, which needs the same answer the sheet
 /// would give — searching in a language the user does not read would make its
 /// one automatic action useless.
-String resolveSubtitleSearchLanguageCode({String? savedLanguageCode, required Locale systemLocale}) {
+///
+/// [accountLanguageCode] is the server-stored
+/// [AccountPreferenceKey.preferredSubtitleLanguage], and it sits above the
+/// system locale because it is a statement about subtitles specifically: a
+/// device in English owned by someone who reads Spanish subtitles used to
+/// search English, and the only way to say otherwise was to open the sheet
+/// and pick a language, which is also the only thing that ever wrote
+/// [SettingsService.subtitleSearchLanguage]. The saved choice still wins,
+/// since it was made for this purpose on this device.
+String resolveSubtitleSearchLanguageCode({
+  String? savedLanguageCode,
+  String? accountLanguageCode,
+  required Locale systemLocale,
+}) {
   return LanguageCodes.getIso6391Code(savedLanguageCode ?? '') ??
+      LanguageCodes.getIso6391Code(accountLanguageCode ?? '') ??
       LanguageCodes.getIso6391Code(systemLocale.languageCode) ??
       'en';
 }
@@ -98,6 +115,10 @@ class _SubtitleSearchSheetState extends State<SubtitleSearchSheet> with Controll
   void _initDefaultLanguage() {
     final code = resolveSubtitleSearchLanguageCode(
       savedLanguageCode: SettingsService.instanceOrNull?.read(SettingsService.subtitleSearchLanguage),
+      accountLanguageCode: context
+          .read<AccountPreferencesController?>()
+          ?.activePreferences
+          ?.preferredSubtitleLanguageCode1,
       systemLocale: WidgetsBinding.instance.platformDispatcher.locale,
     );
     final name = LanguageCodes.getLanguageName(code);

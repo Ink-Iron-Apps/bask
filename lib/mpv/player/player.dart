@@ -235,6 +235,20 @@ abstract class Player {
   /// PCM output while enabled so the effects can process the stream.
   Future<void> setAudioNormalization(bool enabled);
 
+  /// Enable or disable the dialogue boost.
+  ///
+  /// A speech-band peaking EQ followed by a compressor: a film mix puts
+  /// dialogue 20 dB under its effects, and raising the volume raises both. The
+  /// EQ lifts the band speech actually occupies and the compressor stops the
+  /// loud passages from arriving louder still, which is the half of the
+  /// problem that volume cannot address.
+  ///
+  /// mpv backends extend the `af` chain, ahead of `loudnorm` when both are on
+  /// so normalization measures the boosted signal rather than fighting it.
+  /// Android ExoPlayer has no filter chain, so the setting is not offered
+  /// while it is the active backend.
+  Future<void> setDialogueBoost(bool enabled);
+
   /// Force a stereo downmix with a Kodi-style center channel boost.
   ///
   /// [centerBoostDb] (0-12) raises the center channel above its standard

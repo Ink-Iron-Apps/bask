@@ -16,13 +16,14 @@ import 'player_base.dart';
 typedef _AudioStateRequest = ({
   bool passthrough,
   bool normalization,
+  bool dialogueBoost,
   bool downmix,
   int downmixCenterBoostDb,
   bool downmixNormalize,
   double rate,
 });
 
-typedef _AudioStateGenerations = ({int passthrough, int normalization, int downmix, int rate});
+typedef _AudioStateGenerations = ({int passthrough, int normalization, int dialogueBoost, int downmix, int rate});
 
 /// MPV-backed player for platforms where AetherEngine is not the native route.
 class PlayerNative extends PlayerBase {
@@ -841,6 +842,7 @@ class PlayerNative extends PlayerBase {
         _acceptedAudioState = (
           passthrough: accepted.passthrough,
           normalization: accepted.normalization,
+          dialogueBoost: accepted.dialogueBoost,
           downmix: accepted.downmix,
           downmixCenterBoostDb: accepted.downmixCenterBoostDb,
           downmixNormalize: accepted.downmixNormalize,
@@ -962,11 +964,14 @@ class PlayerNative extends PlayerBase {
   static const int _normalizationAudioField = 1 << 1;
   static const int _downmixAudioField = 1 << 2;
   static const int _rateAudioField = 1 << 3;
+  static const int _dialogueBoostAudioField = 1 << 4;
 
   bool _passthroughRequested = false;
   bool _passthroughActive = false;
   bool _normalizationRequested = false;
   bool _normalizationActive = false;
+  bool _dialogueBoostRequested = false;
+  bool _dialogueBoostActive = false;
   bool _downmixRequested = false;
   bool _downmixActive = false;
   int _downmixCenterBoostDb = 0;
@@ -976,11 +981,13 @@ class PlayerNative extends PlayerBase {
   double _currentRate = 1.0;
   int _passthroughGeneration = 0;
   int _normalizationGeneration = 0;
+  int _dialogueBoostGeneration = 0;
   int _downmixGeneration = 0;
   int _rateGeneration = 0;
   _AudioStateRequest _acceptedAudioState = const (
     passthrough: false,
     normalization: false,
+    dialogueBoost: false,
     downmix: false,
     downmixCenterBoostDb: 0,
     downmixNormalize: false,
@@ -1014,6 +1021,7 @@ class PlayerNative extends PlayerBase {
   _AudioStateRequest get _requestedAudioState => (
     passthrough: _passthroughRequested,
     normalization: _normalizationRequested,
+    dialogueBoost: _dialogueBoostRequested,
     downmix: _downmixRequested,
     downmixCenterBoostDb: _downmixCenterBoostDb,
     downmixNormalize: _downmixNormalize,
@@ -1023,6 +1031,7 @@ class PlayerNative extends PlayerBase {
   _AudioStateRequest _rebaseAudioState(_AudioStateRequest accepted, _AudioStateRequest requested, int fields) => (
     passthrough: fields & _passthroughAudioField != 0 ? requested.passthrough : accepted.passthrough,
     normalization: fields & _normalizationAudioField != 0 ? requested.normalization : accepted.normalization,
+    dialogueBoost: fields & _dialogueBoostAudioField != 0 ? requested.dialogueBoost : accepted.dialogueBoost,
     downmix: fields & _downmixAudioField != 0 ? requested.downmix : accepted.downmix,
     downmixCenterBoostDb: fields & _downmixAudioField != 0
         ? requested.downmixCenterBoostDb
@@ -1038,6 +1047,9 @@ class PlayerNative extends PlayerBase {
     if (fields & _normalizationAudioField != 0 && generations.normalization == _normalizationGeneration) {
       _normalizationRequested = previous.normalization;
     }
+    if (fields & _dialogueBoostAudioField != 0 && generations.dialogueBoost == _dialogueBoostGeneration) {
+      _dialogueBoostRequested = previous.dialogueBoost;
+    }
     if (fields & _downmixAudioField != 0 && generations.downmix == _downmixGeneration) {
       _downmixRequested = previous.downmix;
       _downmixCenterBoostDb = previous.downmixCenterBoostDb;
@@ -1052,11 +1064,13 @@ class PlayerNative extends PlayerBase {
     final requested = _requestedAudioState;
     if (fields & _passthroughAudioField != 0) ++_passthroughGeneration;
     if (fields & _normalizationAudioField != 0) ++_normalizationGeneration;
+    if (fields & _dialogueBoostAudioField != 0) ++_dialogueBoostGeneration;
     if (fields & _downmixAudioField != 0) ++_downmixGeneration;
     if (fields & _rateAudioField != 0) ++_rateGeneration;
     final generations = (
       passthrough: _passthroughGeneration,
       normalization: _normalizationGeneration,
+      dialogueBoost: _dialogueBoostGeneration,
       downmix: _downmixGeneration,
       rate: _rateGeneration,
     );
@@ -1127,10 +1141,19 @@ class PlayerNative extends PlayerBase {
       _activeDownmixCenterBoostDb = target.downmixCenterBoostDb;
       _activeDownmixNormalize = target.downmixNormalize;
     }
+    // Both features are the one `af` chain, so they are reconciled together:
+    // applying them in two steps would have the second write drop the first.
     final normalizationShouldBeActive = target.normalization && !passthroughShouldBeActive;
-    if (forceNormalization || _normalizationActive != normalizationShouldBeActive) {
-      await super.setAudioNormalization(normalizationShouldBeActive);
+    final dialogueBoostShouldBeActive = target.dialogueBoost && !passthroughShouldBeActive;
+    if (forceNormalization ||
+        _normalizationActive != normalizationShouldBeActive ||
+        _dialogueBoostActive != dialogueBoostShouldBeActive) {
+      await super.setAudioFilterChain(
+        normalization: normalizationShouldBeActive,
+        dialogueBoost: dialogueBoostShouldBeActive,
+      );
       _normalizationActive = normalizationShouldBeActive;
+      _dialogueBoostActive = dialogueBoostShouldBeActive;
     }
     if (passthroughShouldBeActive && !_passthroughActive) {
       await _applyPassthrough(true);
@@ -1168,6 +1191,13 @@ class PlayerNative extends PlayerBase {
     if (_nativeCoreUnavailable) return Future<void>.value();
     _normalizationRequested = enabled;
     return _enqueueAudioStateReconciliation(_normalizationAudioField);
+  }
+
+  @override
+  Future<void> setDialogueBoost(bool enabled) {
+    if (_nativeCoreUnavailable) return Future<void>.value();
+    _dialogueBoostRequested = enabled;
+    return _enqueueAudioStateReconciliation(_dialogueBoostAudioField);
   }
 
   @override

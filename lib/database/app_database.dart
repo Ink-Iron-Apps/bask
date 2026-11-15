@@ -366,7 +366,7 @@ class AppDatabase extends _$AppDatabase {
   static const FormatException _invalidRecoveryImage = FormatException('Invalid tvOS database recovery image');
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 24;
 
   @override
   MigrationStrategy get migration {
@@ -751,6 +751,13 @@ class AppDatabase extends _$AppDatabase {
         if (from < 23) {
           appLogger.i('Adding managed column to SyncRules (v23 migration)');
           await _ignoreAlreadyExists('SyncRules.managed column', () => m.addColumn(syncRules, syncRules.managed));
+        }
+        if (from < 24) {
+          appLogger.i('Capping unbounded unwatched sync rules (v24 migration)');
+          final capped = await capUnboundedUnwatchedSyncRules();
+          if (capped > 0) {
+            appLogger.i('Gave $capped unwatched sync rule(s) a $defaultUnwatchedSyncCount-episode window');
+          }
         }
       },
     );
@@ -1334,6 +1341,34 @@ class AppDatabase extends _$AppDatabase {
         syncRuleDownloads,
       )..where((t) => t.syncRuleId.equals(rule.id))).write(SyncRuleDownloadsCompanion(profileId: Value(profileId)));
     }
+  }
+
+  /// Give pre-v24 unwatched rules the episode window they were missing.
+  ///
+  /// An unwatched rule created before [defaultUnwatchedSyncCount] existed
+  /// stored a count of 0, which [SyncRuleExecutor] reads as "every episode
+  /// matching the filter" — so the rule held every unwatched episode of the
+  /// show and grew as more aired. Those rules were made by picking "Unwatched"
+  /// in a dialog that never asked for a number, so 0 recorded the absence of a
+  /// choice rather than a choice of everything.
+  ///
+  /// Three kinds of rule keep their 0, because for them it is meant:
+  /// collections and playlists mirror their list and have no episode window at
+  /// all; a rule whose filter is `all` was explicitly told to mirror the show;
+  /// and a managed rule's count is recomputed from the keep-ahead setting on
+  /// every pass. A viewer who sets 0 on an unwatched rule after this migration
+  /// keeps it — the step runs once, at the version boundary.
+  ///
+  /// Returns the number of rules changed.
+  Future<int> capUnboundedUnwatchedSyncRules() {
+    return (update(syncRules)..where(
+          (t) =>
+              t.episodeCount.equals(0) &
+              t.downloadFilter.equals('unwatched') &
+              t.managed.equals(false) &
+              t.targetType.isIn(const [ContentTypes.show, ContentTypes.season]),
+        ))
+        .write(const SyncRulesCompanion(episodeCount: Value(defaultUnwatchedSyncCount)));
   }
 
   Future<void> _writeSyncRule(String globalKey, SyncRulesCompanion values) async {
