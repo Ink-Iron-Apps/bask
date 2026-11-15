@@ -955,6 +955,18 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           onAfterWrite: widget.player.setAudioNormalization,
         ),
 
+        // Where the problem is actually noticed: a line goes by unheard and
+        // the viewer reaches for the remote. Hidden on ExoPlayer, which has no
+        // filter chain to extend — gated on the configured backend, so a
+        // session that silently fell back to mpv does not grow a row mid-film.
+        if (widget.player.playerType != 'exoplayer')
+          _SettingsToggleItem(
+            pref: SettingsService.dialogueBoost,
+            icon: Symbols.record_voice_over_rounded,
+            title: t.videoSettings.dialogueBoost,
+            onAfterWrite: widget.player.setDialogueBoost,
+          ),
+
         _SettingsToggleItem(
           pref: SettingsService.audioDownmix,
           icon: Symbols.headphones_rounded,

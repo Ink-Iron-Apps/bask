@@ -892,6 +892,17 @@ class SettingsService extends BaseSharedPreferencesService {
   /// this off; everyone playing to TV speakers or a stereo soundbar is better
   /// off with it on, which is the common case and so the default.
   static const audioNormalization = BoolPref('audio_normalization', defaultValue: true);
+
+  /// Off by default, unlike [audioNormalization]: this one changes the tone of
+  /// the mix rather than only its level, and a boost nobody asked for on a mix
+  /// that did not need it sounds thin and nasal. It is for the films that
+  /// bury their dialogue, chosen per viewer, and it is reachable mid-film from
+  /// the player's own settings sheet because that is when the problem is
+  /// noticed.
+  ///
+  /// mpv only. ExoPlayer has no filter chain, so the tiles are hidden while it
+  /// is the active backend rather than offering a switch that does nothing.
+  static const dialogueBoost = BoolPref('dialogue_boost');
   static const audioDownmix = BoolPref('audio_downmix');
   static const audioDownmixNormalize = BoolPref('audio_downmix_normalize', defaultValue: true);
   static const liveTvDefaultFavorites = BoolPref('live_tv_default_favorites');
@@ -1522,6 +1533,7 @@ class SettingsService extends BaseSharedPreferencesService {
     ambientLighting,
     audioPassthrough,
     audioNormalization,
+    dialogueBoost,
     audioDownmix,
     audioDownmixNormalize,
     appLocale,

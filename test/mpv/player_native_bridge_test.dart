@@ -1033,6 +1033,80 @@ void main() {
     );
   });
 
+  test('normalization and dialogue boost share one af write, boost first', () async {
+    final propertyWrites = <(String, String)>[];
+    await withMockPlayerChannels(
+      methodChannelName: 'com.plezy/mpv_player',
+      eventChannelName: 'com.plezy/mpv_player/events',
+      methodHandler: (call) async {
+        if (call.method == 'initialize') return true;
+        if (call.method == 'setProperty') {
+          final arguments = call.arguments as Map;
+          propertyWrites.add((arguments['name'] as String, arguments['value'] as String));
+        }
+        return null;
+      },
+      testBody: () async {
+        final player = PlayerNative();
+        try {
+          await player.setAudioNormalization(true);
+          await player.setDialogueBoost(true);
+          // Turning one off must leave the other standing: `af` is the whole
+          // chain, so the second write is the only thing holding the first
+          // feature up.
+          await player.setAudioNormalization(false);
+
+          expect(propertyWrites.where((write) => write.$1 == 'af').map((write) => write.$2), [
+            'loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
+            'equalizer=f=2200:t=h:w=1800:g=5,acompressor=threshold=0.0625:ratio=4:attack=20:release=250,'
+                'loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
+            'equalizer=f=2200:t=h:w=1800:g=5,acompressor=threshold=0.0625:ratio=4:attack=20:release=250,'
+                'format=srate=48000:format=floatp',
+          ]);
+        } finally {
+          await player.dispose();
+        }
+      },
+    );
+  });
+
+  test('passthrough suspends the dialogue boost and restores it on the way back', () async {
+    final propertyWrites = <(String, String)>[];
+    await withMockPlayerChannels(
+      methodChannelName: 'com.plezy/mpv_player',
+      eventChannelName: 'com.plezy/mpv_player/events',
+      methodHandler: (call) async {
+        if (call.method == 'initialize') return true;
+        if (call.method == 'setProperty') {
+          final arguments = call.arguments as Map;
+          propertyWrites.add((arguments['name'] as String, arguments['value'] as String));
+        }
+        if (call.method == 'getAudioSpdifCodecs') return 'ac3,eac3';
+        return null;
+      },
+      testBody: () async {
+        final player = PlayerNative();
+        try {
+          await player.setDialogueBoost(true);
+          // A bitstream cannot be filtered, so the chain has to empty out and
+          // come back rather than the request being forgotten.
+          await player.setAudioPassthrough(true);
+          await player.setAudioPassthrough(false);
+
+          expect(propertyWrites.where((write) => write.$1 == 'af').map((write) => write.$2), [
+            'equalizer=f=2200:t=h:w=1800:g=5,acompressor=threshold=0.0625:ratio=4:attack=20:release=250,'
+                'format=srate=48000:format=floatp',
+            '',
+            'equalizer=f=2200:t=h:w=1800:g=5,acompressor=threshold=0.0625:ratio=4:attack=20:release=250,'
+                'format=srate=48000:format=floatp',
+          ]);
+        } finally {
+          await player.dispose();
+        }
+      },
+    );
+  });
+
   test('failed passthrough restores requested normalization', () async {
     final propertyWrites = <(String, String)>[];
     await withMockPlayerChannels(
