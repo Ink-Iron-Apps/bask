@@ -16,6 +16,7 @@ import 'package:plezy/media/media_kind.dart';
 import 'package:plezy/providers/download_provider.dart';
 import 'package:plezy/providers/multi_server_provider.dart';
 import 'package:plezy/screens/downloads/sync_rules_screen.dart';
+import 'package:plezy/utils/download_utils.dart';
 import 'package:plezy/services/data_aggregation_service.dart';
 import 'package:plezy/services/download_manager_service.dart';
 import 'package:plezy/services/download_storage_service.dart';
@@ -389,6 +390,72 @@ void main() {
     // same thing "Download all" creates — so it must not delete the rule.
     expect(downloadProvider.syncRules.values.single.episodeCount, 0);
     expect(find.text('No sync rules'), findsNothing);
+  });
+
+  testWidgets('a sync rule can be removed without a swipe', (tester) async {
+    // The bug: removal was only reachable by dragging a row sideways, and the
+    // revealed delete button sits inside ExcludeFocus — so on a TV a rule
+    // could be switched off but never deleted.
+    multiServerProvider = testMultiServerProvider(serverManager);
+    await insertRule(ServerId('orphan-srv'), '76672');
+
+    await pumpScreen(tester, keyboardMode: true);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Remove sync rule'));
+    await tester.pumpAndSettle();
+
+    // The confirmation's button carries the same label as the menu entry.
+    await tester.tap(find.text('Remove sync rule').last);
+    await tester.pumpAndSettle();
+
+    expect(downloadProvider.syncRules, isEmpty);
+    expect(find.text('No sync rules'), findsOneWidget);
+  });
+
+  testWidgets('a caller with its own Remove entry is offered both knobs, not just the count', (tester) async {
+    // The media detail screen carries its own menu with Remove sync rule and
+    // Delete download, and its Edit went straight to the episode-count field —
+    // so a rule's filter was changeable from the Sync rules screen and nowhere
+    // else. It now opens this menu with removal suppressed.
+    multiServerProvider = testMultiServerProvider(serverManager);
+    await insertRule(ServerId('orphan-srv'), '76672');
+
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(SyncRulesScreen));
+    unawaited(
+      manageSyncRule(
+        context,
+        downloadProvider: downloadProvider,
+        globalKey: downloadProvider.syncRules.keys.single,
+        displayTitle: 'Plex Show',
+        offerRemoval: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sync filter'), findsOneWidget);
+    expect(find.text('Episode count'), findsOneWidget);
+    expect(find.text('Remove sync rule'), findsNothing);
+  });
+
+  testWidgets('a list rule gets the same menu, so it can be removed too', (tester) async {
+    // A playlist rule used to open the filter picker directly, which left it
+    // with no route to removal at all.
+    multiServerProvider = testMultiServerProvider(serverManager);
+    await insertPlaylistRule(ServerId('orphan-srv'), '76672');
+
+    await pumpScreen(tester, keyboardMode: true);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sync filter'), findsOneWidget);
+    // A list mirrors its list, so there is no episode window to change.
+    expect(find.text('Episode count'), findsNothing);
+    expect(find.text('Remove sync rule'), findsOneWidget);
   });
 
   testWidgets('show sync rule can change its download filter', (tester) async {
