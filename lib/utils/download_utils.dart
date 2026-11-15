@@ -180,7 +180,7 @@ Future<DownloadResult?> showDownloadOptionsAndQueue(
   // Create or update sync rule before queueing (so the rule exists even if queue fails)
   bool syncRuleUpdated = false;
   if (keepSynced) {
-    final syncCount = maxCount ?? 0; // 0 means "everything matching the filter"
+    final syncCount = syncRuleCountFor(filter: filter, explicitCount: maxCount);
     final ruleKey = downloadProvider.syncRuleKeyFor(ServerId(metadata.serverId ?? client.serverId), metadata.id);
     syncRuleUpdated = downloadProvider.hasSyncRule(ruleKey);
 
@@ -250,6 +250,28 @@ Future<void> queueDownloadWithFeedback(
       showErrorSnackBar(context, t.messages.errorLoading(error: e.toString()));
     }
   }
+}
+
+/// How many unwatched episodes a new rule keeps when the viewer did not say.
+///
+/// "Unwatched" describes which episodes qualify, not how many to hold, and the
+/// two were conflated: picking it with Keep synced stored a count of 0, which
+/// the executor reads as "every episode matching the filter". A show with four
+/// unwatched seasons therefore downloaded four seasons and kept doing it as
+/// episodes aired — on a TV with a few hundred MB free that is the whole disk
+/// for one show. A window is what the rule is for; the next ten episodes is
+/// more than anyone watches before the next sync pass.
+const int defaultUnwatchedSyncCount = 10;
+
+/// The episode window to store on a new sync rule.
+///
+/// [explicitCount] is whatever the viewer chose (Next 5, Next 10, a custom
+/// number) and always wins. Without one, only an unwatched rule gets a
+/// default: "Download all" means mirror the show, including episodes that air
+/// later, and 0 is how the executor is told to do that.
+int syncRuleCountFor({required DownloadFilter filter, int? explicitCount}) {
+  if (explicitCount != null) return explicitCount;
+  return filter == DownloadFilter.unwatched ? defaultUnwatchedSyncCount : 0;
 }
 
 /// Shows download options dialog for a collection or playlist, then queues
@@ -445,45 +467,7 @@ Future<bool> editSyncRuleCount(
   return true;
 }
 
-enum _ShowRuleEdit { filter, count }
-
-/// Lets a show/season rule change either knob. Shows created with
-/// "Download all" carry a filter too, so the count dialog alone would strand
-/// them — there would be no way back to unwatched-only.
-Future<bool> _editShowSyncRule(
-  BuildContext context, {
-  required DownloadProvider downloadProvider,
-  required SyncRuleItem rule,
-  String? displayTitle,
-}) async {
-  final selected = await showOptionPickerDialog<_ShowRuleEdit>(
-    context,
-    title: displayTitle ?? rule.ratingKey,
-    options: [
-      (icon: Symbols.filter_alt_rounded, label: t.downloads.editSyncFilter, value: _ShowRuleEdit.filter),
-      (icon: Symbols.tune_rounded, label: t.downloads.editEpisodeCount, value: _ShowRuleEdit.count),
-    ],
-  );
-  if (selected == null || !context.mounted) return false;
-
-  switch (selected) {
-    case _ShowRuleEdit.filter:
-      return editSyncRuleFilter(
-        context,
-        downloadProvider: downloadProvider,
-        globalKey: rule.globalKey,
-        currentFilter: rule.downloadFilter,
-      );
-    case _ShowRuleEdit.count:
-      return editSyncRuleCount(
-        context,
-        downloadProvider: downloadProvider,
-        globalKey: rule.globalKey,
-        currentCount: rule.episodeCount,
-        displayTitle: displayTitle,
-      );
-  }
-}
+enum _SyncRuleEdit { filter, count, remove }
 
 /// Shows a dialog to edit a collection/playlist sync rule's filter. Returns
 /// true if the filter changed.
@@ -608,10 +592,17 @@ extension SyncRuleItemDispatch on SyncRuleItem {
   bool get isListRule => targetType == ContentTypes.collection || targetType == ContentTypes.playlist;
 }
 
-/// Open the right sync-rule edit dialog for [globalKey] and show a success
-/// snackbar when anything changed. Used by both detail screens and the
+/// Open a sync rule's options for [globalKey] and show a success snackbar when
+/// anything changed. Used by the sync rules screen, both detail screens and the
 /// context menu so they don't each reimplement the get-rule / edit / snack
 /// dance.
+///
+/// Removal lives here rather than only as a gesture. The sync rules screen
+/// reveals a delete button on a horizontal drag, which a mouse can reach only
+/// by accident and a TV remote cannot reach at all — the revealed button is
+/// deliberately excluded from focus — so a rule on the TV could be switched off
+/// but never deleted. Opening the rule is what a viewer tries first on every
+/// input, so that is where the action belongs.
 Future<void> manageSyncRule(
   BuildContext context, {
   required DownloadProvider downloadProvider,
@@ -620,24 +611,57 @@ Future<void> manageSyncRule(
 }) async {
   final rule = downloadProvider.getSyncRule(globalKey);
   if (rule == null) return;
+  final title = displayTitle ?? rule.ratingKey;
 
-  final bool updated;
-  if (rule.isListRule) {
-    // A list rule mirrors its list, so the episode count is meaningless —
-    // the filter is the only thing to change.
-    updated = await editSyncRuleFilter(
+  final selected = await showOptionPickerDialog<_SyncRuleEdit>(
+    context,
+    title: title,
+    options: [
+      // Shows created with "Download all" carry a filter too, so the count
+      // dialog alone would strand them — there would be no way back to
+      // unwatched-only.
+      (icon: Symbols.filter_alt_rounded, label: t.downloads.editSyncFilter, value: _SyncRuleEdit.filter),
+      // A list rule mirrors its list, so it has no episode cap to change.
+      // It still gets the menu rather than jumping straight to the filter,
+      // because the menu is the only place removal is reachable.
+      if (!rule.isListRule)
+        (icon: Symbols.tune_rounded, label: t.downloads.editEpisodeCount, value: _SyncRuleEdit.count),
+      (icon: Symbols.delete_rounded, label: t.downloads.removeSyncRule, value: _SyncRuleEdit.remove),
+    ],
+  );
+  if (selected == null || !context.mounted) return;
+
+  // Removal brings its own confirmation and its own message, which says
+  // whether the downloads went with the rule.
+  if (selected == _SyncRuleEdit.remove) {
+    await removeSyncRuleAndSnack(
       context,
       downloadProvider: downloadProvider,
       globalKey: globalKey,
-      currentFilter: rule.downloadFilter,
+      displayTitle: title,
     );
-  } else {
-    updated = await _editShowSyncRule(
-      context,
-      downloadProvider: downloadProvider,
-      rule: rule,
-      displayTitle: displayTitle ?? rule.ratingKey,
-    );
+    return;
+  }
+
+  final bool updated;
+  switch (selected) {
+    case _SyncRuleEdit.filter:
+      updated = await editSyncRuleFilter(
+        context,
+        downloadProvider: downloadProvider,
+        globalKey: globalKey,
+        currentFilter: rule.downloadFilter,
+      );
+    case _SyncRuleEdit.count:
+      updated = await editSyncRuleCount(
+        context,
+        downloadProvider: downloadProvider,
+        globalKey: globalKey,
+        currentCount: rule.episodeCount,
+        displayTitle: title,
+      );
+    case _SyncRuleEdit.remove:
+      return;
   }
   if (updated && context.mounted) {
     showSuccessSnackBar(context, t.downloads.syncRuleUpdated);
@@ -698,7 +722,12 @@ List<FocusableAction> buildSyncRuleActions(
         icon: hasRule ? Symbols.sync_rounded : Symbols.download_rounded,
         tooltip: hasRule ? t.downloads.manageSyncRule : t.downloads.downloadNow,
         onPressed: hasRule
-            ? () => manageSyncRule(context, downloadProvider: context.read<DownloadProvider>(), globalKey: ruleKey)
+            ? () => manageSyncRule(
+                context,
+                downloadProvider: context.read<DownloadProvider>(),
+                globalKey: ruleKey,
+                displayTitle: displayTitle,
+              )
             : onDownload,
         iconColor: hasRule ? Colors.teal : null,
       ),
