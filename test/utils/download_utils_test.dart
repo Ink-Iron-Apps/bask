@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plezy/i18n/strings.g.dart';
+import 'package:plezy/models/download_models.dart';
 import 'package:plezy/providers/download_provider.dart';
 import 'package:plezy/utils/download_utils.dart';
 
