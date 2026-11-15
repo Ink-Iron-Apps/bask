@@ -1881,6 +1881,10 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
         await currentPlayer.setAudioNormalization(true);
       }
 
+      if (settingsService.read(SettingsService.dialogueBoost)) {
+        await currentPlayer.setDialogueBoost(true);
+      }
+
       // After the passthrough apply: downmix wins on both backends (mpv
       // clears audio-spdif, ExoPlayer force-decodes encoded audio).
       if (settingsService.read(SettingsService.audioDownmix)) {
