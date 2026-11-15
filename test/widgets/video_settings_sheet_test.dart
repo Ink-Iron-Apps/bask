@@ -418,6 +418,122 @@ void main() {
       expect(_tickOn('Player'), findsNothing);
     });
   });
+
+  group('the audio filter rows', () {
+    testWidgets('say so while passthrough is carrying the track', (tester) async {
+      // The failure this prevents: both switches read "on", mpv is bitstreaming
+      // the track, and nothing the viewer does to them is audible.
+      final player = _FakeSettingsPlayer(backend: 'mpv', passthroughActive: true);
+      await _pumpSheet(tester, player: player, height: 2000);
+
+      await tester.scrollUntilVisible(find.text('Normalize Loudness'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('No effect while passthrough is on'), findsNWidgets(2));
+    });
+
+    testWidgets('stay quiet when passthrough is not carrying it', (tester) async {
+      final player = _FakeSettingsPlayer(backend: 'mpv');
+      await _pumpSheet(tester, player: player, height: 2000);
+
+      await tester.scrollUntilVisible(find.text('Normalize Loudness'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dialogue Boost'), findsOneWidget);
+      expect(find.text('No effect while passthrough is on'), findsNothing);
+    });
+
+    testWidgets('are hidden on ExoPlayer, which has no filter chain', (tester) async {
+      await _pumpSheet(tester, player: _FakeSettingsPlayer(passthroughActive: true), height: 2000);
+
+      await tester.scrollUntilVisible(find.text('Normalize Loudness'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dialogue Boost'), findsNothing);
+      // ExoPlayer force-decodes for normalization, so passthrough does not
+      // silence it there and the note would be a lie.
+      expect(find.text('No effect while passthrough is on'), findsNothing);
+    });
+
+    testWidgets('offer the boost strength only while the boost is on', (tester) async {
+      final player = _FakeSettingsPlayer(backend: 'mpv');
+      await _pumpSheet(tester, player: player, height: 2000);
+      await tester.scrollUntilVisible(find.text('Dialogue Boost'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Boost Strength'), findsNothing);
+
+      await tester.tap(find.text('Dialogue Boost'));
+      await tester.pumpAndSettle();
+
+      expect(player.dialogueBoostCalls, [(enabled: true, gainDb: 6)]);
+      expect(find.text('Boost Strength'), findsOneWidget);
+      expect(find.text('+6 dB'), findsOneWidget);
+    });
+
+    testWidgets('push a new boost strength to the player and store it', (tester) async {
+      await SettingsService.instance.write(SettingsService.dialogueBoost, true);
+      final player = _FakeSettingsPlayer(backend: 'mpv');
+      await _pumpSheet(tester, player: player, height: 2000);
+      await tester.scrollUntilVisible(find.text('Boost Strength'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Boost Strength'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('+12 dB'));
+      await tester.pumpAndSettle();
+
+      expect(player.dialogueBoostCalls, [(enabled: true, gainDb: 12)]);
+      expect(SettingsService.instance.read(SettingsService.dialogueBoostGain), 12);
+      expect(_tickOn('+12 dB'), findsOneWidget);
+    });
+  });
+
+  group('the downmix detail rows', () {
+    testWidgets('appear only while the downmix is on', (tester) async {
+      final player = _FakeSettingsPlayer(backend: 'mpv');
+      await _pumpSheet(tester, player: player, height: 2000);
+      await tester.scrollUntilVisible(find.text('Downmix to Stereo'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+      expect(find.text('Center Channel Boost'), findsNothing);
+
+      await tester.tap(find.text('Downmix to Stereo'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Center Channel Boost'), findsOneWidget);
+      expect(find.text('Normalize on Downmix'), findsOneWidget);
+      // 0 dB is swresample's own default, so the row has to say the boost is
+      // off rather than imply the downmix is already helping dialogue.
+      expect(
+        find.descendant(
+          of: find.ancestor(of: find.text('Center Channel Boost'), matching: find.byType(ListTile)).first,
+          matching: find.text('Off'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('push a new center boost to the player and store it', (tester) async {
+      await SettingsService.instance.write(SettingsService.audioDownmix, true);
+      final player = _FakeSettingsPlayer(backend: 'mpv');
+      await _pumpSheet(tester, player: player, height: 2000);
+      await tester.scrollUntilVisible(
+        find.text('Center Channel Boost'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Center Channel Boost'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('+6 dB'));
+      await tester.pumpAndSettle();
+
+      // The downmix stays on through the change: the boost is an argument to
+      // it, not a separate switch.
+      expect(player.downmixCalls, [(enabled: true, centerBoostDb: 6, normalize: true)]);
+      expect(SettingsService.instance.read(SettingsService.downmixCenterBoost), 6);
+    });
+  });
 }
 
 /// The tick marking the selected option in one of the sheet's picker views.
@@ -487,7 +603,33 @@ Future<void> _pumpSheetViaOverlayRoute(WidgetTester tester, Player player) async
 }
 
 class _FakeSettingsPlayer implements Player {
-  _FakeSettingsPlayer({this.onSetProperty, this.onSetRate, this.hdrOutputSupported = false});
+  _FakeSettingsPlayer({
+    this.onSetProperty,
+    this.onSetRate,
+    this.hdrOutputSupported = false,
+    this.backend = 'exoplayer',
+    this.passthroughActive = false,
+  });
+
+  /// What [playerType] answers. The audio-filter rows are gated on it, so the
+  /// tests about them need a backend that has an `af` chain.
+  final String backend;
+  final bool passthroughActive;
+  final dialogueBoostCalls = <({bool enabled, int gainDb})>[];
+  final downmixCalls = <({bool enabled, int centerBoostDb, bool normalize})>[];
+
+  @override
+  bool get audioPassthroughActive => passthroughActive;
+
+  @override
+  Future<void> setDialogueBoost({required bool enabled, required int gainDb}) async {
+    dialogueBoostCalls.add((enabled: enabled, gainDb: gainDb));
+  }
+
+  @override
+  Future<void> setAudioDownmix({required bool enabled, required int centerBoostDb, required bool normalize}) async {
+    downmixCalls.add((enabled: enabled, centerBoostDb: centerBoostDb, normalize: normalize));
+  }
 
   /// The plane's notice that the output under the window changed, which is the
   /// only thing that moves [isHdrOutputSupported]'s answer while a sheet is up.
@@ -540,7 +682,7 @@ class _FakeSettingsPlayer implements Player {
   PlayerStreams get streams => _streams;
 
   @override
-  String get playerType => 'exoplayer';
+  String get playerType => backend;
 
   @override
   Future<void> setAudioPassthrough(bool enabled) async {}

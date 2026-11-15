@@ -243,11 +243,18 @@ abstract class Player {
   /// loud passages from arriving louder still, which is the half of the
   /// problem that volume cannot address.
   ///
+  /// [gainDb] (3-12) is the EQ's peak gain, ignored while [enabled] is false.
+  /// It is a setting rather than a constant because how far a mix buries its
+  /// speech varies with the mix and with what is reproducing it: a TV's own
+  /// speakers need more than a soundbar does.
+  ///
   /// mpv backends extend the `af` chain, ahead of `loudnorm` when both are on
   /// so normalization measures the boosted signal rather than fighting it.
   /// Android ExoPlayer has no filter chain, so the setting is not offered
-  /// while it is the active backend.
-  Future<void> setDialogueBoost(bool enabled);
+  /// while it is the active backend. Audio passthrough also wins over it on
+  /// mpv, which bitstreams the track instead of decoding it to PCM the filter
+  /// chain could touch.
+  Future<void> setDialogueBoost({required bool enabled, required int gainDb});
 
   /// Force a stereo downmix with a Kodi-style center channel boost.
   ///

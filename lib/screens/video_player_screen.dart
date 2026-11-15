@@ -1882,7 +1882,10 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
       }
 
       if (settingsService.read(SettingsService.dialogueBoost)) {
-        await currentPlayer.setDialogueBoost(true);
+        await currentPlayer.setDialogueBoost(
+          enabled: true,
+          gainDb: settingsService.read(SettingsService.dialogueBoostGain),
+        );
       }
 
       // After the passthrough apply: downmix wins on both backends (mpv

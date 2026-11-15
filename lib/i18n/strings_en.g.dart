@@ -1166,6 +1166,9 @@ class Translations$settings$en {
 	/// en: 'Send Dolby/DTS audio to your receiver or TV without re-encoding, preserving surround sound. Turn off if you have no sound.'
 	String get audioPassthroughDescription => 'Send Dolby/DTS audio to your receiver or TV without re-encoding, preserving surround sound. Turn off if you have no sound.';
 
+	/// en: 'Dolby and DTS tracks are sent untouched while this is on, so Normalize Loudness and Dialogue Boost have no effect on them.'
+	String get audioPassthroughSuspendsFilters => 'Dolby and DTS tracks are sent untouched while this is on, so Normalize Loudness and Dialogue Boost have no effect on them.';
+
 	/// en: 'Use Apple's native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.'
 	String get audioPassthroughDescriptionAppleTv => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.';
 
@@ -1180,6 +1183,15 @@ class Translations$settings$en {
 
 	/// en: 'Lift the speech frequencies and hold the loud scenes down, so dialogue is clear without turning everything up. Needs decoded audio, so it turns off bitstream passthrough to a receiver.'
 	String get dialogueBoostDescription => 'Lift the speech frequencies and hold the loud scenes down, so dialogue is clear without turning everything up. Needs decoded audio, so it turns off bitstream passthrough to a receiver.';
+
+	/// en: 'Dialogue Boost Strength'
+	String get dialogueBoostGain => 'Dialogue Boost Strength';
+
+	/// en: '+${db} dB'
+	String dialogueBoostGainValue({required Object db}) => '+${db} dB';
+
+	/// en: 'Strength (dB)'
+	String get dialogueBoostGainLabel => 'Strength (dB)';
 
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
@@ -5088,8 +5100,23 @@ class Translations$videoSettings$en {
 	/// en: 'Dialogue Boost'
 	String get dialogueBoost => 'Dialogue Boost';
 
+	/// en: 'Boost Strength'
+	String get dialogueBoostGain => 'Boost Strength';
+
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
+
+	/// en: 'Center Channel Boost'
+	String get downmixCenterBoost => 'Center Channel Boost';
+
+	/// en: 'Normalize on Downmix'
+	String get audioDownmixNormalize => 'Normalize on Downmix';
+
+	/// en: '+${db} dB'
+	String decibelBoost({required Object db}) => '+${db} dB';
+
+	/// en: 'No effect while passthrough is on'
+	String get suspendedByPassthrough => 'No effect while passthrough is on';
 
 	/// en: 'Picture'
 	String get pictureAdjustments => 'Picture';
@@ -8053,11 +8080,15 @@ extension on Translations {
 			'settings.tunneledPlaybackDescription' => 'Use video tunneling. Disable if HDR playback shows black video or motion stutters.',
 			'settings.audioPassthrough' => 'Audio Passthrough',
 			'settings.audioPassthroughDescription' => 'Send Dolby/DTS audio to your receiver or TV without re-encoding, preserving surround sound. Turn off if you have no sound.',
+			'settings.audioPassthroughSuspendsFilters' => 'Dolby and DTS tracks are sent untouched while this is on, so Normalize Loudness and Dialogue Boost have no effect on them.',
 			'settings.audioPassthroughDescriptionAppleTv' => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.',
 			'settings.audioNormalization' => 'Normalize Loudness',
 			'settings.audioNormalizationDescription' => 'Even out loudness so dialogue is audible against loud scenes. Needs decoded audio, so it turns off bitstream passthrough to a receiver.',
 			'settings.dialogueBoost' => 'Dialogue Boost',
 			'settings.dialogueBoostDescription' => 'Lift the speech frequencies and hold the loud scenes down, so dialogue is clear without turning everything up. Needs decoded audio, so it turns off bitstream passthrough to a receiver.',
+			'settings.dialogueBoostGain' => 'Dialogue Boost Strength',
+			'settings.dialogueBoostGainValue' => ({required Object db}) => '+${db} dB',
+			'settings.dialogueBoostGainLabel' => 'Strength (dB)',
 			'settings.audioDownmix' => 'Downmix to Stereo',
 			'settings.audioDownmixDescription' => 'Mix surround audio down to two channels for stereo speakers or headphones',
 			'settings.downmixCenterBoost' => 'Center Channel Boost',
@@ -8200,12 +8231,12 @@ extension on Translations {
 			'hotkeys.actions.shaderToggle' => 'Toggle Shaders',
 			'hotkeys.actions.skipMarker' => 'Skip Intro/Credits',
 			'hotkeys.actions.screenshot' => 'Take Screenshot',
+			_ => null,
+		} ?? switch (path) {
 			'hotkeys.actions.frameStepForward' => 'Step Forward One Frame',
 			'hotkeys.actions.frameStepBackward' => 'Step Back One Frame',
 			'fileInfo.title' => 'File Info',
 			'fileInfo.overview' => 'Overview',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.video' => 'Video',
 			'fileInfo.audio' => 'Audio',
 			'fileInfo.subtitles' => 'Subtitles',
@@ -8714,12 +8745,12 @@ extension on Translations {
 			'accountPreferences.subtitleAccessibility' => 'SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.preferNonSdh' => 'Prefer non-SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.preferSdh' => 'Prefer SDH subtitles',
+			_ => null,
+		} ?? switch (path) {
 			'accountPreferences.subtitleAccessibilityOptions.onlySdh' => 'Only SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.onlyNonSdh' => 'Only non-SDH subtitles',
 			'accountPreferences.forcedSubtitles' => 'Forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.preferNonForced' => 'Prefer non-forced subtitles',
-			_ => null,
-		} ?? switch (path) {
 			'accountPreferences.forcedSubtitleOptions.preferForced' => 'Prefer forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.onlyForced' => 'Only forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.onlyNonForced' => 'Only non-forced subtitles',
@@ -9228,12 +9259,12 @@ extension on Translations {
 			'watchTogether.title' => 'Watch Together',
 			'watchTogether.description' => 'Watch content in sync with friends and family',
 			'watchTogether.createSession' => 'Create Session',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.creating' => 'Creating...',
 			'watchTogether.joinSession' => 'Join Session',
 			'watchTogether.joining' => 'Joining...',
 			'watchTogether.controlMode' => 'Control Mode',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.controlModeQuestion' => 'Who can control playback?',
 			'watchTogether.hostOnly' => 'Host Only',
 			'watchTogether.anyone' => 'Anyone',
@@ -9572,7 +9603,12 @@ extension on Translations {
 			'videoSettings.audioOutputStereo' => 'Stereo',
 			'videoSettings.audioNormalization' => 'Normalize Loudness',
 			'videoSettings.dialogueBoost' => 'Dialogue Boost',
+			'videoSettings.dialogueBoostGain' => 'Boost Strength',
 			'videoSettings.audioDownmix' => 'Downmix to Stereo',
+			'videoSettings.downmixCenterBoost' => 'Center Channel Boost',
+			'videoSettings.audioDownmixNormalize' => 'Normalize on Downmix',
+			'videoSettings.decibelBoost' => ({required Object db}) => '+${db} dB',
+			'videoSettings.suspendedByPassthrough' => 'No effect while passthrough is on',
 			'videoSettings.pictureAdjustments' => 'Picture',
 			'videoSettings.pictureBrightness' => 'Brightness',
 			'videoSettings.pictureContrast' => 'Contrast',
@@ -9737,6 +9773,8 @@ extension on Translations {
 			'trakt.connectedAs' => ({required Object username}) => 'Connected as @${username}',
 			'trakt.disconnectConfirm' => 'Disconnect Trakt account?',
 			'trakt.disconnectConfirmBody' => 'Plezy will stop sending events to Trakt. You can reconnect any time.',
+			_ => null,
+		} ?? switch (path) {
 			'trakt.scrobble' => 'Real-time scrobbling',
 			'trakt.scrobbleDescription' => 'Send play, pause, and stop events to Trakt during playback.',
 			'trakt.watchedSync' => 'Sync watched status',
@@ -9746,8 +9784,6 @@ extension on Translations {
 			'seerr.serverUrl' => 'Server URL',
 			'seerr.serverUrlHelper' => 'The address of your Seerr instance',
 			'seerr.checkServer' => 'Continue',
-			_ => null,
-		} ?? switch (path) {
 			'seerr.signInWithJellyfin' => 'Sign in with Jellyfin',
 			'seerr.signInWithEmby' => 'Sign in with Emby',
 			'seerr.signInWithLocal' => 'Use a local account',
