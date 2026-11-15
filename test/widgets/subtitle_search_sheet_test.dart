@@ -32,6 +32,32 @@ void main() {
       expect(resolveSubtitleSearchLanguageCode(savedLanguageCode: 'zz', systemLocale: const Locale('nl')), 'nl');
     });
 
+    test('the account preference beats the system locale', () {
+      // The device language says what the UI is in; the account preference
+      // says what subtitles the viewer reads. For subtitles, only the second
+      // one was ever a statement about subtitles.
+      expect(resolveSubtitleSearchLanguageCode(accountLanguageCode: 'es', systemLocale: const Locale('en')), 'es');
+    });
+
+    test('a saved device choice still beats the account preference', () {
+      expect(
+        resolveSubtitleSearchLanguageCode(
+          savedLanguageCode: 'fr',
+          accountLanguageCode: 'es',
+          systemLocale: const Locale('en'),
+        ),
+        'fr',
+      );
+    });
+
+    test('an unusable account preference falls through to the system locale', () {
+      expect(resolveSubtitleSearchLanguageCode(accountLanguageCode: 'zz', systemLocale: const Locale('nl')), 'nl');
+      // Plex stores these as locales and Jellyfin as three-letter codes, so
+      // both have to normalize the same way the saved choice does.
+      expect(resolveSubtitleSearchLanguageCode(accountLanguageCode: 'pt_BR', systemLocale: const Locale('nl')), 'pt');
+      expect(resolveSubtitleSearchLanguageCode(accountLanguageCode: 'spa', systemLocale: const Locale('nl')), 'es');
+    });
+
     test('falls back to English when saved and system languages are invalid', () {
       expect(resolveSubtitleSearchLanguageCode(savedLanguageCode: 'zz', systemLocale: const Locale('xx')), 'en');
     });

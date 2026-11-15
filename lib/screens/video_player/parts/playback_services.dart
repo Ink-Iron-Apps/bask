@@ -387,6 +387,10 @@ extension _VideoPlayerPlaybackServiceMethods on VideoPlayerScreenState {
     if (mediaInfo != null && mediaClient is PlexClient && !_isOfflinePlayback) {
       final languageCode = resolveSubtitleSearchLanguageCode(
         savedLanguageCode: SettingsService.instance.read(SettingsService.subtitleSearchLanguage),
+        accountLanguageCode: context
+            .read<AccountPreferencesController?>()
+            ?.activePreferences
+            ?.preferredSubtitleLanguageCode1,
         systemLocale: PlatformDispatcher.instance.locale,
       );
       unawaited(
