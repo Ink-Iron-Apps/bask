@@ -226,6 +226,12 @@ class _IdlePlayer implements Player {
   @override
   Future<bool> isHdrOutputSupported() async => false;
 
+  // The sheet asks on every build, to decide whether to tell the viewer that
+  // passthrough is silencing the audio filters. False keeps those rows plain,
+  // which is what the frame-scheduling assertions here are about.
+  @override
+  bool get audioPassthroughActive => false;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
