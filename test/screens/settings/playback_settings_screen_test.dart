@@ -180,4 +180,57 @@ void main() {
 
     expect(find.text('Gestures'), findsNothing);
   });
+
+  testWidgets('says passthrough is silencing the audio filters', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1000, 1400);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    // Normalization is on by default, so passthrough alone is enough to make
+    // a switch read "on" while being inaudible.
+    await SettingsService.instance.write(SettingsService.audioPassthrough, true);
+
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Audio Passthrough'), 500, scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('have no effect on them'), findsOneWidget);
+  });
+
+  testWidgets('drops the passthrough warning when no filter is being silenced', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1000, 1400);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    await SettingsService.instance.write(SettingsService.audioPassthrough, true);
+    await SettingsService.instance.write(SettingsService.audioNormalization, false);
+
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Audio Passthrough'), 500, scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('have no effect on them'), findsNothing);
+  });
+
+  testWidgets('offers the dialogue boost strength only while the boost is on', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1000, 1400);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Dialogue Boost'), 500, scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Dialogue Boost Strength'), findsNothing);
+
+    await tester.tap(find.text('Dialogue Boost'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dialogue Boost Strength'), findsOneWidget);
+    final tile = find.widgetWithText(ListTile, 'Dialogue Boost Strength');
+    expect(find.descendant(of: tile, matching: find.text('+6 dB')), findsOneWidget);
+  });
 }

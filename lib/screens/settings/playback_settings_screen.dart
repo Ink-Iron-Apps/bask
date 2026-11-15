@@ -37,11 +37,24 @@ class PlaybackSettingsScreen extends StatelessWidget {
         SettingsService.matchContentFrameRate,
         SettingsService.matchContentResolution,
         SettingsService.audioDownmix,
+        SettingsService.audioPassthrough,
+        SettingsService.audioNormalization,
+        SettingsService.dialogueBoost,
       ],
       builder: (context) {
         final svc = SettingsService.instance;
         final exoActive = Platform.isAndroid && svc.read(SettingsService.useExoPlayer);
         final downmixOn = svc.read(SettingsService.audioDownmix);
+        final dialogueBoostOn = !exoActive && svc.read(SettingsService.dialogueBoost);
+        // mpv bitstreams the track instead of decoding it, so there is no PCM
+        // for the filter chain to touch and both audio filters below go quiet.
+        // ExoPlayer is the other way round: normalization force-decodes and
+        // wins, so the warning would be false there.
+        final passthroughSuspendsFilters =
+            !exoActive &&
+            PlatformDetector.supportsAudioPassthrough() &&
+            svc.read(SettingsService.audioPassthrough) &&
+            (svc.read(SettingsService.audioNormalization) || svc.read(SettingsService.dialogueBoost));
         final showDisplaySwitchDelay =
             PlatformDetector.isAppleTV() ||
             (Platform.isWindows &&
@@ -86,12 +99,14 @@ class PlaybackSettingsScreen extends StatelessWidget {
             SettingsGroup(
               title: t.settings.audio,
               children: [
-                if (PlatformDetector.supportsAudioPassthrough()) _audioPassthroughTile(),
+                if (PlatformDetector.supportsAudioPassthrough())
+                  _audioPassthroughTile(suspendsFilters: passthroughSuspendsFilters),
                 _audioNormalizationTile(),
                 // mpv-only, like deinterlace above: ExoPlayer has no filter
                 // chain, and a switch that does nothing is worse than no
                 // switch.
                 if (!exoActive) _dialogueBoostTile(),
+                if (dialogueBoostOn) _dialogueBoostGainTile(),
                 _audioDownmixTile(),
                 if (downmixOn) _downmixCenterBoostTile(),
                 if (downmixOn) _downmixNormalizeTile(),
@@ -476,13 +491,19 @@ class PlaybackSettingsScreen extends StatelessWidget {
     subtitle: t.settings.deinterlaceDescription,
   );
 
-  Widget _audioPassthroughTile() => SettingSwitchTile(
+  Widget _audioPassthroughTile({required bool suspendsFilters}) => SettingSwitchTile(
     pref: SettingsService.audioPassthrough,
     icon: Symbols.surround_sound_rounded,
     title: t.settings.audioPassthrough,
-    subtitle: PlatformDetector.isAppleTV()
-        ? t.settings.audioPassthroughDescriptionAppleTv
-        : t.settings.audioPassthroughDescription,
+    subtitle: [
+      PlatformDetector.isAppleTV()
+          ? t.settings.audioPassthroughDescriptionAppleTv
+          : t.settings.audioPassthroughDescription,
+      // Said here rather than on the two switches it silences: this is the
+      // setting that has to change, and a switch that reads "on" while doing
+      // nothing is the whole problem being fixed.
+      if (suspendsFilters) t.settings.audioPassthroughSuspendsFilters,
+    ].join('\n'),
   );
 
   /// The same global pref the player's own settings sheet writes, mirrored
@@ -503,6 +524,17 @@ class PlaybackSettingsScreen extends StatelessWidget {
     icon: Symbols.record_voice_over_rounded,
     title: t.settings.dialogueBoost,
     subtitle: t.settings.dialogueBoostDescription,
+  );
+
+  /// Shown only while the boost is on, the way the center-boost tile below
+  /// follows the downmix switch.
+  Widget _dialogueBoostGainTile() => SettingNumberTile(
+    pref: SettingsService.dialogueBoostGain,
+    icon: Symbols.tune_rounded,
+    title: t.settings.dialogueBoostGain,
+    subtitleBuilder: (v) => t.settings.dialogueBoostGainValue(db: v.toString()),
+    labelText: t.settings.dialogueBoostGainLabel,
+    suffixText: t.settings.downmixCenterBoostShort,
   );
 
   Widget _audioDownmixTile() => SettingSwitchTile(
