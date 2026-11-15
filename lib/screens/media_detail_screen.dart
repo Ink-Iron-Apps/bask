@@ -1497,16 +1497,17 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
     switch (selected) {
       case _SyncRuleAction.edit:
-        final updated = await editSyncRuleCount(
+        // Both knobs, not just the count: this screen used to jump straight to
+        // the episode-count field, so a rule's filter could be changed from the
+        // Sync rules screen and nowhere else. Removal stays in the menu above,
+        // beside Delete download, so it is not offered twice.
+        await manageSyncRule(
           context,
           downloadProvider: downloadProvider,
           globalKey: ruleKey,
-          currentCount: syncRule.episodeCount,
           displayTitle: metadata.displayTitle,
+          offerRemoval: false,
         );
-        if (updated && context.mounted) {
-          showSuccessSnackBar(context, t.downloads.syncRuleUpdated);
-        }
 
       case _SyncRuleAction.remove:
         final removed = await confirmAndRemoveSyncRule(
