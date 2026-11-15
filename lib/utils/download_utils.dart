@@ -603,11 +603,15 @@ extension SyncRuleItemDispatch on SyncRuleItem {
 /// deliberately excluded from focus — so a rule on the TV could be switched off
 /// but never deleted. Opening the rule is what a viewer tries first on every
 /// input, so that is where the action belongs.
+///
+/// [offerRemoval] is false for a caller whose own menu already carries Remove
+/// sync rule, so the action does not appear twice on the way to itself.
 Future<void> manageSyncRule(
   BuildContext context, {
   required DownloadProvider downloadProvider,
   required String globalKey,
   String? displayTitle,
+  bool offerRemoval = true,
 }) async {
   final rule = downloadProvider.getSyncRule(globalKey);
   if (rule == null) return;
@@ -626,7 +630,7 @@ Future<void> manageSyncRule(
       // because the menu is the only place removal is reachable.
       if (!rule.isListRule)
         (icon: Symbols.tune_rounded, label: t.downloads.editEpisodeCount, value: _SyncRuleEdit.count),
-      (icon: Symbols.delete_rounded, label: t.downloads.removeSyncRule, value: _SyncRuleEdit.remove),
+      if (offerRemoval) (icon: Symbols.delete_rounded, label: t.downloads.removeSyncRule, value: _SyncRuleEdit.remove),
     ],
   );
   if (selected == null || !context.mounted) return;

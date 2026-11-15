@@ -16,6 +16,7 @@ import 'package:plezy/media/media_kind.dart';
 import 'package:plezy/providers/download_provider.dart';
 import 'package:plezy/providers/multi_server_provider.dart';
 import 'package:plezy/screens/downloads/sync_rules_screen.dart';
+import 'package:plezy/utils/download_utils.dart';
 import 'package:plezy/services/data_aggregation_service.dart';
 import 'package:plezy/services/download_manager_service.dart';
 import 'package:plezy/services/download_storage_service.dart';
@@ -411,6 +412,34 @@ void main() {
 
     expect(downloadProvider.syncRules, isEmpty);
     expect(find.text('No sync rules'), findsOneWidget);
+  });
+
+  testWidgets('a caller with its own Remove entry is offered both knobs, not just the count', (tester) async {
+    // The media detail screen carries its own menu with Remove sync rule and
+    // Delete download, and its Edit went straight to the episode-count field —
+    // so a rule's filter was changeable from the Sync rules screen and nowhere
+    // else. It now opens this menu with removal suppressed.
+    multiServerProvider = testMultiServerProvider(serverManager);
+    await insertRule(ServerId('orphan-srv'), '76672');
+
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.byType(SyncRulesScreen));
+    unawaited(
+      manageSyncRule(
+        context,
+        downloadProvider: downloadProvider,
+        globalKey: downloadProvider.syncRules.keys.single,
+        displayTitle: 'Plex Show',
+        offerRemoval: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sync filter'), findsOneWidget);
+    expect(find.text('Episode count'), findsOneWidget);
+    expect(find.text('Remove sync rule'), findsNothing);
   });
 
   testWidgets('a list rule gets the same menu, so it can be removed too', (tester) async {
