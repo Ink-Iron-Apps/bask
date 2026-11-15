@@ -381,7 +381,7 @@ class FakePlayer implements Player {
   Future<void> setAudioNormalization(bool enabled) async {}
 
   @override
-  Future<void> setDialogueBoost(bool enabled) async {}
+  Future<void> setDialogueBoost({required bool enabled, required int gainDb}) async {}
 
   @override
   Future<void> setAudioDownmix({required bool enabled, required int centerBoostDb, required bool normalize}) async {}

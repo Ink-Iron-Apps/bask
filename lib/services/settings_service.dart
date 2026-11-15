@@ -926,6 +926,15 @@ class SettingsService extends BaseSharedPreferencesService {
   );
 
   static final maxVolume = IntPref('max_volume', defaultValue: 100, transform: (v) => v.clamp(100, 300));
+
+  /// How hard [dialogueBoost] lifts the speech band, in dB.
+  ///
+  /// Separate from the switch so the switch keeps the meaning it shipped with
+  /// and nobody's stored choice has to be migrated. 6 dB is the default
+  /// because the fixed 5 dB this replaces was not enough on a TV's own
+  /// speakers; 12 dB is as far as the peaking EQ goes before the boosted band
+  /// starts sounding nasal rather than clearer.
+  static final dialogueBoostGain = IntPref('dialogue_boost_gain', defaultValue: 6, transform: (v) => v.clamp(3, 12));
   static final downmixCenterBoost = IntPref('downmix_center_boost', transform: (v) => v.clamp(0, 12));
   static final subtitlePosition = IntPref('subtitle_position', defaultValue: 100, transform: (v) => v.clamp(0, 100));
   static final defaultPlaybackSpeed = DoublePref(
@@ -1539,6 +1548,7 @@ class SettingsService extends BaseSharedPreferencesService {
     appLocale,
     autoPip,
     maxVolume,
+    dialogueBoostGain,
     downmixCenterBoost,
     subtitlePosition,
     subtitleUseMargins,
@@ -1665,6 +1675,7 @@ class SettingsService extends BaseSharedPreferencesService {
     'volume' => (0, 300),
     'max_volume' => (100, 300),
     'downmix_center_boost' => (0, 12),
+    'dialogue_boost_gain' => (3, 12),
     'default_playback_speed' => (minimumPlaybackRate, maximumPlaybackRate),
     'default_box_fit_mode' => (0, 2),
     'library_density' => (LibraryDensity.min, LibraryDensity.max),

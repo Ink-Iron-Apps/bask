@@ -42,6 +42,7 @@ import '../../../utils/latest_async_write.dart';
 import '../../../utils/snackbar_helper.dart';
 import '../../../theme/mono_tokens.dart';
 import '../../../widgets/focusable_list_tile.dart';
+import '../../../widgets/settings_builder.dart';
 import '../../../widgets/overlay_sheet.dart';
 import '../../../services/video_equalizer.dart';
 import '../../../watch_together/providers/watch_together_provider.dart';
@@ -66,6 +67,8 @@ enum _SettingsView {
   repeatQueue,
   picture,
   pictureChannel,
+  dialogueBoostGain,
+  downmixCenterBoost,
 }
 
 class _SettingsMenuItem extends StatelessWidget {
@@ -184,9 +187,19 @@ class _SettingsToggleItem extends StatefulWidget {
   final Pref<bool> pref;
   final IconData icon;
   final String title;
+
+  /// A line under the title, for saying why a switch that reads "on" is not
+  /// doing anything.
+  final String? subtitle;
   final FutureOr<void> Function(bool value)? onAfterWrite;
 
-  const _SettingsToggleItem({required this.pref, required this.icon, required this.title, this.onAfterWrite});
+  const _SettingsToggleItem({
+    required this.pref,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.onAfterWrite,
+  });
 
   @override
   State<_SettingsToggleItem> createState() => _SettingsToggleItemState();
@@ -256,9 +269,13 @@ class _SettingsToggleItemState extends State<_SettingsToggleItem> {
       builder: (context, value, _) {
         final displayedValue = _pendingValue ?? value;
         final isPending = _pendingValue != null;
+        final subtitle = widget.subtitle;
         return FocusableListTile(
           leading: AppIcon(widget.icon, fill: 1, color: displayedValue ? Colors.amber : tokens(context).textMuted),
           title: Text(widget.title),
+          subtitle: subtitle == null
+              ? null
+              : Text(subtitle, style: TextStyle(color: tokens(context).textMuted, fontSize: 12)),
           trailing: Switch(value: displayedValue, onChanged: isPending ? null : _write, activeThumbColor: Colors.amber),
           onTap: isPending ? null : () => _write(!displayedValue),
         );
@@ -619,6 +636,10 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return t.videoSettings.pictureAdjustments;
       case _SettingsView.pictureChannel:
         return _pictureChannelLabel(_pictureChannel);
+      case _SettingsView.dialogueBoostGain:
+        return t.videoSettings.dialogueBoostGain;
+      case _SettingsView.downmixCenterBoost:
+        return t.videoSettings.downmixCenterBoost;
     }
   }
 
@@ -649,6 +670,10 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
       case _SettingsView.picture:
       case _SettingsView.pictureChannel:
         return Symbols.exposure_rounded;
+      case _SettingsView.dialogueBoostGain:
+        return Symbols.tune_rounded;
+      case _SettingsView.downmixCenterBoost:
+        return Symbols.hearing_rounded;
     }
   }
 
@@ -774,6 +799,125 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         explanation.causedOnlyByOurCap &&
         !_state.selectedQualityPreset.isOriginal &&
         _state.onSwitchQualityPreset != null;
+  }
+
+  /// Whether the backend has an `af` chain for the two audio filters to live
+  /// in. ExoPlayer does not, so their rows stay hidden there rather than
+  /// offering switches that do nothing.
+  bool get _usesFilterChain => widget.player.playerType != 'exoplayer';
+
+  /// Why the filter switches are doing nothing, or null when they are not.
+  ///
+  /// While passthrough is carrying a Dolby or DTS track, mpv hands it to the
+  /// device as a bitstream, so there is no PCM for `af` to work on: both
+  /// switches read "on" and neither is audible, which is exactly how a viewer
+  /// concludes the boost is broken. ExoPlayer is the other way round —
+  /// normalization force-decodes and wins over passthrough — so the note is
+  /// gated on the same backend check as the rows themselves.
+  String? get _filtersSuspendedNote =>
+      _usesFilterChain && widget.player.audioPassthroughActive ? t.videoSettings.suspendedByPassthrough : null;
+
+  /// How hard the dialogue boost pushes, under its own switch.
+  Widget _dialogueBoostGainRow() => SettingsBuilder(
+    prefs: const [SettingsService.dialogueBoost],
+    builder: (context) {
+      if (!SettingsService.instance.read(SettingsService.dialogueBoost)) return const SizedBox.shrink();
+      return SettingValueBuilder<int>(
+        pref: SettingsService.dialogueBoostGain,
+        builder: (context, gainDb, _) => _SettingsMenuItem(
+          icon: Symbols.tune_rounded,
+          title: t.videoSettings.dialogueBoostGain,
+          valueText: t.videoSettings.decibelBoost(db: gainDb.toString()),
+          isHighlighted: true,
+          onTap: () => _navigateTo(_SettingsView.dialogueBoostGain),
+        ),
+      );
+    },
+  );
+
+  /// The two downmix settings that decide whether the downmix helps dialogue
+  /// at all.
+  ///
+  /// They were reachable only from the app's own settings, which is the one
+  /// place a viewer is not while a line goes by unheard — and a center boost
+  /// of 0 dB is the swresample default, so the switch above could be turned on
+  /// from here and change nothing but the channel count.
+  Widget _downmixDetailRows() => SettingsBuilder(
+    prefs: const [SettingsService.audioDownmix],
+    builder: (context) {
+      if (!SettingsService.instance.read(SettingsService.audioDownmix)) return const SizedBox.shrink();
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SettingValueBuilder<int>(
+            pref: SettingsService.downmixCenterBoost,
+            builder: (context, centerBoostDb, _) => _SettingsMenuItem(
+              icon: Symbols.hearing_rounded,
+              title: t.videoSettings.downmixCenterBoost,
+              valueText: centerBoostDb == 0 ? t.common.off : t.videoSettings.decibelBoost(db: centerBoostDb.toString()),
+              isHighlighted: centerBoostDb > 0,
+              onTap: () => _navigateTo(_SettingsView.downmixCenterBoost),
+            ),
+          ),
+          _SettingsToggleItem(
+            pref: SettingsService.audioDownmixNormalize,
+            icon: Symbols.compress_rounded,
+            title: t.videoSettings.audioDownmixNormalize,
+            onAfterWrite: (normalize) => widget.player.setAudioDownmix(
+              enabled: true,
+              centerBoostDb: SettingsService.instance.read(SettingsService.downmixCenterBoost),
+              normalize: normalize,
+            ),
+          ),
+        ],
+      );
+    },
+  );
+
+  /// A dB picker for the two audio settings whose value is the whole point of
+  /// the switch above them.
+  ///
+  /// Discrete steps rather than a slider: a remote lands on a row reliably and
+  /// on a slider position only approximately, and steps finer than these are
+  /// below what a living room will show.
+  Widget _buildDbPickerView({
+    required Pref<int> pref,
+    required List<int> values,
+    required FutureOr<void> Function(int value) apply,
+  }) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return SettingValueBuilder<int>(
+      pref: pref,
+      builder: (context, current, _) => ListView(
+        children: [
+          for (final value in values)
+            FocusableListTile(
+              title: Text(
+                value == 0 ? t.common.off : t.videoSettings.decibelBoost(db: value.toString()),
+                style: TextStyle(color: value == current ? primary : null),
+              ),
+              trailing: value == current ? AppIcon(Symbols.check_rounded, fill: 1, color: primary) : null,
+              onTap: () => _writeDbSetting(pref, value, apply),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Ranked through the same [_prefWrites] queue as the toggle rows, so a
+  /// second pick landing while the first is still being applied cannot leave
+  /// the device on the value that was abandoned.
+  void _writeDbSetting(Pref<int> pref, int value, FutureOr<void> Function(int value) apply) {
+    final writeToken = _prefWrites.begin(pref.key);
+    unawaited(
+      _prefWrites.commitIfLatest(pref.key, writeToken, () => _applyThenPersist(pref, value, apply)).catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        appLogger.w('Failed to update "${pref.key}"', error: error, stackTrace: stackTrace);
+        return false;
+      }),
+    );
   }
 
   Widget _buildMenuView() {
@@ -952,6 +1096,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           pref: SettingsService.audioNormalization,
           icon: Symbols.graphic_eq_rounded,
           title: t.videoSettings.audioNormalization,
+          subtitle: _filtersSuspendedNote,
           onAfterWrite: widget.player.setAudioNormalization,
         ),
 
@@ -959,13 +1104,18 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         // the viewer reaches for the remote. Hidden on ExoPlayer, which has no
         // filter chain to extend — gated on the configured backend, so a
         // session that silently fell back to mpv does not grow a row mid-film.
-        if (widget.player.playerType != 'exoplayer')
+        if (_usesFilterChain)
           _SettingsToggleItem(
             pref: SettingsService.dialogueBoost,
             icon: Symbols.record_voice_over_rounded,
             title: t.videoSettings.dialogueBoost,
-            onAfterWrite: widget.player.setDialogueBoost,
+            subtitle: _filtersSuspendedNote,
+            onAfterWrite: (enabled) => widget.player.setDialogueBoost(
+              enabled: enabled,
+              gainDb: SettingsService.instance.read(SettingsService.dialogueBoostGain),
+            ),
           ),
+        if (_usesFilterChain) _dialogueBoostGainRow(),
 
         _SettingsToggleItem(
           pref: SettingsService.audioDownmix,
@@ -977,6 +1127,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             normalize: SettingsService.instance.read(SettingsService.audioDownmixNormalize),
           ),
         ),
+        _downmixDetailRows(),
 
         // Shader Preset (MPV only)
         if (_state.shaderService != null && _state.shaderService!.isSupported)
@@ -1868,6 +2019,22 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             return _buildSubtitleRateView();
           case _SettingsView.repeatQueue:
             return _buildRepeatQueueView();
+          case _SettingsView.dialogueBoostGain:
+            return _buildDbPickerView(
+              pref: SettingsService.dialogueBoostGain,
+              values: const [3, 6, 9, 12],
+              apply: (gainDb) => widget.player.setDialogueBoost(enabled: true, gainDb: gainDb),
+            );
+          case _SettingsView.downmixCenterBoost:
+            return _buildDbPickerView(
+              pref: SettingsService.downmixCenterBoost,
+              values: const [0, 2, 4, 6, 8, 10, 12],
+              apply: (centerBoostDb) => widget.player.setAudioDownmix(
+                enabled: true,
+                centerBoostDb: centerBoostDb,
+                normalize: SettingsService.instance.read(SettingsService.audioDownmixNormalize),
+              ),
+            );
         }
       }(),
     );

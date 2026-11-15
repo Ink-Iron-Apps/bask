@@ -16,7 +16,7 @@ import 'player_base.dart';
 typedef _AudioStateRequest = ({
   bool passthrough,
   bool normalization,
-  bool dialogueBoost,
+  int dialogueBoostGainDb,
   bool downmix,
   int downmixCenterBoostDb,
   bool downmixNormalize,
@@ -842,7 +842,7 @@ class PlayerNative extends PlayerBase {
         _acceptedAudioState = (
           passthrough: accepted.passthrough,
           normalization: accepted.normalization,
-          dialogueBoost: accepted.dialogueBoost,
+          dialogueBoostGainDb: accepted.dialogueBoostGainDb,
           downmix: accepted.downmix,
           downmixCenterBoostDb: accepted.downmixCenterBoostDb,
           downmixNormalize: accepted.downmixNormalize,
@@ -970,8 +970,8 @@ class PlayerNative extends PlayerBase {
   bool _passthroughActive = false;
   bool _normalizationRequested = false;
   bool _normalizationActive = false;
-  bool _dialogueBoostRequested = false;
-  bool _dialogueBoostActive = false;
+  int _dialogueBoostGainRequested = 0;
+  int _activeDialogueBoostGainDb = 0;
   bool _downmixRequested = false;
   bool _downmixActive = false;
   int _downmixCenterBoostDb = 0;
@@ -987,7 +987,7 @@ class PlayerNative extends PlayerBase {
   _AudioStateRequest _acceptedAudioState = const (
     passthrough: false,
     normalization: false,
-    dialogueBoost: false,
+    dialogueBoostGainDb: 0,
     downmix: false,
     downmixCenterBoostDb: 0,
     downmixNormalize: false,
@@ -1021,7 +1021,7 @@ class PlayerNative extends PlayerBase {
   _AudioStateRequest get _requestedAudioState => (
     passthrough: _passthroughRequested,
     normalization: _normalizationRequested,
-    dialogueBoost: _dialogueBoostRequested,
+    dialogueBoostGainDb: _dialogueBoostGainRequested,
     downmix: _downmixRequested,
     downmixCenterBoostDb: _downmixCenterBoostDb,
     downmixNormalize: _downmixNormalize,
@@ -1031,7 +1031,9 @@ class PlayerNative extends PlayerBase {
   _AudioStateRequest _rebaseAudioState(_AudioStateRequest accepted, _AudioStateRequest requested, int fields) => (
     passthrough: fields & _passthroughAudioField != 0 ? requested.passthrough : accepted.passthrough,
     normalization: fields & _normalizationAudioField != 0 ? requested.normalization : accepted.normalization,
-    dialogueBoost: fields & _dialogueBoostAudioField != 0 ? requested.dialogueBoost : accepted.dialogueBoost,
+    dialogueBoostGainDb: fields & _dialogueBoostAudioField != 0
+        ? requested.dialogueBoostGainDb
+        : accepted.dialogueBoostGainDb,
     downmix: fields & _downmixAudioField != 0 ? requested.downmix : accepted.downmix,
     downmixCenterBoostDb: fields & _downmixAudioField != 0
         ? requested.downmixCenterBoostDb
@@ -1048,7 +1050,7 @@ class PlayerNative extends PlayerBase {
       _normalizationRequested = previous.normalization;
     }
     if (fields & _dialogueBoostAudioField != 0 && generations.dialogueBoost == _dialogueBoostGeneration) {
-      _dialogueBoostRequested = previous.dialogueBoost;
+      _dialogueBoostGainRequested = previous.dialogueBoostGainDb;
     }
     if (fields & _downmixAudioField != 0 && generations.downmix == _downmixGeneration) {
       _downmixRequested = previous.downmix;
@@ -1144,16 +1146,16 @@ class PlayerNative extends PlayerBase {
     // Both features are the one `af` chain, so they are reconciled together:
     // applying them in two steps would have the second write drop the first.
     final normalizationShouldBeActive = target.normalization && !passthroughShouldBeActive;
-    final dialogueBoostShouldBeActive = target.dialogueBoost && !passthroughShouldBeActive;
+    final dialogueBoostGainShouldBeActive = passthroughShouldBeActive ? 0 : target.dialogueBoostGainDb;
     if (forceNormalization ||
         _normalizationActive != normalizationShouldBeActive ||
-        _dialogueBoostActive != dialogueBoostShouldBeActive) {
+        _activeDialogueBoostGainDb != dialogueBoostGainShouldBeActive) {
       await super.setAudioFilterChain(
         normalization: normalizationShouldBeActive,
-        dialogueBoost: dialogueBoostShouldBeActive,
+        dialogueBoostGainDb: dialogueBoostGainShouldBeActive,
       );
       _normalizationActive = normalizationShouldBeActive;
-      _dialogueBoostActive = dialogueBoostShouldBeActive;
+      _activeDialogueBoostGainDb = dialogueBoostGainShouldBeActive;
     }
     if (passthroughShouldBeActive && !_passthroughActive) {
       await _applyPassthrough(true);
@@ -1194,9 +1196,12 @@ class PlayerNative extends PlayerBase {
   }
 
   @override
-  Future<void> setDialogueBoost(bool enabled) {
+  Future<void> setDialogueBoost({required bool enabled, required int gainDb}) {
     if (_nativeCoreUnavailable) return Future<void>.value();
-    _dialogueBoostRequested = enabled;
+    // One number carries both halves: the chain has no way to hold a disabled
+    // filter, so off is a gain of zero rather than a second field that could
+    // disagree with this one.
+    _dialogueBoostGainRequested = enabled ? gainDb.clamp(1, 24) : 0;
     return _enqueueAudioStateReconciliation(_dialogueBoostAudioField);
   }
 
