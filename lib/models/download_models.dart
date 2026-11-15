@@ -5,6 +5,21 @@ import '../utils/formatters.dart';
 
 part 'download_models.freezed.dart';
 
+/// How many unwatched episodes a sync rule keeps when the viewer did not say.
+///
+/// "Unwatched" describes which episodes qualify, not how many to hold, and the
+/// two were conflated: picking it with Keep synced stored a count of 0, which
+/// the executor reads as "every episode matching the filter". A show with four
+/// unwatched seasons therefore downloaded four seasons and kept doing it as
+/// episodes aired — on a TV with a few hundred MB free that is the whole disk
+/// for one show. A window is what the rule is for; the next ten episodes is
+/// more than anyone watches before the next sync pass.
+///
+/// Lives here rather than beside the dialog that applies it because the
+/// database needs the same number for the v24 migration, and the dialog layer
+/// is downstream of the database.
+const int defaultUnwatchedSyncCount = 10;
+
 enum DownloadStatus {
   queued,
   downloading,
