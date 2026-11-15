@@ -391,6 +391,44 @@ void main() {
     expect(find.text('No sync rules'), findsNothing);
   });
 
+  testWidgets('a sync rule can be removed without a swipe', (tester) async {
+    // The bug: removal was only reachable by dragging a row sideways, and the
+    // revealed delete button sits inside ExcludeFocus — so on a TV a rule
+    // could be switched off but never deleted.
+    multiServerProvider = testMultiServerProvider(serverManager);
+    await insertRule(ServerId('orphan-srv'), '76672');
+
+    await pumpScreen(tester, keyboardMode: true);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Remove sync rule'));
+    await tester.pumpAndSettle();
+
+    // The confirmation's button carries the same label as the menu entry.
+    await tester.tap(find.text('Remove sync rule').last);
+    await tester.pumpAndSettle();
+
+    expect(downloadProvider.syncRules, isEmpty);
+    expect(find.text('No sync rules'), findsOneWidget);
+  });
+
+  testWidgets('a list rule gets the same menu, so it can be removed too', (tester) async {
+    // A playlist rule used to open the filter picker directly, which left it
+    // with no route to removal at all.
+    multiServerProvider = testMultiServerProvider(serverManager);
+    await insertPlaylistRule(ServerId('orphan-srv'), '76672');
+
+    await pumpScreen(tester, keyboardMode: true);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sync filter'), findsOneWidget);
+    // A list mirrors its list, so there is no episode window to change.
+    expect(find.text('Episode count'), findsNothing);
+    expect(find.text('Remove sync rule'), findsOneWidget);
+  });
+
   testWidgets('show sync rule can change its download filter', (tester) async {
     multiServerProvider = testMultiServerProvider(serverManager);
     await insertRule(ServerId('orphan-srv'), '76672');
