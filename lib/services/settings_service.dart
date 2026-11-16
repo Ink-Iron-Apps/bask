@@ -746,6 +746,22 @@ class SettingsService extends BaseSharedPreferencesService {
   /// turning it off persists so the next download keeps the choice.
   static const downloadIncludeSpecials = BoolPref('download_include_specials', defaultValue: true);
   static const autoCheckUpdatesOnStartup = BoolPref('auto_check_updates_on_startup', defaultValue: true);
+
+  /// Keep a recent settings backup in the app's own documents directory.
+  ///
+  /// On by default: the file is a few kilobytes of non-credential JSON in
+  /// private storage, and the whole point is to exist on the day someone
+  /// wishes they had exported. Settings only — see
+  /// [SettingsAutoExportService] for why an unattended backup can never
+  /// carry sign-ins.
+  static const autoExportSettings = BoolPref('auto_export_settings', defaultValue: true);
+
+  /// Whether this install has already been asked about restoring a settings
+  /// backup it found. Set when the question is put, answered either way, so
+  /// a declined offer is not repeated every launch. Deliberately outside the
+  /// portable registry: an imported file must not be able to answer the
+  /// question for the next install.
+  static const restorePromptShown = BoolPref('restore_prompt_shown');
   static const showPerformanceOverlay = BoolPref('show_performance_overlay');
   static const autoHidePerformanceOverlay = BoolPref('auto_hide_performance_overlay', defaultValue: true);
   static const enableDiscordRPC = BoolPref('enable_discord_rpc');
@@ -1500,6 +1516,7 @@ class SettingsService extends BaseSharedPreferencesService {
     backgroundDownloadWarningAcknowledged,
     downloadIncludeSpecials,
     autoCheckUpdatesOnStartup,
+    autoExportSettings,
     showPerformanceOverlay,
     autoHidePerformanceOverlay,
     enableDiscordRPC,
@@ -1625,6 +1642,7 @@ class SettingsService extends BaseSharedPreferencesService {
   /// per-device state plus user-authored player configuration, none of which
   /// should travel between installations.
   static final List<Pref<Object?>> _resetOnlyPrefs = [
+    restorePromptShown,
     customDownloadPathType,
     mediaVersionPreferences,
     localLastPlayedAt,
