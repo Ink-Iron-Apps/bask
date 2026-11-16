@@ -204,7 +204,7 @@ class AppUpdateService {
 
     if (!await canRequestInstall()) {
       await openInstallPermissionSettings();
-      throw const AppUpdateException('Allow Plexy to install unknown apps, then run the update again.');
+      throw const AppUpdateException('Allow Bask to install unknown apps, then run the update again.');
     }
     await _channel.invokeMethod<bool>('installApk', {'path': file.path});
   }
@@ -230,7 +230,7 @@ class AppUpdateService {
     request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $_updateReadToken');
     request.headers.set(HttpHeaders.acceptHeader, accept);
     request.headers.set('X-GitHub-Api-Version', '2022-11-28');
-    request.headers.set(HttpHeaders.userAgentHeader, 'Plexy');
+    request.headers.set(HttpHeaders.userAgentHeader, 'Bask');
     final response = await request.close();
 
     if (response.isRedirect) {
@@ -241,7 +241,7 @@ class AppUpdateService {
       }
       final redirected = await _httpClient.getUrl(uri.resolve(location));
       redirected.followRedirects = true;
-      redirected.headers.set(HttpHeaders.userAgentHeader, 'Plexy');
+      redirected.headers.set(HttpHeaders.userAgentHeader, 'Bask');
       return redirected.close();
     }
     return response;

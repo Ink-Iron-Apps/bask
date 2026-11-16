@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/subtitle_two_point_sync.dart';
+import 'package:bask/services/subtitle_two_point_sync.dart';
 
 void main() {
   test('recovers a pure frame-rate error', () {

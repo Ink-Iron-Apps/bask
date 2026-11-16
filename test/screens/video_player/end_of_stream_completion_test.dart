@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/mpv/player/platform/player_android.dart';
-import 'package:plezy/providers/playback_state_provider.dart';
-import 'package:plezy/screens/video_player/completion_latch.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/mpv/player/platform/player_android.dart';
+import 'package:bask/providers/playback_state_provider.dart';
+import 'package:bask/screens/video_player/completion_latch.dart';
+import 'package:bask/services/settings_service.dart';
 
 import '../../test_helpers/prefs.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/playback_session.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/playback_session.dart';
 
 PlaybackSession session({StreamDecision? video, StreamDecision? audio, int? positionMs, int? durationMs}) =>
     PlaybackSession(

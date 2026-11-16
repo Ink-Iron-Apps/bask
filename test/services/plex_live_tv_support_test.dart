@@ -1,20 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:plezy/media/ids.dart';
+import 'package:bask/media/ids.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/exceptions/media_server_exceptions.dart';
-import 'package:plezy/media/media_server_client.dart';
-import 'package:plezy/models/media_subscription.dart';
-import 'package:plezy/models/livetv_channel.dart';
-import 'package:plezy/models/plex/plex_config.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/utils/active_client_scope.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/exceptions/media_server_exceptions.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/models/media_subscription.dart';
+import 'package:bask/models/livetv_channel.dart';
+import 'package:bask/models/plex/plex_config.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/utils/active_client_scope.dart';
 
 void main() {
   late AppDatabase db;
@@ -39,7 +39,7 @@ void main() {
         baseUrl: 'https://plex.example.com',
         token: token,
         clientIdentifier: clientIdentifier,
-        product: 'Plezy',
+        product: 'Bask',
         version: '1',
         machineIdentifier: 'machine-1',
       ),

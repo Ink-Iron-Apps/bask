@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/playback_disk_cache.dart';
+import 'package:bask/services/playback_disk_cache.dart';
 
 void main() {
   late Directory directory;

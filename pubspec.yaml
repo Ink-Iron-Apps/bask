@@ -1,4 +1,4 @@
-name: plezy
+name: bask
 description: "A beautiful Plex and Jellyfin client for Flutter"
 publish_to: "none"
 version: 2.50.0+92
@@ -145,8 +145,8 @@ dependency_overrides:
 flutter:
   uses-material-design: true
   assets:
-    - assets/plexy.svg
-    - assets/plexy_adaptive_foreground.svg
+    - assets/bask.svg
+    - assets/bask_adaptive_foreground.svg
     - assets/plex_chevron.svg
     - assets/jellyfin_icon.svg
     - assets/emby_icon.svg

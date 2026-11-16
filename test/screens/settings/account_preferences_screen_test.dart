@@ -2,19 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/focus/input_mode_tracker.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/media/account_preferences.dart';
-import 'package:plezy/media/account_preferences_source.dart';
-import 'package:plezy/media/account_preferences_target.dart';
-import 'package:plezy/media/account_ref.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_server_user_profile.dart';
-import 'package:plezy/screens/settings/account_preferences_detail_screen.dart';
-import 'package:plezy/screens/settings/account_preferences_screen.dart';
-import 'package:plezy/services/account_preferences_repository.dart';
-import 'package:plezy/theme/mono_theme.dart';
-import 'package:plezy/widgets/backend_badge.dart';
+import 'package:bask/focus/input_mode_tracker.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/media/account_preferences.dart';
+import 'package:bask/media/account_preferences_source.dart';
+import 'package:bask/media/account_preferences_target.dart';
+import 'package:bask/media/account_ref.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_server_user_profile.dart';
+import 'package:bask/screens/settings/account_preferences_detail_screen.dart';
+import 'package:bask/screens/settings/account_preferences_screen.dart';
+import 'package:bask/services/account_preferences_repository.dart';
+import 'package:bask/theme/mono_theme.dart';
+import 'package:bask/widgets/backend_badge.dart';
 import 'package:provider/provider.dart';
 
 /// The Account preferences section edits values that live on a media server, so

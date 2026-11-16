@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/utils/android_exit_diagnostics.dart';
-import 'package:plezy/utils/app_logger.dart';
+import 'package:bask/utils/android_exit_diagnostics.dart';
+import 'package:bask/utils/app_logger.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

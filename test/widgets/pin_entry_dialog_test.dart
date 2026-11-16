@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:plezy/screens/profile/pin_entry_dialog.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/screens/profile/pin_entry_dialog.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 void main() {
   tearDown(() {

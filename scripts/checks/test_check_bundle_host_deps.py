@@ -229,7 +229,7 @@ class BundleHostDepsGuardTest(unittest.TestCase):
     def test_a_nested_module_cannot_satisfy_a_top_level_dependency(self) -> None:
         """Only lib/ is on the loader path, so only lib/ can make a soname bundled.
 
-        plezy carries RPATH $ORIGIN/lib and plezy.sh exports $INSTALL_DIR/lib.
+        plezy carries RPATH $ORIGIN/lib and bask.sh exports $INSTALL_DIR/lib.
         The gdk-pixbuf loaders two directories below are opened by explicit
         path and resolve nothing for the executable, so a module whose basename
         happens to equal a host soname must not suppress it - otherwise the

@@ -4,10 +4,10 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/mpv/mpv.dart';
-import 'package:plezy/mpv/player/platform/player_android.dart';
-import 'package:plezy/mpv/player/player_native.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/mpv/mpv.dart';
+import 'package:bask/mpv/player/platform/player_android.dart';
+import 'package:bask/mpv/player/player_native.dart';
+import 'package:bask/services/settings_service.dart';
 
 import '../test_helpers/mock_player_channels.dart';
 import '../test_helpers/prefs.dart';
@@ -737,7 +737,7 @@ void main() {
               'X-Plex-Token': 'secret',
               'X-Plex-Device': 'Mac17,9',
               'X-Plex-Platform': 'macOS',
-              'User-Agent': 'Plezy',
+              'User-Agent': 'Bask',
             };
             await player.open(Media('https://example.test/movie.mkv', headers: headers));
 

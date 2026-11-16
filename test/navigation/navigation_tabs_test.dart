@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/navigation/navigation_tabs.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/navigation/navigation_tabs.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 void main() {
   group('NavigationTab.resolveDefaultTab', () {

@@ -7,22 +7,23 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/database/download_operations.dart';
-import 'package:plezy/database/tvos_database_recovery_store.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/main.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/models/download_models.dart';
-import 'package:plezy/providers/theme_provider.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
-import 'package:plezy/services/prefs_recovery.dart';
-import 'package:plezy/services/settings_service.dart' as settings;
-import 'package:plezy/services/startup_diagnostics.dart';
-import 'package:plezy/theme/mono_theme.dart';
-import 'package:plezy/utils/dialogs.dart';
-import 'package:plezy/utils/layout_constants.dart';
-import 'package:plezy/widgets/startup_failure_view.dart';
+import 'package:bask/services/log_upload_service.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/database/download_operations.dart';
+import 'package:bask/database/tvos_database_recovery_store.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/main.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/models/download_models.dart';
+import 'package:bask/providers/theme_provider.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/prefs_recovery.dart';
+import 'package:bask/services/settings_service.dart' as settings;
+import 'package:bask/services/startup_diagnostics.dart';
+import 'package:bask/theme/mono_theme.dart';
+import 'package:bask/utils/dialogs.dart';
+import 'package:bask/utils/layout_constants.dart';
+import 'package:bask/widgets/startup_failure_view.dart';
 
 import 'test_helpers/download_fixtures.dart';
 import 'test_helpers/prefs.dart';
@@ -62,6 +63,8 @@ final class _OpenTrackingInterceptor extends QueryInterceptor {
 }
 
 void main() {
+  setUp(() => LogUploadEndpoint.setForTesting('https://logs.test.invalid/logs'));
+  tearDown(() => LogUploadEndpoint.setForTesting(null));
   testWidgets('renders a Flutter frame before starting the initialization gate', (tester) async {
     final completion = Completer<int>();
     var bootstrapWasMounted = false;

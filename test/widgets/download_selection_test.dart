@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/models/download_models.dart';
-import 'package:plezy/widgets/download_selection.dart';
-import 'package:plezy/widgets/download_tree_view.dart';
+import 'package:bask/models/download_models.dart';
+import 'package:bask/widgets/download_selection.dart';
+import 'package:bask/widgets/download_tree_view.dart';
 
 DownloadTreeNode _leaf(String key, [DownloadStatus status = DownloadStatus.completed]) =>
     DownloadTreeNode(key: key, title: key, type: DownloadNodeType.episode, status: status);

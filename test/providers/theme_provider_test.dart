@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart' as material;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/providers/theme_provider.dart';
-import 'package:plezy/screens/settings/settings_utils.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
-import 'package:plezy/services/settings_service.dart' as settings;
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/providers/theme_provider.dart';
+import 'package:bask/screens/settings/settings_utils.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/settings_service.dart' as settings;
 
 import '../test_helpers/prefs.dart';
 

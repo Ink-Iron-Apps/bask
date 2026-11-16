@@ -278,7 +278,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           mainAxisAlignment: .center,
                           crossAxisAlignment: .center,
                           children: [
-                            SvgPicture.asset('assets/plexy.svg', width: 120, height: 120),
+                            SvgPicture.asset('assets/bask.svg', width: 120, height: 120),
                             const SizedBox(height: 24),
                             Text(
                               t.app.title,
@@ -307,7 +307,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       mainAxisSize: .min,
                       crossAxisAlignment: .stretch,
                       children: [
-                        SvgPicture.asset('assets/plexy.svg', width: 120, height: 120),
+                        SvgPicture.asset('assets/bask.svg', width: 120, height: 120),
                         const SizedBox(height: 24),
                         Text(
                           t.app.title,

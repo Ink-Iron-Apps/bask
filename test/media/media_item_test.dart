@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_browser_dialect.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_part.dart';
-import 'package:plezy/media/media_rating.dart';
-import 'package:plezy/media/media_role.dart';
-import 'package:plezy/media/media_version.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_browser_dialect.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_part.dart';
+import 'package:bask/media/media_rating.dart';
+import 'package:bask/media/media_role.dart';
+import 'package:bask/media/media_version.dart';
+import 'package:bask/services/settings_service.dart';
 import '../test_helpers/media_items.dart';
 
 /// Backend-agnostic [MediaItem] tests. Existing coverage is split between

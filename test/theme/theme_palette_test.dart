@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/theme/mono_theme.dart';
-import 'package:plezy/theme/theme_palette.dart';
+import 'package:bask/theme/mono_theme.dart';
+import 'package:bask/theme/theme_palette.dart';
 
 /// Contrast ratio, so the accent assertions state a legibility floor rather
 /// than pinning hex values a designer may want to retune.

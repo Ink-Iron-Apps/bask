@@ -1,10 +1,10 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/services/auto_download_planner.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/services/auto_download_planner.dart';
 
 import '../test_helpers/media_items.dart';
 

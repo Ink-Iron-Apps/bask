@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_source_info.dart';
-import 'package:plezy/mpv/mpv.dart';
-import 'package:plezy/utils/subtitle_forced_semantics.dart';
+import 'package:bask/media/media_source_info.dart';
+import 'package:bask/mpv/mpv.dart';
+import 'package:bask/utils/subtitle_forced_semantics.dart';
 
 MediaSubtitleTrack _row({bool forced = false, String? title, String? displayTitle}) =>
     MediaSubtitleTrack(id: 1, selected: false, forced: forced, title: title, displayTitle: displayTitle);

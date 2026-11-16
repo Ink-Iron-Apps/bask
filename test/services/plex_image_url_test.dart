@@ -1,9 +1,9 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/utils/media_image_helper.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/utils/media_image_helper.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';
 

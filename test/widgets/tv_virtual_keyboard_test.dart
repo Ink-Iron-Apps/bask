@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:plezy/focus/dpad_navigator.dart';
-import 'package:plezy/utils/platform_detector.dart';
-import 'package:plezy/widgets/tv_virtual_keyboard.dart';
+import 'package:bask/focus/dpad_navigator.dart';
+import 'package:bask/utils/platform_detector.dart';
+import 'package:bask/widgets/tv_virtual_keyboard.dart';
 
 void main() {
   tearDown(() {

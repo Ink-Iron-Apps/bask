@@ -5,12 +5,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:plezy/models/shader_preset.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
-import 'package:plezy/services/file_picker_service.dart';
-import 'package:plezy/services/settings_export_service.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/services/trackers/tracker_constants.dart';
+import 'package:bask/models/shader_preset.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/file_picker_service.dart';
+import 'package:bask/services/settings_export_service.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/services/trackers/tracker_constants.dart';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -29,7 +29,7 @@ void main() {
     picker = _FakeFilePicker();
     FilePickerService.setDelegateForTesting(picker);
     PackageInfo.setMockInitialValues(
-      appName: 'Plezy',
+      appName: 'Bask',
       packageName: 'com.example.plezy',
       version: '1.2.3',
       buildNumber: '4',

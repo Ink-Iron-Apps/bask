@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/video_equalizer.dart';
+import 'package:bask/services/video_equalizer.dart';
 
 void main() {
   test('a fresh equalizer leaves the picture alone', () {

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Bask
+Comment=A media client for Plex, Jellyfin and Emby for desktop and mobile
+Exec=bask
+Icon=bask
+Terminal=false
+Categories=AudioVideo;Video;Player;
+Keywords=plex;jellyfin;media;streaming;video;
+StartupWMClass=bask

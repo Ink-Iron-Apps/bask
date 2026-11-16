@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/models/audio_quality_preset.dart';
-import 'package:plezy/models/transcode_quality_preset.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/services/trackers/tracker_constants.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/models/audio_quality_preset.dart';
+import 'package:bask/models/transcode_quality_preset.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/services/trackers/tracker_constants.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 import '../test_helpers/prefs.dart';
 

@@ -2,21 +2,21 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
-import 'package:plezy/media/ids.dart';
+import 'package:bask/media/ids.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/media/media_backend.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/media/media_backend.dart';
 
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_server_client.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_server_client.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:plezy/models/download_models.dart';
-import 'package:plezy/models/transcode_quality_preset.dart';
-import 'package:plezy/services/download_storage_service.dart';
-import 'package:plezy/services/multi_server_manager.dart';
-import 'package:plezy/services/playback_context.dart';
-import 'package:plezy/services/playback_initialization_types.dart';
-import 'package:plezy/services/playback_source_resolver.dart';
+import 'package:bask/models/download_models.dart';
+import 'package:bask/models/transcode_quality_preset.dart';
+import 'package:bask/services/download_storage_service.dart';
+import 'package:bask/services/multi_server_manager.dart';
+import 'package:bask/services/playback_context.dart';
+import 'package:bask/services/playback_initialization_types.dart';
+import 'package:bask/services/playback_source_resolver.dart';
 import '../test_helpers/io_fakes.dart';
 import '../test_helpers/media_items.dart';
 

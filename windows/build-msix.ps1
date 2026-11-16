@@ -42,9 +42,9 @@ function New-AppxManifest {
     # Copied verbatim from the reserved product's identity page in Partner
     # Center; Store validation rejects the upload if any of the three differs by
     # a single character. Together they yield package family name
-    # edde746.Plezy_13q3sv6jzathm. Identity/@Name is also constrained to
+    # InkIronApps.Bask_<publisher-hash>. Identity/@Name is also constrained to
     # '[-.A-Za-z0-9]+' by the schema, so it can never carry an underscore.
-    $IdentityName = "edde746.Plezy"
+    $IdentityName = "InkIronApps.Bask"
     $Publisher = "CN=AA9C53CB-AD3C-48DA-B3E3-D1E8986D4E25"
     $PublisherDisplayName = "edde746"
 
@@ -74,7 +74,7 @@ function New-AppxManifest {
             ProcessorArchitecture="$Architecture" />
 
   <Properties>
-    <DisplayName>Plezy</DisplayName>
+    <DisplayName>Bask</DisplayName>
     <PublisherDisplayName>$PublisherDisplayName</PublisherDisplayName>
     <Logo>assets\StoreLogo.png</Logo>
   </Properties>
@@ -96,8 +96,8 @@ function New-AppxManifest {
   </Capabilities>
 
   <Applications>
-    <Application Id="Plezy" Executable="plezy.exe" EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements DisplayName="Plezy"
+    <Application Id="Bask" Executable="bask.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="Bask"
                           Description="A modern client for Plex and Jellyfin"
                           BackgroundColor="transparent"
                           Square150x150Logo="assets\Square150x150Logo.png"
@@ -248,11 +248,11 @@ foreach ($Architecture in $BuildDirs.Keys) {
 
     Write-Host "Packing $Architecture..." -ForegroundColor Cyan
     Invoke-SdkTool -Tool $MakeAppx -Arguments @(
-        "pack", "/d", $Staging, "/p", (Join-Path $PackageDir "plezy-$Architecture.msix"), "/o"
+        "pack", "/d", $Staging, "/p", (Join-Path $PackageDir "bask-$Architecture.msix"), "/o"
     )
 }
 
-$Bundle = Join-Path $ResolvedOutput "plezy-windows.msixbundle"
+$Bundle = Join-Path $ResolvedOutput "bask-windows.msixbundle"
 Write-Host "`nBundling $($BuildDirs.Count) package(s)..." -ForegroundColor Cyan
 Invoke-SdkTool -Tool $MakeAppx -Arguments @(
     "bundle", "/d", $PackageDir, "/p", $Bundle, "/bv", $MsixVersion, "/o"

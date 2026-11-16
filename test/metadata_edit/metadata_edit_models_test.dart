@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_server_client.dart';
-import 'package:plezy/metadata_edit/metadata_edit_models.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/metadata_edit/metadata_edit_models.dart';
 import '../test_helpers/media_items.dart';
 
 void main() {

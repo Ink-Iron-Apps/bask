@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/utils/download_utils.dart';
+import 'package:bask/utils/download_utils.dart';
 
 void main() {
   group('canManageRuleWhileBusy', () {

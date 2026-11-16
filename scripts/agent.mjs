@@ -5,7 +5,7 @@ import { constants } from "node:fs";
 import { open } from "node:fs/promises";
 import { VM, VMError, sleep } from "./perf/vmclient.mjs";
 
-const EXTENSION = "ext.plezy.agent";
+const EXTENSION = "ext.bask.agent";
 const MAX_PAYLOAD_BYTES = 1024 * 1024;
 const MAX_INPUT_BYTES = 768 * 1024;
 const MAX_BINARY_BYTES = 512 * 1024;

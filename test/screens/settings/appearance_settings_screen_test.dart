@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/providers/theme_provider.dart';
-import 'package:plezy/screens/settings/appearance_settings_screen.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/theme/mono_theme.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/providers/theme_provider.dart';
+import 'package:bask/screens/settings/appearance_settings_screen.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/theme/mono_theme.dart';
 import 'package:provider/provider.dart';
 
 import '../../test_helpers/prefs.dart';

@@ -4,16 +4,16 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/connection/connection_registry.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/profiles/active_profile_provider.dart';
-import 'package:plezy/profiles/plex_home_service.dart';
-import 'package:plezy/profiles/profile.dart';
-import 'package:plezy/profiles/profile_connection_registry.dart';
-import 'package:plezy/profiles/profile_registry.dart';
-import 'package:plezy/screens/main_screen.dart';
-import 'package:plezy/services/storage_service.dart';
-import 'package:plezy/widgets/side_navigation_rail.dart';
+import 'package:bask/connection/connection_registry.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/profiles/active_profile_provider.dart';
+import 'package:bask/profiles/plex_home_service.dart';
+import 'package:bask/profiles/profile.dart';
+import 'package:bask/profiles/profile_connection_registry.dart';
+import 'package:bask/profiles/profile_registry.dart';
+import 'package:bask/screens/main_screen.dart';
+import 'package:bask/services/storage_service.dart';
+import 'package:bask/widgets/side_navigation_rail.dart';
 
 import '../test_helpers/prefs.dart';
 

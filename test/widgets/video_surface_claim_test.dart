@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/mpv/mpv.dart';
-import 'package:plezy/mpv/player/player_native.dart';
-import 'package:plezy/mpv/player/video_rect_support.dart';
+import 'package:bask/mpv/mpv.dart';
+import 'package:bask/mpv/player/player_native.dart';
+import 'package:bask/mpv/player/video_rect_support.dart';
 
 import '../test_helpers/theme.dart';
 

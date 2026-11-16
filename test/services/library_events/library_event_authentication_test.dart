@@ -5,21 +5,21 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:plezy/connection/connection.dart';
+import 'package:bask/connection/connection.dart';
 
 import '../../test_helpers/prefs.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/exceptions/media_server_exceptions.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/library_change_event.dart';
-import 'package:plezy/services/library_events/library_event_service.dart';
-import 'package:plezy/services/multi_server_manager.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_auth_service.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/utils/active_client_scope.dart';
-import 'package:plezy/utils/deletion_notifier.dart';
-import 'package:plezy/utils/library_content_notifier.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/exceptions/media_server_exceptions.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/library_change_event.dart';
+import 'package:bask/services/library_events/library_event_service.dart';
+import 'package:bask/services/multi_server_manager.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_auth_service.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/utils/active_client_scope.dart';
+import 'package:bask/utils/deletion_notifier.dart';
+import 'package:bask/utils/library_content_notifier.dart';
 
 import '../../test_helpers/backend_client_fixtures.dart';
 
