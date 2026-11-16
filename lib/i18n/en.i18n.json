@@ -188,8 +188,6 @@
     "showWatchedIndicatorsDescription": "Display a checkmark on watched movies, shows, and episodes",
     "showEpisodeNumberOnCards": "Show Episode Number on Cards",
     "showEpisodeNumberOnCardsDescription": "Show season and episode number on episode cards",
-    "showSeasonPostersOnTabs": "Show Season Posters on Tabs",
-    "showSeasonPostersOnTabsDescription": "Show each season's poster above its tab",
     "tvFullCardLayout": "Full TV Cards",
     "tvFullCardLayoutDescription": "Use image-only TV cards with actor names overlaid",
     "focusGlow": "Focus Glow",

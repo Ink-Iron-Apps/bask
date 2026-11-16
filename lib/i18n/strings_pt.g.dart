@@ -280,8 +280,6 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Exibir contagem de episódios não assistidos em séries e temporadas';
 	@override String get showEpisodeNumberOnCards => 'Mostrar Número do Episódio nos Cards';
 	@override String get showEpisodeNumberOnCardsDescription => 'Mostrar temporada e episódio nos cartões de episódio';
-	@override String get showSeasonPostersOnTabs => 'Mostrar Pôsteres de Temporada nas Abas';
-	@override String get showSeasonPostersOnTabsDescription => 'Mostrar o pôster de cada temporada acima da aba';
 	@override String get tvFullCardLayout => 'Cartões TV completos';
 	@override String get tvFullCardLayoutDescription => 'Usar cartões de TV só com imagem e nomes dos atores sobrepostos';
 	@override String get focusGlow => 'Brilho de foco';
@@ -3098,8 +3096,6 @@ extension on TranslationsPt {
 			'settings.showUnwatchedCountDescription' => 'Exibir contagem de episódios não assistidos em séries e temporadas',
 			'settings.showEpisodeNumberOnCards' => 'Mostrar Número do Episódio nos Cards',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Mostrar temporada e episódio nos cartões de episódio',
-			'settings.showSeasonPostersOnTabs' => 'Mostrar Pôsteres de Temporada nas Abas',
-			'settings.showSeasonPostersOnTabsDescription' => 'Mostrar o pôster de cada temporada acima da aba',
 			'settings.tvFullCardLayout' => 'Cartões TV completos',
 			'settings.tvFullCardLayoutDescription' => 'Usar cartões de TV só com imagem e nomes dos atores sobrepostos',
 			'settings.focusGlow' => 'Brilho de foco',
@@ -3453,10 +3449,10 @@ extension on TranslationsPt {
 			'fileInfo.optimizedVersion' => 'Versão otimizada',
 			'fileInfo.optimizationTarget' => 'Alvo de otimização',
 			'fileInfo.deletedAt' => 'Excluído',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Origem remota',
 			'fileInfo.infiniteStream' => 'Fluxo infinito',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Reprodução direta',
 			'fileInfo.directStream' => 'Fluxo direto',
 			'fileInfo.transcoding' => 'Transcodificação',
@@ -3967,10 +3963,10 @@ extension on TranslationsPt {
 			'libraries.filterCategories.year' => 'Ano',
 			'libraries.filterCategories.contentRating' => 'Classificação indicativa',
 			'libraries.filterCategories.tag' => 'Tag',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Não assistidos',
 			'libraries.filterCategories.unplayed' => 'Não reproduzidos',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Favoritos',
 			'libraries.sortLabels.title' => 'Título',
 			'libraries.sortLabels.dateAdded' => 'Data de adição',
@@ -4481,10 +4477,10 @@ extension on TranslationsPt {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Regra de sincronização e downloads associados removidos',
 			'downloads.syncRuleCleanupBusy' => 'As regras de sincronização estão sendo atualizadas. Tente novamente em instantes.',
 			'downloads.syncRuleCleanupUnavailable' => 'Os downloads associados não puderam ser identificados com segurança. Reconecte o servidor e tente novamente, ou remova a regra sem excluir os downloads.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => '${count} novos episódios sincronizados para ${title}',
 			'downloads.activeSyncRules' => 'Regras de sincronização',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Nenhuma regra de sincronização',
 			'downloads.manageSyncRule' => 'Gerenciar sincronização',
 			'downloads.editEpisodeCount' => 'Número de episódios',

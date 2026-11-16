@@ -53,13 +53,6 @@ class AppearanceSettingsScreen extends StatelessWidget {
               title: t.settings.showEpisodeNumberOnCards,
               subtitle: t.settings.showEpisodeNumberOnCardsDescription,
             ),
-            if (!PlatformDetector.isTV())
-              SettingSwitchTile(
-                pref: SettingsService.showSeasonPostersOnTabs,
-                icon: Symbols.image_rounded,
-                title: t.settings.showSeasonPostersOnTabs,
-                subtitle: t.settings.showSeasonPostersOnTabsDescription,
-              ),
             SettingSwitchTile(
               pref: SettingsService.hideSpoilers,
               icon: Symbols.visibility_off_rounded,

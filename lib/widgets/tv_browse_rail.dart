@@ -355,6 +355,13 @@ class TvBrowseRail extends StatefulWidget {
   /// ([MediaCard.showTitleImplied]).
   final bool Function(MediaHub hub)? showTitleImpliedForHub;
 
+  /// Hubs whose cards should wear their item's own artwork rather than the
+  /// one [MediaItem.posterThumb] resolves.
+  ///
+  /// A show's seasons row is the case: a season card normally takes the
+  /// show's poster, which would draw the same picture along the whole row.
+  final bool Function(MediaHub hub)? prefersOwnArtworkForHub;
+
   /// Explicit background bleed override. When null, the bleed target is read
   /// from [MainScreenFocusScope] (offset aspect) inside the bleed widget
   /// itself, so sidebar flips never rebuild the rail — only the bleed layer.
@@ -389,6 +396,7 @@ class TvBrowseRail extends StatefulWidget {
     this.episodePosterModeForHub,
     this.widePosterScaleForHub,
     this.showTitleImpliedForHub,
+    this.prefersOwnArtworkForHub,
     this.backgroundBleedLeft,
   });
 
@@ -1725,6 +1733,7 @@ class TvBrowseRailState extends State<TvBrowseRail> with TickerProviderStateMixi
             mixedHubContext: metrics.isMixedHub,
             episodePosterModeOverride: episodePosterMode,
             showTitleImplied: widget.showTitleImpliedForHub?.call(hub) ?? false,
+            posterPathOverride: (widget.prefersOwnArtworkForHub?.call(hub) ?? false) ? item.thumbPath : null,
           );
   }
 
