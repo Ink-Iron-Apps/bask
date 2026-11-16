@@ -1,20 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/models/trackers/tracker_context.dart';
-import 'package:plezy/providers/trackers_provider.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
-import 'package:plezy/services/trackers/anilist/anilist_tracker.dart';
-import 'package:plezy/services/trackers/tracker_account_store.dart';
-import 'package:plezy/services/trackers/tracker_constants.dart';
-import 'package:plezy/services/trackers/tracker_coordinator.dart';
-import 'package:plezy/services/trackers/tracker_session.dart';
-import 'package:plezy/services/trackers/tracker_write_queue.dart';
-import 'package:plezy/services/trackers/mal/mal_tracker.dart';
-import 'package:plezy/services/trackers/mdblist/mdblist_tracker.dart';
-import 'package:plezy/services/trackers/simkl/simkl_tracker.dart';
-import 'package:plezy/services/trackers/trakt/trakt_tracker.dart';
-import 'package:plezy/utils/external_ids.dart';
+import 'package:bask/models/trackers/tracker_context.dart';
+import 'package:bask/providers/trackers_provider.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/trackers/anilist/anilist_tracker.dart';
+import 'package:bask/services/trackers/tracker_account_store.dart';
+import 'package:bask/services/trackers/tracker_constants.dart';
+import 'package:bask/services/trackers/tracker_coordinator.dart';
+import 'package:bask/services/trackers/tracker_session.dart';
+import 'package:bask/services/trackers/tracker_write_queue.dart';
+import 'package:bask/services/trackers/mal/mal_tracker.dart';
+import 'package:bask/services/trackers/mdblist/mdblist_tracker.dart';
+import 'package:bask/services/trackers/simkl/simkl_tracker.dart';
+import 'package:bask/services/trackers/trakt/trakt_tracker.dart';
+import 'package:bask/utils/external_ids.dart';
 
 import '../test_helpers/io_fakes.dart';
 import '../test_helpers/prefs.dart';

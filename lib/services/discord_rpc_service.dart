@@ -53,7 +53,15 @@ class _CachedUrl {
 /// when video is playing. Gracefully handles Discord not running.
 class DiscordRPCService {
   static const String _applicationId = '1453773470306402439';
-  static const String _posterUploadUrl = 'https://ice.plezy.app/posters';
+
+  /// Host that accepts a poster image and serves it back over HTTPS, so
+  /// Discord can fetch the artwork for the presence card.
+  ///
+  /// Empty by default: hosting other people's artwork is not something a
+  /// self-hosted build should hand to a third party's server. With no
+  /// endpoint the presence still works and simply shows the app's own image.
+  /// Supply one with `--dart-define=POSTER_UPLOAD_ENDPOINT=https://…`.
+  static const String _posterUploadUrl = String.fromEnvironment('POSTER_UPLOAD_ENDPOINT');
   static const int _maxPosterUploadBytes = 5 * 1024 * 1024;
 
   /// Cache of thumbnail paths to hosted poster URLs. Keyed by
@@ -356,6 +364,7 @@ class DiscordRPCService {
         return null;
       }
 
+      if (_posterUploadUrl.isEmpty) return null;
       final uploadResponse = await httpClient.post(
         _posterUploadUrl,
         body: imageBytes,
@@ -381,7 +390,7 @@ class DiscordRPCService {
         return hostedUrl;
       }
     } catch (e) {
-      appLogger.d('Failed to upload thumbnail to Plezy poster host', error: e);
+      appLogger.d('Failed to upload thumbnail to Bask poster host', error: e);
     }
     return null;
   }
@@ -409,6 +418,7 @@ class DiscordRPCService {
     if (uri.hasScheme || uri.hasAuthority || !url.startsWith('/posters/')) {
       return null;
     }
+    if (_posterUploadUrl.isEmpty) return null;
     return Uri.parse(_posterUploadUrl).resolve(url).toString();
   }
 

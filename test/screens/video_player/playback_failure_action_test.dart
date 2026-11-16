@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/mpv/models.dart';
-import 'package:plezy/screens/video_player/playback_failure_action.dart';
+import 'package:bask/mpv/models.dart';
+import 'package:bask/screens/video_player/playback_failure_action.dart';
 
 PlaybackFailureAction resolve({
   String? cause,

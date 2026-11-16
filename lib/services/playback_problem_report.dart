@@ -27,7 +27,7 @@ String buildPlaybackProblemReport({
   int maxLogLines = 300,
 }) {
   final out = StringBuffer()
-    ..writeln('Plexy playback problem report')
+    ..writeln('Bask playback problem report')
     ..writeln('Reported: ${now.toUtc().toIso8601String()}')
     ..writeln('App: $appVersion')
     ..writeln('Device: $platform${deviceModel == null ? '' : ' ($deviceModel)'}');

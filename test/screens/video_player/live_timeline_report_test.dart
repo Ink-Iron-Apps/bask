@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/live_tv_support.dart';
-import 'package:plezy/media/media_source_info.dart';
-import 'package:plezy/models/livetv_capture_buffer.dart';
-import 'package:plezy/screens/video_player/live_timeline_report.dart';
+import 'package:bask/media/live_tv_support.dart';
+import 'package:bask/media/media_source_info.dart';
+import 'package:bask/models/livetv_capture_buffer.dart';
+import 'package:bask/screens/video_player/live_timeline_report.dart';
 
 void main() {
   test('live stop drains an in-flight heartbeat and rejects later progress', () async {

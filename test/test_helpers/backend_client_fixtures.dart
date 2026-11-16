@@ -1,12 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/connection/connection.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/media_browser_dialect.dart';
-import 'package:plezy/models/plex/plex_config.dart';
-import 'package:plezy/services/jellyfin_client.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/utils/active_client_scope.dart';
+import 'package:bask/connection/connection.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_browser_dialect.dart';
+import 'package:bask/models/plex/plex_config.dart';
+import 'package:bask/services/jellyfin_client.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/utils/active_client_scope.dart';
 
 /// A MediaBrowser-family connection fixture. Defaults to the Jellyfin dialect;
 /// pass `dialect: MediaBrowserDialect.emby` (or use [testEmbyConnection]) to
@@ -81,7 +81,7 @@ PlexConfig testPlexConfig({
   String baseUrl = 'https://plex.example.com',
   String? token = 'token',
   String clientIdentifier = 'test-client',
-  String product = 'Plezy Test',
+  String product = 'Bask Test',
   String version = '1.0.0',
   String platform = 'Flutter Test',
   String? device,

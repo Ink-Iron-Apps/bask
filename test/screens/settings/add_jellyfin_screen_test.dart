@@ -7,28 +7,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:plezy/connection/connection.dart';
-import 'package:plezy/connection/connection_registry.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/focus/input_mode_tracker.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/media_browser_dialect.dart';
-import 'package:plezy/profiles/active_profile_binder.dart';
-import 'package:plezy/profiles/active_profile_provider.dart';
-import 'package:plezy/profiles/plex_home_service.dart';
-import 'package:plezy/profiles/profile.dart';
-import 'package:plezy/profiles/profile_connection.dart';
-import 'package:plezy/profiles/profile_connection_registry.dart';
-import 'package:plezy/profiles/profile_registry.dart';
-import 'package:plezy/providers/multi_server_provider.dart';
-import 'package:plezy/screens/settings/add_jellyfin_screen.dart';
-import 'package:plezy/services/jellyfin_auth_service.dart';
-import 'package:plezy/services/credential_vault.dart';
-import 'package:plezy/services/jellyfin_lan_discovery_service.dart';
-import 'package:plezy/services/multi_server_manager.dart';
-import 'package:plezy/services/storage_service.dart';
-import 'package:plezy/theme/mono_theme.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/connection/connection.dart';
+import 'package:bask/connection/connection_registry.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/focus/input_mode_tracker.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_browser_dialect.dart';
+import 'package:bask/profiles/active_profile_binder.dart';
+import 'package:bask/profiles/active_profile_provider.dart';
+import 'package:bask/profiles/plex_home_service.dart';
+import 'package:bask/profiles/profile.dart';
+import 'package:bask/profiles/profile_connection.dart';
+import 'package:bask/profiles/profile_connection_registry.dart';
+import 'package:bask/profiles/profile_registry.dart';
+import 'package:bask/providers/multi_server_provider.dart';
+import 'package:bask/screens/settings/add_jellyfin_screen.dart';
+import 'package:bask/services/jellyfin_auth_service.dart';
+import 'package:bask/services/credential_vault.dart';
+import 'package:bask/services/jellyfin_lan_discovery_service.dart';
+import 'package:bask/services/multi_server_manager.dart';
+import 'package:bask/services/storage_service.dart';
+import 'package:bask/theme/mono_theme.dart';
+import 'package:bask/utils/platform_detector.dart';
 import 'package:provider/provider.dart';
 
 import '../../test_helpers/multi_server_fixtures.dart';
@@ -41,7 +41,7 @@ Widget _testApp(Widget home) => MaterialApp(theme: monoTheme(dark: true), home: 
 
 JellyfinConnectionAuthService _jellyfinAuthService({bool quickConnectEnabled = false, Duration? initiateDelay}) {
   return JellyfinConnectionAuthService(
-    clientName: 'Plezy',
+    clientName: 'Bask',
     clientVersion: 'test',
     deviceName: 'TestDevice',
     testHttpClientFactory: () => MockClient((request) async {
@@ -76,7 +76,7 @@ JellyfinConnectionAuthService _jellyfinAuthService({bool quickConnectEnabled = f
 
 JellyfinConnectionAuthService _jellyfinAuthServiceForBareHost() {
   return JellyfinConnectionAuthService(
-    clientName: 'Plezy',
+    clientName: 'Bask',
     clientVersion: 'test',
     deviceName: 'TestDevice',
     testHttpClientFactory: () => MockClient((request) async {
@@ -109,7 +109,7 @@ JellyfinConnectionAuthService _successfulAuthService({required bool quickConnect
   };
 
   return JellyfinConnectionAuthService(
-    clientName: 'Plezy',
+    clientName: 'Bask',
     clientVersion: 'test',
     deviceName: 'Opaque Device',
     testHttpClientFactory: () => MockClient((request) async {
@@ -318,7 +318,7 @@ Future<List<DiscoveredJellyfinServer>> _noLocalServers() async => const [];
 void main() {
   group('resolveJellyfinClientVersion', () {
     PackageInfo packageInfo(String version) =>
-        PackageInfo(appName: 'Plezy', packageName: 'com.example.plezy', version: version, buildNumber: '1');
+        PackageInfo(appName: 'Bask', packageName: 'com.example.plezy', version: version, buildNumber: '1');
 
     test('uses a non-empty package version', () async {
       final version = await resolveJellyfinClientVersion(packageInfoLoader: () async => packageInfo(' 2.9.1 '));

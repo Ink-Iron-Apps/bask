@@ -1,11 +1,11 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/database/download_operations.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/models/download_models.dart';
-import 'package:plezy/services/download_manager_service.dart';
-import 'package:plezy/services/download_storage_service.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/database/download_operations.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/models/download_models.dart';
+import 'package:bask/services/download_manager_service.dart';
+import 'package:bask/services/download_storage_service.dart';
 
 import '../test_helpers/download_fixtures.dart';
 

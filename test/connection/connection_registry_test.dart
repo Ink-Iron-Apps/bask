@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/connection/connection.dart';
-import 'package:plezy/connection/connection_registry.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_browser_dialect.dart';
-import 'package:plezy/services/credential_vault.dart';
-import 'package:plezy/services/plex_auth_service.dart';
+import 'package:bask/connection/connection.dart';
+import 'package:bask/connection/connection_registry.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_browser_dialect.dart';
+import 'package:bask/services/credential_vault.dart';
+import 'package:bask/services/plex_auth_service.dart';
 
 import '../test_helpers/prefs.dart';
 

@@ -4,10 +4,10 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:plezy/main.dart';
-import 'package:plezy/services/sensitive_prefs.dart';
-import 'package:plezy/services/startup_diagnostics.dart';
-import 'package:plezy/utils/log_redaction_manager.dart';
+import 'package:bask/main.dart';
+import 'package:bask/services/sensitive_prefs.dart';
+import 'package:bask/services/startup_diagnostics.dart';
+import 'package:bask/utils/log_redaction_manager.dart';
 
 StartupFailureRecord _record({
   StartupPhase? phase = StartupPhase.database,

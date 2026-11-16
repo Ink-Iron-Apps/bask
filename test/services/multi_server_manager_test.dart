@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/media_server_client.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_server_client.dart';
 
 import 'package:drift/native.dart';
 import 'package:fake_async/fake_async.dart';
@@ -11,18 +11,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:plezy/connection/connection.dart';
-import 'package:plezy/connection/connection_registry.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/models/plex/plex_config.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_auth_service.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/services/jellyfin_client.dart';
-import 'package:plezy/services/multi_server_manager.dart';
-import 'package:plezy/services/storage_service.dart';
-import 'package:plezy/utils/active_client_scope.dart';
-import 'package:plezy/utils/device_identity.dart';
+import 'package:bask/connection/connection.dart';
+import 'package:bask/connection/connection_registry.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/models/plex/plex_config.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_auth_service.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/services/jellyfin_client.dart';
+import 'package:bask/services/multi_server_manager.dart';
+import 'package:bask/services/storage_service.dart';
+import 'package:bask/utils/active_client_scope.dart';
+import 'package:bask/utils/device_identity.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';
 import '../test_helpers/prefs.dart';
@@ -317,7 +317,7 @@ void main() {
           baseUrl: 'https://plex.example',
           token: 'old-token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: '1.0.0',
         ),
         serverId: ServerId('server-1'),
@@ -381,7 +381,7 @@ void main() {
           baseUrl: 'https://plex.example',
           token: 'old-token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: '1.0.0',
         ),
         serverId: ServerId('server-1'),
@@ -500,7 +500,7 @@ void main() {
           baseUrl: 'https://plex.example',
           token: 'old-token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: '1.0.0',
         ),
         serverId: ServerId('server-1'),
@@ -566,7 +566,7 @@ void main() {
           baseUrl: 'https://plex.example',
           token: 'old-token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: '1.0.0',
         ),
         serverId: ServerId('server-1'),
@@ -611,7 +611,7 @@ void main() {
           baseUrl: 'https://plex.example',
           token: 'old-token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: '1.0.0',
         ),
         serverId: ServerId('server-1'),
@@ -664,7 +664,7 @@ void main() {
           baseUrl: 'https://$serverId.example',
           token: 'old-$serverId',
           clientIdentifier: 'client-$serverId',
-          product: 'Plezy',
+          product: 'Bask',
           version: '1.0.0',
         ),
         serverId: ServerId(serverId),
@@ -848,7 +848,7 @@ void main() {
           baseUrl: replacementEndpoint.uri,
           token: 'redacted',
           clientIdentifier: 'replacement-client',
-          product: 'Plezy',
+          product: 'Bask',
           version: '1.0.0',
         ),
         serverId: ServerId('stale-server'),
@@ -2086,7 +2086,7 @@ PlexAccountConnection _plexAccount(String accountId, List<PlexServer> servers) =
 
 Future<StorageService> _prepareFreshPlexManagerTest() async {
   PackageInfo.setMockInitialValues(
-    appName: 'Plezy',
+    appName: 'Bask',
     packageName: 'com.example.plezy',
     version: '1.0.0',
     buildNumber: '1',

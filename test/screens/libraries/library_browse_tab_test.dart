@@ -9,34 +9,34 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/library_filter_result.dart';
-import 'package:plezy/media/library_change_event.dart';
-import 'package:plezy/media/library_query.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_library.dart';
-import 'package:plezy/media/media_server_client.dart';
-import 'package:plezy/media/media_sort.dart';
-import 'package:plezy/media/server_capabilities.dart';
-import 'package:plezy/models/plex/plex_config.dart';
-import 'package:plezy/providers/multi_server_provider.dart';
-import 'package:plezy/screens/libraries/alpha_scroll_handle.dart';
-import 'package:plezy/screens/libraries/sort_bottom_sheet.dart';
-import 'package:plezy/screens/libraries/state_messages.dart';
-import 'package:plezy/screens/libraries/tabs/library_browse_tab.dart';
-import 'package:plezy/services/jellyfin_mappers.dart';
-import 'package:plezy/services/multi_server_manager.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/services/storage_service.dart';
-import 'package:plezy/utils/media_server_http_client.dart';
-import 'package:plezy/utils/library_content_notifier.dart';
-import 'package:plezy/utils/platform_detector.dart';
-import 'package:plezy/widgets/focusable_filter_chip.dart';
-import 'package:plezy/widgets/focusable_media_card.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/library_filter_result.dart';
+import 'package:bask/media/library_change_event.dart';
+import 'package:bask/media/library_query.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_library.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/media/media_sort.dart';
+import 'package:bask/media/server_capabilities.dart';
+import 'package:bask/models/plex/plex_config.dart';
+import 'package:bask/providers/multi_server_provider.dart';
+import 'package:bask/screens/libraries/alpha_scroll_handle.dart';
+import 'package:bask/screens/libraries/sort_bottom_sheet.dart';
+import 'package:bask/screens/libraries/state_messages.dart';
+import 'package:bask/screens/libraries/tabs/library_browse_tab.dart';
+import 'package:bask/services/jellyfin_mappers.dart';
+import 'package:bask/services/multi_server_manager.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/services/storage_service.dart';
+import 'package:bask/utils/media_server_http_client.dart';
+import 'package:bask/utils/library_content_notifier.dart';
+import 'package:bask/utils/platform_detector.dart';
+import 'package:bask/widgets/focusable_filter_chip.dart';
+import 'package:bask/widgets/focusable_media_card.dart';
 
 import '../../test_helpers/backend_client_fixtures.dart';
 import '../../test_helpers/library_tab_scaffold.dart';
@@ -496,7 +496,7 @@ class _PlexBrowseHarness {
         baseUrl: 'https://plex.example.com',
         token: 'token',
         clientIdentifier: 'client-id',
-        product: 'Plezy',
+        product: 'Bask',
         version: 'test',
       ),
       serverId: _serverId,

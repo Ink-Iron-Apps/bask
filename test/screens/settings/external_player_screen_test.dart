@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/focus/focusable_button.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/models/external_player_models.dart';
-import 'package:plezy/screens/settings/external_player_screen.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/theme/mono_theme.dart';
-import 'package:plezy/widgets/focusable_list_tile.dart';
+import 'package:bask/focus/focusable_button.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/models/external_player_models.dart';
+import 'package:bask/screens/settings/external_player_screen.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/theme/mono_theme.dart';
+import 'package:bask/widgets/focusable_list_tile.dart';
 
 import '../../test_helpers/prefs.dart';
 
@@ -78,7 +78,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    // VLC is supported on every platform Plezy ships, so with detection
+    // VLC is supported on every platform Bask ships, so with detection
     // reporting nothing installed it is always one of the filtered-out ids.
     KnownPlayers.resetForTesting();
     KnownPlayers.probe = const _NoPlayersInstalled();

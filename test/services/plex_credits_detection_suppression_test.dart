@@ -3,19 +3,19 @@ import 'dart:convert';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/services/cached_playback_metadata_service.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/utils/active_client_scope.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/services/cached_playback_metadata_service.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/utils/active_client_scope.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';
 
 /// Plex strips detected credits markers from its responses when the admin
 /// disables credits detection for a show or movie
-/// (`enableCreditsMarkerGeneration == 0`), but Plezy's chapter-title fallback
+/// (`enableCreditsMarkerGeneration == 0`), but Bask's chapter-title fallback
 /// would resurrect a credits skip action from a "Credits"/"Ending" chapter,
 /// showing "Next Episode" during credits the admin asked to leave alone
 /// (#2137). These tests pin the suppression rule: explicit `0` on the owning

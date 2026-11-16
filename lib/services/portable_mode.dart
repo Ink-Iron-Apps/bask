@@ -33,7 +33,17 @@ class PortableMode {
   /// database and caches in there would mix user state into the program's
   /// own files, and an update that replaces the bundle would take them with
   /// it.
-  static const String dataDirectoryName = 'plexy-data';
+  static const String dataDirectoryName = 'bask-data';
+
+  /// The folder this app wrote to when it was called Bask.
+  ///
+  /// Renaming the app renamed its data folder, and a portable copy is the one
+  /// install with no package manager and no sandbox to carry state across
+  /// that change: the folder beside the executable is the whole install. A
+  /// copy updated in place would otherwise come up empty with its old
+  /// settings sitting untouched one directory over, so the first run after
+  /// the rename adopts the old folder instead.
+  static const String legacyDataDirectoryName = 'plexy-data';
 
   static bool _initialized = false;
   static Directory? _root;
@@ -49,6 +59,29 @@ class PortableMode {
   /// a caller outside path_provider — the downloader's storage isolate — can
   /// be handed a path rather than a provider.
   static String? get supportPath => _root == null ? null : PortablePathProvider(_root!.path)._ensure('support');
+
+  /// Rename a pre-rename data folder into place, once.
+  ///
+  /// Only ever moves when the new folder does not exist yet, so a copy that
+  /// has already run under the new name never has its state replaced by
+  /// whatever the old folder still holds. A failure here is not fatal: the
+  /// caller goes on to create an empty folder, which is the same state the
+  /// install would have been in without the migration.
+  static void _adoptLegacyDataDirectory(String exeDir, Directory data) {
+    if (data.existsSync()) return;
+    final legacy = Directory(p.join(exeDir, legacyDataDirectoryName));
+    if (!legacy.existsSync()) return;
+    try {
+      legacy.renameSync(data.path);
+      appLogger.i('Portable mode: adopted $legacyDataDirectoryName as $dataDirectoryName');
+    } catch (e, stackTrace) {
+      appLogger.w(
+        'Portable mode: could not adopt the $legacyDataDirectoryName folder; starting fresh',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
 
   /// Detect the marker and redirect path_provider at it.
   ///
@@ -67,6 +100,7 @@ class PortableMode {
       if (!marker.existsSync()) return;
 
       final data = Directory(p.join(exeDir, dataDirectoryName));
+      _adoptLegacyDataDirectory(exeDir, data);
       data.createSync(recursive: true);
 
       // A folder the user cannot write to would fail later, one file at a

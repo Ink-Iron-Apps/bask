@@ -4,10 +4,10 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/services/jellyfin_api_cache.dart';
-import 'package:plezy/utils/external_ids.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/services/jellyfin_api_cache.dart';
+import 'package:bask/utils/external_ids.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';
 

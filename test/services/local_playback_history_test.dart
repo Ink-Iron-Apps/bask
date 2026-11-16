@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
+import 'package:bask/media/media_backend.dart';
 
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/services/local_playback_history.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/services/local_playback_history.dart';
+import 'package:bask/services/settings_service.dart';
 
 import '../test_helpers/prefs.dart';
 import '../test_helpers/media_items.dart';

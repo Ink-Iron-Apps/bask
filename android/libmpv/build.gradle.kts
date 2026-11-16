@@ -99,7 +99,7 @@ fun stagedArchiveName(abi: String) = "libmpv-android-$abi.tar.gz"
 // libmpv-android-<key>-<abi>.tar.gz per ABI) to test changes before a lock
 // bump. Checksums are skipped for local archives; the lock stays
 // authoritative otherwise.
-val localMpvDir: String? = (project.findProperty("plezy.localMpvDir") as String?)
+val localMpvDir: String? = (project.findProperty("bask.localMpvDir") as String?)
   ?: System.getenv("PLEZY_LOCAL_MPV_DIR")
 
 fun localArchive(abi: String): File {
@@ -221,7 +221,7 @@ val extractLibmpvNative = tasks.register("extractLibmpvNative") {
 }
 
 android {
-  namespace = "com.edde746.plezy.libmpv"
+  namespace = "com.inknironapps.bask.libmpv"
   compileSdk = 36
   // Matches the app's latest stable NDK so every project-owned native library
   // is built with the same 16 KB page-size-capable libc++ toolchain. That copy

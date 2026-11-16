@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:plezy/widgets/app_icon.dart';
+import 'package:bask/widgets/app_icon.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
@@ -349,7 +349,7 @@ class _AudioRenderingModeItemState extends State<_AudioRenderingModeItem> {
 class VideoSettingsSheet extends StatefulWidget {
   final Player player;
 
-  /// Whether this player surface supports Plezy's HDR control.
+  /// Whether this player surface supports Bask's HDR control.
   ///
   /// Defaults to the native platform capability, but can be supplied by
   /// embedders whose capability is known independently of the host platform.
@@ -1195,14 +1195,15 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         // What the overlay shows, captured rather than watched: whatever is
         // wrong is happening now, and none of it survives to be asked about
         // later.
-        FocusableListTile(
-          leading: AppIcon(Symbols.bug_report_rounded, fill: 1, color: tokens(context).textMuted),
-          title: Text(t.videoSettings.reportPlaybackProblem),
-          onTap: () {
-            OverlaySheetController.of(context).close();
-            unawaited(_reportPlaybackProblem());
-          },
-        ),
+        if (logUploadConfigured)
+          FocusableListTile(
+            leading: AppIcon(Symbols.bug_report_rounded, fill: 1, color: tokens(context).textMuted),
+            title: Text(t.videoSettings.reportPlaybackProblem),
+            onTap: () {
+              OverlaySheetController.of(context).close();
+              unawaited(_reportPlaybackProblem());
+            },
+          ),
 
         if (_showDebugDvConversionMode)
           _SettingsMenuItem(

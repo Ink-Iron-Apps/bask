@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_item.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_item.dart';
 
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_playlist.dart';
-import 'package:plezy/models/plex/play_queue_response.dart';
-import 'package:plezy/providers/playback_state_provider.dart';
-import 'package:plezy/services/media_list_playback_launcher.dart';
-import 'package:plezy/services/play_queue_launcher.dart';
-import 'package:plezy/services/plex_client.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_playlist.dart';
+import 'package:bask/models/plex/play_queue_response.dart';
+import 'package:bask/providers/playback_state_provider.dart';
+import 'package:bask/services/media_list_playback_launcher.dart';
+import 'package:bask/services/play_queue_launcher.dart';
+import 'package:bask/services/plex_client.dart';
 
 import '../test_helpers/media_items.dart';
 

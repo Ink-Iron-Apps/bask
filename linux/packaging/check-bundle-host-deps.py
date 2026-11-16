@@ -57,7 +57,7 @@ BASELINE_PREFIXES = (
 )
 
 # Where the loader actually looks for a soname, relative to the bundle root:
-# linux/CMakeLists.txt gives plezy RPATH $ORIGIN/lib and plezy.sh exports
+# linux/CMakeLists.txt gives bask RPATH $ORIGIN/lib and bask.sh exports
 # $INSTALL_DIR/lib. Nothing in the bundle carries a RUNPATH of its own, so this
 # one directory is the whole search path for every object in it.
 LOADER_DIRECTORIES = ("lib",)

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/models/download_models.dart';
-import 'package:plezy/widgets/download_tree_view.dart';
+import 'package:bask/models/download_models.dart';
+import 'package:bask/widgets/download_tree_view.dart';
 
 void main() {
   DownloadTreeNode leaf(String key, {required DownloadStatus status, int total = 0, int done = 0}) {

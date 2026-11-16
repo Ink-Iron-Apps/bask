@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/media/account_preferences.dart';
-import 'package:plezy/media/media_browser_dialect.dart';
-import 'package:plezy/services/jellyfin_client.dart';
-import 'package:plezy/services/media_browser_account_preferences_source.dart';
+import 'package:bask/media/account_preferences.dart';
+import 'package:bask/media/media_browser_dialect.dart';
+import 'package:bask/services/jellyfin_client.dart';
+import 'package:bask/services/media_browser_account_preferences_source.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';
 

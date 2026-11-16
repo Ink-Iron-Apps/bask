@@ -1,5 +1,5 @@
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/services/data_aggregation_service.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/services/data_aggregation_service.dart';
 
 /// A reverse-lookup wave fixture. By default every listed server answered;
 /// name [failed] / [cancelled] servers to model a wave a server sat out, and

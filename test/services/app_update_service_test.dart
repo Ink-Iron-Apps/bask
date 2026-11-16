@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/app_update_service.dart';
+import 'package:bask/services/app_update_service.dart';
 
 void main() {
   group('isNewerVersion', () {
@@ -39,47 +39,47 @@ void main() {
 
     test('prefers the ABI the device actually runs', () {
       final assets = [
-        asset('Plexy-v2.14.0-armeabi-v7a.apk'),
-        asset('Plexy-v2.14.0-arm64-v8a.apk'),
-        asset('Plexy-v2.14.0-x86_64.apk'),
+        asset('Bask-v2.14.0-armeabi-v7a.apk'),
+        asset('Bask-v2.14.0-arm64-v8a.apk'),
+        asset('Bask-v2.14.0-x86_64.apk'),
       ];
 
-      expect(selectApkAsset(assets, abis: ['arm64-v8a', 'armeabi-v7a'])?['name'], 'Plexy-v2.14.0-arm64-v8a.apk');
-      expect(selectApkAsset(assets, abis: ['x86_64'])?['name'], 'Plexy-v2.14.0-x86_64.apk');
+      expect(selectApkAsset(assets, abis: ['arm64-v8a', 'armeabi-v7a'])?['name'], 'Bask-v2.14.0-arm64-v8a.apk');
+      expect(selectApkAsset(assets, abis: ['x86_64'])?['name'], 'Bask-v2.14.0-x86_64.apk');
     });
 
     test('honours the device ABI order', () {
-      final assets = [asset('Plexy-arm64-v8a.apk'), asset('Plexy-armeabi-v7a.apk')];
+      final assets = [asset('Bask-arm64-v8a.apk'), asset('Bask-armeabi-v7a.apk')];
 
       // A 32-bit-first device must not be handed the 64-bit build.
-      expect(selectApkAsset(assets, abis: ['armeabi-v7a', 'arm64-v8a'])?['name'], 'Plexy-armeabi-v7a.apk');
+      expect(selectApkAsset(assets, abis: ['armeabi-v7a', 'arm64-v8a'])?['name'], 'Bask-armeabi-v7a.apk');
     });
 
     test('does not hand a 32-bit x86 device the 64-bit build', () {
       // 'x86_64'.contains('x86') is true, so a substring match installs an APK
       // the device cannot run. Emulators are exactly where x86-only shows up.
-      final assets = [asset('Plexy-v2.14.0-x86_64.apk'), asset('Plexy-v2.14.0-arm64-v8a.apk')];
+      final assets = [asset('Bask-v2.14.0-x86_64.apk'), asset('Bask-v2.14.0-arm64-v8a.apk')];
 
       expect(selectApkAsset(assets, abis: ['x86']), isNull);
     });
 
     test('falls back to a universal APK when no ABI matches', () {
-      final assets = [asset('Plexy-v2.14.0.apk'), asset('Plexy-v2.14.0-x86_64.apk')];
+      final assets = [asset('Bask-v2.14.0.apk'), asset('Bask-v2.14.0-x86_64.apk')];
 
-      expect(selectApkAsset(assets, abis: ['riscv64'])?['name'], 'Plexy-v2.14.0.apk');
+      expect(selectApkAsset(assets, abis: ['riscv64'])?['name'], 'Bask-v2.14.0.apk');
     });
 
     test('fallback ABI order degrades safely when the device cannot be asked', () {
       // A 32-bit device cannot install the arm64 build, and finds out only
       // after downloading it. A 64-bit device runs the 32-bit build fine, so
       // the blind guess has to be armeabi-v7a first.
-      final assets = [asset('Plexy-v2.23.0-arm64-v8a.apk'), asset('Plexy-v2.23.0-armeabi-v7a.apk')];
+      final assets = [asset('Bask-v2.23.0-arm64-v8a.apk'), asset('Bask-v2.23.0-armeabi-v7a.apk')];
 
-      expect(selectApkAsset(assets, abis: fallbackDeviceAbis)?['name'], 'Plexy-v2.23.0-armeabi-v7a.apk');
+      expect(selectApkAsset(assets, abis: fallbackDeviceAbis)?['name'], 'Bask-v2.23.0-armeabi-v7a.apk');
     });
 
     test('returns null when the release carries no APK', () {
-      expect(selectApkAsset([asset('Plexy-sources.zip')], abis: ['arm64-v8a']), isNull);
+      expect(selectApkAsset([asset('Bask-sources.zip')], abis: ['arm64-v8a']), isNull);
       expect(selectApkAsset([], abis: ['arm64-v8a']), isNull);
     });
   });

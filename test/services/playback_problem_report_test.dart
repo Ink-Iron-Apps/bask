@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logger/logger.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/services/playback_problem_report.dart';
-import 'package:plezy/utils/app_logger.dart';
-import 'package:plezy/utils/storage_space.dart';
-import 'package:plezy/widgets/video_controls/widgets/performance_overlay/performance_stats.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/services/playback_problem_report.dart';
+import 'package:bask/utils/app_logger.dart';
+import 'package:bask/utils/storage_space.dart';
+import 'package:bask/widgets/video_controls/widgets/performance_overlay/performance_stats.dart';
 
 import '../test_helpers/media_items.dart';
 

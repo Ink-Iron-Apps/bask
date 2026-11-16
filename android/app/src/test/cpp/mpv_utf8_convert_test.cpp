@@ -5,8 +5,8 @@
 
 namespace {
 
-using plezy::utf8::FromUtf16;
-using plezy::utf8::ToUtf16;
+using bask::utf8::FromUtf16;
+using bask::utf8::ToUtf16;
 
 bool check(bool condition, const char* message) {
   if (!condition) std::fprintf(stderr, "%s\n", message);

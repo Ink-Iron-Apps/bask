@@ -288,7 +288,7 @@ class PerformanceStats {
   /// `prepare_frame`, which makes mpv hand frames over a full preparation
   /// lead *before* their pts - so that condition is never true in normal
   /// playback. `decoder-frame-drop-count` is the `--framedrop=decoder` path,
-  /// which Plezy does not enable. A GL vo (`gpu`/`gpu-next`, every software
+  /// which Bask does not enable. A GL vo (`gpu`/`gpu-next`, every software
   /// Android session and every desktop/Apple one) has no `prepare_frame` and
   /// mpv's counters do work there.
   bool get _voCountsDroppedFrames => currentVo != 'mediacodec';

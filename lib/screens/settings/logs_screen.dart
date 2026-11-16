@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show SelectedContent;
-import 'package:plezy/utils/media_server_http_client.dart';
+import 'package:bask/utils/media_server_http_client.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
@@ -441,11 +441,15 @@ class _LogsScreenState extends State<LogsScreen> with MountedSetStateMixin {
                                 tooltip: t.common.refresh,
                                 onPressed: _loadLogs,
                               ),
-                              FocusableAction(
-                                icon: Symbols.upload_rounded,
-                                tooltip: t.logs.uploadLogs,
-                                onPressed: _hasDiagnostics ? _uploadLogs : null,
-                              ),
+                              // Absent, not disabled, when this build has no
+                              // log endpoint: there is nothing the viewer
+                              // could do to make it work.
+                              if (logUploadConfigured)
+                                FocusableAction(
+                                  icon: Symbols.upload_rounded,
+                                  tooltip: t.logs.uploadLogs,
+                                  onPressed: _hasDiagnostics ? _uploadLogs : null,
+                                ),
                               FocusableAction(
                                 icon: Symbols.content_copy_rounded,
                                 tooltip: t.logs.copyLogs,

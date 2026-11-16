@@ -1,76 +1,48 @@
 <h1>
-  <img src="assets/plezy.png" alt="Plezy Logo" height="24" style="vertical-align: middle;" />
-  Plezy
+  <img src="assets/bask_icon.png" alt="Bask logo" height="24" style="vertical-align: middle;" />
+  Bask
 </h1>
 
-A modern client for Plex, Jellyfin, and Emby on desktop, mobile, and TV. Built with Flutter for native performance and a clean interface.
+A media client for Plex, Jellyfin and Emby on desktop, mobile and TV. Built with Flutter, so one codebase drives a phone, a desktop window and a ten-foot TV interface, with native playback on each.
 
 <p>
-  <a href="https://plezy.app">Website</a> ·
-  <a href="https://plezy.app/#screenshots">Screenshots</a> ·
   <a href="#download">Download</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#building-from-source">Building</a> ·
   <a href="CONTRIBUTING.md">Contributing</a> ·
   <a href="LICENSE">License</a>
 </p>
 
 <p align="center">
-  <img src="assets/readme-showcase.webp" alt="Plezy mobile screenshots" width="900" />
+  <img src="assets/readme-showcase.webp" alt="Bask screenshots" width="900" />
 </p>
+
+> **Bask is a fork of [Plezy](https://github.com/edde746/plezy) by [@edde746](https://github.com/edde746)**, continued under GPL-3.0.
+> The great majority of this application is upstream's work. Bask changes the name, the release pipeline and some device-support
+> decisions, and adds features of its own. Upstream publishes to the app stores and to the usual package managers; Bask does not.
 
 ## Download
 
-<a href='https://apps.apple.com/app/apple-store/id6754315964?pt=128238902&ct=GitHub&mt=8'><img height='60' alt='Download on the App Store' src='./assets/app-store-badge.png'/></a>
-<a href='https://play.google.com/store/apps/details?id=com.edde746.plezy&referrer=utm_source%3Dgithub%26utm_campaign%3Dreadme_badge'><img height='60' alt='Get it on Google Play' src='./assets/play-store-badge.png'/></a>
-<a href='https://www.amazon.com/gp/product/B0GK65CVS1'><img height='60' alt='Available at the Amazon App Store' src='./assets/amazon-badge.png'/></a>
-<a href='https://get.microsoft.com/installer/download/9n5r1s1t68h7?referrer=appbadge&cid=github'><img height='60' alt='Get it from Microsoft' src='./assets/microsoft-badge.png'/></a>
+Bask is self-hosted. It ships from this repository's [Releases](https://github.com/Ink-Iron-Apps/bask/releases/latest) and nowhere
+else — there is no App Store, Play Store, Amazon or Microsoft Store listing, and no Homebrew, WinGet, AUR, Nix or distribution
+package. A copy of Bask offered anywhere else did not come from here.
 
-| Platform | Download |
-| --- | --- |
-| macOS | [DMG (x64, arm64)](https://github.com/edde746/plezy/releases/latest/download/plezy-macos.dmg) |
-| Linux x64 | [.deb](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-x64.deb) · [.rpm](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-x64.rpm) · [.pkg.tar.zst](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-x64.pkg.tar.zst) · [portable tar.gz](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-x64.tar.gz) |
-| Linux arm64 | [.deb](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-arm64.deb) · [.rpm](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-arm64.rpm) · [.pkg.tar.zst](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-arm64.pkg.tar.zst) · [portable tar.gz](https://github.com/edde746/plezy/releases/latest/download/plezy-linux-arm64.tar.gz) |
+| Platform | File | Notes |
+| --- | --- | --- |
+| Android · Android TV · Fire TV | `Bask-<version>-arm64-v8a.apk` | Any current phone, tablet or TV box |
+| Android TV, 32-bit | `Bask-<version>-armeabi-v7a.apk` | Required by older TV userspaces — Sony Bravia sets on Android 12 report `armeabi-v7a` only |
+| Windows x64 | `Bask-<version>-windows-x64-portable.zip` | Unzip and run; there is no installer |
 
-<details>
-<summary>Install with a package manager</summary>
+Install an APK by sideloading it, either with `adb install -r <file>.apk` or through your TV's own file manager with installation
+from unknown sources enabled.
 
-### macOS — Homebrew
+The Windows build is portable on purpose. Keep the `portable.txt` file next to `bask.exe` and everything Bask writes — database,
+preferences, artwork cache, logs and downloads — stays inside a `bask-data` folder beside the executable, so the folder is the
+entire install and deleting it leaves nothing behind. Delete `portable.txt` and Bask uses the normal per-user Windows locations
+instead. A copy upgraded from the Plexy era adopts its old `plexy-data` folder once, automatically.
 
-```bash
-brew tap edde746/plezy https://github.com/edde746/plezy
-brew install --cask plezy
-```
-
-### Windows — WinGet
-
-```bash
-winget install edde746.Plezy
-```
-
-### Arch Linux — Pacman
-
-[Distribution package](https://archlinux.org/packages/extra/x86_64/plezy/).
-
-```bash
-sudo pacman -S plezy
-```
-
-### Fedora / Red Hat — DNF
-
-[Installation instructions](https://github.com/aldobarr/plezy-rpm) · Community repository by [@aldobarr](https://github.com/aldobarr).
-
-### Nix
-
-[Community package](https://search.nixos.org/packages?channel=unstable&query=plezy) maintained by [@mio-19](https://github.com/mio-19) and [@MiniHarinn](https://github.com/MiniHarinn).
-
-### aerynOS — Moss
-
-[Distribution package](https://github.com/aerynOS/recipes/tree/main/p/plezy).
-
-```bash
-sudo moss it plezy
-```
-
-</details>
+macOS, Linux, iOS and tvOS are all supported in the source tree and their project files are maintained, but no binaries are
+published for them. Build those yourself with the instructions below.
 
 ## Features
 
@@ -144,7 +116,7 @@ Older relays still accept explicit create/join, but failed recovery requires joi
 ### <img src="assets/readme_icons/integrations.svg" height="20" alt="" align="center" /> Integrations
 - Discord Rich Presence[^desktop]
 - Trakt, MyAnimeList, AniList, and Simkl — ratings, watched sync, and real-time scrobbling[^rt]
-- Plezy Remote — control desktop and TV from mobile
+- Bask Remote — control desktop and TV from mobile
 - Watch Next row and tvOS Top Shelf[^shelf]
 
 ### <img src="assets/readme_icons/customization.svg" height="20" alt="" align="center" /> Platform & Customization
@@ -184,8 +156,8 @@ Older relays still accept explicit create/join, but failed recovery requires joi
 ### Setup
 
 ```bash
-git clone https://github.com/edde746/plezy.git
-cd plezy
+git clone https://github.com/Ink-Iron-Apps/bask.git
+cd bask
 flutter pub get
 scripts/codegen.sh
 flutter run
@@ -229,7 +201,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow, formatting, tes
 
 ## License
 
-Plezy is licensed under [GPL-3.0](LICENSE).
+Bask is licensed under [GPL-3.0](LICENSE).
 
 ## Acknowledgments
 

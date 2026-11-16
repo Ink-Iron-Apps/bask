@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/media/media_item_labels.dart';
-import 'package:plezy/media/media_kind.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/media/media_item_labels.dart';
+import 'package:bask/media/media_kind.dart';
 
 import '../test_helpers/media_items.dart';
 

@@ -23,11 +23,15 @@
              lib/services/plex_client/parts/live_tv.dart:3).
              Does NOT match *.plex.direct — user PMS keeps base-config. -->
         <domain includeSubdomains="true">plex.tv</domain>
-        <!-- ice.plezy.app: relay + /auth OAuth proxy + /posters
+        <!-- ice.plezy.app: the Watch Together relay, which also serves the
+             /auth OAuth proxy that signs TVs in to Trakt, MyAnimeList,
+             AniList and Simkl
              (lib/watch_together/services/watch_together_relay_endpoint.dart:8,
-             lib/services/trackers/oauth_proxy_client.dart:22,
-             lib/services/discord_rpc_service.dart:55);
-             bugs.plezy.app: Sentry DSN (lib/main.dart:90). -->
+             lib/services/trackers/oauth_proxy_client.dart:23).
+             Log and poster uploads no longer have a default host and reach
+             this domain only if a build defines one. bugs.plezy.app likewise
+             carries nothing unless a build supplies a Sentry DSN, which no
+             release here does. -->
         <domain includeSubdomains="true">plezy.app</domain>
         <!-- api.trakt.tv incl. /oauth/device/*, /oauth/token
              (lib/services/trakt/trakt_constants.dart:16,21-24). -->

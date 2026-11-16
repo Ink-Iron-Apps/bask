@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_file_info.dart';
-import 'package:plezy/services/jellyfin_client.dart';
-import 'package:plezy/services/plex_playback_mapper.dart';
+import 'package:bask/media/media_file_info.dart';
+import 'package:bask/services/jellyfin_client.dart';
+import 'package:bask/services/plex_playback_mapper.dart';
 
 void main() {
   group('parsePlexFileInfoFromJson', () {

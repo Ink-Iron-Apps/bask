@@ -4,16 +4,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:os_media_controls/os_media_controls.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/services/car_ux_restrictions_service.dart';
-import 'package:plezy/services/multi_server_manager.dart';
-import 'package:plezy/services/music/music_playback_service.dart';
-import 'package:plezy/services/music/music_source_resolver.dart';
-import 'package:plezy/services/music/music_playback_service_impl.dart';
-import 'package:plezy/utils/notification_permission.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/services/car_ux_restrictions_service.dart';
+import 'package:bask/services/multi_server_manager.dart';
+import 'package:bask/services/music/music_playback_service.dart';
+import 'package:bask/services/music/music_source_resolver.dart';
+import 'package:bask/services/music/music_playback_service_impl.dart';
+import 'package:bask/utils/notification_permission.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 import '../../test_helpers/media_items.dart';
 import 'music_playback_service_test.dart' as music_fakes;
@@ -304,7 +304,7 @@ void main() {
     await pumpEventQueue();
     expect(harness.player.state.playing, isFalse);
 
-    // The user opens Plezy again while the vehicle still cannot answer. Focus is
+    // The user opens Bask again while the vehicle still cannot answer. Focus is
     // not a verdict, so nothing auto-starts here...
     binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await pumpEventQueue();

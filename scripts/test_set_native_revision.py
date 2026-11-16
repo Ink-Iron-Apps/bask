@@ -4,7 +4,7 @@
 The script moves ten pin sites at once and promises all-or-nothing: either
 every Apple requirement, every SwiftPM lock, and mpv-build.lock.json move to
 the new commit together, or nothing is written. These tests drive the real
-script end to end against a synthetic Plezy tree and a real (temporary) git
+script end to end against a synthetic Bask tree and a real (temporary) git
 checkout of the unified mpv-build repo, because the failure that matters --
 a half-moved pin -- can only happen across process and file boundaries.
 
@@ -346,7 +346,7 @@ class SetNativeRevisionTest(unittest.TestCase):
 
     def test_default_source_is_the_sibling_checkout(self) -> None:
         # No --repo: the ../mpv-build convention must find the checkout
-        # sitting next to the Plezy tree.
+        # sitting next to the Bask tree.
         _, commit = self._make_mpv_build()
 
         result = self._run(commit)
