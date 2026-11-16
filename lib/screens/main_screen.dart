@@ -50,6 +50,13 @@ import '../widgets/tv_virtual_keyboard.dart';
 import '../services/api_cache.dart';
 import '../services/multi_server_manager.dart';
 import '../services/offline_watch_sync_service.dart';
+import '../database/app_database.dart';
+import '../services/first_run_restore.dart';
+import '../services/settings_credential_export.dart';
+import '../services/settings_export_service.dart';
+import '../services/settings_handoff_service.dart';
+import '../services/storage_service.dart';
+import '../widgets/settings_restore_prompt.dart';
 import '../services/settings_service.dart';
 import '../providers/offline_mode_provider.dart';
 import '../services/companion_remote/companion_remote_host_controller.dart';
@@ -370,6 +377,10 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen>
     with RouteAware, WindowListener, WidgetsBindingObserver, MountedSetStateMixin {
+  /// When this run began. A backup written after it was written by this
+  /// session, and restoring one of those would be a loop with no content.
+  final DateTime _sessionStart = DateTime.now();
+
   NavigationTabId _currentTab = NavigationTabId.discover;
   String? _selectedLibraryGlobalKey;
   Future<void>? _windowCloseFuture;
@@ -602,6 +613,11 @@ class _MainScreenState extends State<MainScreen>
         if (_companionRemoteSetup) {
           unawaited(_autoStartCompanionRemoteServer());
         }
+
+        // The first moment a user scope exists, which is what an import needs
+        // in order to re-scope the preferences it carries.
+        await _maybeOfferSettingsRestore();
+        if (!mounted) return;
       }
 
       // Focus content initially (replaces autofocus which caused focus stealing issues)
@@ -777,6 +793,65 @@ class _MainScreenState extends State<MainScreen>
     // sidebar reflects the new server set without an app restart.
     if (action == ProfileInvalidationAction.invalidateNow) {
       unawaited(_invalidateAllScreens());
+    }
+  }
+
+  /// Offers the settings backup sitting beside a fresh install, once.
+  ///
+  /// [FirstRunRestore] decides whether there is anything to offer; this only
+  /// asks and applies. A declined offer is recorded the same as an accepted
+  /// one, so the question is put exactly once per install.
+  Future<void> _maybeOfferSettingsRestore() async {
+    final settings = SettingsService.instance;
+    final bool eligible;
+    try {
+      eligible = FirstRunRestore.isEligible(settings: settings, storage: await StorageService.getInstance());
+    } catch (error, stackTrace) {
+      appLogger.w('Could not decide about a settings restore', error: error, stackTrace: stackTrace);
+      return;
+    }
+    if (!eligible || !mounted) return;
+
+    // A predecessor app still installed beats a file on disk: it is the live
+    // answer, and on a renamed install there is no file to find, because the
+    // rename gave this app a new sandbox.
+    final handoff = await SettingsHandoffService.readFromPreviousInstall();
+    final backup = handoff != null ? null : await FirstRunRestore.localBackup(sessionStart: _sessionStart);
+    if (handoff == null && backup == null) return;
+    if (!mounted) return;
+
+    await FirstRunRestore.markOffered(settings);
+    if (!mounted) return;
+    final accepted = handoff != null
+        ? await promptToAcceptHandoff(context)
+        : await promptToRestoreBackup(context, backup!);
+    if (!accepted || !mounted) return;
+
+    try {
+      final database = context.read<AppDatabase>();
+      Future<String?> askPassphrase() => mounted ? promptForCredentialPassphrase(context) : Future<String?>.value();
+      final result = handoff != null
+          ? await SettingsExportService.importFromJson(
+              handoff.payload,
+              database: database,
+              passphraseProvider: askPassphrase,
+            )
+          : await SettingsExportService.importFromPath(
+              backup!.path,
+              database: database,
+              passphraseProvider: askPassphrase,
+            );
+      if (!mounted || result == null) return;
+      settings.refreshListenables();
+      showSuccessSnackBar(
+        context,
+        result.credentials != null ? t.settings.importCredentialsSuccess : t.settings.importSettingsSuccess,
+      );
+    } on WrongPassphraseException {
+      if (mounted) showErrorSnackBar(context, t.settings.importCredentialsWrongPassphrase);
+    } on SettingsExportException catch (error) {
+      appLogger.w('Restoring the found settings failed', error: error);
+      if (mounted) showErrorSnackBar(context, t.settings.importSettingsInvalidFile);
     }
   }
 

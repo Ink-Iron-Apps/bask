@@ -30,6 +30,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import com.edde746.plezy.car.CarRestrictionsMonitor
+import com.edde746.plezy.handoff.SettingsHandoffClient
 import com.edde746.plezy.exoplayer.ExoPlayerPlugin
 import com.edde746.plezy.mpv.MpvAudioPlayerPlugin
 import com.edde746.plezy.mpv.MpvPlayerPlugin
@@ -100,6 +101,7 @@ class MainActivity : FlutterActivity() {
   private val APP_EXIT_CHANNEL = "com.plezy/app_exit"
   private val CAR_RESTRICTIONS_CHANNEL = "com.plezy/car_restrictions"
   private val APK_INSTALL_CHANNEL = "com.plezy/apk_install"
+  private val SETTINGS_HANDOFF_CHANNEL = "com.plezy/settings_handoff"
   private val ASSISTIVE_TECHNOLOGY_CHANNEL = "com.plezy/assistive_technology"
   private var watchNextPlugin: WatchNextPlugin? = null
   private var carRestrictions: CarRestrictionsMonitor? = null
@@ -847,6 +849,14 @@ class MainActivity : FlutterActivity() {
 
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, APK_INSTALL_CHANNEL).setMethodCallHandler { call, result ->
       apkInstallChannel.handle(call, result)
+    }
+
+    val settingsHandoff = SettingsHandoffClient(applicationContext)
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SETTINGS_HANDOFF_CHANNEL).setMethodCallHandler {
+      call,
+      result,
+      ->
+      settingsHandoff.handle(call, result)
     }
 
     val assistiveChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ASSISTIVE_TECHNOLOGY_CHANNEL)

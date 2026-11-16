@@ -320,6 +320,7 @@ abstract class BaseSharedPreferencesService {
     checkCurrent?.call();
     final n = _listenables[pref.key];
     if (n != null) (n as ValueNotifier<T>).value = read(pref);
+    _bumpStoreRevision();
   }
 
   /// Remove only this override, then publish its resolved default. Migration
@@ -328,7 +329,20 @@ abstract class BaseSharedPreferencesService {
     await pref.removeFrom(this, checkCurrent: checkCurrent);
     checkCurrent?.call();
     pref.refreshListenable(this);
+    _bumpStoreRevision();
   }
+
+  /// Bumped after every [write] and [reset].
+  ///
+  /// For observers that care *that* a preference changed rather than which
+  /// one — the settings auto-export is the case, and watching every pref
+  /// individually to learn the same thing would be absurd. Bulk paths that
+  /// write the store directly (import, repair) deliberately do not bump it:
+  /// they publish through [refreshListenables] instead, and an import should
+  /// not immediately trigger a backup of what it just restored.
+  final ValueNotifier<int> storeRevision = ValueNotifier<int>(0);
+
+  void _bumpStoreRevision() => storeRevision.value++;
 
   /// Lazy per-key [ValueNotifier]. Use with [ValueListenableBuilder] to rebuild
   /// when the value changes. Notifiers live for the app lifetime — do not
