@@ -1195,14 +1195,15 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         // What the overlay shows, captured rather than watched: whatever is
         // wrong is happening now, and none of it survives to be asked about
         // later.
-        FocusableListTile(
-          leading: AppIcon(Symbols.bug_report_rounded, fill: 1, color: tokens(context).textMuted),
-          title: Text(t.videoSettings.reportPlaybackProblem),
-          onTap: () {
-            OverlaySheetController.of(context).close();
-            unawaited(_reportPlaybackProblem());
-          },
-        ),
+        if (logUploadConfigured)
+          FocusableListTile(
+            leading: AppIcon(Symbols.bug_report_rounded, fill: 1, color: tokens(context).textMuted),
+            title: Text(t.videoSettings.reportPlaybackProblem),
+            onTap: () {
+              OverlaySheetController.of(context).close();
+              unawaited(_reportPlaybackProblem());
+            },
+          ),
 
         if (_showDebugDvConversionMode)
           _SettingsMenuItem(

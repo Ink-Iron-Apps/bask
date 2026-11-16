@@ -7,6 +7,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bask/services/log_upload_service.dart';
 import 'package:bask/database/app_database.dart';
 import 'package:bask/database/download_operations.dart';
 import 'package:bask/database/tvos_database_recovery_store.dart';
@@ -62,6 +63,8 @@ final class _OpenTrackingInterceptor extends QueryInterceptor {
 }
 
 void main() {
+  setUp(() => LogUploadEndpoint.setForTesting('https://logs.test.invalid/logs'));
+  tearDown(() => LogUploadEndpoint.setForTesting(null));
   testWidgets('renders a Flutter frame before starting the initialization gate', (tester) async {
     final completion = Completer<int>();
     var bootstrapWasMounted = false;
