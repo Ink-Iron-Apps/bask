@@ -5,7 +5,6 @@ import '../media/ids.dart';
 import 'package:flutter/material.dart';
 
 import '../navigation/profile_navigation_scope.dart';
-import '../services/device_performance.dart';
 import '../services/fullscreen_state_manager.dart';
 import 'package:flutter/services.dart';
 import 'package:plezy/utils/platform_detector.dart';
@@ -133,7 +132,9 @@ const double _tvDetailEpisodeThumbnailScale = 0.72;
 const double _tvDetailActionSize = 46;
 const double _tvDetailActionRailGap = 4;
 const String _tvDetailSeasonsErrorHubId = 'detail_seasons_error';
-const String _tvDetailSeasonHubIdPrefix = 'detail_season_';
+
+/// The show's seasons, as one row of posters that open their own screen.
+const String _tvDetailSeasonsHubId = 'detail_seasons';
 const String _tvDetailExtrasHubId = 'detail_extras';
 const String _tvDetailActorsHubId = 'detail_actors';
 const String _tvDetailActorPersonIdRawKey = 'tvDetailActorPersonId';
@@ -3620,7 +3621,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
               onActiveHubChanged: _handleTvDetailHubChanged,
               onActivateItem: _handleTvDetailRailItemActivated,
               trailingForHub: _tvDetailTrailingState,
-              leadingItemForHub: _tvDetailLeadingItemForHub,
               onRetryHub: _retryTvDetailHub,
               onNavigateUp: _focusTvDetailActionRow,
               onBack: _popMediaDetailIfBackNotSuppressed,
@@ -3630,6 +3630,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
               initialItemId: _tvDetailInitialItemId(metadata),
               episodePosterModeForHub: _tvDetailEpisodePosterModeForHub,
               showTitleImpliedForHub: _isTvDetailEpisodeHub,
+              prefersOwnArtworkForHub: (hub) => hub.id == _tvDetailSeasonsHubId,
             ),
           ),
       ],
@@ -4117,9 +4118,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         TvBrowseRailLayout.railBottomPaddingForScale(scale);
   }
 
-  bool _isTvDetailEpisodeHub(MediaHub hub) {
-    return hub.id.startsWith(_tvDetailSeasonHubIdPrefix) || hub.id == 'detail_episodes';
-  }
+  bool _isTvDetailEpisodeHub(MediaHub hub) => hub.id == 'detail_episodes';
 
   EpisodePosterMode _tvDetailEpisodePosterModeForHub(MediaHub hub) {
     if (_isTvDetailEpisodeHub(hub)) return EpisodePosterMode.episodeThumbnail;
@@ -4143,24 +4142,19 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         ),
       );
     } else if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty) {
-      // Emit a hub for every season so TV users can choose a season before its
-      // episodes are fetched. Extra pages load in-place when focus reaches the
-      // last loaded episode; the trailing slot is reserved for loading/retry.
-      for (var i = 0; i < _seasons.length; i++) {
-        final season = _seasons[i];
-        final state = _seasonEpisodePager.stateFor(season.id);
-        final episodes = i == _selectedSeasonIndex ? _episodes : state.items;
-        final total = state.totalCount > episodes.length ? state.totalCount : (season.leafCount ?? episodes.length);
-        hubs.add(
-          MediaHub(
-            id: '$_tvDetailSeasonHubIdPrefix$i',
-            title: season.title?.isNotEmpty == true ? season.title! : (season.displaySubtitle ?? season.displayTitle),
-            type: 'episode',
-            items: episodes,
-            size: total,
-          ),
-        );
-      }
+      // One row of seasons, not one row per season. Choosing a season opens
+      // its own screen, which is where its episodes are paged, so this row
+      // never waits on an episode fetch and a show's length stops deciding
+      // how far down the rail goes.
+      hubs.add(
+        MediaHub(
+          id: _tvDetailSeasonsHubId,
+          title: t.libraries.groupings.seasons,
+          type: 'season',
+          items: _seasons,
+          size: _seasons.length,
+        ),
+      );
     } else if (_episodes.isNotEmpty) {
       final total = _allEpisodesTotal > _episodes.length ? _allEpisodesTotal : _episodes.length;
       hubs.add(
@@ -4208,7 +4202,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
   String? _tvDetailInitialHubId(MediaItem metadata) {
     if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty) {
-      return '$_tvDetailSeasonHubIdPrefix$_selectedSeasonIndex';
+      return _tvDetailSeasonsHubId;
     }
     if ((metadata.isShow && _showEpisodesDirectly) || metadata.isSeason) {
       return 'detail_episodes';
@@ -4300,12 +4294,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       }
       return;
     }
-    if (hub.id == '$_tvDetailSeasonHubIdPrefix$_selectedSeasonIndex' &&
-        !_seasonEpisodesPageError &&
-        _episodes.isNotEmpty &&
-        item.id == _episodes.last.id) {
-      unawaited(_loadMoreSeasonEpisodes());
-    }
   }
 
   void _handleTvDetailHubChanged(MediaHub hub, int index) {
@@ -4314,70 +4302,17 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       return;
     }
     if (hub.items.isEmpty) _clearTvDetailFocusedEpisode();
-    if (!hub.id.startsWith(_tvDetailSeasonHubIdPrefix)) return;
-    final seasonIndex = int.tryParse(hub.id.substring(_tvDetailSeasonHubIdPrefix.length));
-    if (seasonIndex == null || seasonIndex < 0 || seasonIndex >= _seasons.length) return;
-    final season = _seasons[seasonIndex];
-    final state = _seasonEpisodePager.stateFor(season.id);
-    final hasLoadedState =
-        _seasonEpisodePager.hasState(season.id) && !state.isInitialLoading && !state.initialLoadFailed;
-    if (_selectedSeasonIndex == seasonIndex &&
-        (hasLoadedState || _episodes.isNotEmpty || _isLoadingSeasonEpisodes || _seasonEpisodesFirstPageError)) {
-      return;
-    }
-
-    if (hasLoadedState) {
-      _seasonEpisodePager.completeFirstPage(season.id, state.items, state.totalCount);
-      setStateIfMounted(() {
-        _selectedSeasonIndex = seasonIndex;
-        _episodes = List.of(_seasonEpisodePager.stateFor(season.id).items);
-      });
-      unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
-      _pruneDistantSeasonPages(seasonIndex);
-      return;
-    }
-
-    setStateIfMounted(() {
-      _selectedSeasonIndex = seasonIndex;
-      _episodes = const <MediaItem>[];
-      _seasonEpisodePager.markFirstPageLoading(season.id);
-    });
-    unawaited(_fetchSeasonEpisodes(seasonIndex));
-    unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
-    _pruneDistantSeasonPages(seasonIndex);
-  }
-
-  /// Low-end TV only: keep episode pages for the selected season ±1 (the
-  /// prefetch window) and drop the rest. Visited 200-item pages otherwise
-  /// accumulate for the screen's lifetime — irrelevant for a 3-season show,
-  /// tens of MB of retained heap for a 30-season one.
-  void _pruneDistantSeasonPages(int seasonIndex) {
-    if (!DevicePerformance.isLowEndHardware || !PlatformDetector.isTV()) return;
-    final keep = <String>{
-      for (var i = seasonIndex - 1; i <= seasonIndex + 1; i++)
-        if (i >= 0 && i < _seasons.length) _seasons[i].id,
-    };
-    _seasonEpisodePager.retainOnly(keep);
   }
 
   /// What the rail should show in a hub's trailing slot: a spinner while the
-  /// selected season page loads or a retry tile if it failed. Episode hubs do
-  /// not use the legacy "View All" slot; they page in-place on focus.
+  /// episode page loads or a retry tile if it failed. The episode hub does
+  /// not use the legacy "View All" slot; it pages in-place on focus, and the
+  /// seasons row is complete the moment the seasons themselves have loaded.
   TvRailTrailing _tvDetailTrailingState(MediaHub hub) {
     if (hub.id == _tvDetailSeasonsErrorHubId) return TvRailTrailing.error;
-    final isFlatten = hub.id == 'detail_episodes';
-    final isSeason = hub.id.startsWith(_tvDetailSeasonHubIdPrefix);
-    if (!isFlatten && !isSeason) return hub.more ? TvRailTrailing.viewAll : TvRailTrailing.none;
-    if (isFlatten) {
-      if (_allEpisodesPageError) return TvRailTrailing.error;
-      if (_isLoadingEpisodes || _isLoadingAllEpisodes) return TvRailTrailing.loading;
-      return TvRailTrailing.none;
-    }
-    final isSelectedSeason = hub.id == '$_tvDetailSeasonHubIdPrefix$_selectedSeasonIndex';
-    if (isSelectedSeason) {
-      if (_seasonEpisodesFirstPageError || _seasonEpisodesPageError) return TvRailTrailing.error;
-      if (_isLoadingSeasonEpisodes || _isLoadingMoreSeasonEpisodes) return TvRailTrailing.loading;
-    }
+    if (hub.id != 'detail_episodes') return hub.more ? TvRailTrailing.viewAll : TvRailTrailing.none;
+    if (_allEpisodesPageError) return TvRailTrailing.error;
+    if (_isLoadingEpisodes || _isLoadingAllEpisodes) return TvRailTrailing.loading;
     return TvRailTrailing.none;
   }
 
@@ -4390,30 +4325,11 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       unawaited(_episodes.isEmpty ? _fetchAllEpisodes() : _loadMoreAllEpisodes());
       return;
     }
-    if (hub.id.startsWith(_tvDetailSeasonHubIdPrefix)) {
-      final seasonIndex = int.tryParse(hub.id.substring(_tvDetailSeasonHubIdPrefix.length));
-      if (seasonIndex != null && seasonIndex >= 0 && seasonIndex < _seasons.length) {
-        final state = _seasonEpisodePager.stateFor(_seasons[seasonIndex].id);
-        unawaited(state.items.isNotEmpty ? _loadMoreSeasonEpisodes() : _fetchSeasonEpisodes(seasonIndex));
-      }
-    }
-  }
-
-  /// The season behind a TV detail episode hub, surfaced as the rail's leading
-  /// options slot so D-pad users can reach season actions (mark season
-  /// watched/unwatched, download, delete) that mobile exposes on the season
-  /// tabs (#2156). Non-season hubs (flatten episodes, actors, extras, related)
-  /// have no leading slot.
-  MediaItem? _tvDetailLeadingItemForHub(MediaHub hub) {
-    if (!hub.id.startsWith(_tvDetailSeasonHubIdPrefix)) return null;
-    final seasonIndex = int.tryParse(hub.id.substring(_tvDetailSeasonHubIdPrefix.length));
-    if (seasonIndex == null || seasonIndex < 0 || seasonIndex >= _seasons.length) return null;
-    return _seasons[seasonIndex];
   }
 
   IconData _getTvDetailHubIcon(MediaHub hub, int index) {
     if (hub.id == _tvDetailSeasonsErrorHubId) return Symbols.error_outline_rounded;
-    if (hub.id.startsWith(_tvDetailSeasonHubIdPrefix)) return Symbols.tv_rounded;
+    if (hub.id == _tvDetailSeasonsHubId) return Symbols.video_library_rounded;
     if (hub.id == 'detail_episodes') return Symbols.tv_rounded;
     if (hub.id == _tvDetailExtrasHubId) return Symbols.theaters_rounded;
     if (hub.id == _tvDetailActorsHubId) return Symbols.group_rounded;
