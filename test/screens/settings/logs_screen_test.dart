@@ -21,6 +21,8 @@ import 'package:bask/utils/platform_detector.dart';
 import 'package:bask/widgets/app_bar_back_button.dart';
 
 void main() {
+  setUp(() => LogUploadEndpoint.setForTesting('https://logs.test.invalid/logs'));
+  tearDown(() => LogUploadEndpoint.setForTesting(null));
   setUpAll(() {
     LocaleSettings.setLocaleSync(AppLocale.en);
   });
@@ -140,7 +142,7 @@ void main() {
     expect(find.text(capability, findRichText: true), findsOneWidget);
     expect(utf8.encode(uploadedBody!).length, lessThanOrEqualTo(maxLogUploadBytes));
     expect(uploadedRequest!.method, 'POST');
-    expect(uploadedRequest!.url, Uri.parse('https://ice.plezy.app/logs'));
+    expect(uploadedRequest!.url, Uri.parse('https://logs.test.invalid/logs'));
     final contentType = uploadedRequest!.headers.entries
         .singleWhere((entry) => entry.key.toLowerCase() == 'content-type')
         .value;

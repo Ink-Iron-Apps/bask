@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bask/services/log_upload_service.dart';
 import 'package:bask/i18n/strings.g.dart';
 import 'package:bask/services/app_exit_service.dart';
 import 'package:bask/services/startup_diagnostics.dart';
@@ -51,6 +52,8 @@ bool _hasFocus(WidgetTester tester, Key key) =>
     false;
 
 void main() {
+  setUp(() => LogUploadEndpoint.setForTesting('https://logs.test.invalid/logs'));
+  tearDown(() => LogUploadEndpoint.setForTesting(null));
   setUpAll(() => LocaleSettings.setLocaleSync(AppLocale.en));
 
   tearDown(() => PlatformDetector.debugSetIsDesktopOSOverride(null));
@@ -99,6 +102,20 @@ void main() {
     expect(find.byKey(startupFailureCopyKey), findsOneWidget);
     expect(find.byKey(startupFailureUploadKey), findsOneWidget);
     expect(find.text(t.startup.restartRequiredBody), findsOneWidget);
+  });
+
+  testWidgets('a build with no log endpoint offers no upload at all', (tester) async {
+    // Anchor: a self-hosted build ships without a log relay. Offering an
+    // upload that can only throw would strand a viewer who is already
+    // looking at a failure screen, so the control is absent rather than
+    // present-and-doomed. Copy stays, because it always works.
+    LogUploadEndpoint.setForTesting('');
+
+    await _pumpView(tester, restartRequired: false);
+
+    expect(find.byKey(startupFailureUploadKey), findsNothing);
+    expect(find.text(t.startup.uploadDetails), findsNothing);
+    expect(find.byKey(startupFailureCopyKey), findsOneWidget);
   });
 
   testWidgets('the desktop quit button asks the platform to exit', (tester) async {
