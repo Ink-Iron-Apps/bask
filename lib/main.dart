@@ -45,6 +45,7 @@ import 'services/video_decode_capabilities.dart';
 import 'services/macos_window_service.dart';
 import 'services/native_window_service.dart';
 import 'services/fullscreen_state_manager.dart';
+import 'services/settings_auto_export_service.dart';
 import 'services/settings_service.dart';
 import 'services/agent_control_service.dart';
 import 'widgets/agent_control_scope.dart';
@@ -1300,6 +1301,9 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
   /// Periodic RSS watchdog timer (desktop + Android).
   Timer? _memoryCheckTimer;
 
+  /// Keeps a recent settings backup on disk. Null until the first frame.
+  SettingsAutoExportService? _settingsAutoExport;
+
   /// Last watchdog eviction, for the cooldown; RSS at that moment so a
   /// still-climbing RSS can re-evict inside the cooldown window.
   DateTime _lastRssEviction = DateTime(0);
@@ -1314,6 +1318,14 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
     // its timer only after the first app frame has completed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _startRssWatchdog();
+    });
+
+    // A settings backup is cheap and only interesting after the app has
+    // drawn, so it waits for the first frame like the RSS watchdog does.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _settingsAutoExport = SettingsAutoExportService(settings: SettingsService.instance);
+      unawaited(_settingsAutoExport!.start());
     });
 
     _serverManager = MultiServerManager();
@@ -1384,6 +1396,7 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
     _removeConnectivitySyncListener();
     _memoryCheckTimer?.cancel();
 
+    _settingsAutoExport?.dispose();
     _libraryEventService.dispose();
     _downloadManager.dispose();
     // Quitting straight from the player is a real stop: the trackers that own
@@ -1412,6 +1425,7 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
     _removeConnectivitySyncListener();
     _memoryCheckTimer?.cancel();
     _appLifecycleListener.dispose();
+    _settingsAutoExport?.dispose();
     if (_shutdownFuture == null) {
       _libraryEventService.dispose();
       _downloadManager.dispose();

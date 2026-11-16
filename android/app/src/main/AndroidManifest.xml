@@ -94,6 +94,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
         </provider>
+        <!-- Hands this install's settings to a successor app after a rename.
+             Exported because the caller is a different applicationId and so a
+             different app; the provider itself refuses any caller not signed
+             with the same key, and serves only the automatic settings-only
+             backups, never a manual export that may hold credentials. -->
+        <provider
+            android:name=".handoff.SettingsHandoffProvider"
+            android:authorities="${applicationId}.settingshandoff"
+            android:exported="true"
+            android:grantUriPermissions="false" />
         <!-- Launcher shelf artwork. Not exported: readers reach it only through the
              per-URI read grants issued to CATEGORY_HOME packages by WatchNextProvider. -->
         <provider

@@ -851,6 +851,30 @@ class Translations$settings$en {
 	/// en: 'Restore preferences from a file'
 	String get importSettingsDescription => 'Restore preferences from a file';
 
+	/// en: 'Keep a Settings Backup'
+	String get autoExportSettings => 'Keep a Settings Backup';
+
+	/// en: 'Quietly keep a recent copy of your settings on this device, so a reinstall has something to restore from. Settings only, never sign-ins.'
+	String get autoExportSettingsDescription => 'Quietly keep a recent copy of your settings on this device, so a reinstall has something to restore from. Settings only, never sign-ins.';
+
+	/// en: 'Restore your settings?'
+	String get restoreBackupFoundTitle => 'Restore your settings?';
+
+	/// en: 'A settings backup from this device was found, saved ${when}. Restoring it brings back your preferences; starting fresh leaves them at their defaults.'
+	String restoreBackupFoundMessage({required Object when}) => 'A settings backup from this device was found, saved ${when}. Restoring it brings back your preferences; starting fresh leaves them at their defaults.';
+
+	/// en: 'Restore'
+	String get restoreBackupConfirm => 'Restore';
+
+	/// en: 'Start fresh'
+	String get restoreBackupDecline => 'Start fresh';
+
+	/// en: 'Bring your settings across?'
+	String get restoreHandoffFoundTitle => 'Bring your settings across?';
+
+	/// en: 'A previous version of this app is still installed and is holding your settings. Bringing them across copies your preferences; starting fresh leaves them at their defaults. Sign-ins do not travel this way.'
+	String get restoreHandoffFoundMessage => 'A previous version of this app is still installed and is holding your settings. Bringing them across copies your preferences; starting fresh leaves them at their defaults. Sign-ins do not travel this way.';
+
 	/// en: 'This will replace your current settings. Continue?'
 	String get importSettingsConfirm => 'This will replace your current settings. Continue?';
 
@@ -1411,6 +1435,54 @@ class Translations$settings$en {
 
 	/// en: 'Export Plezy settings'
 	String get exportDialogTitle => 'Export Plezy settings';
+
+	/// en: 'Settings saved to ${path}'
+	String exportSettingsSavedTo({required Object path}) => 'Settings saved to ${path}';
+
+	/// en: 'Choose an export'
+	String get importSettingsChooseFile => 'Choose an export';
+
+	/// en: 'No export files found. Export settings here first, or copy a .json export into ${path}'
+	String importSettingsNoLocalFiles({required Object path}) => 'No export files found. Export settings here first, or copy a .json export into ${path}';
+
+	/// en: 'Include sign-ins?'
+	String get exportIncludeSignIns => 'Include sign-ins?';
+
+	/// en: 'Your servers and tracker sign-ins can travel with this file so the next install is already signed in. They are encrypted with a passphrase you choose, and the file is only as safe as that passphrase. Settings alone need no passphrase.'
+	String get exportIncludeSignInsMessage => 'Your servers and tracker sign-ins can travel with this file so the next install is already signed in. They are encrypted with a passphrase you choose, and the file is only as safe as that passphrase. Settings alone need no passphrase.';
+
+	/// en: 'Include sign-ins'
+	String get exportIncludeSignInsConfirm => 'Include sign-ins';
+
+	/// en: 'Settings only'
+	String get exportSettingsOnly => 'Settings only';
+
+	/// en: 'Passphrase'
+	String get credentialPassphrase => 'Passphrase';
+
+	/// en: 'Protect the sign-ins'
+	String get credentialPassphraseExportTitle => 'Protect the sign-ins';
+
+	/// en: 'This file has sign-ins'
+	String get credentialPassphraseImportTitle => 'This file has sign-ins';
+
+	/// en: 'Passphrase used to export it'
+	String get credentialPassphraseImportLabel => 'Passphrase used to export it';
+
+	/// en: 'Use at least 8 characters'
+	String get credentialPassphraseTooShort => 'Use at least 8 characters';
+
+	/// en: 'That passphrase doesn't open the sign-ins in this file'
+	String get importCredentialsWrongPassphrase => 'That passphrase doesn\'t open the sign-ins in this file';
+
+	/// en: 'The sign-ins in this file couldn't be read'
+	String get importCredentialsDamaged => 'The sign-ins in this file couldn\'t be read';
+
+	/// en: 'Settings imported. The sign-ins in this file were left alone'
+	String get importCredentialsSkipped => 'Settings imported. The sign-ins in this file were left alone';
+
+	/// en: 'Settings and sign-ins imported. Restart to finish signing in'
+	String get importCredentialsSuccess => 'Settings and sign-ins imported. Restart to finish signing in';
 
 	/// en: 'Buffer to storage'
 	String get diskCache => 'Buffer to storage';
@@ -7969,6 +8041,14 @@ extension on Translations {
 			'settings.exportSettingsSuccess' => 'Settings exported',
 			'settings.importSettings' => 'Import Settings',
 			'settings.importSettingsDescription' => 'Restore preferences from a file',
+			'settings.autoExportSettings' => 'Keep a Settings Backup',
+			'settings.autoExportSettingsDescription' => 'Quietly keep a recent copy of your settings on this device, so a reinstall has something to restore from. Settings only, never sign-ins.',
+			'settings.restoreBackupFoundTitle' => 'Restore your settings?',
+			'settings.restoreBackupFoundMessage' => ({required Object when}) => 'A settings backup from this device was found, saved ${when}. Restoring it brings back your preferences; starting fresh leaves them at their defaults.',
+			'settings.restoreBackupConfirm' => 'Restore',
+			'settings.restoreBackupDecline' => 'Start fresh',
+			'settings.restoreHandoffFoundTitle' => 'Bring your settings across?',
+			'settings.restoreHandoffFoundMessage' => 'A previous version of this app is still installed and is holding your settings. Bringing them across copies your preferences; starting fresh leaves them at their defaults. Sign-ins do not travel this way.',
 			'settings.importSettingsConfirm' => 'This will replace your current settings. Continue?',
 			'settings.importSettingsSuccess' => 'Settings imported',
 			'settings.importSettingsInvalidFile' => 'This file isn\'t a valid Plezy settings export',
@@ -8156,6 +8236,22 @@ extension on Translations {
 			'settings.playerScopeLibrary' => 'Per library',
 			'settings.playerScopeTitle' => 'Per show or movie',
 			'settings.exportDialogTitle' => 'Export Plezy settings',
+			'settings.exportSettingsSavedTo' => ({required Object path}) => 'Settings saved to ${path}',
+			'settings.importSettingsChooseFile' => 'Choose an export',
+			'settings.importSettingsNoLocalFiles' => ({required Object path}) => 'No export files found. Export settings here first, or copy a .json export into ${path}',
+			'settings.exportIncludeSignIns' => 'Include sign-ins?',
+			'settings.exportIncludeSignInsMessage' => 'Your servers and tracker sign-ins can travel with this file so the next install is already signed in. They are encrypted with a passphrase you choose, and the file is only as safe as that passphrase. Settings alone need no passphrase.',
+			'settings.exportIncludeSignInsConfirm' => 'Include sign-ins',
+			'settings.exportSettingsOnly' => 'Settings only',
+			'settings.credentialPassphrase' => 'Passphrase',
+			'settings.credentialPassphraseExportTitle' => 'Protect the sign-ins',
+			'settings.credentialPassphraseImportTitle' => 'This file has sign-ins',
+			'settings.credentialPassphraseImportLabel' => 'Passphrase used to export it',
+			'settings.credentialPassphraseTooShort' => 'Use at least 8 characters',
+			'settings.importCredentialsWrongPassphrase' => 'That passphrase doesn\'t open the sign-ins in this file',
+			'settings.importCredentialsDamaged' => 'The sign-ins in this file couldn\'t be read',
+			'settings.importCredentialsSkipped' => 'Settings imported. The sign-ins in this file were left alone',
+			'settings.importCredentialsSuccess' => 'Settings and sign-ins imported. Restart to finish signing in',
 			'settings.diskCache' => 'Buffer to storage',
 			'settings.diskCacheOff' => 'Memory only',
 			'settings.diskCacheGB' => ({required Object size}) => '${size} GB on disk',
@@ -8201,6 +8297,8 @@ extension on Translations {
 			'hotkeys.actions.playPause' => 'Play/Pause',
 			'hotkeys.actions.volumeUp' => 'Volume Up',
 			'hotkeys.actions.volumeDown' => 'Volume Down',
+			_ => null,
+		} ?? switch (path) {
 			'hotkeys.actions.seekForward' => ({required Object seconds}) => 'Seek Forward (${seconds}s)',
 			'hotkeys.actions.seekBackward' => ({required Object seconds}) => 'Seek Backward (${seconds}s)',
 			'hotkeys.actions.fullscreenToggle' => 'Toggle Fullscreen',
@@ -8225,8 +8323,6 @@ extension on Translations {
 			'hotkeys.actions.screenshot' => 'Take Screenshot',
 			'hotkeys.actions.frameStepForward' => 'Step Forward One Frame',
 			'hotkeys.actions.frameStepBackward' => 'Step Back One Frame',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.title' => 'File Info',
 			'fileInfo.overview' => 'Overview',
 			'fileInfo.video' => 'Video',
@@ -8715,6 +8811,8 @@ extension on Translations {
 			'accountPreferences.unavailable' => 'Can\'t reach this account',
 			'accountPreferences.loadFailed' => 'Couldn\'t load these preferences',
 			'accountPreferences.noPreference' => 'No preference',
+			_ => null,
+		} ?? switch (path) {
 			'accountPreferences.notSet' => 'Not set',
 			'accountPreferences.groups.audioAndSubtitles' => 'Audio & subtitles',
 			'accountPreferences.groups.libraryDisplay' => 'Library',
@@ -8739,8 +8837,6 @@ extension on Translations {
 			'accountPreferences.subtitleAccessibilityOptions.preferSdh' => 'Prefer SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.onlySdh' => 'Only SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.onlyNonSdh' => 'Only non-SDH subtitles',
-			_ => null,
-		} ?? switch (path) {
 			'accountPreferences.forcedSubtitles' => 'Forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.preferNonForced' => 'Prefer non-forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.preferForced' => 'Prefer forced subtitles',
@@ -9229,6 +9325,8 @@ extension on Translations {
 			'music.nowPlaying' => 'Now Playing',
 			'music.playingFrom' => ({required Object title}) => 'Playing from ${title}',
 			'music.queue' => 'Queue',
+			_ => null,
+		} ?? switch (path) {
 			'music.clearQueue' => 'Clear queue',
 			'music.lyrics' => 'Lyrics',
 			'music.noLyrics' => 'No lyrics available',
@@ -9253,8 +9351,6 @@ extension on Translations {
 			'watchTogether.createSession' => 'Create Session',
 			'watchTogether.creating' => 'Creating...',
 			'watchTogether.joinSession' => 'Join Session',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.joining' => 'Joining...',
 			'watchTogether.controlMode' => 'Control Mode',
 			'watchTogether.controlModeQuestion' => 'Who can control playback?',
@@ -9743,6 +9839,8 @@ extension on Translations {
 			'metadataEdit.country' => 'Country',
 			'metadataEdit.collection' => 'Collection',
 			'metadataEdit.label' => 'Label',
+			_ => null,
+		} ?? switch (path) {
 			'metadataEdit.style' => 'Style',
 			'metadataEdit.mood' => 'Mood',
 			'matchScreen.match' => 'Match...',
@@ -9767,8 +9865,6 @@ extension on Translations {
 			'trakt.disconnectConfirmBody' => 'Plezy will stop sending events to Trakt. You can reconnect any time.',
 			'trakt.scrobble' => 'Real-time scrobbling',
 			'trakt.scrobbleDescription' => 'Send play, pause, and stop events to Trakt during playback.',
-			_ => null,
-		} ?? switch (path) {
 			'trakt.watchedSync' => 'Sync watched status',
 			'trakt.watchedSyncDescription' => 'When you mark items as watched in Plezy, they are also marked as watched on Trakt.',
 			'seerr.title' => 'Seerr',
