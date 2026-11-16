@@ -964,7 +964,7 @@ class PlexServer {
   /// The literal address a plex.direct hostname stands for, as a plain HTTP
   /// URL, or `null` when [connection] is not a plex.direct endpoint.
   ///
-  /// `100-100-1-10.<hash>.plex.direct` resolves to `100.100.1.10`; the name
+  /// `100-64-0-10.<hash>.plex.direct` resolves to `100.64.0.10`; the name
   /// exists so Plex can present a certificate for an address, and it carries
   /// the address in its first label. HTTP rather than HTTPS: the certificate
   /// is issued for the name, so requesting the address directly cannot present

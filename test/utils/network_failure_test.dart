@@ -6,7 +6,7 @@ void main() {
     test('recognises the Android resolver failures downloads actually report', () {
       expect(
         isNetworkFailureMessage(
-          'Unable to resolve host "100-100-1-10.abc.plex.direct": No address associated with hostname',
+          'Unable to resolve host "100-64-0-10.abc.plex.direct": No address associated with hostname',
         ),
         isTrue,
       );
