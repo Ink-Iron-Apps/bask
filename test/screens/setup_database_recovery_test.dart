@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/database/tvos_database_recovery_store.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/main.dart';
-import 'package:plezy/screens/auth_screen.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
+import 'package:bask/database/tvos_database_recovery_store.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/main.dart';
+import 'package:bask/screens/auth_screen.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
 
 import '../test_helpers/prefs.dart';
 

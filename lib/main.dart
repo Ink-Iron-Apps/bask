@@ -147,7 +147,7 @@ void _registerTvosPlatformPlugins() {
 }
 
 void main() {
-  final binding = PlezyWidgetsBinding.ensureInitialized();
+  final binding = BaskWidgetsBinding.ensureInitialized();
   // Before anything resolves a path. The database, preferences and every
   // cache read theirs once and keep them, so a portable copy that decided
   // late would already have written to %APPDATA%.
@@ -290,7 +290,7 @@ Future<_StartupDependencies> _initializeApplication() async {
   if (_enableSentry) {
     // Crash reporting is observability: it must never veto the launch it
     // exists to report on. `Sentry.init` runs its integrations eagerly, so an
-    // integration throwing used to fail the gate before any Plezy code ran.
+    // integration throwing used to fail the gate before any Bask code ran.
     //
     // Deliberately no `appRunner`. On every non-web platform `Sentry.init`
     // reduces it to `await appRunner()` after the integrations — error capture
@@ -1077,7 +1077,7 @@ Future<void> _logEnvironmentDiagnostics() async {
     await Future.sync(() => Sentry.configureScope((scope) => scope.setTag('renderer', rendererName ?? 'unknown')));
   }
   appLogger.i(
-    'Plezy v${packageInfo.version}+${packageInfo.buildNumber}$commitSuffix$renderer'
+    'Bask v${packageInfo.version}+${packageInfo.buildNumber}$commitSuffix$renderer'
     ' [effects: ${DevicePerformance.describeSync()}]',
   );
   appLogger.i('Display: ${DevicePerformance.describeDisplay()}');
@@ -2473,7 +2473,7 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SvgPicture.asset('assets/plexy_adaptive_foreground.svg', width: 160, height: 160),
+                  SvgPicture.asset('assets/bask_adaptive_foreground.svg', width: 160, height: 160),
                   _buildStatusText(context),
                   const SizedBox(height: 16),
                   Center(
@@ -2496,7 +2496,7 @@ class _SetupScreenState extends State<SetupScreen> with MountedSetStateMixin {
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Stack(
         children: [
-          Center(child: SvgPicture.asset('assets/plexy_adaptive_foreground.svg', width: 288, height: 288)),
+          Center(child: SvgPicture.asset('assets/bask_adaptive_foreground.svg', width: 288, height: 288)),
           Positioned(left: 0, right: 0, bottom: height * 0.5 - 170, child: _buildStatusText(context)),
           Positioned(
             left: 0,

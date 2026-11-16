@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/connection/connection.dart';
-import 'package:plezy/models/plex/plex_home_user.dart';
-import 'package:plezy/profiles/profile.dart';
-import 'package:plezy/profiles/profile_connection.dart';
-import 'package:plezy/profiles/profile_merge.dart';
-import 'package:plezy/services/storage_service.dart';
+import 'package:bask/connection/connection.dart';
+import 'package:bask/models/plex/plex_home_user.dart';
+import 'package:bask/profiles/profile.dart';
+import 'package:bask/profiles/profile_connection.dart';
+import 'package:bask/profiles/profile_merge.dart';
+import 'package:bask/services/storage_service.dart';
 
 import '../test_helpers/prefs.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/video_decode_capabilities.dart';
-import 'package:plezy/utils/device_channel.dart';
+import 'package:bask/services/video_decode_capabilities.dart';
+import 'package:bask/utils/device_channel.dart';
 
 void main() {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();

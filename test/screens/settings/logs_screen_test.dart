@@ -9,16 +9,16 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:plezy/focus/focusable_action_bar.dart';
-import 'package:plezy/focus/input_mode_tracker.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/screens/settings/logs_screen.dart';
-import 'package:plezy/services/log_upload_service.dart';
-import 'package:plezy/services/startup_diagnostics.dart';
-import 'package:plezy/utils/app_logger.dart';
-import 'package:plezy/utils/media_server_http_client.dart';
-import 'package:plezy/utils/platform_detector.dart';
-import 'package:plezy/widgets/app_bar_back_button.dart';
+import 'package:bask/focus/focusable_action_bar.dart';
+import 'package:bask/focus/input_mode_tracker.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/screens/settings/logs_screen.dart';
+import 'package:bask/services/log_upload_service.dart';
+import 'package:bask/services/startup_diagnostics.dart';
+import 'package:bask/utils/app_logger.dart';
+import 'package:bask/utils/media_server_http_client.dart';
+import 'package:bask/utils/platform_detector.dart';
+import 'package:bask/widgets/app_bar_back_button.dart';
 
 void main() {
   setUpAll(() {
@@ -33,7 +33,7 @@ void main() {
     MemoryLogOutput.clearLogs();
   });
   test('log upload payload preserves the header and newest complete lines', () {
-    const header = 'Plezy test device\n---\n';
+    const header = 'Bask test device\n---\n';
     const logs = 'oldest line that should be removed\nmiddle line that should be removed\nnewest 🚀 line';
 
     final payload = constrainLogUploadPayload(header: header, logs: logs, maxBytes: 52);
@@ -58,7 +58,7 @@ void main() {
     String? clipboardText;
 
     PackageInfo.setMockInitialValues(
-      appName: 'Plezy',
+      appName: 'Bask',
       packageName: 'com.plezy.test',
       version: '1.2.3',
       buildNumber: '45',
@@ -170,7 +170,7 @@ void main() {
 
     Future<void> pumpLogs(WidgetTester tester) async {
       PackageInfo.setMockInitialValues(
-        appName: 'Plezy',
+        appName: 'Bask',
         packageName: 'com.plezy.test',
         version: '2.11.0',
         buildNumber: '124',
@@ -236,7 +236,7 @@ void main() {
 
     setUp(() {
       PackageInfo.setMockInitialValues(
-        appName: 'Plezy',
+        appName: 'Bask',
         packageName: 'com.plezy.test',
         version: '1.2.3',
         buildNumber: '45',
@@ -380,7 +380,7 @@ void main() {
       await tester.pump();
 
       expect(clipboardText, isNotNull);
-      expect(clipboardText, startsWith('Plezy'));
+      expect(clipboardText, startsWith('Bask'));
       expect(clipboardText, matches(RegExp(r'---\n\[')));
       expect(clipboardText, matches(RegExp(r'newer-row\n\[')));
       expect(clipboardText, endsWith('older-row'));
@@ -403,7 +403,7 @@ void main() {
 
       await pumpLogs(tester);
       await pumpSelectionRegistration(tester);
-      final header = find.textContaining('Plezy', findRichText: true);
+      final header = find.textContaining('Bask', findRichText: true);
       final newerRow = find.textContaining('newer-row', findRichText: true);
       final gesture = await tester.startGesture(
         tester.getTopLeft(header) + const Offset(1, 6),
@@ -441,7 +441,7 @@ void main() {
       await TvDetectionService.getInstance(forceTv: true);
       TvDetectionService.setForceTVSync(true);
       PackageInfo.setMockInitialValues(
-        appName: 'Plezy',
+        appName: 'Bask',
         packageName: 'com.plezy.test',
         version: '1.2.3',
         buildNumber: '45',

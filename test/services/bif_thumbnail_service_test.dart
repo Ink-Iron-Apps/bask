@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/bif_thumbnail_service.dart';
+import 'package:bask/services/bif_thumbnail_service.dart';
 
 // BIF parser coverage feeds hand-crafted bytes through the load callback.
 // Size-limit and download-failure behavior are intentionally left to

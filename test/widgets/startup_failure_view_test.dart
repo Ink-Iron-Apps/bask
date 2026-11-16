@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/services/app_exit_service.dart';
-import 'package:plezy/services/startup_diagnostics.dart';
-import 'package:plezy/utils/platform_detector.dart';
-import 'package:plezy/widgets/startup_failure_view.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/services/app_exit_service.dart';
+import 'package:bask/services/startup_diagnostics.dart';
+import 'package:bask/utils/platform_detector.dart';
+import 'package:bask/widgets/startup_failure_view.dart';
 
 StartupFailureRecord _record() => StartupFailureRecord(
   phase: StartupPhase.preferences,

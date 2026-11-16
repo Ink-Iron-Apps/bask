@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'dart:convert';
-import 'package:plezy/media/ids.dart';
+import 'package:bask/media/ids.dart';
 import 'dart:io';
 
 import 'package:background_downloader/background_downloader.dart';
@@ -11,27 +11,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/database/download_operations.dart';
-import 'package:plezy/exceptions/media_server_exceptions.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/media/download_resolution.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_source_info.dart';
-import 'package:plezy/media/media_server_client.dart';
-import 'package:plezy/models/download_models.dart';
-import 'package:plezy/services/download_artwork_helpers.dart';
-import 'package:plezy/services/download_artwork_service.dart';
-import 'package:plezy/services/download_manager_service.dart';
-import 'package:plezy/services/download_storage_service.dart';
-import 'package:plezy/services/jellyfin_api_cache.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/saf_storage_service.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/utils/media_server_http_client.dart';
-import 'package:plezy/utils/active_client_scope.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/database/download_operations.dart';
+import 'package:bask/exceptions/media_server_exceptions.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/media/download_resolution.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_source_info.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/models/download_models.dart';
+import 'package:bask/services/download_artwork_helpers.dart';
+import 'package:bask/services/download_artwork_service.dart';
+import 'package:bask/services/download_manager_service.dart';
+import 'package:bask/services/download_storage_service.dart';
+import 'package:bask/services/jellyfin_api_cache.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/saf_storage_service.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/utils/media_server_http_client.dart';
+import 'package:bask/utils/active_client_scope.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
 
 import '../test_helpers/download_fixtures.dart';
@@ -155,14 +155,14 @@ void main() {
     });
 
     test('accepts a directory inside the configured custom download root', () {
-      final task = _rootTask('t', 'srv:item-1', '/Volumes/External/Plezy/Movies/Arrival (2016)');
+      final task = _rootTask('t', 'srv:item-1', '/Volumes/External/Bask/Movies/Arrival (2016)');
 
       expect(
         isRelocatedRootTaskDirectory(
           task: task,
           rootBasePath: rootBase,
           baseAppDirPath: baseAppDir,
-          customRootPath: '/Volumes/External/Plezy',
+          customRootPath: '/Volumes/External/Bask',
         ),
         isFalse,
       );
@@ -173,7 +173,7 @@ void main() {
         taskId: 't',
         url: 'https://example.test/video.mp4',
         filename: 'video.mp4',
-        directoryUri: Uri.parse('content://com.android.externalstorage.documents/tree/usb%3APlezy'),
+        directoryUri: Uri.parse('content://com.android.externalstorage.documents/tree/usb%3ABask'),
         metaData: 'srv:item-1',
       );
 

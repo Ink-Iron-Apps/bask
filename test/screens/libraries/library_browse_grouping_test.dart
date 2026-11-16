@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_library.dart';
-import 'package:plezy/screens/libraries/library_browse_grouping.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_library.dart';
+import 'package:bask/screens/libraries/library_browse_grouping.dart';
 
 MediaLibrary _library({required MediaKind kind, bool isShared = false}) {
   return MediaLibrary(

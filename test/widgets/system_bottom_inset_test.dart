@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/focus/focusable_action_bar.dart';
-import 'package:plezy/mixins/grid_focus_node_mixin.dart';
-import 'package:plezy/screens/focusable_detail_screen_mixin.dart';
-import 'package:plezy/utils/platform_detector.dart';
-import 'package:plezy/widgets/focused_scroll_scaffold.dart';
-import 'package:plezy/widgets/system_bottom_inset.dart';
+import 'package:bask/focus/focusable_action_bar.dart';
+import 'package:bask/mixins/grid_focus_node_mixin.dart';
+import 'package:bask/screens/focusable_detail_screen_mixin.dart';
+import 'package:bask/utils/platform_detector.dart';
+import 'package:bask/widgets/focused_scroll_scaffold.dart';
+import 'package:bask/widgets/system_bottom_inset.dart';
 
 /// Stand-in for the Android 3-button navigation bar (#1766).
 const _navBarInset = 48.0;

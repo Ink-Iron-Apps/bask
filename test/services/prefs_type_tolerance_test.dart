@@ -1,16 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/main.dart';
-import 'package:plezy/profiles/profile.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
-import 'package:plezy/services/credential_vault.dart';
-import 'package:plezy/services/prefs_recovery.dart';
-import 'package:plezy/services/seerr/seerr_session_store.dart';
-import 'package:plezy/services/sensitive_prefs.dart';
-import 'package:plezy/services/startup_diagnostics.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/services/storage_service.dart';
-import 'package:plezy/services/trackers/tracker_account_store.dart';
-import 'package:plezy/services/trackers/tracker_constants.dart';
+import 'package:bask/main.dart';
+import 'package:bask/profiles/profile.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/credential_vault.dart';
+import 'package:bask/services/prefs_recovery.dart';
+import 'package:bask/services/seerr/seerr_session_store.dart';
+import 'package:bask/services/sensitive_prefs.dart';
+import 'package:bask/services/startup_diagnostics.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/services/storage_service.dart';
+import 'package:bask/services/trackers/tracker_account_store.dart';
+import 'package:bask/services/trackers/tracker_constants.dart';
 
 import '../test_helpers/prefs.dart';
 

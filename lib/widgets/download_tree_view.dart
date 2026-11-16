@@ -2,7 +2,7 @@ import '../utils/formatters.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../media/ids.dart';
-import 'package:plezy/widgets/app_icon.dart';
+import 'package:bask/widgets/app_icon.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../focus/focusable_wrapper.dart';
 import '../i18n/strings.g.dart';

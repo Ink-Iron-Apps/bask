@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/widgets/tv_color_picker.dart';
-import 'package:plezy/widgets/tv_number_spinner.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/widgets/tv_color_picker.dart';
+import 'package:bask/widgets/tv_number_spinner.dart';
 
 void main() {
   setUp(() async {

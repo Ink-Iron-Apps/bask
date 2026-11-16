@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/services/base_shared_preferences_service.dart';
-import 'package:plezy/services/credential_vault.dart';
-import 'package:plezy/services/sensitive_prefs.dart';
-import 'package:plezy/services/settings_credential_export.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/credential_vault.dart';
+import 'package:bask/services/sensitive_prefs.dart';
+import 'package:bask/services/settings_credential_export.dart';
 
 import '../test_helpers/prefs.dart';
 

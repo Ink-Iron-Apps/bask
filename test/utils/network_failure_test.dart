@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/utils/network_failure.dart';
+import 'package:bask/utils/network_failure.dart';
 
 void main() {
   group('isNetworkFailureMessage', () {

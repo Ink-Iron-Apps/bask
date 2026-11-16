@@ -340,7 +340,7 @@ Future<SymbolPlan> createSymbolPlan(
   } else if (apple) {
     final explicitArchive = environment['BUGS_APPLE_ARCHIVE'];
     final product = platform == 'macos'
-        ? path.join(build, 'macos/Build/Products/Release/Plezy.app')
+        ? path.join(build, 'macos/Build/Products/Release/Bask.app')
         : explicitArchive != null && explicitArchive.isNotEmpty
         ? path.join(
             path.isAbsolute(explicitArchive) ? explicitArchive : path.join(sourceRoot, explicitArchive),

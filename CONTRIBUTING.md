@@ -87,7 +87,7 @@ diagnostics directory under `build/maestro-profile-regressions/`.
 
 ### Agent controls
 
-Opted-in debug and profile builds expose `ext.plezy.agent` over Flutter's authenticated Dart VM service.
+Opted-in debug and profile builds expose `ext.bask.agent` over Flutter's authenticated Dart VM service.
 Release builds never register it. Use a disposable installation/profile: a worktree does not isolate installed app data.
 Sign in through the ordinary UI; these commands do not expose credentials, bypass profile locks, or perform onboarding.
 

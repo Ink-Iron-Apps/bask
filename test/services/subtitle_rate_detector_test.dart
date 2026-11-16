@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/subtitle_rate_detector.dart';
-import 'package:plezy/services/subtitle_timing.dart';
+import 'package:bask/services/subtitle_rate_detector.dart';
+import 'package:bask/services/subtitle_timing.dart';
 
 const int _ninetyMinutes = 90 * 60 * 1000;
 

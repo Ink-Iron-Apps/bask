@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/theme/mono_theme.dart';
-import 'package:plezy/widgets/focusable_list_tile.dart';
-import 'package:plezy/widgets/setting_tile.dart';
-import 'package:plezy/widgets/settings_section.dart';
+import 'package:bask/theme/mono_theme.dart';
+import 'package:bask/widgets/focusable_list_tile.dart';
+import 'package:bask/widgets/setting_tile.dart';
+import 'package:bask/widgets/settings_section.dart';
 
 /// Settings rows must render exactly like every other row in the app on every
 /// platform. Each row type is measured against an untouched [FocusableListTile]

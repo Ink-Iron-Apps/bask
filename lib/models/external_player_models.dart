@@ -326,7 +326,7 @@ class KnownPlayers {
   ///
   /// Detection forks `sh` or `where.exe` and calls out over platform channels,
   /// so it is asynchronous and memoised: it runs once per process and a player
-  /// installed while Plezy is running only appears after a restart. Android is
+  /// installed while Bask is running only appears after a restart. Android is
   /// the one platform left unprobed — where there is no reliable check the
   /// player stays listed, because hiding a working player is worse than
   /// listing a missing one.

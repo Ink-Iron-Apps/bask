@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_server_client.dart';
-import 'package:plezy/models/catalog/catalog_item.dart';
-import 'package:plezy/services/catalog/catalog_source.dart';
-import 'package:plezy/services/catalog/library_watchlist_candidates.dart';
-import 'package:plezy/utils/external_ids.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/models/catalog/catalog_item.dart';
+import 'package:bask/services/catalog/catalog_source.dart';
+import 'package:bask/services/catalog/library_watchlist_candidates.dart';
+import 'package:bask/utils/external_ids.dart';
 
 import '../../test_helpers/media_items.dart';
 

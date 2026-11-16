@@ -6,25 +6,25 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_part.dart';
-import 'package:plezy/media/media_server_client.dart';
-import 'package:plezy/media/media_version.dart';
-import 'package:plezy/models/plex/plex_config.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/utils/delete_impact.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_part.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/media/media_version.dart';
+import 'package:bask/models/plex/plex_config.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/utils/delete_impact.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';
 import '../test_helpers/media_items.dart';
 
 /// Plex is the backend that actually produces multi-episode files, and #1781
 /// was reported against it. These drive the real [PlexClient] and Plex mappers
-/// over a [MockClient], so the wire shape Plezy depends on — `Media` → `Part` →
+/// over a [MockClient], so the wire shape Bask depends on — `Media` → `Part` →
 /// `file` on both `/library/metadata/{id}` and `/library/metadata/{id}/children`
 /// — is asserted rather than assumed.
 ///
@@ -96,7 +96,7 @@ void main() {
         baseUrl: 'https://plex.example.com',
         token: 'token',
         clientIdentifier: 'client-id',
-        product: 'Plezy',
+        product: 'Bask',
         version: '1',
       ),
       serverId: ServerId('plex-1'),
@@ -116,7 +116,7 @@ void main() {
     return (client: client, paths: paths, deleted: deleted);
   }
 
-  /// The reported shape: an episode row Plezy holds with no media at all.
+  /// The reported shape: an episode row Bask holds with no media at all.
   final thinEpisode = testMediaItem(
     id: 'ep-2',
     backend: MediaBackend.plex,

@@ -39,7 +39,7 @@ WORKFLOW = ROOT / ".github/workflows/build.yml"
 MSIX_STEP = "Build Store package (MSIX)"
 BUNDLE = "plezy-windows.msixbundle"
 # Partner Center reserves these identity values and derives the package family name.
-IDENTITY_NAME = "edde746.Plezy"
+IDENTITY_NAME = "edde746.Bask"
 PUBLISHER = "CN=AA9C53CB-AD3C-48DA-B3E3-D1E8986D4E25"
 PUBLISHER_DISPLAY_NAME = "edde746"
 PACKAGE_FAMILY_SUFFIX = "13q3sv6jzathm"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Plezy contributors
+ * Copyright (C) 2026 Bask contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-namespace plezy {
+namespace bask {
 namespace ffmpeg {
 
 inline bool CheckedAudioByteCount(int sample_count, int channel_count, int bytes_per_sample, int* byte_count) {
@@ -43,6 +43,6 @@ inline bool CheckedAddByteCount(int current_size, int additional_size, int* tota
 }
 
 }  // namespace ffmpeg
-}  // namespace plezy
+}  // namespace bask
 
 #endif  // PLEZY_FFMPEG_AUDIO_BUFFER_H_

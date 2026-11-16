@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/services/server_health.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/services/server_health.dart';
 
 ServerHealth health({
   bool online = true,

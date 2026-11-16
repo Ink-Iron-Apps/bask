@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/models/audio_quality_preset.dart';
-import 'package:plezy/screens/settings/playback_settings_screen.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/theme/mono_theme.dart';
-import 'package:plezy/models/player_setting_scope.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/models/audio_quality_preset.dart';
+import 'package:bask/screens/settings/playback_settings_screen.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/theme/mono_theme.dart';
+import 'package:bask/models/player_setting_scope.dart';
 
 import '../../test_helpers/prefs.dart';
 

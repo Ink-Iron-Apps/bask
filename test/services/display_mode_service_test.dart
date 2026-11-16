@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/display_mode_service.dart';
-import 'package:plezy/services/fullscreen_state_manager.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/utils/app_logger.dart';
+import 'package:bask/services/display_mode_service.dart';
+import 'package:bask/services/fullscreen_state_manager.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/utils/app_logger.dart';
 
 import '../test_helpers/prefs.dart';
 

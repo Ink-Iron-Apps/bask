@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/services/offline_search.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/services/offline_search.dart';
 
 import '../test_helpers/media_items.dart';
 
