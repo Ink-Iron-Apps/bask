@@ -1059,10 +1059,10 @@
       "subtitle": "Pin an address Plex cannot advertise",
       "explanation": "Plex only advertises addresses it can reach from the internet, so an address that works only over a VPN, split DNS or an internal proxy never reaches this app. Pin it here and Bask will try it alongside the addresses Plex does advertise.",
       "fieldLabel": "Custom address",
-      "fieldHint": "http://100.100.1.10:32400",
+      "fieldHint": "http://100.64.0.10:32400",
       "advertised": "Advertised by Plex: ${addresses}",
       "advertisedNone": "Plex advertises no addresses for this server",
-      "invalid": "Enter a full address, such as http://100.100.1.10:32400",
+      "invalid": "Enter a full address, such as http://100.64.0.10:32400",
       "saved": "Server addresses updated",
       "order": "A pinned address is tried after the local network address, so Wi-Fi still takes the direct route."
     }
