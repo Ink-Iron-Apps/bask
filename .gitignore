@@ -30,6 +30,8 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+# Vendored packages build into their own folder, which the root rule misses.
+packages/*/build/
 /debug-info/
 
 # Windows Store packaging output (windows/build-msix.ps1)

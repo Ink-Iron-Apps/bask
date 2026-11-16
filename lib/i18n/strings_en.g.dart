@@ -6489,8 +6489,8 @@ class Translations$profiles$plexEndpoints$en {
 	/// en: 'Custom address'
 	String get fieldLabel => 'Custom address';
 
-	/// en: 'http://100.100.1.10:32400'
-	String get fieldHint => 'http://100.100.1.10:32400';
+	/// en: 'http://100.64.0.10:32400'
+	String get fieldHint => 'http://100.64.0.10:32400';
 
 	/// en: 'Advertised by Plex: ${addresses}'
 	String advertised({required Object addresses}) => 'Advertised by Plex: ${addresses}';
@@ -6498,8 +6498,8 @@ class Translations$profiles$plexEndpoints$en {
 	/// en: 'Plex advertises no addresses for this server'
 	String get advertisedNone => 'Plex advertises no addresses for this server';
 
-	/// en: 'Enter a full address, such as http://100.100.1.10:32400'
-	String get invalid => 'Enter a full address, such as http://100.100.1.10:32400';
+	/// en: 'Enter a full address, such as http://100.64.0.10:32400'
+	String get invalid => 'Enter a full address, such as http://100.64.0.10:32400';
 
 	/// en: 'Server addresses updated'
 	String get saved => 'Server addresses updated';
@@ -8786,10 +8786,10 @@ extension on Translations {
 			'profiles.plexEndpoints.subtitle' => 'Pin an address Plex cannot advertise',
 			'profiles.plexEndpoints.explanation' => 'Plex only advertises addresses it can reach from the internet, so an address that works only over a VPN, split DNS or an internal proxy never reaches this app. Pin it here and Bask will try it alongside the addresses Plex does advertise.',
 			'profiles.plexEndpoints.fieldLabel' => 'Custom address',
-			'profiles.plexEndpoints.fieldHint' => 'http://100.100.1.10:32400',
+			'profiles.plexEndpoints.fieldHint' => 'http://100.64.0.10:32400',
 			'profiles.plexEndpoints.advertised' => ({required Object addresses}) => 'Advertised by Plex: ${addresses}',
 			'profiles.plexEndpoints.advertisedNone' => 'Plex advertises no addresses for this server',
-			'profiles.plexEndpoints.invalid' => 'Enter a full address, such as http://100.100.1.10:32400',
+			'profiles.plexEndpoints.invalid' => 'Enter a full address, such as http://100.64.0.10:32400',
 			'profiles.plexEndpoints.saved' => 'Server addresses updated',
 			'profiles.plexEndpoints.order' => 'A pinned address is tried after the local network address, so Wi-Fi still takes the direct route.',
 			'connections.sectionTitle' => 'Connections',
