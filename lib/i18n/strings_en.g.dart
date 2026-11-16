@@ -605,12 +605,6 @@ class Translations$settings$en {
 	/// en: 'Show season and episode number on episode cards'
 	String get showEpisodeNumberOnCardsDescription => 'Show season and episode number on episode cards';
 
-	/// en: 'Show Season Posters on Tabs'
-	String get showSeasonPostersOnTabs => 'Show Season Posters on Tabs';
-
-	/// en: 'Show each season's poster above its tab'
-	String get showSeasonPostersOnTabsDescription => 'Show each season\'s poster above its tab';
-
 	/// en: 'Full TV Cards'
 	String get tvFullCardLayout => 'Full TV Cards';
 
@@ -7893,8 +7887,6 @@ extension on Translations {
 			'settings.showWatchedIndicatorsDescription' => 'Display a checkmark on watched movies, shows, and episodes',
 			'settings.showEpisodeNumberOnCards' => 'Show Episode Number on Cards',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Show season and episode number on episode cards',
-			'settings.showSeasonPostersOnTabs' => 'Show Season Posters on Tabs',
-			'settings.showSeasonPostersOnTabsDescription' => 'Show each season\'s poster above its tab',
 			'settings.tvFullCardLayout' => 'Full TV Cards',
 			'settings.tvFullCardLayoutDescription' => 'Use image-only TV cards with actor names overlaid',
 			'settings.focusGlow' => 'Focus Glow',
@@ -8231,10 +8223,10 @@ extension on Translations {
 			'hotkeys.actions.shaderToggle' => 'Toggle Shaders',
 			'hotkeys.actions.skipMarker' => 'Skip Intro/Credits',
 			'hotkeys.actions.screenshot' => 'Take Screenshot',
-			_ => null,
-		} ?? switch (path) {
 			'hotkeys.actions.frameStepForward' => 'Step Forward One Frame',
 			'hotkeys.actions.frameStepBackward' => 'Step Back One Frame',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.title' => 'File Info',
 			'fileInfo.overview' => 'Overview',
 			'fileInfo.video' => 'Video',
@@ -8745,10 +8737,10 @@ extension on Translations {
 			'accountPreferences.subtitleAccessibility' => 'SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.preferNonSdh' => 'Prefer non-SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.preferSdh' => 'Prefer SDH subtitles',
-			_ => null,
-		} ?? switch (path) {
 			'accountPreferences.subtitleAccessibilityOptions.onlySdh' => 'Only SDH subtitles',
 			'accountPreferences.subtitleAccessibilityOptions.onlyNonSdh' => 'Only non-SDH subtitles',
+			_ => null,
+		} ?? switch (path) {
 			'accountPreferences.forcedSubtitles' => 'Forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.preferNonForced' => 'Prefer non-forced subtitles',
 			'accountPreferences.forcedSubtitleOptions.preferForced' => 'Prefer forced subtitles',
@@ -9259,10 +9251,10 @@ extension on Translations {
 			'watchTogether.title' => 'Watch Together',
 			'watchTogether.description' => 'Watch content in sync with friends and family',
 			'watchTogether.createSession' => 'Create Session',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.creating' => 'Creating...',
 			'watchTogether.joinSession' => 'Join Session',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.joining' => 'Joining...',
 			'watchTogether.controlMode' => 'Control Mode',
 			'watchTogether.controlModeQuestion' => 'Who can control playback?',
@@ -9773,10 +9765,10 @@ extension on Translations {
 			'trakt.connectedAs' => ({required Object username}) => 'Connected as @${username}',
 			'trakt.disconnectConfirm' => 'Disconnect Trakt account?',
 			'trakt.disconnectConfirmBody' => 'Plezy will stop sending events to Trakt. You can reconnect any time.',
-			_ => null,
-		} ?? switch (path) {
 			'trakt.scrobble' => 'Real-time scrobbling',
 			'trakt.scrobbleDescription' => 'Send play, pause, and stop events to Trakt during playback.',
+			_ => null,
+		} ?? switch (path) {
 			'trakt.watchedSync' => 'Sync watched status',
 			'trakt.watchedSyncDescription' => 'When you mark items as watched in Plezy, they are also marked as watched on Trakt.',
 			'seerr.title' => 'Seerr',

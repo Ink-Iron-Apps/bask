@@ -280,8 +280,6 @@ class _Translations$settings$ko extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => '시리즈 및 시즌에 미시청 에피소드 수 표시';
 	@override String get showEpisodeNumberOnCards => '카드에 에피소드 번호 표시';
 	@override String get showEpisodeNumberOnCardsDescription => '에피소드 카드에 시즌 및 에피소드 번호 표시';
-	@override String get showSeasonPostersOnTabs => '탭에 시즌 포스터 표시';
-	@override String get showSeasonPostersOnTabsDescription => '각 시즌 포스터를 탭 위에 표시';
 	@override String get tvFullCardLayout => '전체 TV 카드';
 	@override String get tvFullCardLayoutDescription => 'TV 카드에 이미지만 표시하고 배우 이름을 오버레이로 표시';
 	@override String get focusGlow => '포커스 글로우';
@@ -3088,8 +3086,6 @@ extension on TranslationsKo {
 			'settings.showUnwatchedCountDescription' => '시리즈 및 시즌에 미시청 에피소드 수 표시',
 			'settings.showEpisodeNumberOnCards' => '카드에 에피소드 번호 표시',
 			'settings.showEpisodeNumberOnCardsDescription' => '에피소드 카드에 시즌 및 에피소드 번호 표시',
-			'settings.showSeasonPostersOnTabs' => '탭에 시즌 포스터 표시',
-			'settings.showSeasonPostersOnTabsDescription' => '각 시즌 포스터를 탭 위에 표시',
 			'settings.tvFullCardLayout' => '전체 TV 카드',
 			'settings.tvFullCardLayoutDescription' => 'TV 카드에 이미지만 표시하고 배우 이름을 오버레이로 표시',
 			'settings.focusGlow' => '포커스 글로우',
@@ -3443,10 +3439,10 @@ extension on TranslationsKo {
 			'fileInfo.optimizedVersion' => '최적화 버전',
 			'fileInfo.optimizationTarget' => '최적화 대상',
 			'fileInfo.deletedAt' => '삭제됨',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => '원격 소스',
 			'fileInfo.infiniteStream' => '무한 스트림',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Direct Play',
 			'fileInfo.directStream' => 'Direct Stream',
 			'fileInfo.transcoding' => '트랜스코딩',
@@ -3957,10 +3953,10 @@ extension on TranslationsKo {
 			'libraries.filterCategories.year' => '연도',
 			'libraries.filterCategories.contentRating' => '시청 등급',
 			'libraries.filterCategories.tag' => '태그',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => '미시청',
 			'libraries.filterCategories.unplayed' => '재생하지 않음',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => '즐겨찾기',
 			'libraries.sortLabels.title' => '제목',
 			'libraries.sortLabels.dateAdded' => '추가된 날짜',
@@ -4471,10 +4467,10 @@ extension on TranslationsKo {
 			'downloads.syncRuleAndDownloadsRemoved' => '동기화 규칙과 연결된 다운로드가 삭제되었습니다',
 			'downloads.syncRuleCleanupBusy' => '동기화 규칙이 현재 업데이트 중입니다. 잠시 후 다시 시도하세요.',
 			'downloads.syncRuleCleanupUnavailable' => '연결된 다운로드를 안전하게 확인할 수 없습니다. 서버에 다시 연결한 후 시도하거나, 다운로드를 삭제하지 않고 규칙만 제거하세요.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object title, required Object count}) => '${title}의 새 에피소드 ${count}개 동기화됨',
 			'downloads.activeSyncRules' => '동기화 규칙',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => '동기화 규칙 없음',
 			'downloads.manageSyncRule' => '동기화 관리',
 			'downloads.editEpisodeCount' => '에피소드 수',

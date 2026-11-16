@@ -280,8 +280,6 @@ class _Translations$settings$de extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Zeigt die Anzahl nicht gesehener Episoden bei Serien und Staffeln an';
 	@override String get showEpisodeNumberOnCards => 'Episodennummer auf Karten anzeigen';
 	@override String get showEpisodeNumberOnCardsDescription => 'Staffel- und Episodennummer auf Episodenkarten anzeigen';
-	@override String get showSeasonPostersOnTabs => 'Staffelposter auf Tabs anzeigen';
-	@override String get showSeasonPostersOnTabsDescription => 'Poster jeder Staffel über ihrem Tab anzeigen';
 	@override String get tvFullCardLayout => 'Vollflächige TV-Karten';
 	@override String get tvFullCardLayoutDescription => 'TV-Karten nur mit Bild verwenden und Darstellernamen einblenden';
 	@override String get focusGlow => 'Fokusleuchten';
@@ -3098,8 +3096,6 @@ extension on TranslationsDe {
 			'settings.showUnwatchedCountDescription' => 'Zeigt die Anzahl nicht gesehener Episoden bei Serien und Staffeln an',
 			'settings.showEpisodeNumberOnCards' => 'Episodennummer auf Karten anzeigen',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Staffel- und Episodennummer auf Episodenkarten anzeigen',
-			'settings.showSeasonPostersOnTabs' => 'Staffelposter auf Tabs anzeigen',
-			'settings.showSeasonPostersOnTabsDescription' => 'Poster jeder Staffel über ihrem Tab anzeigen',
 			'settings.tvFullCardLayout' => 'Vollflächige TV-Karten',
 			'settings.tvFullCardLayoutDescription' => 'TV-Karten nur mit Bild verwenden und Darstellernamen einblenden',
 			'settings.focusGlow' => 'Fokusleuchten',
@@ -3453,10 +3449,10 @@ extension on TranslationsDe {
 			'fileInfo.optimizedVersion' => 'Optimierte Version',
 			'fileInfo.optimizationTarget' => 'Optimierungsziel',
 			'fileInfo.deletedAt' => 'Gelöscht',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Remote-Quelle',
 			'fileInfo.infiniteStream' => 'Endlos-Stream',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Direct Play',
 			'fileInfo.directStream' => 'Direct Stream',
 			'fileInfo.transcoding' => 'Transkodierung',
@@ -3967,10 +3963,10 @@ extension on TranslationsDe {
 			'libraries.filterCategories.year' => 'Jahr',
 			'libraries.filterCategories.contentRating' => 'Altersfreigabe',
 			'libraries.filterCategories.tag' => 'Tag',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Ungesehene',
 			'libraries.filterCategories.unplayed' => 'Nicht abgespielt',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Favoriten',
 			'libraries.sortLabels.title' => 'Titel',
 			'libraries.sortLabels.dateAdded' => 'Hinzugefügt am',
@@ -4481,10 +4477,10 @@ extension on TranslationsDe {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Synchronisierungsregel und zugehörige Downloads entfernt',
 			'downloads.syncRuleCleanupBusy' => 'Synchronisierungsregeln werden gerade aktualisiert. Versuche es gleich noch einmal.',
 			'downloads.syncRuleCleanupUnavailable' => 'Zugehörige Downloads konnten nicht sicher ermittelt werden. Verbinde den Server erneut und versuche es noch einmal, oder entferne die Regel, ohne die Downloads zu löschen.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => '${count} neue Episoden für ${title} synchronisiert',
 			'downloads.activeSyncRules' => 'Synchronisierungsregeln',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Keine Synchronisierungsregeln',
 			'downloads.manageSyncRule' => 'Synchronisierung verwalten',
 			'downloads.editEpisodeCount' => 'Episodenanzahl',

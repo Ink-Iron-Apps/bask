@@ -173,8 +173,6 @@
     "showWatchedIndicatorsDescription": "",
     "showEpisodeNumberOnCards": "Epizódszám megjelenítése a kártyákon",
     "showEpisodeNumberOnCardsDescription": "Megjeleníti az évad- és epizódszámot az epizódkártyákon",
-    "showSeasonPostersOnTabs": "Évadborítók megjelenítése a füleken",
-    "showSeasonPostersOnTabsDescription": "Megjeleníti az egyes évadok borítóját a fülük felett",
     "tvFullCardLayout": "Teljes TV-kártyák",
     "tvFullCardLayoutDescription": "Csak képet tartalmazó TV-kártyák használata, rájuk helyezett színésznevekkel",
     "focusGlow": "Kijelölési ragyogás",

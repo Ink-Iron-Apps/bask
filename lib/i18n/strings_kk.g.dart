@@ -280,8 +280,6 @@ class _Translations$settings$kk extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Сериалдар мен маусымдарда көрілмеген бөлімдер санын көрсету';
 	@override String get showEpisodeNumberOnCards => 'Карточкаларда бөлім нөмірін көрсету';
 	@override String get showEpisodeNumberOnCardsDescription => 'Бөлім карточкаларында маусым мен бөлім нөмірін көрсету';
-	@override String get showSeasonPostersOnTabs => 'Қойындыларда маусым постерлерін көрсету';
-	@override String get showSeasonPostersOnTabsDescription => 'Әр маусымның постерін өз бөлімінің үстінде көрсету';
 	@override String get tvFullCardLayout => 'Толық TV карточкалары';
 	@override String get tvFullCardLayoutDescription => 'Тек суреттен тұратын TV карточкаларын пайдалану';
 	@override String get focusGlow => 'Фокус жарқылы';
@@ -3098,8 +3096,6 @@ extension on TranslationsKk {
 			'settings.showUnwatchedCountDescription' => 'Сериалдар мен маусымдарда көрілмеген бөлімдер санын көрсету',
 			'settings.showEpisodeNumberOnCards' => 'Карточкаларда бөлім нөмірін көрсету',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Бөлім карточкаларында маусым мен бөлім нөмірін көрсету',
-			'settings.showSeasonPostersOnTabs' => 'Қойындыларда маусым постерлерін көрсету',
-			'settings.showSeasonPostersOnTabsDescription' => 'Әр маусымның постерін өз бөлімінің үстінде көрсету',
 			'settings.tvFullCardLayout' => 'Толық TV карточкалары',
 			'settings.tvFullCardLayoutDescription' => 'Тек суреттен тұратын TV карточкаларын пайдалану',
 			'settings.focusGlow' => 'Фокус жарқылы',
@@ -3453,10 +3449,10 @@ extension on TranslationsKk {
 			'fileInfo.optimizedVersion' => 'Оңтайландырылған нұсқа',
 			'fileInfo.optimizationTarget' => 'Оңтайландыру мақсаты',
 			'fileInfo.deletedAt' => 'Өшірілген',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Қашықтағы дереккөз',
 			'fileInfo.infiniteStream' => 'Шексіз ағын',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Тікелей ойнату',
 			'fileInfo.directStream' => 'Тікелей ағын',
 			'fileInfo.transcoding' => 'Транскодтау',
@@ -3967,10 +3963,10 @@ extension on TranslationsKk {
 			'libraries.filterCategories.year' => 'Жыл',
 			'libraries.filterCategories.contentRating' => 'Мазмұн рейтингі',
 			'libraries.filterCategories.tag' => 'Тег',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Көрілмеген',
 			'libraries.filterCategories.unplayed' => 'Ойнатылмаған',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Таңдаулылар',
 			'libraries.sortLabels.title' => 'Атауы',
 			'libraries.sortLabels.dateAdded' => 'Қосылған күні',
@@ -4481,10 +4477,10 @@ extension on TranslationsKk {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Синхрондау ережесі және байланысты жүктеулер өшірілді',
 			'downloads.syncRuleCleanupBusy' => 'Синхрондау ережелері қазір жаңартылуда. Сәлден соң қайталап көріңіз.',
 			'downloads.syncRuleCleanupUnavailable' => 'Байланысты жүктеулерді қауіпсіз анықтау мүмкін болмады. Серверге қайта қосылып көріңіз немесе ережені жүктеулерді жоймай өшіріңіз.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object title, required Object count}) => '${title} үшін ${count} жаңа бөлім синхрондалды',
 			'downloads.activeSyncRules' => 'Белсенді синхрондау ережелері',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Синхрондау ережелері жоқ',
 			'downloads.manageSyncRule' => 'Синхрондауды басқару',
 			'downloads.editEpisodeCount' => 'Бөлімдер саны',

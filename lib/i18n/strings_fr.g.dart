@@ -280,8 +280,6 @@ class _Translations$settings$fr extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Afficher le nombre d’épisodes non vus pour les séries et les saisons';
 	@override String get showEpisodeNumberOnCards => 'Afficher le numéro de l’épisode sur les cartes';
 	@override String get showEpisodeNumberOnCardsDescription => 'Afficher les numéros de saison et d’épisode sur les cartes d’épisode';
-	@override String get showSeasonPostersOnTabs => 'Afficher les affiches de saison sur les onglets';
-	@override String get showSeasonPostersOnTabsDescription => 'Afficher l’affiche de chaque saison au-dessus de son onglet';
 	@override String get tvFullCardLayout => 'Cartes TV plein format';
 	@override String get tvFullCardLayoutDescription => 'Utiliser des cartes TV composées uniquement d’une image, avec le nom des acteurs en surimpression';
 	@override String get focusGlow => 'Halo de sélection';
@@ -3098,8 +3096,6 @@ extension on TranslationsFr {
 			'settings.showUnwatchedCountDescription' => 'Afficher le nombre d’épisodes non vus pour les séries et les saisons',
 			'settings.showEpisodeNumberOnCards' => 'Afficher le numéro de l’épisode sur les cartes',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Afficher les numéros de saison et d’épisode sur les cartes d’épisode',
-			'settings.showSeasonPostersOnTabs' => 'Afficher les affiches de saison sur les onglets',
-			'settings.showSeasonPostersOnTabsDescription' => 'Afficher l’affiche de chaque saison au-dessus de son onglet',
 			'settings.tvFullCardLayout' => 'Cartes TV plein format',
 			'settings.tvFullCardLayoutDescription' => 'Utiliser des cartes TV composées uniquement d’une image, avec le nom des acteurs en surimpression',
 			'settings.focusGlow' => 'Halo de sélection',
@@ -3453,10 +3449,10 @@ extension on TranslationsFr {
 			'fileInfo.optimizedVersion' => 'Version optimisée',
 			'fileInfo.optimizationTarget' => 'Cible d\'optimisation',
 			'fileInfo.deletedAt' => 'Supprimé',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Source distante',
 			'fileInfo.infiniteStream' => 'Flux infini',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Lecture directe',
 			'fileInfo.directStream' => 'Flux direct',
 			'fileInfo.transcoding' => 'Transcodage',
@@ -3967,10 +3963,10 @@ extension on TranslationsFr {
 			'libraries.filterCategories.year' => 'Année',
 			'libraries.filterCategories.contentRating' => 'Classification',
 			'libraries.filterCategories.tag' => 'Étiquette',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Non vus',
 			'libraries.filterCategories.unplayed' => 'Non lus',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Favoris',
 			'libraries.sortLabels.title' => 'Titre',
 			'libraries.sortLabels.dateAdded' => 'Date d\'ajout',
@@ -4481,10 +4477,10 @@ extension on TranslationsFr {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Règle de synchronisation et téléchargements associés supprimés',
 			'downloads.syncRuleCleanupBusy' => 'Les règles de synchronisation sont en cours de mise à jour. Réessayez dans un instant.',
 			'downloads.syncRuleCleanupUnavailable' => 'Les téléchargements associés n\'ont pas pu être identifiés en toute sécurité. Reconnectez le serveur et réessayez, ou retirez la règle sans supprimer les téléchargements.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => '${count} nouveaux épisodes synchronisés pour ${title}',
 			'downloads.activeSyncRules' => 'Règles de synchronisation',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Aucune règle de synchronisation',
 			'downloads.manageSyncRule' => 'Gérer la synchronisation',
 			'downloads.editEpisodeCount' => 'Nombre d’épisodes',

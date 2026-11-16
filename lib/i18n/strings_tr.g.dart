@@ -280,8 +280,6 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Dizilerde ve sezonlarda izlenmemiş bölüm sayısını göster';
 	@override String get showEpisodeNumberOnCards => 'Kartlarda Bölüm Numarasını Göster';
 	@override String get showEpisodeNumberOnCardsDescription => 'Bölüm kartlarında sezon ve bölüm numarasını göster';
-	@override String get showSeasonPostersOnTabs => 'Sekmelerde Sezon Afişlerini Göster';
-	@override String get showSeasonPostersOnTabsDescription => 'Her sezonun afişini sekmesinin üzerinde göster';
 	@override String get tvFullCardLayout => 'Tam TV Kartları';
 	@override String get tvFullCardLayoutDescription => 'Oyuncu isimleri üzerinde katmanlanmış yalnızca görsel içeren TV kartları kullan';
 	@override String get focusGlow => 'Odak Parıltısı';
@@ -3098,8 +3096,6 @@ extension on TranslationsTr {
 			'settings.showUnwatchedCountDescription' => 'Dizilerde ve sezonlarda izlenmemiş bölüm sayısını göster',
 			'settings.showEpisodeNumberOnCards' => 'Kartlarda Bölüm Numarasını Göster',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Bölüm kartlarında sezon ve bölüm numarasını göster',
-			'settings.showSeasonPostersOnTabs' => 'Sekmelerde Sezon Afişlerini Göster',
-			'settings.showSeasonPostersOnTabsDescription' => 'Her sezonun afişini sekmesinin üzerinde göster',
 			'settings.tvFullCardLayout' => 'Tam TV Kartları',
 			'settings.tvFullCardLayoutDescription' => 'Oyuncu isimleri üzerinde katmanlanmış yalnızca görsel içeren TV kartları kullan',
 			'settings.focusGlow' => 'Odak Parıltısı',
@@ -3453,10 +3449,10 @@ extension on TranslationsTr {
 			'fileInfo.optimizedVersion' => 'Optimize Edilmiş Sürüm',
 			'fileInfo.optimizationTarget' => 'Optimizasyon Hedefi',
 			'fileInfo.deletedAt' => 'Silindi',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Uzak Kaynak',
 			'fileInfo.infiniteStream' => 'Sonsuz Akış',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Doğrudan Oynatma',
 			'fileInfo.directStream' => 'Doğrudan Akış',
 			'fileInfo.transcoding' => 'Kod Dönüştürme',
@@ -3967,10 +3963,10 @@ extension on TranslationsTr {
 			'libraries.filterCategories.year' => 'Yıl',
 			'libraries.filterCategories.contentRating' => 'İçerik Derecelendirmesi',
 			'libraries.filterCategories.tag' => 'Etiket',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'İzlenmemiş',
 			'libraries.filterCategories.unplayed' => 'Oynatılmamış',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Favoriler',
 			'libraries.sortLabels.title' => 'Başlık',
 			'libraries.sortLabels.dateAdded' => 'Ekleme Tarihi',
@@ -4481,10 +4477,10 @@ extension on TranslationsTr {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Eşitleme kuralı ve ilişkili indirmeler kaldırıldı',
 			'downloads.syncRuleCleanupBusy' => 'Eşitleme kuralları şu anda güncelleniyor. Birazdan tekrar deneyin.',
 			'downloads.syncRuleCleanupUnavailable' => 'İlişkili indirmeler güvenli biçimde belirlenemedi. Sunucuya yeniden bağlanıp tekrar deneyin veya kuralı indirmeleri silmeden kaldırın.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object title, required Object count}) => '${title} için ${count} yeni bölüm eşitlendi',
 			'downloads.activeSyncRules' => 'Eşitleme kuralları',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Eşitleme kuralı yok',
 			'downloads.manageSyncRule' => 'Eşitlemeyi yönet',
 			'downloads.editEpisodeCount' => 'Bölüm sayısı',

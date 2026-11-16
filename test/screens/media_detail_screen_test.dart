@@ -2268,7 +2268,7 @@ void main() {
       expect(FocusManager.instance.primaryFocus?.debugLabel, 'overview');
     });
 
-    testWidgets('phone detail focuses requested season tab', (tester) async {
+    testWidgets('phone detail lists every season as a grid tile', (tester) async {
       final show = buildShow();
       final season1 = buildSeason(show, 1);
       final season2 = buildSeason(show, 2);
@@ -2285,8 +2285,11 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.text('1. Episode S2E1'), findsOneWidget);
-      expect(FocusManager.instance.primaryFocus?.debugLabel, 'season_tab_1');
+      // Every season is on the page at once, and episodes are a level down:
+      // the show screen no longer holds one season's list.
+      expect(find.text('Season 1'), findsOneWidget);
+      expect(find.text('Season 2'), findsOneWidget);
+      expect(find.text('1. Episode S2E1'), findsNothing);
     });
 
     testWidgets('phone detail focuses requested episode row', (tester) async {
@@ -2303,14 +2306,7 @@ void main() {
         },
       );
 
-      await pumpPhoneDetail(
-        tester,
-        client,
-        show,
-        initialSeasonId: season2.id,
-        initialSeasonIndex: season2.index,
-        initialEpisodeId: episode2.id,
-      );
+      await pumpPhoneDetail(tester, client, season2, initialEpisodeId: episode2.id);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
@@ -2332,19 +2328,12 @@ void main() {
         },
       );
 
-      await pumpPhoneDetail(
-        tester,
-        client,
-        show,
-        initialSeasonId: season2.id,
-        initialSeasonIndex: season2.index,
-        initialEpisodeId: episode1.id,
-      );
+      await pumpPhoneDetail(tester, client, season2, initialEpisodeId: episode1.id);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      // The first row keeps _firstEpisodeFocusNode (so season-tab DOWN keeps
-      // working) and the initial focus lands on that node instead.
+      // The first row keeps _firstEpisodeFocusNode (so DOWN from the overview
+      // still reaches it) and the initial focus lands on that node instead.
       expect(find.text('1. Episode S2E1'), findsOneWidget);
       expect(FocusManager.instance.primaryFocus?.debugLabel, 'first_episode');
     });
@@ -2362,7 +2351,7 @@ void main() {
         },
       );
 
-      await pumpPhoneDetail(tester, client, show);
+      await pumpPhoneDetail(tester, client, season1);
 
       // Seed a session patch for one episode (e.g. user toggled it earlier).
       await emit(tester, () => WatchStateNotifier().notifyWatched(item: episode1, isNowWatched: false));
@@ -2387,7 +2376,7 @@ void main() {
         },
       );
 
-      await pumpPhoneDetail(tester, client, show);
+      await pumpPhoneDetail(tester, client, season1);
 
       await emit(tester, () => WatchStateNotifier().notifyWatched(item: season1, isNowWatched: true));
 
@@ -2395,7 +2384,7 @@ void main() {
       expect(episodeRowWatched(tester, '2. Episode S1E2'), isTrue);
     });
 
-    testWidgets('container mark clears progress, including after a season tab round-trip', (tester) async {
+    testWidgets('a container mark clears an episode row\'s progress', (tester) async {
       final show = buildShow();
       final season1 = buildSeason(show, 1);
       final season2 = buildSeason(show, 2);
@@ -2409,7 +2398,7 @@ void main() {
         },
       );
 
-      await pumpPhoneDetail(tester, client, show);
+      await pumpPhoneDetail(tester, client, season1);
 
       // Played partway earlier in the session.
       await emit(
@@ -2419,18 +2408,6 @@ void main() {
       expect(episodeRowHasProgress(tester, '1. Episode S1E1'), isTrue);
 
       await emit(tester, () => WatchStateNotifier().notifyWatched(item: show, isNowWatched: true));
-      expect(episodeRowHasProgress(tester, '1. Episode S1E1'), isFalse);
-      expect(episodeRowWatched(tester, '1. Episode S1E1'), isTrue);
-
-      // Round-trip through another season tab; the cached page restore must not
-      // resurrect the dead progress offset.
-      await tester.tap(find.text('Season 2'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.tap(find.text('Season 1'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
       expect(episodeRowHasProgress(tester, '1. Episode S1E1'), isFalse);
       expect(episodeRowWatched(tester, '1. Episode S1E1'), isTrue);
     });
