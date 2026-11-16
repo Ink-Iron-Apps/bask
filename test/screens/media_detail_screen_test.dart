@@ -435,7 +435,7 @@ void main() {
     expect(find.descendant(of: find.byType(MediaDetailsSheet), matching: find.textContaining('1080p')), findsOneWidget);
   });
 
-  testWidgets('TV detail defaults to first regular season when specials precede it', (tester) async {
+  testWidgets('TV detail puts every season, specials included, in one row', (tester) async {
     await SettingsService.getInstance();
 
     final show = testMediaItem(
@@ -522,12 +522,17 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
+    // One row holds every season, specials included — the rail no longer
+    // scrolls past a specials hub to reach the first regular one. Episodes
+    // belong to the season's own screen, so none are on this page.
     expect(find.text('Season 1'), findsOneWidget);
-    expect(find.text('Specials'), findsNothing);
-    expect(find.text('S1E1'), findsOneWidget);
+    expect(find.text('Specials'), findsOneWidget);
+    // The hero still names the on-deck episode; what is gone is any episode
+    // card on the show's own page.
+    expect(find.descendant(of: find.byType(MediaCard), matching: find.text('S1E1')), findsNothing);
   });
 
-  testWidgets('TV detail exposes each season as its episode hub leading options item', (tester) async {
+  testWidgets('TV detail gathers the seasons into one row of their own artwork', (tester) async {
     await SettingsService.getInstance();
 
     final show = testMediaItem(
@@ -612,18 +617,21 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    // Every season hub surfaces its own season as the leading options item —
-    // the D-pad path to mark a whole season watched/unwatched (#2156).
+    // The seasons are one row of cards, so season actions (mark watched,
+    // download, delete) ride each card's own context menu. The per-hub
+    // leading options slot that carried them (#2156) has nothing left to
+    // attach to and is gone.
     final rail = tester.widget<TvBrowseRail>(find.byType(TvBrowseRail));
-    expect(rail.leadingItemForHub, isNotNull);
-    final seasonHubs = rail.hubs.where((hub) => hub.id.startsWith('detail_season_')).toList();
-    expect(seasonHubs, hasLength(2));
-    expect(rail.leadingItemForHub!(seasonHubs[0])?.id, season1.id);
-    expect(rail.leadingItemForHub!(seasonHubs[1])?.id, season2.id);
+    expect(rail.leadingItemForHub, isNull);
 
-    // Non-season hubs (flatten episodes, actors, extras, related) get none.
-    const flattenHub = MediaHub(id: 'detail_episodes', title: 'Episodes', type: 'episode', items: <MediaItem>[]);
-    expect(rail.leadingItemForHub!(flattenHub), isNull);
+    final seasonHubs = rail.hubs.where((hub) => hub.id == 'detail_seasons').toList();
+    expect(seasonHubs, hasLength(1));
+    expect(seasonHubs.single.items.map((item) => item.id), [season1.id, season2.id]);
+
+    // Their own artwork, not the show's, or the row would be one picture
+    // repeated.
+    expect(rail.prefersOwnArtworkForHub, isNotNull);
+    expect(rail.prefersOwnArtworkForHub!(seasonHubs.single), isTrue);
   });
   testWidgets('TV detail reveal still waits for the supplemental sections', (tester) async {
     // Counterpart to the test above: the early paint does NOT move the TV
@@ -933,106 +941,6 @@ void main() {
 
     expect(find.text('Season 1'), findsOneWidget);
     expect(find.text('Season 2'), findsOneWidget);
-  });
-
-  testWidgets('TV detail completes adjacent prefetch after focus moves to that season', (tester) async {
-    await SettingsService.getInstance();
-
-    final show = testMediaItem(
-      id: 'show_1',
-      backend: MediaBackend.jellyfin,
-      kind: MediaKind.show,
-      title: 'The Show',
-      serverId: 'server_1',
-      serverName: 'Server',
-    );
-    final season1 = testMediaItem(
-      id: 'season_1',
-      backend: MediaBackend.jellyfin,
-      kind: MediaKind.season,
-      title: 'Season 1',
-      index: 1,
-      parentId: show.id,
-      serverId: show.serverId,
-      serverName: show.serverName,
-    );
-    final season2 = testMediaItem(
-      id: 'season_2',
-      backend: MediaBackend.jellyfin,
-      kind: MediaKind.season,
-      title: 'Season 2',
-      index: 2,
-      parentId: show.id,
-      serverId: show.serverId,
-      serverName: show.serverName,
-    );
-    final episode1 = testMediaItem(
-      id: 'episode_1',
-      backend: MediaBackend.jellyfin,
-      kind: MediaKind.episode,
-      title: 'Episode 1',
-      index: 1,
-      parentId: season1.id,
-      parentIndex: season1.index,
-      grandparentId: show.id,
-      serverId: show.serverId,
-      serverName: show.serverName,
-    );
-    final episode2 = testMediaItem(
-      id: 'episode_2',
-      backend: MediaBackend.jellyfin,
-      kind: MediaKind.episode,
-      title: 'Episode 2',
-      index: 1,
-      parentId: season2.id,
-      parentIndex: season2.index,
-      grandparentId: show.id,
-      serverId: show.serverId,
-      serverName: show.serverName,
-    );
-    final season2Completer = Completer<List<MediaItem>>();
-    final client = _FakeMediaServerClient(
-      show: show,
-      childrenByParent: {
-        show.id: [season1, season2],
-        season1.id: [episode1],
-      },
-      childrenPageFutures: {season2.id: season2Completer.future},
-    );
-    final provider = testMultiServer(clients: [client]).provider;
-
-    await tester.pumpWidget(
-      TranslationProvider(
-        child: ChangeNotifierProvider<MultiServerProvider>.value(
-          value: provider,
-          child: MaterialApp(
-            theme: monoTheme(dark: true),
-            home: withProfileNavigationScope(
-              child: SizedBox(width: 1280, height: 720, child: MediaDetailScreen(metadata: show)),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pump();
-    await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    tester.state<TvBrowseRailState>(find.byType(TvBrowseRail)).requestFocus();
-    await tester.pump();
-
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
-    expect(find.descendant(of: find.byType(MediaCard), matching: find.text('Episode 2')), findsNothing);
-
-    season2Completer.complete([episode2]);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-
-    expect(find.descendant(of: find.byType(MediaCard), matching: find.text('Episode 2')), findsOneWidget);
   });
 
   testWidgets('TV detail hero, rail cards, and Play all follow the focused episode', (tester) async {
