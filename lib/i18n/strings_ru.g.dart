@@ -280,8 +280,6 @@ class _Translations$settings$ru extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Отображать количество непросмотренных эпизодов для сериалов и сезонов';
 	@override String get showEpisodeNumberOnCards => 'Показывать номер эпизода на карточках';
 	@override String get showEpisodeNumberOnCardsDescription => 'Показывать номер сезона и серии на карточках серий';
-	@override String get showSeasonPostersOnTabs => 'Показывать постеры сезонов на вкладках';
-	@override String get showSeasonPostersOnTabsDescription => 'Показывать постер каждого сезона над его вкладкой';
 	@override String get tvFullCardLayout => 'Полноформатные ТВ-карточки';
 	@override String get tvFullCardLayoutDescription => 'Использовать ТВ-карточки только с изображением и наложенными именами актёров';
 	@override String get focusGlow => 'Свечение при фокусе';
@@ -3118,8 +3116,6 @@ extension on TranslationsRu {
 			'settings.showUnwatchedCountDescription' => 'Отображать количество непросмотренных эпизодов для сериалов и сезонов',
 			'settings.showEpisodeNumberOnCards' => 'Показывать номер эпизода на карточках',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Показывать номер сезона и серии на карточках серий',
-			'settings.showSeasonPostersOnTabs' => 'Показывать постеры сезонов на вкладках',
-			'settings.showSeasonPostersOnTabsDescription' => 'Показывать постер каждого сезона над его вкладкой',
 			'settings.tvFullCardLayout' => 'Полноформатные ТВ-карточки',
 			'settings.tvFullCardLayoutDescription' => 'Использовать ТВ-карточки только с изображением и наложенными именами актёров',
 			'settings.focusGlow' => 'Свечение при фокусе',
@@ -3473,10 +3469,10 @@ extension on TranslationsRu {
 			'fileInfo.optimizedVersion' => 'Оптимизированная версия',
 			'fileInfo.optimizationTarget' => 'Цель оптимизации',
 			'fileInfo.deletedAt' => 'Удалено',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Удалённый источник',
 			'fileInfo.infiniteStream' => 'Бесконечный поток',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Прямое воспроизведение',
 			'fileInfo.directStream' => 'Прямой поток',
 			'fileInfo.transcoding' => 'Транскодирование',
@@ -3987,10 +3983,10 @@ extension on TranslationsRu {
 			'libraries.filterCategories.year' => 'Год',
 			'libraries.filterCategories.contentRating' => 'Возрастной рейтинг',
 			'libraries.filterCategories.tag' => 'Тег',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Непросмотренные',
 			'libraries.filterCategories.unplayed' => 'Не прослушано',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Избранное',
 			'libraries.sortLabels.title' => 'Название',
 			'libraries.sortLabels.dateAdded' => 'Дата добавления',
@@ -4501,10 +4497,10 @@ extension on TranslationsRu {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Правило синхронизации и связанные загрузки удалены',
 			'downloads.syncRuleCleanupBusy' => 'Правила синхронизации сейчас обновляются. Попробуйте снова чуть позже.',
 			'downloads.syncRuleCleanupUnavailable' => 'Не удалось надёжно определить связанные загрузки. Переподключите сервер и повторите попытку либо удалите правило без удаления загрузок.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => 'Синхронизировано ${count} новых эпизодов для ${title}',
 			'downloads.activeSyncRules' => 'Правила синхронизации',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Нет правил синхронизации',
 			'downloads.manageSyncRule' => 'Управление синхронизацией',
 			'downloads.editEpisodeCount' => 'Количество эпизодов',

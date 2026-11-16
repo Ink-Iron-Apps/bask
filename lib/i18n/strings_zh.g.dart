@@ -280,8 +280,6 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => '在剧集和季上显示未观看集数';
 	@override String get showEpisodeNumberOnCards => '在卡片上显示集数';
 	@override String get showEpisodeNumberOnCardsDescription => '在剧集卡片上显示季和集编号';
-	@override String get showSeasonPostersOnTabs => '在选项卡上显示季海报';
-	@override String get showSeasonPostersOnTabsDescription => '在每季标签上方显示该季海报';
 	@override String get tvFullCardLayout => '完整电视卡片';
 	@override String get tvFullCardLayoutDescription => '使用仅显示图片的电视卡片，并在图片上叠加演员姓名';
 	@override String get focusGlow => '焦点光晕';
@@ -3088,8 +3086,6 @@ extension on TranslationsZh {
 			'settings.showUnwatchedCountDescription' => '在剧集和季上显示未观看集数',
 			'settings.showEpisodeNumberOnCards' => '在卡片上显示集数',
 			'settings.showEpisodeNumberOnCardsDescription' => '在剧集卡片上显示季和集编号',
-			'settings.showSeasonPostersOnTabs' => '在选项卡上显示季海报',
-			'settings.showSeasonPostersOnTabsDescription' => '在每季标签上方显示该季海报',
 			'settings.tvFullCardLayout' => '完整电视卡片',
 			'settings.tvFullCardLayoutDescription' => '使用仅显示图片的电视卡片，并在图片上叠加演员姓名',
 			'settings.focusGlow' => '焦点光晕',
@@ -3443,10 +3439,10 @@ extension on TranslationsZh {
 			'fileInfo.optimizedVersion' => '优化版本',
 			'fileInfo.optimizationTarget' => '优化目标',
 			'fileInfo.deletedAt' => '已删除',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => '远程来源',
 			'fileInfo.infiniteStream' => '无限流',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => '直接播放',
 			'fileInfo.directStream' => '直接串流',
 			'fileInfo.transcoding' => '转码',
@@ -3957,10 +3953,10 @@ extension on TranslationsZh {
 			'libraries.filterCategories.year' => '年份',
 			'libraries.filterCategories.contentRating' => '内容分级',
 			'libraries.filterCategories.tag' => '标签',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => '未观看',
 			'libraries.filterCategories.unplayed' => '未播放',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => '收藏夹',
 			'libraries.sortLabels.title' => '标题',
 			'libraries.sortLabels.dateAdded' => '添加日期',
@@ -4471,10 +4467,10 @@ extension on TranslationsZh {
 			'downloads.syncRuleAndDownloadsRemoved' => '同步规则及相关下载已删除',
 			'downloads.syncRuleCleanupBusy' => '同步规则正在更新中，请稍后再试。',
 			'downloads.syncRuleCleanupUnavailable' => '无法安全识别相关下载。请重新连接服务器后再试，或在不删除下载的情况下移除规则。',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object title, required Object count}) => '已为 ${title} 同步 ${count} 个新剧集',
 			'downloads.activeSyncRules' => '同步规则',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => '没有同步规则',
 			'downloads.manageSyncRule' => '管理同步',
 			'downloads.editEpisodeCount' => '剧集数量',

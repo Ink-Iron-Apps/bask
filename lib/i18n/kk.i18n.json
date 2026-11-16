@@ -173,8 +173,6 @@
     "showWatchedIndicatorsDescription": "",
     "showEpisodeNumberOnCards": "Карточкаларда бөлім нөмірін көрсету",
     "showEpisodeNumberOnCardsDescription": "Бөлім карточкаларында маусым мен бөлім нөмірін көрсету",
-    "showSeasonPostersOnTabs": "Қойындыларда маусым постерлерін көрсету",
-    "showSeasonPostersOnTabsDescription": "Әр маусымның постерін өз бөлімінің үстінде көрсету",
     "tvFullCardLayout": "Толық TV карточкалары",
     "tvFullCardLayoutDescription": "Тек суреттен тұратын TV карточкаларын пайдалану",
     "focusGlow": "Фокус жарқылы",

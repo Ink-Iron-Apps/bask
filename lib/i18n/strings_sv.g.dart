@@ -280,8 +280,6 @@ class _Translations$settings$sv extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Visa antal osedda avsnitt för serier och säsonger';
 	@override String get showEpisodeNumberOnCards => 'Visa avsnittsnummer på kort';
 	@override String get showEpisodeNumberOnCardsDescription => 'Visa säsongs- och avsnittsnummer på avsnittskort';
-	@override String get showSeasonPostersOnTabs => 'Visa säsongsaffischer på flikar';
-	@override String get showSeasonPostersOnTabsDescription => 'Visa affischen för varje säsong ovanför dess flik';
 	@override String get tvFullCardLayout => 'Heltäckande TV-kort';
 	@override String get tvFullCardLayoutDescription => 'Använd TV-kort med enbart bild och skådespelarnamn ovanpå';
 	@override String get focusGlow => 'Fokusmarkering';
@@ -3098,8 +3096,6 @@ extension on TranslationsSv {
 			'settings.showUnwatchedCountDescription' => 'Visa antal osedda avsnitt för serier och säsonger',
 			'settings.showEpisodeNumberOnCards' => 'Visa avsnittsnummer på kort',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Visa säsongs- och avsnittsnummer på avsnittskort',
-			'settings.showSeasonPostersOnTabs' => 'Visa säsongsaffischer på flikar',
-			'settings.showSeasonPostersOnTabsDescription' => 'Visa affischen för varje säsong ovanför dess flik',
 			'settings.tvFullCardLayout' => 'Heltäckande TV-kort',
 			'settings.tvFullCardLayoutDescription' => 'Använd TV-kort med enbart bild och skådespelarnamn ovanpå',
 			'settings.focusGlow' => 'Fokusmarkering',
@@ -3453,10 +3449,10 @@ extension on TranslationsSv {
 			'fileInfo.optimizedVersion' => 'Optimerad version',
 			'fileInfo.optimizationTarget' => 'Optimeringsmål',
 			'fileInfo.deletedAt' => 'Raderad',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Fjärrkälla',
 			'fileInfo.infiniteStream' => 'Oändlig ström',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Direktuppspelning',
 			'fileInfo.directStream' => 'Direktströmning',
 			'fileInfo.transcoding' => 'Transkodning',
@@ -3967,10 +3963,10 @@ extension on TranslationsSv {
 			'libraries.filterCategories.year' => 'År',
 			'libraries.filterCategories.contentRating' => 'Åldersgräns',
 			'libraries.filterCategories.tag' => 'Tagg',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Osedda',
 			'libraries.filterCategories.unplayed' => 'Ospelat',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Favoriter',
 			'libraries.sortLabels.title' => 'Titel',
 			'libraries.sortLabels.dateAdded' => 'Tillagd',
@@ -4481,10 +4477,10 @@ extension on TranslationsSv {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Synkregel och associerade nedladdningar borttagna',
 			'downloads.syncRuleCleanupBusy' => 'Synkregler uppdateras just nu. Försök igen om en liten stund.',
 			'downloads.syncRuleCleanupUnavailable' => 'Associerade nedladdningar kunde inte identifieras på ett säkert sätt. Återanslut servern och försök igen, eller ta bort regeln utan att ta bort nedladdningar.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => 'Synkroniserade ${count} nya avsnitt för ${title}',
 			'downloads.activeSyncRules' => 'Synkregler',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Inga synkregler',
 			'downloads.manageSyncRule' => 'Hantera synkronisering',
 			'downloads.editEpisodeCount' => 'Antal avsnitt',

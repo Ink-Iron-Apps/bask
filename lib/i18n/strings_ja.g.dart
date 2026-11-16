@@ -280,8 +280,6 @@ class _Translations$settings$ja extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => '番組とシーズンに未視聴エピソード数を表示';
 	@override String get showEpisodeNumberOnCards => 'カードにエピソード番号を表示';
 	@override String get showEpisodeNumberOnCardsDescription => 'エピソードカードにシーズン番号とエピソード番号を表示します';
-	@override String get showSeasonPostersOnTabs => 'タブにシーズンポスターを表示';
-	@override String get showSeasonPostersOnTabsDescription => '各シーズンのポスターをタブの上に表示します';
 	@override String get tvFullCardLayout => 'フルTVカード';
 	@override String get tvFullCardLayoutDescription => 'TVカードを画像のみで表示し、出演者名を重ねて表示します';
 	@override String get focusGlow => 'フォーカス時の光彩';
@@ -3088,8 +3086,6 @@ extension on TranslationsJa {
 			'settings.showUnwatchedCountDescription' => '番組とシーズンに未視聴エピソード数を表示',
 			'settings.showEpisodeNumberOnCards' => 'カードにエピソード番号を表示',
 			'settings.showEpisodeNumberOnCardsDescription' => 'エピソードカードにシーズン番号とエピソード番号を表示します',
-			'settings.showSeasonPostersOnTabs' => 'タブにシーズンポスターを表示',
-			'settings.showSeasonPostersOnTabsDescription' => '各シーズンのポスターをタブの上に表示します',
 			'settings.tvFullCardLayout' => 'フルTVカード',
 			'settings.tvFullCardLayoutDescription' => 'TVカードを画像のみで表示し、出演者名を重ねて表示します',
 			'settings.focusGlow' => 'フォーカス時の光彩',
@@ -3443,10 +3439,10 @@ extension on TranslationsJa {
 			'fileInfo.optimizedVersion' => '最適化バージョン',
 			'fileInfo.optimizationTarget' => '最適化ターゲット',
 			'fileInfo.deletedAt' => '削除済み',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'リモートソース',
 			'fileInfo.infiniteStream' => '無限ストリーム',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'ダイレクト再生',
 			'fileInfo.directStream' => 'ダイレクトストリーム',
 			'fileInfo.transcoding' => 'トランスコード',
@@ -3957,10 +3953,10 @@ extension on TranslationsJa {
 			'libraries.filterCategories.year' => '年',
 			'libraries.filterCategories.contentRating' => '視聴年齢区分',
 			'libraries.filterCategories.tag' => 'タグ',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => '未視聴',
 			'libraries.filterCategories.unplayed' => '未再生',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'お気に入り',
 			'libraries.sortLabels.title' => 'タイトル',
 			'libraries.sortLabels.dateAdded' => '追加日',
@@ -4471,10 +4467,10 @@ extension on TranslationsJa {
 			'downloads.syncRuleAndDownloadsRemoved' => '同期ルールと関連するダウンロードを削除しました',
 			'downloads.syncRuleCleanupBusy' => '同期ルールが更新中です。しばらくしてからもう一度お試しください。',
 			'downloads.syncRuleCleanupUnavailable' => '関連するダウンロードを安全に特定できませんでした。サーバーに再接続して再試行するか、ダウンロードを削除せずにルールを削除してください。',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object title, required Object count}) => '${title}の新しいエピソードを${count}件同期しました',
 			'downloads.activeSyncRules' => '同期ルール',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => '同期ルールなし',
 			'downloads.manageSyncRule' => '同期を管理',
 			'downloads.editEpisodeCount' => 'エピソード数',

@@ -280,8 +280,6 @@ class _Translations$settings$az extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Seriallarda və mövsümlərdə baxılmamış seriya sayını göstər';
 	@override String get showEpisodeNumberOnCards => 'Kartlarda seriya nömrəsini göstər';
 	@override String get showEpisodeNumberOnCardsDescription => 'Seriya kartlarında mövsüm və seriya nömrəsini göstər';
-	@override String get showSeasonPostersOnTabs => 'Mərhələlərdə mövsüm posterlərini göstər';
-	@override String get showSeasonPostersOnTabsDescription => 'Hər mövsümün posterini öz bölməsinin üstündə göstər';
 	@override String get tvFullCardLayout => 'Tam TV kartları';
 	@override String get tvFullCardLayoutDescription => 'Aktyor adları üstündə olan yalnız şəkil tərkibli TV kartları istifadə et';
 	@override String get focusGlow => 'Fokus parıltısı';
@@ -3098,8 +3096,6 @@ extension on TranslationsAz {
 			'settings.showUnwatchedCountDescription' => 'Seriallarda və mövsümlərdə baxılmamış seriya sayını göstər',
 			'settings.showEpisodeNumberOnCards' => 'Kartlarda seriya nömrəsini göstər',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Seriya kartlarında mövsüm və seriya nömrəsini göstər',
-			'settings.showSeasonPostersOnTabs' => 'Mərhələlərdə mövsüm posterlərini göstər',
-			'settings.showSeasonPostersOnTabsDescription' => 'Hər mövsümün posterini öz bölməsinin üstündə göstər',
 			'settings.tvFullCardLayout' => 'Tam TV kartları',
 			'settings.tvFullCardLayoutDescription' => 'Aktyor adları üstündə olan yalnız şəkil tərkibli TV kartları istifadə et',
 			'settings.focusGlow' => 'Fokus parıltısı',
@@ -3453,10 +3449,10 @@ extension on TranslationsAz {
 			'fileInfo.optimizedVersion' => 'Optimallaşdırılmış versiya',
 			'fileInfo.optimizationTarget' => 'Optimallaşdırma hədəfi',
 			'fileInfo.deletedAt' => 'Silinib',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Uzaq mənbə',
 			'fileInfo.infiniteStream' => 'Sonsuz axın',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Birbaşa oynatma',
 			'fileInfo.directStream' => 'Birbaşa axın',
 			'fileInfo.transcoding' => 'Yenidən kodlaşdırma',
@@ -3967,10 +3963,10 @@ extension on TranslationsAz {
 			'libraries.filterCategories.year' => 'İl',
 			'libraries.filterCategories.contentRating' => 'Məzmun reytinqi',
 			'libraries.filterCategories.tag' => 'Teq',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Baxılmayıb',
 			'libraries.filterCategories.unplayed' => 'Oynadılmayıb',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Sevimlilər',
 			'libraries.sortLabels.title' => 'Ad',
 			'libraries.sortLabels.dateAdded' => 'Əlavə olunma tarixi',
@@ -4481,10 +4477,10 @@ extension on TranslationsAz {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Eyniləşdirmə qaydası və əlaqəli yükləmələr silindi',
 			'downloads.syncRuleCleanupBusy' => 'Eyniləşdirmə qaydaları hazırda yenilənir. Bir azdan təzədən cəhd edin.',
 			'downloads.syncRuleCleanupUnavailable' => 'Əlaqəli yükləmələr təhlükəsiz şəkildə müəyyən edilə bilmədi. Serverə yenidən qoşulub cəhd edin və ya qaydanı yükləmələri silmədən silin.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object title, required Object count}) => '${title} üçün ${count} yeni seriya eyniləşdirildi',
 			'downloads.activeSyncRules' => 'Eyniləşdirmə qaydaları',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Eyniləşdirmə qaydası yoxdur',
 			'downloads.manageSyncRule' => 'Eyniləşdirməni idarə et',
 			'downloads.editEpisodeCount' => 'Seriya sayı',

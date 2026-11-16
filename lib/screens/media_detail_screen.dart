@@ -39,6 +39,7 @@ import '../media/media_source_info.dart';
 import '../media/media_role.dart';
 import '../media/paged_media_list_state.dart';
 import '../widgets/media_card.dart';
+import '../widgets/media_grid_delegate.dart';
 import '../widgets/media_rating_badge.dart';
 import '../widgets/fitted_metadata_line.dart';
 import '../i18n/strings.g.dart';
@@ -96,7 +97,6 @@ import '../utils/tone_mapped_logo_image.dart';
 import '../widgets/episode_card.dart';
 import '../widgets/fitting_title_text.dart';
 import 'actor_media_screen.dart';
-import '../widgets/focusable_tab_chip.dart';
 import '../widgets/hub_section.dart';
 import '../widgets/ios_status_bar_tap_scroll_to_top.dart';
 import '../widgets/loading_indicator_box.dart';
@@ -388,7 +388,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   // Inline season tabs
   int _selectedSeasonIndex = 0;
   final _seasonEpisodePager = _SeasonEpisodePager();
-  List<FocusNode> _seasonTabFocusNodes = [];
 
   PagedMediaListState<MediaItem> get _selectedSeasonEpisodeState {
     if (_selectedSeasonIndex < 0 || _selectedSeasonIndex >= _seasons.length) {
@@ -413,8 +412,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     );
   }
 
-  final Map<int, GlobalKey<MediaContextMenuState>> _seasonContextMenuKeys = {};
-  final ScrollController _seasonTabsScrollController = ScrollController();
   final FocusNode _firstEpisodeFocusNode = FocusNode(debugLabel: 'first_episode');
   final FocusNode _lastEpisodeFocusNode = FocusNode(debugLabel: 'last_episode');
   final FocusNode _initialEpisodeFocusNode = FocusNode(debugLabel: 'initial_episode');
@@ -1008,10 +1005,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     _tvDetailInfoFocusNode.dispose();
     _infoRowsFocusNode.dispose();
     _extrasSelectLongPress.dispose();
-    for (final node in _seasonTabFocusNodes) {
-      node.dispose();
-    }
-    _seasonTabsScrollController.dispose();
     _firstEpisodeFocusNode.dispose();
     _lastEpisodeFocusNode.removeListener(_onLastEpisodeFocusChanged);
     _lastEpisodeFocusNode.dispose();
@@ -1740,7 +1733,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       }
 
       // Create focus nodes for season tabs
-      _updateSeasonTabFocusNodes(seasonsWithServerId.length);
 
       // Auto-select the on-deck season
       final onDeckSeasonIndex = _findOnDeckSeasonIndex(seasonsWithServerId);
@@ -1835,7 +1827,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     }).toList()..sort((a, b) => (a.index ?? 0).compareTo(b.index ?? 0));
 
     // Create focus nodes for season tabs and cache episodes per season
-    _updateSeasonTabFocusNodes(seasons.length);
     for (final entry in seasonMap.entries) {
       final seasonRatingKey = entry.value.first.parentId ?? '';
       final sortedEpisodes = entry.value..sort((a, b) => (a.index ?? 0).compareTo(b.index ?? 0));
@@ -1878,17 +1869,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       _episodes = _allEpisodes.items;
       _hasLoadedEpisodes = true;
     });
-  }
-
-  /// Create or update focus nodes for season tab chips
-  void _updateSeasonTabFocusNodes(int count) {
-    if (_seasonTabFocusNodes.length != count) {
-      for (final node in _seasonTabFocusNodes) {
-        node.dispose();
-      }
-      _seasonTabFocusNodes = List.generate(count, (i) => FocusNode(debugLabel: 'season_tab_$i'));
-      _seasonContextMenuKeys.clear();
-    }
   }
 
   /// Find the season index matching the initial selection or on-deck episode,
@@ -2241,8 +2221,11 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   /// Shared by cast UP, extras UP, and related hub UP handlers.
   void _focusSectionAboveCast() {
     final metadata = _fullMetadata ?? _metadata;
-    if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty && _seasonTabFocusNodes.isNotEmpty) {
-      _seasonTabFocusNodes[_selectedSeasonIndex].requestFocus();
+    if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty) {
+      // The season grid's tiles are ordinary cards in the traversal order, so
+      // there is no node of ours to hand focus to: scrolling the section into
+      // view puts them under the cursor and Flutter's own traversal takes it
+      // from there.
       _scrollSectionIntoView(_seasonsSectionKey);
     } else if (!PlatformDetector.isTV() && metadata.summary != null && metadata.summary!.isNotEmpty) {
       _overviewFocusNode.requestFocus();
@@ -2312,14 +2295,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       // Target never materialized (stale/deleted id) — fall back to the
       // season anchors below instead of retrying forever.
       if (!_initialEpisodePagingDone) return;
-    }
-
-    if (metadata.isShow &&
-        !_showEpisodesDirectly &&
-        _seasons.isNotEmpty &&
-        _seasonTabFocusNodes.length > _selectedSeasonIndex) {
-      _applyInitialMobileFocus(_seasonTabFocusNodes[_selectedSeasonIndex], _seasonsSectionKey);
-      return;
     }
 
     if (((metadata.isShow && _showEpisodesDirectly) || metadata.isSeason) && _episodes.isNotEmpty) {
@@ -2412,10 +2387,8 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   void _focusBelowOverview() {
     final metadata = _fullMetadata ?? _metadata;
 
-    // DOWN order: season tabs → episodes → cast → extras → related hubs → info rows.
-    if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty && _seasonTabFocusNodes.isNotEmpty) {
-      // Focus the selected season tab chip
-      _seasonTabFocusNodes[_selectedSeasonIndex].requestFocus();
+    // DOWN order: seasons → episodes → cast → extras → related hubs → info rows.
+    if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty) {
       _scrollSectionIntoView(_seasonsSectionKey);
       return;
     }
@@ -2453,168 +2426,66 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   /// the rendered cards can never disagree.
   double _getResponsiveCardWidth() => CastMemberStrip.responsiveCardWidth(context);
 
-  /// Show context menu for a season tab
-  void _showSeasonTabContextMenu(int index, {Offset? position}) {
-    final key = _seasonContextMenuKeys.putIfAbsent(index, () => GlobalKey<MediaContextMenuState>());
-    key.currentState?.showContextMenu(context, position: position);
-  }
-
-  /// Focus the currently selected season tab
-  void _focusSelectedSeasonTab() {
-    if (_seasonTabFocusNodes.length > _selectedSeasonIndex) {
-      _seasonTabFocusNodes[_selectedSeasonIndex].requestFocus();
-    }
-  }
-
-  /// Scroll a season tab into view within the horizontal scroll
-  void _scrollSeasonTabIntoView(int index) {
-    if (index < 0 || index >= _seasonTabFocusNodes.length) return;
-    scrollContextToCenter(_seasonTabFocusNodes[index].context);
-  }
-
-  /// Build inline season tab chips with LEFT/RIGHT/DOWN focus navigation
-  Widget _buildSeasonTabs() {
-    return SettingValueBuilder<bool>(
-      pref: SettingsService.showSeasonPostersOnTabs,
-      builder: (context, showPosters, _) => _buildSeasonTabsContent(context, showPosters),
-    );
-  }
-
-  Widget _buildSeasonTabsContent(BuildContext context, bool showPosters) {
-    final showSeasonPosters = showPosters && !PlatformDetector.isTV();
-
-    return HorizontalScrollWithArrows(
-      controller: _seasonTabsScrollController,
-      builder: (scrollController) => SingleChildScrollView(
-        controller: scrollController,
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: List.generate(_seasons.length, (index) {
-            final season = _seasons[index];
-            final contextMenuKey = _seasonContextMenuKeys.putIfAbsent(index, () => GlobalKey<MediaContextMenuState>());
-            Offset? tapPosition;
-            final posterPath = season.thumbPath;
-            Widget? topImage;
-            if (showSeasonPosters && posterPath != null && posterPath.isNotEmpty) {
-              const posterWidth = 72.0;
-              const posterHeight = 108.0;
-              final localArtwork = _buildOfflineArtworkIfAvailable(
-                context,
-                artworkPaths: [posterPath],
-                fit: BoxFit.cover,
-                imageType: ImageType.poster,
-                placeholder: (context, url) => const PlaceholderContainer(),
-                errorWidget: (context, url, error) => const PlaceholderContainer(),
-              );
-              topImage = SizedBox(
-                width: posterWidth,
-                height: posterHeight,
-                child:
-                    localArtwork ??
-                    (widget.isOffline
-                        ? const PlaceholderContainer()
-                        : Builder(
-                            builder: (context) {
-                              final pixelRatio = MediaImageHelper.artworkPixelRatio(context);
-                              final client = _getMediaClientForMetadata(context);
-                              final imageUrl = MediaImageHelper.getOptimizedImageUrl(
-                                client: client,
-                                thumbPath: posterPath,
-                                maxWidth: posterWidth,
-                                maxHeight: posterHeight,
-                                pixelRatio: pixelRatio,
-                                imageType: ImageType.poster,
-                              );
-                              final (memWidth, memHeight) = MediaImageHelper.getMemCacheDimensions(
-                                displayWidth: (posterWidth * pixelRatio).round(),
-                                displayHeight: (posterHeight * pixelRatio).round(),
-                                imageType: ImageType.poster,
-                              );
-                              return Image(
-                                image: MediaImageHelper.serverArtworkProvider(
-                                  imageUrl: imageUrl,
-                                  memWidth: memWidth,
-                                  memHeight: memHeight,
-                                ),
-                                fit: BoxFit.cover,
-                                filterQuality: MediaImageHelper.artworkFilterQuality(context, ImageType.poster),
-                                errorBuilder: (context, error, stackTrace) => const PlaceholderContainer(),
-                                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                                  if (wasSynchronouslyLoaded || frame != null) return child;
-                                  return const PlaceholderContainer();
-                                },
-                              );
-                            },
-                          )),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: MediaContextMenu(
-                key: contextMenuKey,
-                item: season,
-                onRefresh: (source) {
-                  _watchStateChanged = true;
-                  unawaited(_refreshItemInPlace(source));
-                },
-                onListRefresh: () {
-                  if (widget.isOffline) {
-                    _loadSeasonsFromDownloads();
-                  } else {
-                    _loadSeasons();
-                  }
-                },
-                child: GestureDetector(
-                  onTapDown: (details) => tapPosition = details.globalPosition,
-                  onLongPress: () => _showSeasonTabContextMenu(index, position: tapPosition),
-                  onSecondaryTapDown: (details) => tapPosition = details.globalPosition,
-                  onSecondaryTap: () => _showSeasonTabContextMenu(index, position: tapPosition),
-                  child: FocusableTabChip(
-                    label: season.title!,
-                    isSelected: index == _selectedSeasonIndex,
-                    topImage: topImage,
-                    focusNode: _seasonTabFocusNodes.length > index ? _seasonTabFocusNodes[index] : null,
-                    onSelect: () {
-                      if (index == _selectedSeasonIndex) return;
-                      setState(() => _selectedSeasonIndex = index);
-                      _fetchSeasonEpisodes(index);
-                    },
-                    onNavigateLeft: index > 0
-                        ? () {
-                            final newIndex = index - 1;
-                            setState(() => _selectedSeasonIndex = newIndex);
-                            _seasonTabFocusNodes[newIndex].requestFocus();
-                            _scrollSeasonTabIntoView(newIndex);
-                            _fetchSeasonEpisodes(newIndex);
-                          }
-                        : null,
-                    onNavigateRight: index < _seasons.length - 1
-                        ? () {
-                            final newIndex = index + 1;
-                            setState(() => _selectedSeasonIndex = newIndex);
-                            _seasonTabFocusNodes[newIndex].requestFocus();
-                            _scrollSeasonTabIntoView(newIndex);
-                            _fetchSeasonEpisodes(newIndex);
-                          }
-                        : null,
-                    onNavigateDown: () {
-                      if (PlatformDetector.isTV()) {
-                        _tvDetailRailKey.currentState?.requestFocus();
-                        return;
-                      }
-                      _firstEpisodeFocusNode.requestFocus();
-                    },
-                    onLongPress: () => _showSeasonTabContextMenu(index),
-                    onBack: () {
-                      Navigator.of(context).maybePop();
-                    },
-                  ),
-                ),
-              ),
+  /// The show's seasons as artwork, in place of the chip strip that used to
+  /// select one in-page.
+  ///
+  /// Each tile is a [MediaCard], so a season keeps the context menu the chips
+  /// gave it — which is where "mark season watched" lives — along with the
+  /// watched indicator and unwatched count every other poster in the app
+  /// carries. [MediaCard.posterPathOverride] supplies the one thing a season
+  /// needs here that it must not have elsewhere: its own artwork instead of
+  /// the show's, since every tile on this screen belongs to the same show.
+  ///
+  /// Opening a tile pushes the season's own screen. That works because
+  /// `detailSubjectTargetFor` stopped rewriting a season into its show when
+  /// this grid replaced the strip.
+  Widget _buildSeasonGrid() {
+    return SettingsBuilder(
+      prefs: const [SettingsService.libraryDensity],
+      builder: (context) {
+        final density = SettingsService.instance.read(SettingsService.libraryDensity);
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final geometry = MediaGridGeometry.resolve(
+              context: context,
+              crossAxisExtent: constraints.maxWidth,
+              density: density,
+              shape: CardShape.poster,
             );
-          }),
-        ),
-      ),
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: .zero,
+              addAutomaticKeepAlives: false,
+              addSemanticIndexes: false,
+              gridDelegate: geometry.delegate,
+              itemCount: _seasons.length,
+              itemBuilder: (context, index) {
+                final season = _seasons[index];
+                return MediaCard(
+                  key: ValueKey(season.globalKey),
+                  item: season,
+                  width: geometry.itemWidth,
+                  posterPathOverride: season.thumbPath,
+                  isOffline: widget.isOffline,
+                  forceGridMode: true,
+                  onRefresh: (source) {
+                    _watchStateChanged = true;
+                    unawaited(_refreshItemInPlace(source));
+                  },
+                  onListRefresh: () {
+                    if (widget.isOffline) {
+                      _loadSeasonsFromDownloads();
+                    } else {
+                      unawaited(_loadSeasons());
+                    }
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -2839,9 +2710,11 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           focusNode: _episodeListFocusNode(episode: episode, index: index, hasPinnedLastEpisode: hasPinnedLastEpisode),
           onNavigateUp: index == 0
               ? () {
-                  if (!_showEpisodesDirectly) {
-                    _focusSelectedSeasonTab();
-                  } else if (!PlatformDetector.isTV() && (_fullMetadata ?? _metadata).summary?.isNotEmpty == true) {
+                  // This list only renders where the episodes are the page —
+                  // a season's own screen, or a show the server flattens — so
+                  // UP from the first row goes to the overview or the hero.
+                  // There is no season strip above it any more.
+                  if (!PlatformDetector.isTV() && (_fullMetadata ?? _metadata).summary?.isNotEmpty == true) {
                     _overviewFocusNode.requestFocus();
                     _scrollSectionIntoView(_overviewSectionKey);
                   } else {
@@ -3502,23 +3375,14 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                                   else ...[
                                     Text(
                                       key: _seasonsSectionKey,
-                                      t.libraries.groupings.episodes,
+                                      t.libraries.groupings.seasons,
                                       style: sectionTitleStyle,
                                     ),
                                     const SizedBox(height: 12),
-                                    _buildSeasonTabs(),
-                                    const SizedBox(height: 16),
-                                    if (_isLoadingSeasonEpisodes)
-                                      _sectionLoading
-                                    else if (_seasonEpisodesFirstPageError && _episodes.isEmpty)
-                                      _sectionError(
-                                        t.messages.episodesLoadFailed,
-                                        () => unawaited(_fetchSeasonEpisodes(_selectedSeasonIndex)),
-                                      )
-                                    else if (_episodes.isNotEmpty)
-                                      _buildEpisodesList()
-                                    else
-                                      _sectionEmpty(context, t.messages.noEpisodesFoundGeneral),
+                                    // Episodes are a level down now: a season
+                                    // opens its own screen rather than filling
+                                    // the rest of this one.
+                                    _buildSeasonGrid(),
                                   ],
                                   SizedBox(height: isTv ? 24 : 12),
                                 ] else if ((isShow && _showEpisodesDirectly) || metadata.isSeason) ...[

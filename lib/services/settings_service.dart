@@ -865,7 +865,6 @@ class SettingsService extends BaseSharedPreferencesService {
   /// and unwatched counts are unaffected.
   static const showWatchedIndicators = BoolPref('show_watched_indicators', defaultValue: true);
   static const showEpisodeNumberOnCards = BoolPref('show_episode_number_on_cards', defaultValue: true);
-  static const showSeasonPostersOnTabs = BoolPref('show_season_posters_on_tabs');
   static const hideSpoilers = BoolPref('hide_spoilers');
   static const showNavBarLabels = BoolPref('show_nav_bar_labels', defaultValue: true);
   static const globalShaderPreset = StringPref('global_shader_preset', defaultValue: 'none');
@@ -1531,7 +1530,6 @@ class SettingsService extends BaseSharedPreferencesService {
     showUnwatchedCount,
     showWatchedIndicators,
     showEpisodeNumberOnCards,
-    showSeasonPostersOnTabs,
     hideSpoilers,
     showNavBarLabels,
     globalShaderPreset,

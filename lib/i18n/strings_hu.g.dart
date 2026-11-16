@@ -280,8 +280,6 @@ class _Translations$settings$hu extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Megjeleníti a még nem látott epizódok számát a sorozatoknál és évadoknál';
 	@override String get showEpisodeNumberOnCards => 'Epizódszám megjelenítése a kártyákon';
 	@override String get showEpisodeNumberOnCardsDescription => 'Megjeleníti az évad- és epizódszámot az epizódkártyákon';
-	@override String get showSeasonPostersOnTabs => 'Évadborítók megjelenítése a füleken';
-	@override String get showSeasonPostersOnTabsDescription => 'Megjeleníti az egyes évadok borítóját a fülük felett';
 	@override String get tvFullCardLayout => 'Teljes TV-kártyák';
 	@override String get tvFullCardLayoutDescription => 'Csak képet tartalmazó TV-kártyák használata, rájuk helyezett színésznevekkel';
 	@override String get focusGlow => 'Kijelölési ragyogás';
@@ -3098,8 +3096,6 @@ extension on TranslationsHu {
 			'settings.showUnwatchedCountDescription' => 'Megjeleníti a még nem látott epizódok számát a sorozatoknál és évadoknál',
 			'settings.showEpisodeNumberOnCards' => 'Epizódszám megjelenítése a kártyákon',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Megjeleníti az évad- és epizódszámot az epizódkártyákon',
-			'settings.showSeasonPostersOnTabs' => 'Évadborítók megjelenítése a füleken',
-			'settings.showSeasonPostersOnTabsDescription' => 'Megjeleníti az egyes évadok borítóját a fülük felett',
 			'settings.tvFullCardLayout' => 'Teljes TV-kártyák',
 			'settings.tvFullCardLayoutDescription' => 'Csak képet tartalmazó TV-kártyák használata, rájuk helyezett színésznevekkel',
 			'settings.focusGlow' => 'Kijelölési ragyogás',
@@ -3453,10 +3449,10 @@ extension on TranslationsHu {
 			'fileInfo.optimizedVersion' => 'Optimalizált verzió',
 			'fileInfo.optimizationTarget' => 'Optimalizálási cél',
 			'fileInfo.deletedAt' => 'Törölve',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Távoli forrás',
 			'fileInfo.infiniteStream' => 'Végtelen adatfolyam',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Közvetlen lejátszás',
 			'fileInfo.directStream' => 'Közvetlen adatfolyam',
 			'fileInfo.transcoding' => 'Átkódolás',
@@ -3967,10 +3963,10 @@ extension on TranslationsHu {
 			'libraries.filterCategories.year' => 'Év',
 			'libraries.filterCategories.contentRating' => 'Korhatár-besorolás',
 			'libraries.filterCategories.tag' => 'Címke',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Nem látott',
 			'libraries.filterCategories.unplayed' => 'Nem lejátszott',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Kedvencek',
 			'libraries.sortLabels.title' => 'Cím',
 			'libraries.sortLabels.dateAdded' => 'Hozzáadás dátuma',
@@ -4481,10 +4477,10 @@ extension on TranslationsHu {
 			'downloads.syncRuleAndDownloadsRemoved' => 'A szinkronszabály és a kapcsolódó letöltések eltávolítva',
 			'downloads.syncRuleCleanupBusy' => 'A szinkronszabályok éppen frissülnek. Próbálja újra egy pillanat múlva.',
 			'downloads.syncRuleCleanupUnavailable' => 'A kapcsolódó letöltések nem azonosíthatók biztonságosan. Csatlakoztassa újra a szervert, és próbálja újra, vagy távolítsa el a szabályt a letöltések törlése nélkül.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => '${count} új epizód szinkronizálva a következőhöz: ${title}',
 			'downloads.activeSyncRules' => 'Szinkronizálási szabályok',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Nincsenek szinkronizálási szabályok',
 			'downloads.manageSyncRule' => 'Szinkronizálás kezelése',
 			'downloads.editEpisodeCount' => 'Epizódszám',

@@ -266,15 +266,19 @@ Future<MediaNavigationResult> navigateToMediaItem(
 /// the episode and the action row plays it. Resolving it through
 /// [mediaDetailNavigationTargetFor] instead would open the containing season
 /// focused on that row — usually the very screen the episode was activated
-/// from, so it reads as nothing having happened. A season still resolves to
-/// its show, because the show screen with that season selected *is* the season
-/// view; and "Go to series" wants the containing show, so it calls
-/// [mediaDetailNavigationTargetFor] directly.
+/// from, so it reads as nothing having happened.
+///
+/// A season is its own subject for the same reason. It used to resolve to its
+/// show, because the show screen with that season selected *was* the season
+/// view; now the show screen is a grid of seasons, so sending a season there
+/// would land the viewer back on the grid they just chose from.
+/// [mediaDetailNavigationTargetFor] still performs the rewrite, which is what
+/// "Go to series" and an episode's route up the hierarchy want.
 ///
 /// [metadataOverride] means the caller has already fetched the subject it
-/// wants shown, so it is honoured ahead of the episode rule.
+/// wants shown, so it is honoured ahead of these rules.
 MediaDetailNavigationTarget detailSubjectTargetFor(MediaItem mi, {MediaItem? metadataOverride}) =>
-    mi.isEpisode && metadataOverride == null
+    (mi.isEpisode || mi.isSeason) && metadataOverride == null
     ? MediaDetailNavigationTarget(metadata: mi)
     : mediaDetailNavigationTargetFor(mi, metadataOverride: metadataOverride);
 
