@@ -280,8 +280,6 @@ class _Translations$settings$bg extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Показвай броя негледани епизоди при сериали и сезони';
 	@override String get showEpisodeNumberOnCards => 'Показвай номера на епизода върху картите';
 	@override String get showEpisodeNumberOnCardsDescription => 'Показвай сезон и номер на епизод върху картите на епизодите';
-	@override String get showSeasonPostersOnTabs => 'Показвай постери на сезоните в табовете';
-	@override String get showSeasonPostersOnTabsDescription => 'Показвай постера на всеки сезон над неговия таб';
 	@override String get tvFullCardLayout => 'Пълни телевизионни карти';
 	@override String get tvFullCardLayoutDescription => 'Използвай телевизионни карти само с изображения и насложени имена на актьорите';
 	@override String get focusGlow => 'Сияние при фокус';
@@ -3098,8 +3096,6 @@ extension on TranslationsBg {
 			'settings.showUnwatchedCountDescription' => 'Показвай броя негледани епизоди при сериали и сезони',
 			'settings.showEpisodeNumberOnCards' => 'Показвай номера на епизода върху картите',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Показвай сезон и номер на епизод върху картите на епизодите',
-			'settings.showSeasonPostersOnTabs' => 'Показвай постери на сезоните в табовете',
-			'settings.showSeasonPostersOnTabsDescription' => 'Показвай постера на всеки сезон над неговия таб',
 			'settings.tvFullCardLayout' => 'Пълни телевизионни карти',
 			'settings.tvFullCardLayoutDescription' => 'Използвай телевизионни карти само с изображения и насложени имена на актьорите',
 			'settings.focusGlow' => 'Сияние при фокус',
@@ -3453,10 +3449,10 @@ extension on TranslationsBg {
 			'fileInfo.optimizedVersion' => 'Оптимизирана версия',
 			'fileInfo.optimizationTarget' => 'Цел на оптимизацията',
 			'fileInfo.deletedAt' => 'Изтрит',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Отдалечен източник',
 			'fileInfo.infiniteStream' => 'Безкраен поток',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Директно възпроизвеждане',
 			'fileInfo.directStream' => 'Директен поток',
 			'fileInfo.transcoding' => 'Транскодиране',
@@ -3967,10 +3963,10 @@ extension on TranslationsBg {
 			'libraries.filterCategories.year' => 'Година',
 			'libraries.filterCategories.contentRating' => 'Възрастов рейтинг',
 			'libraries.filterCategories.tag' => 'Таг',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Негледани',
 			'libraries.filterCategories.unplayed' => 'Непускани',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Любими',
 			'libraries.sortLabels.title' => 'Заглавие',
 			'libraries.sortLabels.dateAdded' => 'Дата на добавяне',
@@ -4481,10 +4477,10 @@ extension on TranslationsBg {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Правилото за синхронизация и свързаните изтегляния са премахнати',
 			'downloads.syncRuleCleanupBusy' => 'Правилата за синхронизация в момента се обновяват. Опитайте отново след малко.',
 			'downloads.syncRuleCleanupUnavailable' => 'Свързаните изтегляния не можаха да бъдат идентифицирани безопасно. Свържете се отново със сървъра и опитайте отново, или премахнете правилото, без да изтривате изтеглянията.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => 'Синхронизирани са ${count} нови епизода за ${title}',
 			'downloads.activeSyncRules' => 'Правила за синхронизация',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Няма правила за синхронизация',
 			'downloads.manageSyncRule' => 'Управление на синхронизацията',
 			'downloads.editEpisodeCount' => 'Брой епизоди',

@@ -280,8 +280,6 @@ class _Translations$settings$uz extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Seriallar va mavsumlarda koʻrilmagan qismlar sonini koʻrsatish';
 	@override String get showEpisodeNumberOnCards => 'Kartochkalarda qism raqamini koʻrsatish';
 	@override String get showEpisodeNumberOnCardsDescription => 'Qism kartochkalarida mavsum va qism raqamini koʻrsatish';
-	@override String get showSeasonPostersOnTabs => 'Varaqlarda mavsum posterlarini koʻrsatish';
-	@override String get showSeasonPostersOnTabsDescription => 'Har bir mavsum posterini oʻz boʻlimida koʻrsatish';
 	@override String get tvFullCardLayout => 'Toʻliq TV kartochkalari';
 	@override String get tvFullCardLayoutDescription => 'Faqat rasmdan iborat TV kartochkalaridan foydalanish';
 	@override String get focusGlow => 'Fokus nuri';
@@ -3098,8 +3096,6 @@ extension on TranslationsUz {
 			'settings.showUnwatchedCountDescription' => 'Seriallar va mavsumlarda koʻrilmagan qismlar sonini koʻrsatish',
 			'settings.showEpisodeNumberOnCards' => 'Kartochkalarda qism raqamini koʻrsatish',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Qism kartochkalarida mavsum va qism raqamini koʻrsatish',
-			'settings.showSeasonPostersOnTabs' => 'Varaqlarda mavsum posterlarini koʻrsatish',
-			'settings.showSeasonPostersOnTabsDescription' => 'Har bir mavsum posterini oʻz boʻlimida koʻrsatish',
 			'settings.tvFullCardLayout' => 'Toʻliq TV kartochkalari',
 			'settings.tvFullCardLayoutDescription' => 'Faqat rasmdan iborat TV kartochkalaridan foydalanish',
 			'settings.focusGlow' => 'Fokus nuri',
@@ -3453,10 +3449,10 @@ extension on TranslationsUz {
 			'fileInfo.optimizedVersion' => 'Optimallashtirilgan versiya',
 			'fileInfo.optimizationTarget' => 'Optimallashtirish maqsadi',
 			'fileInfo.deletedAt' => 'Oʻchirilgan',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Masofaviy manba',
 			'fileInfo.infiniteStream' => 'Cheksiz oqim',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Toʻgʻridan-toʻgʻri ijro',
 			'fileInfo.directStream' => 'Toʻgʻridan-toʻgʻri oqim',
 			'fileInfo.transcoding' => 'Qayta kodlash',
@@ -3967,10 +3963,10 @@ extension on TranslationsUz {
 			'libraries.filterCategories.year' => 'Yil',
 			'libraries.filterCategories.contentRating' => 'Kontent reytingi',
 			'libraries.filterCategories.tag' => 'Teg',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Koʻrilmagan',
 			'libraries.filterCategories.unplayed' => 'Eshitilmagan',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Tanlanganlar',
 			'libraries.sortLabels.title' => 'Nomi',
 			'libraries.sortLabels.dateAdded' => 'Qoʻshilgan sanasi',
@@ -4481,10 +4477,10 @@ extension on TranslationsUz {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Sinxronlash qoidasi va bogʻliq yuklamalar oʻchirildi',
 			'downloads.syncRuleCleanupBusy' => 'Sinxronlash qoidalari hozir yangilanmoqda. Bir ozdan soʻng qayta urinib koʻring.',
 			'downloads.syncRuleCleanupUnavailable' => 'Bogʻliq yuklamalarni xavfsiz aniqlab boʻlmadi. Serverga qayta ulanib koʻring yoki yuklamalarni oʻchirmasdan qoidani olib tashlang.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object title, required Object count}) => '${title} uchun ${count} yangi qism sinxronlandi',
 			'downloads.activeSyncRules' => 'Faol sinxronlash qoidalari',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Sinxronlash qoidalari yoʻq',
 			'downloads.manageSyncRule' => 'Sinxronlashni boshqarish',
 			'downloads.editEpisodeCount' => 'Qismlar soni',

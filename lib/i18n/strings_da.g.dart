@@ -280,8 +280,6 @@ class _Translations$settings$da extends Translations$settings$en {
 	@override String get showUnwatchedCountDescription => 'Vis antal usete episoder på serier og sæsoner';
 	@override String get showEpisodeNumberOnCards => 'Vis episodenummer på kort';
 	@override String get showEpisodeNumberOnCardsDescription => 'Vis sæson- og episodenummer på episodekort';
-	@override String get showSeasonPostersOnTabs => 'Vis sæsonplakater på faner';
-	@override String get showSeasonPostersOnTabsDescription => 'Vis hver sæsons plakat over dens fane';
 	@override String get tvFullCardLayout => 'TV-kort med billeder over hele fladen';
 	@override String get tvFullCardLayoutDescription => 'Brug TV-kort, der kun viser billeder, med skuespillernavnene ovenpå';
 	@override String get focusGlow => 'Fokusglød';
@@ -3098,8 +3096,6 @@ extension on TranslationsDa {
 			'settings.showUnwatchedCountDescription' => 'Vis antal usete episoder på serier og sæsoner',
 			'settings.showEpisodeNumberOnCards' => 'Vis episodenummer på kort',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Vis sæson- og episodenummer på episodekort',
-			'settings.showSeasonPostersOnTabs' => 'Vis sæsonplakater på faner',
-			'settings.showSeasonPostersOnTabsDescription' => 'Vis hver sæsons plakat over dens fane',
 			'settings.tvFullCardLayout' => 'TV-kort med billeder over hele fladen',
 			'settings.tvFullCardLayoutDescription' => 'Brug TV-kort, der kun viser billeder, med skuespillernavnene ovenpå',
 			'settings.focusGlow' => 'Fokusglød',
@@ -3453,10 +3449,10 @@ extension on TranslationsDa {
 			'fileInfo.optimizedVersion' => 'Optimeret version',
 			'fileInfo.optimizationTarget' => 'Optimeringsmål',
 			'fileInfo.deletedAt' => 'Slettet',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.remoteSource' => 'Fjernkilde',
 			'fileInfo.infiniteStream' => 'Uendelig strøm',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Direkte afspilning',
 			'fileInfo.directStream' => 'Direkte strømning',
 			'fileInfo.transcoding' => 'Transkodning',
@@ -3967,10 +3963,10 @@ extension on TranslationsDa {
 			'libraries.filterCategories.year' => 'År',
 			'libraries.filterCategories.contentRating' => 'Aldersvurdering',
 			'libraries.filterCategories.tag' => 'Tag',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.unwatched' => 'Usete',
 			'libraries.filterCategories.unplayed' => 'Ikke afspillet',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Favoritter',
 			'libraries.sortLabels.title' => 'Titel',
 			'libraries.sortLabels.dateAdded' => 'Tilføjet dato',
@@ -4481,10 +4477,10 @@ extension on TranslationsDa {
 			'downloads.syncRuleAndDownloadsRemoved' => 'Synkroniseringsregel og tilknyttede downloads fjernet',
 			'downloads.syncRuleCleanupBusy' => 'Synkroniseringsregler opdateres lige nu. Prøv igen om et øjeblik.',
 			'downloads.syncRuleCleanupUnavailable' => 'Tilknyttede downloads kunne ikke identificeres sikkert. Genopret forbindelse til serveren og prøv igen, eller fjern reglen uden at slette downloads.',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => 'Synkroniserede ${count} nye episoder for ${title}',
 			'downloads.activeSyncRules' => 'Synkroniseringsregler',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Ingen synkroniseringsregler',
 			'downloads.manageSyncRule' => 'Administrer synkronisering',
 			'downloads.editEpisodeCount' => 'Antal episoder',

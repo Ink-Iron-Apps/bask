@@ -70,7 +70,7 @@ void main() {
     expect(target.initialEpisodeId, 'episode-1');
   });
 
-  test('a season opened as its own subject still resolves to its show', () {
+  test('a season opened as its own subject stays the season', () {
     final season = testMediaItem(
       id: 'season-3',
       backend: MediaBackend.jellyfin,
@@ -84,8 +84,11 @@ void main() {
 
     final target = detailSubjectTargetFor(season);
 
-    expect(target.metadata.id, 'show-1');
-    expect(target.initialSeasonId, 'season-3');
+    // The show screen is a grid of seasons now, so resolving to the show would
+    // put the viewer back on the grid they just chose from.
+    expect(target.metadata.id, 'season-3');
+    expect(target.metadata.kind, MediaKind.season);
+    expect(target.initialSeasonId, isNull);
   });
 
   test('season detail target opens parent show and focuses season', () {

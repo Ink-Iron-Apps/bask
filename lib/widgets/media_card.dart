@@ -246,6 +246,16 @@ class MediaCard extends StatefulWidget {
   /// Paint-time black tint amount for the artwork, from 0 (clear) to 1 (black).
   final Animation<double>? artworkDim;
 
+  /// Artwork to draw in place of the one the item resolves for itself, with
+  /// that one kept as the fallback.
+  ///
+  /// The season grid is why this exists. Everywhere else a season card wears
+  /// the show's poster on purpose ([MediaItem.posterThumb] prefers
+  /// `grandparentThumbPath`), because a lone season in a mixed row reads as
+  /// the show. A grid *of* one show's seasons is the opposite case: every
+  /// card would be the same picture.
+  final String? posterPathOverride;
+
   /// Overrides the silhouette inferred from the item itself. Collection and
   /// playlist records do not encode the media-library shape, so their owning
   /// surface supplies this for music libraries.
@@ -277,6 +287,7 @@ class MediaCard extends StatefulWidget {
     this.showTitleImplied = false,
     this.artworkDim,
     this.cardShapeOverride,
+    this.posterPathOverride,
   }) : usesContinueWatchingAction = usesContinueWatchingAction ?? isInContinueWatching;
 
   @override
@@ -645,6 +656,7 @@ class MediaCardState extends State<MediaCard> with ContextMenuTapMixin<MediaCard
                 knownWidth: _catalogItem != null ? posterWidth : (posterHeight != null ? posterWidth : null),
                 knownHeight: posterHeight,
                 artworkDim: widget.artworkDim,
+                posterPathOverride: widget.posterPathOverride,
               ),
             ),
             if (item is MediaItem && _showsWatchedIndicator(item)) WatchedIndicator(item: item),
@@ -1081,6 +1093,7 @@ Widget _buildPosterImage(
   double? knownWidth,
   double? knownHeight,
   Animation<double>? artworkDim,
+  String? posterPathOverride,
 }) {
   if (item is MediaPlaylist) {
     return OptimizedMediaImage(
@@ -1109,8 +1122,13 @@ Widget _buildPosterImage(
       CardShape.poster => ImageType.poster,
       null => MediaImageHelper.cardImageType(item, episodePosterMode, mixedHubContext: mixedHubContext),
     };
-    final defaultPosterUrl = item.posterThumb(mode: episodePosterMode, mixedHubContext: mixedHubContext);
-    final defaultFallbackUrl = item.posterThumbFallback(mode: episodePosterMode, mixedHubContext: mixedHubContext);
+    final resolvedPosterUrl = item.posterThumb(mode: episodePosterMode, mixedHubContext: mixedHubContext);
+    // An override does not discard the item's own answer, it demotes it: a
+    // season with no art of its own still has the show's to fall back on.
+    final defaultPosterUrl = posterPathOverride ?? resolvedPosterUrl;
+    final defaultFallbackUrl = posterPathOverride != null && posterPathOverride != resolvedPosterUrl
+        ? resolvedPosterUrl
+        : item.posterThumbFallback(mode: episodePosterMode, mixedHubContext: mixedHubContext);
     final targetPx = knownWidth != null && knownWidth.isFinite && knownWidth > 0
         ? MediaImageHelper.artworkTargetPx(context, knownWidth, imageType: imageType)
         : null;
