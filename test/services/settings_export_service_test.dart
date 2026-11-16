@@ -12,6 +12,10 @@ import 'package:plezy/services/settings_export_service.dart';
 import 'package:plezy/services/settings_service.dart';
 import 'package:plezy/services/trackers/tracker_constants.dart';
 
+import 'package:path/path.dart' as p;
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+import '../test_helpers/io_fakes.dart';
 import '../test_helpers/prefs.dart';
 
 void main() {
@@ -960,6 +964,83 @@ void main() {
     test('missing active profile rejects before opening the picker', () async {
       await expectLater(SettingsExportService.importFromFile(), throwsA(isA<NoUserSignedInException>()));
       expect(picker.pickCalls, 0);
+    });
+  });
+
+  // Android TV has no document picker, so an export there is written to the
+  // app's documents directory. These cover reading one back without a picker,
+  // which is the half that was missing: the TV could write a file it had no
+  // way to open again.
+  group('local export directory', () {
+    late Directory root;
+
+    setUp(() async {
+      root = await Directory.systemTemp.createTemp('plezy_local_export_test_');
+      PathProviderPlatform.instance = FakePathProvider(root);
+    });
+
+    tearDown(() async {
+      if (await root.exists()) await root.delete(recursive: true);
+    });
+
+    Future<File> writeExport(String name, {required DateTime modified, bool enableHdr = true}) async {
+      final dir = Directory(p.join(root.path, 'documents'))..createSync(recursive: true);
+      final file = File(p.join(dir.path, name));
+      await file.writeAsString(
+        jsonEncode({
+          'formatVersion': SettingsExportService.formatVersion,
+          'prefs': {
+            'enable_hdr': {'type': 'bool', 'value': enableHdr},
+          },
+        }),
+      );
+      await file.setLastModified(modified);
+      return file;
+    }
+
+    test('lists only exports, newest first', () async {
+      await writeExport('plezy-settings-20260101.json', modified: DateTime(2026, 1, 1));
+      await writeExport('plezy-settings-20260601.json', modified: DateTime(2026, 6, 1));
+      final stray = File(p.join(root.path, 'documents', 'notes.txt'))..writeAsStringSync('not an export');
+      expect(stray.existsSync(), isTrue);
+
+      final found = await SettingsExportService.listLocalExports();
+
+      expect(found.map((f) => f.fileName), ['plezy-settings-20260601.json', 'plezy-settings-20260101.json']);
+    });
+
+    test('an empty directory offers nothing rather than throwing', () async {
+      Directory(p.join(root.path, 'documents')).createSync(recursive: true);
+      expect(await SettingsExportService.listLocalExports(), isEmpty);
+    });
+
+    test('imports a listed file without going near the picker', () async {
+      final prefs = await BaseSharedPreferencesService.sharedCache();
+      await prefs.setString('active_app_profile_id', 'profile-a');
+      await prefs.setBool('enable_hdr', false);
+      final file = await writeExport('plezy-settings-20260601.json', modified: DateTime(2026, 6, 1));
+
+      final result = await SettingsExportService.importFromPath(file.path);
+
+      expect(result?.keysImported, 1);
+      expect(prefs.getBool('enable_hdr'), isTrue);
+      expect(picker.pickCalls, 0);
+    });
+
+    test('a path that is not there reads as an invalid export, not a crash', () async {
+      final prefs = await BaseSharedPreferencesService.sharedCache();
+      await prefs.setString('active_app_profile_id', 'profile-a');
+
+      await expectLater(
+        SettingsExportService.importFromPath(p.join(root.path, 'documents', 'gone.json')),
+        throwsA(isA<InvalidExportFileException>()),
+      );
+    });
+
+    test('a signed-out import is refused before the file is read', () async {
+      final file = await writeExport('plezy-settings-20260601.json', modified: DateTime(2026, 6, 1));
+
+      await expectLater(SettingsExportService.importFromPath(file.path), throwsA(isA<NoUserSignedInException>()));
     });
   });
 }

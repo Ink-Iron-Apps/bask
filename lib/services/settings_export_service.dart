@@ -10,19 +10,45 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../database/app_database.dart';
 import '../models/shader_preset.dart';
 import '../i18n/strings.g.dart';
 import '../utils/app_logger.dart';
 import '../utils/formatters.dart';
 import '../utils/platform_detector.dart';
 import 'file_picker_service.dart';
+import 'settings_credential_export.dart';
 import 'settings_service.dart';
 import 'storage_service.dart';
+
+/// An export file sitting in the app's own documents directory, which is
+/// where [SettingsExportService.exportToFile] leaves one on a TV.
+class LocalExportFile {
+  final String path;
+  final String fileName;
+  final DateTime modified;
+
+  const LocalExportFile({required this.path, required this.fileName, required this.modified});
+}
 
 class ImportResult {
   final int keysImported;
   final int keysSkipped;
-  const ImportResult({required this.keysImported, required this.keysSkipped});
+
+  /// What the credential section restored, or null when the file had none or
+  /// no passphrase was supplied for it.
+  final CredentialImportResult? credentials;
+
+  /// The file carried credentials that were left alone, because no passphrase
+  /// was offered. The UI says so rather than reporting a clean import.
+  final bool credentialsSkipped;
+
+  const ImportResult({
+    required this.keysImported,
+    required this.keysSkipped,
+    this.credentials,
+    this.credentialsSkipped = false,
+  });
 }
 
 class SettingsExportException implements Exception {
@@ -75,6 +101,13 @@ class _StoredPreferenceValue {
 class SettingsExportService {
   static const int formatVersion = 1;
   static const String fileExtension = 'json';
+
+  /// Key of the optional passphrase-encrypted credential section.
+  ///
+  /// Its absence is the normal case: an export is settings only unless the
+  /// viewer asked for sign-ins and typed a passphrase. A file that has it is
+  /// a credential file and should be treated like one.
+  static const String credentialsKey = 'credentials';
 
   // Type markers written into the export JSON. One per SharedPreferences setter.
   static const String _typeBool = 'bool';
@@ -425,7 +458,13 @@ class SettingsExportService {
   /// cancelled the picker.
   ///
   /// Platform and filesystem failures retain their original exception types.
-  static Future<String?> exportToFile() async {
+  /// Writes an export file and returns where it landed.
+  ///
+  /// [credentialPassphrase] and [database] together add the credential
+  /// section; either alone exports settings only. Nothing is encrypted with a
+  /// passphrase the viewer did not type, and a settings-only file stays safe
+  /// to pass around.
+  static Future<String?> exportToFile({AppDatabase? database, String? credentialPassphrase}) async {
     final prefs = (await SettingsService.getInstance()).prefs;
     final storage = await StorageService.getInstance();
     String appVersion = '';
@@ -437,13 +476,17 @@ class SettingsExportService {
     }
 
     final exportMap = buildExportMap(prefs, currentUserUuid: storage.activeUserScope(), appVersion: appVersion);
+    if (database != null && credentialPassphrase != null && credentialPassphrase.isNotEmpty) {
+      final payload = await CredentialPortability.gather(database: database, prefs: prefs);
+      exportMap[credentialsKey] = await CredentialExportEnvelope.seal(payload, credentialPassphrase);
+    }
     final jsonString = const JsonEncoder.withIndent('  ').convert(exportMap);
     final bytes = Uint8List.fromList(utf8.encode(jsonString));
     final fileName = await _defaultFileName();
 
     // Android TV has no document picker — write to the app docs dir and let
     // the caller surface the path.
-    if (Platform.isAndroid && PlatformDetector.isTV()) {
+    if (usesLocalExportDirectory) {
       return _writeToAppDocuments(fileName, bytes);
     }
 
@@ -469,7 +512,10 @@ class SettingsExportService {
   /// Returns `null` if the user cancelled. Malformed files throw
   /// [InvalidExportFileException]; platform and filesystem failures retain
   /// their original exception types.
-  static Future<ImportResult?> importFromFile() async {
+  static Future<ImportResult?> importFromFile({
+    AppDatabase? database,
+    Future<String?> Function()? passphraseProvider,
+  }) async {
     final storage = await StorageService.getInstance();
     final uuid = storage.activeUserScope();
     if (uuid == null || uuid.isEmpty) {
@@ -498,6 +544,59 @@ class SettingsExportService {
       throw const InvalidExportFileException('Could not read the selected file');
     }
 
+    return _applyImportContents(contents, uuid, database: database, passphraseProvider: passphraseProvider);
+  }
+
+  /// Imports an export already on disk, for platforms with no document picker.
+  ///
+  /// Android TV is the case: [exportToFile] drops the file in the app's own
+  /// documents directory there because the picker does not exist, and without
+  /// this the file it wrote could never be read back on the same device.
+  static Future<ImportResult?> importFromPath(
+    String path, {
+    AppDatabase? database,
+    Future<String?> Function()? passphraseProvider,
+  }) async {
+    final storage = await StorageService.getInstance();
+    final uuid = storage.activeUserScope();
+    if (uuid == null || uuid.isEmpty) {
+      throw const NoUserSignedInException();
+    }
+
+    final String contents;
+    try {
+      contents = await File(path).readAsString();
+    } on FileSystemException {
+      throw const InvalidExportFileException('Could not read the selected file');
+    } on FormatException {
+      throw const InvalidExportFileException('Could not read the selected file');
+    }
+    return _applyImportContents(contents, uuid, database: database, passphraseProvider: passphraseProvider);
+  }
+
+  /// Imports an export held in memory rather than on disk.
+  ///
+  /// The settings handoff is why this exists: a predecessor app returns its
+  /// export over a method channel, and there is no file to point at.
+  static Future<ImportResult?> importFromJson(
+    String contents, {
+    AppDatabase? database,
+    Future<String?> Function()? passphraseProvider,
+  }) async {
+    final storage = await StorageService.getInstance();
+    final uuid = storage.activeUserScope();
+    if (uuid == null || uuid.isEmpty) {
+      throw const NoUserSignedInException();
+    }
+    return _applyImportContents(contents, uuid, database: database, passphraseProvider: passphraseProvider);
+  }
+
+  static Future<ImportResult> _applyImportContents(
+    String contents,
+    String uuid, {
+    AppDatabase? database,
+    Future<String?> Function()? passphraseProvider,
+  }) async {
     final Object? decoded;
     try {
       decoded = json.decode(contents);
@@ -507,9 +606,131 @@ class SettingsExportService {
     if (decoded is! Map<String, dynamic>) {
       throw const InvalidExportFileException('Invalid export file');
     }
-    final data = decoded;
 
     final prefs = (await SettingsService.getInstance()).prefs;
-    return applyImportMap(data, prefs, currentUserUuid: uuid);
+    final settings = await applyImportMap(decoded, prefs, currentUserUuid: uuid);
+
+    final section = decoded[credentialsKey];
+    if (section is! Map<String, dynamic>) return settings;
+
+    ImportResult withoutCredentials() =>
+        ImportResult(keysImported: settings.keysImported, keysSkipped: settings.keysSkipped, credentialsSkipped: true);
+
+    if (database == null || passphraseProvider == null) return withoutCredentials();
+
+    // Asked for only once the settings have landed, so a cancelled passphrase
+    // still leaves the half of the import that needed no secret.
+    final passphrase = await passphraseProvider();
+    if (passphrase == null || passphrase.isEmpty) return withoutCredentials();
+
+    final payload = await CredentialExportEnvelope.open(section, passphrase);
+    final restored = await CredentialPortability.apply(payload, database: database, prefs: prefs);
+    return ImportResult(keysImported: settings.keysImported, keysSkipped: settings.keysSkipped, credentials: restored);
   }
+
+  /// Name prefix for a backup the app wrote by itself.
+  ///
+  /// Distinct from a manual export's name so rotation only ever deletes the
+  /// app's own files: a viewer who exported to this directory on a TV keeps
+  /// that file forever.
+  static const String automaticFilePrefix = 'plezy-settings-auto-';
+
+  /// Writes a settings-only backup into the app's documents directory and
+  /// prunes older automatic ones, keeping [keep].
+  ///
+  /// Settings only, always: a backup nobody asked for must never be a
+  /// credential file, and there is no passphrase to protect one with when
+  /// the app is writing it unattended.
+  static Future<String?> writeAutomaticBackup({int keep = 3}) async {
+    final prefs = (await SettingsService.getInstance()).prefs;
+    final storage = await StorageService.getInstance();
+    final exportMap = buildExportMap(prefs, currentUserUuid: storage.activeUserScope(), appVersion: '');
+    final bytes = Uint8List.fromList(utf8.encode(const JsonEncoder.withIndent('  ').convert(exportMap)));
+
+    final Directory dir;
+    try {
+      dir = await getApplicationDocumentsDirectory();
+    } on MissingPlatformDirectoryException {
+      return null;
+    }
+
+    final stamp = DateTime.now().toUtc().toIso8601String().replaceAll(RegExp(r'[:.]'), '-');
+    final file = File(p.join(dir.path, '$automaticFilePrefix$stamp.$fileExtension'));
+    await file.writeAsBytes(bytes, flush: true);
+    await _pruneAutomaticBackups(keep: keep, dir: dir);
+    return file.path;
+  }
+
+  static Future<void> _pruneAutomaticBackups({required int keep, required Directory dir}) async {
+    final automatic = <File>[];
+    for (final entity in dir.listSync()) {
+      if (entity is! File) continue;
+      if (!p.basename(entity.path).startsWith(automaticFilePrefix)) continue;
+      automatic.add(entity);
+    }
+    if (automatic.length <= keep) return;
+    automatic.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+    for (final stale in automatic.skip(keep)) {
+      try {
+        await stale.delete();
+      } on FileSystemException catch (error) {
+        // A backup that will not delete is not worth failing a backup over.
+        appLogger.w('Could not prune an old settings backup', error: error);
+      }
+    }
+  }
+
+  /// The newest automatic backup, or null when none has been written.
+  static Future<LocalExportFile?> newestAutomaticBackup() async {
+    final all = await listLocalExports();
+    for (final candidate in all) {
+      if (candidate.fileName.startsWith(automaticFilePrefix)) return candidate;
+    }
+    return null;
+  }
+
+  /// Export files in the app's documents directory, newest first.
+  ///
+  /// The directory a TV export writes to, and the only place a TV can read
+  /// one back from. Copying a file there over adb, or from another install
+  /// of the app, is how an export crosses devices without a picker.
+  static Future<List<LocalExportFile>> listLocalExports() async {
+    final Directory dir;
+    try {
+      dir = await getApplicationDocumentsDirectory();
+    } on MissingPlatformDirectoryException {
+      return const [];
+    }
+    if (!dir.existsSync()) return const [];
+
+    final found = <LocalExportFile>[];
+    for (final entity in dir.listSync()) {
+      if (entity is! File) continue;
+      if (p.extension(entity.path).toLowerCase() != '.$fileExtension') continue;
+      try {
+        found.add(
+          LocalExportFile(path: entity.path, fileName: p.basename(entity.path), modified: entity.statSync().modified),
+        );
+      } on FileSystemException {
+        // A file that vanished between listing and stat is simply not offered.
+        continue;
+      }
+    }
+    found.sort((a, b) => b.modified.compareTo(a.modified));
+    return found;
+  }
+
+  /// Where [exportToFile] writes when there is no document picker, so the UI
+  /// can tell the viewer where to find the file or where to put one.
+  static Future<String?> localExportDirectory() async {
+    try {
+      return (await getApplicationDocumentsDirectory()).path;
+    } on MissingPlatformDirectoryException {
+      return null;
+    }
+  }
+
+  /// Whether this platform reads and writes exports through the app's own
+  /// documents directory instead of a document picker.
+  static bool get usesLocalExportDirectory => Platform.isAndroid && PlatformDetector.isTV();
 }

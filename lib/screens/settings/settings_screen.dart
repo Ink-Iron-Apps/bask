@@ -27,6 +27,9 @@ import '../../services/donation_service.dart';
 import '../../services/download_storage_service.dart';
 import '../../services/file_picker_service.dart';
 import '../../services/saf_storage_service.dart';
+import '../../database/app_database.dart';
+import '../../services/settings_credential_export.dart';
+import '../../widgets/settings_restore_prompt.dart';
 import '../../services/settings_export_service.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/seerr_account_provider.dart';
@@ -781,6 +784,12 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           subtitle: t.settings.importSettingsDescription,
           onTap: _showImportSettingsDialog,
         ),
+        SettingSwitchTile(
+          pref: settings.SettingsService.autoExportSettings,
+          icon: Symbols.history_rounded,
+          title: t.settings.autoExportSettings,
+          subtitle: t.settings.autoExportSettingsDescription,
+        ),
         // TODO: Cloud settings sync/backup (#1795, #1979) goes here once a
         // sync backend exists (iCloud on Apple platforms, or the relay).
       ],
@@ -1087,14 +1096,61 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
     if (mounted) showSuccessSnackBar(context, t.settings.resetSettingsSuccess);
   }
 
+  /// Offers the credential tier, then asks for the passphrase that protects
+  /// it. Null means settings only, which is the default and needs no secret.
+  Future<String?> _askCredentialPassphrase() async {
+    final include = await showConfirmDialog(
+      context,
+      title: t.settings.exportIncludeSignIns,
+      message: t.settings.exportIncludeSignInsMessage,
+      confirmText: t.settings.exportIncludeSignInsConfirm,
+      cancelText: t.settings.exportSettingsOnly,
+    );
+    if (!mounted || !include) return null;
+
+    return showTextInputDialog(
+      context,
+      title: t.settings.credentialPassphraseExportTitle,
+      labelText: t.settings.credentialPassphrase,
+      obscureText: true,
+      validator: (value) => value.trim().length < 8 ? t.settings.credentialPassphraseTooShort : null,
+    );
+  }
+
+  /// The real exporter, built only when no exporter was injected.
+  Future<Future<String?> Function()> _buildExporter() async {
+    final database = context.read<AppDatabase>();
+    final passphrase = await _askCredentialPassphrase();
+    return () => SettingsExportService.exportToFile(database: database, credentialPassphrase: passphrase);
+  }
+
+  String _importMessageFor(ImportResult result) {
+    if (result.credentials != null) return t.settings.importCredentialsSuccess;
+    if (result.credentialsSkipped) return t.settings.importCredentialsSkipped;
+    return t.settings.importSettingsSuccess;
+  }
+
   Future<void> _handleExportSettings() async {
     await guardSettingsOperation<void, SettingsExportException>(
       context,
       operation: 'Settings export',
       body: () async {
-        final path = await (widget.settingsExporter ?? SettingsExportService.exportToFile)();
+        // Resolved through the injected exporter first: a caller that supplies
+        // one is not going near the database or the passphrase prompt, and
+        // must not be made to provide either.
+        final exporter = widget.settingsExporter ?? await _buildExporter();
+        if (!mounted) return;
+        final path = await exporter();
         if (!mounted || path == null) return;
-        showSuccessSnackBar(context, t.settings.exportSettingsSuccess);
+        // Where a picker saved it is the viewer's own choice, so naming it
+        // adds nothing. Where the TV fallback put it is the only way to find
+        // the file again, so it has to be said.
+        showSuccessSnackBar(
+          context,
+          SettingsExportService.usesLocalExportDirectory
+              ? t.settings.exportSettingsSavedTo(path: path)
+              : t.settings.exportSettingsSuccess,
+        );
       },
     );
   }
@@ -1110,6 +1166,50 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
     await _handleImportSettings();
   }
 
+  /// Which import path this platform gets.
+  ///
+  /// Android TV has no document picker, so [SettingsExportService.exportToFile]
+  /// leaves its file in the app's own documents directory there. Without a
+  /// chooser over that directory the TV could write an export it could never
+  /// read back, which is the state this app shipped in.
+  Future<ImportResult?> Function() _resolveImporter() {
+    final database = context.read<AppDatabase>();
+    if (!SettingsExportService.usesLocalExportDirectory) {
+      return () => SettingsExportService.importFromFile(database: database, passphraseProvider: _askImportPassphrase);
+    }
+    return _importFromLocalDirectory;
+  }
+
+  /// Asked for only when the chosen file turns out to carry sign-ins.
+  Future<String?> _askImportPassphrase() async {
+    if (!mounted) return null;
+    return promptForCredentialPassphrase(context);
+  }
+
+  Future<ImportResult?> _importFromLocalDirectory() async {
+    final files = await SettingsExportService.listLocalExports();
+    if (!mounted) return null;
+
+    if (files.isEmpty) {
+      final dir = await SettingsExportService.localExportDirectory();
+      if (!mounted) return null;
+      showErrorSnackBar(context, t.settings.importSettingsNoLocalFiles(path: dir ?? ''));
+      return null;
+    }
+
+    final chosen = await showOptionPickerDialog<String>(
+      context,
+      title: t.settings.importSettingsChooseFile,
+      options: [for (final file in files) (icon: Symbols.description_rounded, label: file.fileName, value: file.path)],
+    );
+    if (!mounted || chosen == null) return null;
+    return SettingsExportService.importFromPath(
+      chosen,
+      database: context.read<AppDatabase>(),
+      passphraseProvider: _askImportPassphrase,
+    );
+  }
+
   Future<void> _handleImportSettings() async {
     await guardSettingsOperation<void, SettingsExportException>(
       context,
@@ -1119,9 +1219,10 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
         // handled here instead of falling through to the generic guard.
         try {
           final previousRootConfiguration = SettingsMutationService.captureRootConfiguration();
-          final result = await (widget.settingsImporter ?? SettingsExportService.importFromFile)();
+          final importer = widget.settingsImporter ?? _resolveImporter();
+          final result = await importer();
           if (!mounted) return;
-          if (result == null) return; // user cancelled file picker
+          if (result == null) return; // user cancelled the picker or chooser
 
           final hiddenLibrariesProvider = context.read<HiddenLibrariesProvider>();
           final librariesProvider = context.read<LibrariesProvider>();
@@ -1138,11 +1239,16 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           );
 
           if (!mounted) return;
-          showSuccessSnackBar(context, t.settings.importSettingsSuccess);
+          showSuccessSnackBar(context, _importMessageFor(result));
         } on NoUserSignedInException {
           if (mounted) showErrorSnackBar(context, t.settings.importSettingsNoUser);
         } on InvalidExportFileException {
           if (mounted) showErrorSnackBar(context, t.settings.importSettingsInvalidFile);
+        } on WrongPassphraseException {
+          // The settings half already landed; only the sign-ins did not.
+          if (mounted) showErrorSnackBar(context, t.settings.importCredentialsWrongPassphrase);
+        } on MalformedCredentialSectionException {
+          if (mounted) showErrorSnackBar(context, t.settings.importCredentialsDamaged);
         }
       },
     );
