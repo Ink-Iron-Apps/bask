@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/exact_subtitle_fetcher.dart';
-import 'package:plezy/models/plex/plex_subtitle_search_result.dart';
+import 'package:bask/services/exact_subtitle_fetcher.dart';
+import 'package:bask/models/plex/plex_subtitle_search_result.dart';
 
 void main() {
   setUp(ExactSubtitleFetcher.resetForTesting);

@@ -5,10 +5,10 @@ project(runner LANGUAGES CXX)
 # registered by the runner subdirectory.
 include(CTest)
 
-set(BINARY_NAME "plezy")
+set(BINARY_NAME "bask")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.edde746.plezy")
+set(APPLICATION_ID "com.inknironapps.bask")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

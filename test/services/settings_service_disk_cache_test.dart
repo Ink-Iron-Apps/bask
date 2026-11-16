@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 import '../test_helpers/prefs.dart';
 

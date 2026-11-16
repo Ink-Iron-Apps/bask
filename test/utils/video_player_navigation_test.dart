@@ -4,15 +4,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
+import 'package:bask/media/media_backend.dart';
 
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_version.dart';
-import 'package:plezy/models/transcode_quality_preset.dart';
-import 'package:plezy/mpv/player/player_native.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/utils/video_player_navigation.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_version.dart';
+import 'package:bask/models/transcode_quality_preset.dart';
+import 'package:bask/mpv/player/player_native.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/utils/video_player_navigation.dart';
 
 import '../test_helpers/prefs.dart';
 import '../test_helpers/media_items.dart';

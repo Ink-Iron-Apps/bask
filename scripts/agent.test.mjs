@@ -28,8 +28,8 @@ function endpoint(handler, { advertised = true, rpc } = {}) {
         if (result === undefined && message.method === "getVM") {
           result = { isolates: [{ id: "isolates/main", name: "main" }, { id: "isolates/ui", name: "other" }] };
         } else if (result === undefined && message.method === "getIsolate") {
-          result = { extensionRPCs: advertised && message.params.isolateId === "isolates/ui" ? ["ext.plezy.agent"] : [] };
-        } else if (result === undefined && message.method === "ext.plezy.agent") {
+          result = { extensionRPCs: advertised && message.params.isolateId === "isolates/ui" ? ["ext.bask.agent"] : [] };
+        } else if (result === undefined && message.method === "ext.bask.agent") {
           const request = JSON.parse(message.params.payload);
           commands.push(request);
           if (message.params.isolateId !== "isolates/ui") {
@@ -220,7 +220,7 @@ test("profile-session changes invalidate a correlated operation wait", async () 
     if (request.command === "playback.start") return { operationId: "launch-a", stage: "accepted", item: TARGET };
   }, {
     rpc(message) {
-      if (message.method !== "ext.plezy.agent") return;
+      if (message.method !== "ext.bask.agent") return;
       const request = JSON.parse(message.params.payload);
       if (request.command === "playback.status") {
         return {

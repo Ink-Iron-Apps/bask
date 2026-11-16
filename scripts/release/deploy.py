@@ -9,7 +9,7 @@
 #   "cryptography>=42",
 # ]
 # ///
-"""Plezy production deployment pipeline.
+"""Bask production deployment pipeline.
 
 One command releases to every channel:
 
@@ -1143,7 +1143,7 @@ def phase_ios(ctx: Context) -> None:
         [str(SCRIPTS_DIR / "upload-symbols.sh"), "ios"],
         env={"SENTRY_DIST": "app-store", "BUGS_APPLE_ARCHIVE": "build/ios/archive/Runner.xcarchive"},
     )
-    _upload_ipa(ctx, ROOT / "build/ios/ipa/Plezy.ipa", "ios")
+    _upload_ipa(ctx, ROOT / "build/ios/ipa/Bask.ipa", "ios")
 
 
 def phase_tvos(ctx: Context) -> None:
@@ -1743,7 +1743,7 @@ def cmd_clean(_args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="deploy.py",
-        description="Plezy production deployment pipeline",
+        description="Bask production deployment pipeline",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="phases: " + " ".join(PHASES),
     )

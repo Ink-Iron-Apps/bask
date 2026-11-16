@@ -1,8 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/mpv/models.dart';
-import 'package:plezy/mpv/player/platform/player_android.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/mpv/models.dart';
+import 'package:bask/mpv/player/platform/player_android.dart';
+import 'package:bask/services/settings_service.dart';
 
 import '../test_helpers/mock_player_channels.dart';
 import '../test_helpers/prefs.dart';

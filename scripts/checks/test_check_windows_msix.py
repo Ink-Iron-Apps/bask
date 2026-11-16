@@ -88,7 +88,7 @@ class WindowsMsixGuardTest(unittest.TestCase):
     def test_underscored_identity_name_is_rejected(self) -> None:
         # makeappx enforces the schema pattern on Identity/@Name before it reads
         # any payload, so an underscore makes the package unbuildable.
-        script = self._mutate('$IdentityName = "edde746.Plezy"', '$IdentityName = "edde746_Plezy"')
+        script = self._mutate('$IdentityName = "edde746.Bask"', '$IdentityName = "edde746_Bask"')
 
         result = self._run(script)
 
@@ -142,7 +142,7 @@ class WindowsMsixGuardTest(unittest.TestCase):
     def test_unresolved_interpolation_is_rejected(self) -> None:
         # A new variable in the template has to be declared where the checker
         # can see it, or the manifest it validates is not the one that ships.
-        script = self._mutate("<DisplayName>Plezy</DisplayName>", "<DisplayName>$AppName</DisplayName>")
+        script = self._mutate("<DisplayName>Bask</DisplayName>", "<DisplayName>$AppName</DisplayName>")
 
         result = self._run(script)
 

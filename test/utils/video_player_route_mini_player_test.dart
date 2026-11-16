@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/utils/video_player_navigation.dart';
+import 'package:bask/utils/video_player_navigation.dart';
 
 /// Handing the picture to the corner player has to let the routes underneath
 /// paint again.

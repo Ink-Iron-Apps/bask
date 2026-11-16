@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/car_ux_restrictions_service.dart';
-import 'package:plezy/services/driver_distraction.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/services/car_ux_restrictions_service.dart';
+import 'package:bask/services/driver_distraction.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 void main() {
   group('automotivePlaybackAllowed', () {

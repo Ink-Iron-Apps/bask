@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/utils/active_client_scope.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/utils/active_client_scope.dart';
 
 void main() {
   final serverId = ServerId('jf-machine');

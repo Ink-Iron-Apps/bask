@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:http/http.dart' as http;
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/screens/auth/plex_pin_auth_flow.dart';
-import 'package:plezy/services/plex_auth_service.dart';
-import 'package:plezy/utils/media_server_http_client.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/screens/auth/plex_pin_auth_flow.dart';
+import 'package:bask/services/plex_auth_service.dart';
+import 'package:bask/utils/media_server_http_client.dart';
+import 'package:bask/utils/platform_detector.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../test_helpers/theme.dart';

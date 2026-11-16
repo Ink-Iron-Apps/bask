@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/services/resume_elsewhere.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/services/resume_elsewhere.dart';
 
 import '../test_helpers/media_items.dart';
 

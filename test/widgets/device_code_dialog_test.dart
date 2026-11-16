@@ -2,9 +2,9 @@ import 'dart:ui' show SemanticsAction, Tristate;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/models/trackers/device_code.dart';
-import 'package:plezy/widgets/device_code_dialog.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/models/trackers/device_code.dart';
+import 'package:bask/widgets/device_code_dialog.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 void main() {

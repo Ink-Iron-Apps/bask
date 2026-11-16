@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/transcode_explanation.dart';
+import 'package:bask/media/transcode_explanation.dart';
 
 void main() {
   group('parseMediaBrowserTranscodeReasons', () {

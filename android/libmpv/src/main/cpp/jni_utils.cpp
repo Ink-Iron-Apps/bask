@@ -9,7 +9,7 @@
 
 jstring new_java_string(JNIEnv* env, const char* utf8) {
   if (!utf8) return NULL;
-  const std::u16string u16 = plezy::utf8::ToUtf16(utf8);
+  const std::u16string u16 = bask::utf8::ToUtf16(utf8);
   return env->NewString(reinterpret_cast<const jchar*>(u16.data()), static_cast<jsize>(u16.size()));
 }
 
@@ -18,7 +18,7 @@ std::string java_string_to_utf8(JNIEnv* env, jstring jstr) {
   const jsize len = env->GetStringLength(jstr);
   const jchar* chars = env->GetStringChars(jstr, NULL);
   if (!chars) return std::string();
-  std::string out = plezy::utf8::FromUtf16(reinterpret_cast<const char16_t*>(chars), static_cast<size_t>(len));
+  std::string out = bask::utf8::FromUtf16(reinterpret_cast<const char16_t*>(chars), static_cast<size_t>(len));
   env->ReleaseStringChars(jstr, chars);
   return out;
 }

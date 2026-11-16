@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:plezy/focus/dpad_navigator.dart';
-import 'package:plezy/focus/focusable_text_field.dart';
-import 'package:plezy/focus/input_mode_tracker.dart';
-import 'package:plezy/focus/key_event_utils.dart';
-import 'package:plezy/services/gamepad_service.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/focus/dpad_navigator.dart';
+import 'package:bask/focus/focusable_text_field.dart';
+import 'package:bask/focus/input_mode_tracker.dart';
+import 'package:bask/focus/key_event_utils.dart';
+import 'package:bask/services/gamepad_service.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 void main() {
   tearDown(() {
@@ -1676,7 +1676,7 @@ void main() {
   testWidgets('tvOS synthesized Select opens an explicit Flutter overlay', (tester) async {
     // The custom Flutter tvOS engine emits Siri Remote center-dpad presses
     // as `LogicalKeyboardKey.select` with `deviceType=keyboard` (via the
-    // legacy `flutter/keyevent` path). Fields that explicitly retain Plezy's
+    // legacy `flutter/keyevent` path). Fields that explicitly retain Bask's
     // Flutter overlay must open it rather than submit the form.
     // `isPhysicalKeyboardEnter` matched select+keyboard and routed through
     // `_submitTextInput`, which silently triggered form submit on every

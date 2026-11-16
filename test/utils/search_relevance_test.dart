@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/utils/search_relevance.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/utils/search_relevance.dart';
 
 import '../test_helpers/media_items.dart';
 

@@ -33,7 +33,7 @@ enum AccountPreferenceKey {
 
   /// Play the next episode automatically. Jellyfin
   /// `EnableNextEpisodeAutoPlay`. MediaBrowser only — Plex keeps its twin in
-  /// the per-device `experience` blob, which Plezy deliberately never writes.
+  /// the per-device `experience` blob, which Bask deliberately never writes.
   autoPlayNextEpisode(AccountPreferenceValueKind.boolean),
 
   /// List episodes the library knows about but has no file for. Jellyfin
@@ -68,11 +68,11 @@ enum AccountPreferenceKey {
   ///
   /// Jellyfin only, and the one key here with no field of its own on the
   /// server: `/Shows/NextUp` takes `EnableRewatching` per request and
-  /// `UserConfiguration` has no twin, so Plezy stores it in the account's
+  /// `UserConfiguration` has no twin, so Bask stores it in the account's
   /// `DisplayPreferences` custom prefs and sends the parameter itself. That is
   /// a deliberate departure from jellyfin-web, which keeps the same switch in
   /// browser local storage and therefore loses it on every new device; the
-  /// store Plezy uses is keyed by user, so the choice follows the account.
+  /// store Bask uses is keyed by user, so the choice follows the account.
   rewatchingInNextUp(AccountPreferenceValueKind.boolean);
 
   const AccountPreferenceKey(this.valueKind);
@@ -272,7 +272,7 @@ class AccountPreferences implements MediaServerUserProfile {
 /// reasons: Plex Web sends only the changed keys as query parameters, and
 /// Jellyfin's `POST /Users/Configuration` replaces the whole object against
 /// constructor defaults, so its transport must merge the patch into a freshly
-/// read `Configuration` and preserve the fields Plezy does not model
+/// read `Configuration` and preserve the fields Bask does not model
 /// (`OrderedViews`, `CastReceiverId`, …).
 class AccountPreferencesPatch {
   AccountPreferencesPatch(Map<AccountPreferenceKey, Object?> values)
@@ -335,7 +335,7 @@ class AccountPreferencesCapabilities {
   /// [AccountPreferenceKey.rememberSubtitleSelections] and
   /// [AccountPreferenceKey.autoPlayNextEpisode] are read and round-tripped —
   /// the whole-object write must never reset them — but are deliberately **not**
-  /// editable here. Plezy already owns each of those decisions locally
+  /// editable here. Bask already owns each of those decisions locally
   /// (`SettingsService.rememberTrackSelections`, `followServerTrackSelections`,
   /// `autoPlayNextEpisode`, the last of which is also a toggle in the player's
   /// settings sheet), those local prefs are the only ones the playback path

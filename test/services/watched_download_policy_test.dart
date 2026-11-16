@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/sync_rule_executor.dart';
-import 'package:plezy/services/watched_download_policy.dart';
+import 'package:bask/services/sync_rule_executor.dart';
+import 'package:bask/services/watched_download_policy.dart';
 
 void main() {
   test('an unwatched rule gives up its watched copies, whatever the preference says', () {

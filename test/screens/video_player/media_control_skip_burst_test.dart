@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:os_media_controls/os_media_controls.dart';
-import 'package:plezy/mpv/mpv.dart';
-import 'package:plezy/providers/playback_state_provider.dart';
-import 'package:plezy/screens/video_player_screen.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/mpv/mpv.dart';
+import 'package:bask/providers/playback_state_provider.dart';
+import 'package:bask/screens/video_player_screen.dart';
+import 'package:bask/services/settings_service.dart';
 import 'package:provider/provider.dart';
 
 import '../../test_helpers/media_items.dart';

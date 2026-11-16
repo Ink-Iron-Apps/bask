@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 
-import 'package:plezy/connection/connection.dart';
-import 'package:plezy/models/livetv_channel.dart';
-import 'package:plezy/services/favorite_channels_repository.dart';
-import 'package:plezy/services/jellyfin_client.dart';
+import 'package:bask/connection/connection.dart';
+import 'package:bask/models/livetv_channel.dart';
+import 'package:bask/services/favorite_channels_repository.dart';
+import 'package:bask/services/jellyfin_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';

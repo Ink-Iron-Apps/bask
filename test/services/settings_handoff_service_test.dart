@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/settings_handoff_service.dart';
+import 'package:bask/services/settings_handoff_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

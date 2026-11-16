@@ -3,10 +3,10 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/focus/dpad_navigator.dart';
-import 'package:plezy/focus/focusable_action_bar.dart';
-import 'package:plezy/focus/key_event_utils.dart';
-import 'package:plezy/utils/platform_detector.dart';
+import 'package:bask/focus/dpad_navigator.dart';
+import 'package:bask/focus/focusable_action_bar.dart';
+import 'package:bask/focus/key_event_utils.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 void main() {
   tearDown(() {

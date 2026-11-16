@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/exceptions/media_server_exceptions.dart';
-import 'package:plezy/media/account_preferences.dart';
-import 'package:plezy/media/media_browser_dialect.dart';
-import 'package:plezy/media/media_server_user_profile.dart';
-import 'package:plezy/services/jellyfin_client.dart';
-import 'package:plezy/services/media_browser_account_preferences_source.dart';
+import 'package:bask/exceptions/media_server_exceptions.dart';
+import 'package:bask/media/account_preferences.dart';
+import 'package:bask/media/media_browser_dialect.dart';
+import 'package:bask/media/media_server_user_profile.dart';
+import 'package:bask/services/jellyfin_client.dart';
+import 'package:bask/services/media_browser_account_preferences_source.dart';
 
 import '../test_helpers/backend_client_fixtures.dart';
 import '../test_helpers/http_fixtures.dart';
@@ -278,7 +278,7 @@ void main() {
       expect(posts, hasLength(1));
       final post = posts.single;
       expect(post.url.path, '/DisplayPreferences/usersettings');
-      expect(post.url.queryParameters['client'], 'Plezy');
+      expect(post.url.queryParameters['client'], 'Bask');
       expect(post.url.queryParameters['userId'], 'user-1');
       final body = jsonDecode(post.body) as Map<String, dynamic>;
       final customPrefs = body['CustomPrefs'] as Map<String, dynamic>;

@@ -1,15 +1,15 @@
 import '../test_helpers/paged_fakes.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/media/library_query.dart';
-import 'package:plezy/media/media_backend.dart';
-import 'package:plezy/media/media_item.dart';
-import 'package:plezy/media/media_kind.dart';
-import 'package:plezy/media/media_part.dart';
-import 'package:plezy/media/media_server_client.dart';
-import 'package:plezy/media/media_version.dart';
-import 'package:plezy/utils/download_version_utils.dart';
-import 'package:plezy/media/episode_collection.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/media/library_query.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_kind.dart';
+import 'package:bask/media/media_part.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/media/media_version.dart';
+import 'package:bask/utils/download_version_utils.dart';
+import 'package:bask/media/episode_collection.dart';
+import 'package:bask/services/settings_service.dart';
 import '../test_helpers/prefs.dart';
 import '../test_helpers/media_items.dart';
 

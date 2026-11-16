@@ -16,7 +16,7 @@ import '../utils/app_logger.dart';
 /// over a blurred background.
 ///
 /// mpv places subtitles against the displayed video rect, which the override
-/// turns into the whole window; `sub-video-rect-aspect` (a Plezy mpv patch)
+/// turns into the whole window; `sub-video-rect-aspect` (a Bask mpv patch)
 /// hands it the picture's real aspect so corner-anchored ASS events and PGS
 /// bitmaps stay on the picture the shader composites (#2120).
 ///

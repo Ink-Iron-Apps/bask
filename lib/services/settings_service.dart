@@ -13,7 +13,7 @@ import '../theme/theme_palette.dart';
 // way [ThemeMode] is declared here.
 export '../theme/theme_palette.dart' show ThemePalette;
 import 'image_cache_service.dart';
-import 'package:plezy/utils/app_logger.dart';
+import 'package:bask/utils/app_logger.dart';
 import '../i18n/app_locale_utils.dart';
 import '../i18n/strings.g.dart';
 import '../models/mpv_config_models.dart';

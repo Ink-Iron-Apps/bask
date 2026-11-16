@@ -6,18 +6,18 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/connection/connection.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/exceptions/media_server_exceptions.dart';
-import 'package:plezy/media/ids.dart';
-import 'package:plezy/media/live_tv_support.dart';
-import 'package:plezy/media/media_source_info.dart';
-import 'package:plezy/models/plex/plex_config.dart';
-import 'package:plezy/services/jellyfin_client.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/services/playback_initialization_types.dart';
-import 'package:plezy/models/transcode_quality_preset.dart';
+import 'package:bask/connection/connection.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/exceptions/media_server_exceptions.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/live_tv_support.dart';
+import 'package:bask/media/media_source_info.dart';
+import 'package:bask/models/plex/plex_config.dart';
+import 'package:bask/services/jellyfin_client.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/services/playback_initialization_types.dart';
+import 'package:bask/models/transcode_quality_preset.dart';
 import '../test_helpers/backend_client_fixtures.dart';
 
 /// Pins the [LiveTvPlaybackSession] lifecycle on both backends — the
@@ -106,7 +106,7 @@ void main() {
         baseUrl: 'https://plex.example.com',
         token: 'tok',
         clientIdentifier: 'client',
-        product: 'Plezy',
+        product: 'Bask',
         version: '1',
         machineIdentifier: 'machine-1',
       ),
@@ -812,7 +812,7 @@ void main() {
       final deviceProfile = body['DeviceProfile'] as Map<String, dynamic>;
       expect(body['EnableDirectPlay'], isTrue);
       expect(body['EnableDirectStream'], isTrue);
-      // Original uses Plezy's normal high negotiation ceiling. 100 Mbps is
+      // Original uses Bask's normal high negotiation ceiling. 100 Mbps is
       // above MediaBrowser's 40 Mbps unknown-live estimate and prevents an
       // omitted DeviceProfile value from falling back to 8 Mbps server-side.
       expect(request.url.queryParameters['MaxStreamingBitrate'], '100000000');

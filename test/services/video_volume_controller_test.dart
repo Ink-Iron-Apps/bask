@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/mpv/mpv.dart';
-import 'package:plezy/mpv/player/platform/player_android.dart';
-import 'package:plezy/mpv/player/player_native.dart';
-import 'package:plezy/services/settings_service.dart';
-import 'package:plezy/services/video_volume_controller.dart';
+import 'package:bask/mpv/mpv.dart';
+import 'package:bask/mpv/player/platform/player_android.dart';
+import 'package:bask/mpv/player/player_native.dart';
+import 'package:bask/services/settings_service.dart';
+import 'package:bask/services/video_volume_controller.dart';
 
 import '../test_helpers/mock_player_channels.dart';
 import '../test_helpers/prefs.dart';

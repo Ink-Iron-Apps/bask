@@ -25,7 +25,7 @@ class AgentControlService {
   AgentControlService._();
 
   static final instance = AgentControlService._();
-  static const extensionName = 'ext.plezy.agent';
+  static const extensionName = 'ext.bask.agent';
   static const protocolVersion = 1;
   static const maxPayloadBytes = 1024 * 1024;
   static const scopeTypes = [

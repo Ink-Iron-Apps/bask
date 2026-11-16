@@ -1,8 +1,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/download_manager_service.dart';
-import 'package:plezy/services/network_metered_probe.dart';
-import 'package:plezy/services/settings_service.dart';
+import 'package:bask/services/download_manager_service.dart';
+import 'package:bask/services/network_metered_probe.dart';
+import 'package:bask/services/settings_service.dart';
 
 import '../test_helpers/prefs.dart';
 

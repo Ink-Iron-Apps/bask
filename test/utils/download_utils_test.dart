@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/i18n/strings.g.dart';
-import 'package:plezy/models/download_models.dart';
-import 'package:plezy/providers/download_provider.dart';
-import 'package:plezy/utils/download_utils.dart';
+import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/models/download_models.dart';
+import 'package:bask/providers/download_provider.dart';
+import 'package:bask/utils/download_utils.dart';
 
 void main() {
   setUpAll(() => LocaleSettings.setLocaleSync(AppLocale.en));

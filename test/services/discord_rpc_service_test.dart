@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:dart_discord_presence/dart_discord_presence.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plezy/services/discord_rpc_service.dart';
+import 'package:bask/services/discord_rpc_service.dart';
 
 void main() {
   group('posterCacheExpiryFromResponse', () {

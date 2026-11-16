@@ -120,7 +120,7 @@ fi
 # multiarch path), which does not exist on other distros, and glib's bare-name
 # PATH fallback misses hosts that keep the helper in /usr/libexec (Fedora).
 # Every launchUrl then failed (#1477). Ship the helper that matches the
-# bundled libgio; plezy.sh points GIO_LAUNCH_DESKTOP at it.
+# bundled libgio; bask.sh points GIO_LAUNCH_DESKTOP at it.
 if compgen -G "$LIB_DIR/libgio-2.0.so*" > /dev/null; then
     GLIB_LIBDIR="$(pkg-config --variable=libdir glib-2.0 2>/dev/null || true)"
     GIO_HELPER=""

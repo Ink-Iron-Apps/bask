@@ -1,16 +1,16 @@
 import 'dart:async';
-import 'package:plezy/media/ids.dart';
+import 'package:bask/media/ids.dart';
 import 'dart:convert';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:plezy/database/app_database.dart';
-import 'package:plezy/models/plex/plex_config.dart';
-import 'package:plezy/services/plex_api_cache.dart';
-import 'package:plezy/services/plex_client.dart';
-import 'package:plezy/utils/active_client_scope.dart';
+import 'package:bask/database/app_database.dart';
+import 'package:bask/models/plex/plex_config.dart';
+import 'package:bask/services/plex_api_cache.dart';
+import 'package:bask/services/plex_client.dart';
+import 'package:bask/utils/active_client_scope.dart';
 
 typedef _RequestHandler = Future<http.StreamedResponse> Function(http.BaseRequest request);
 
@@ -37,7 +37,7 @@ void main() {
         baseUrl: 'http://server:32400',
         token: 'token',
         clientIdentifier: 'client-id',
-        product: 'Plezy',
+        product: 'Bask',
         version: 'test',
         languageCode: 'fr',
       );
@@ -51,7 +51,7 @@ void main() {
         baseUrl: 'http://server:32400',
         token: 'old-token',
         clientIdentifier: 'client-id',
-        product: 'Plezy',
+        product: 'Bask',
         version: 'test',
         languageCode: 'es',
       ).copyWith(token: 'new-token');
@@ -77,7 +77,7 @@ void main() {
           baseUrl: 'http://server:32400',
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -114,7 +114,7 @@ void main() {
           baseUrl: 'http://server:32400',
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -140,7 +140,7 @@ void main() {
           baseUrl: 'http://server:32400',
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
           languageCode: 'fr',
         ),
@@ -171,7 +171,7 @@ void main() {
           baseUrl: 'http://server:32400',
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
           languageCode: 'en',
         ),
@@ -208,7 +208,7 @@ void main() {
           baseUrl: primary,
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -241,7 +241,7 @@ void main() {
           baseUrl: primary,
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -286,7 +286,7 @@ void main() {
           baseUrl: 'http://server:32400',
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -319,7 +319,7 @@ void main() {
           baseUrl: 'http://server:32400',
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -351,7 +351,7 @@ void main() {
           baseUrl: 'http://server:32400',
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -387,7 +387,7 @@ void main() {
           baseUrl: primary,
           token: 'token',
           clientIdentifier: 'client-id',
-          product: 'Plezy',
+          product: 'Bask',
           version: 'test',
         ),
         serverId: ServerId('server-id'),
@@ -491,7 +491,7 @@ PlexClient _continueWatchingTestClient(http.BaseClient httpClient) => PlexClient
     baseUrl: 'http://server:32400',
     token: 'token',
     clientIdentifier: 'client-id',
-    product: 'Plezy',
+    product: 'Bask',
     version: 'test',
   ),
   serverId: ServerId('server-id'),

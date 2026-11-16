@@ -177,5 +177,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh workflow run "Plexy release" --ref main
-          echo "dispatched Plexy release on main"
+          gh workflow run "Bask release" --ref main
+          echo "dispatched Bask release on main"

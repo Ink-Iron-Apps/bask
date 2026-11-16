@@ -11,8 +11,8 @@ import run_maestro
 
 
 ANDROID_15_INSTRUMENTATION_CLASSES = (
-    "androidx.media3.decoder.ffmpeg.PlezyFfmpegPlaybackTest,"
-    "com.edde746.plezy.exoplayer.PlezyAudioModePlaybackTest"
+    "androidx.media3.decoder.ffmpeg.BaskFfmpegPlaybackTest,"
+    "com.edde746.plezy.exoplayer.BaskAudioModePlaybackTest"
 )
 ANDROID_15_INSTRUMENTATION_TARGET = "android-15-instrumentation"
 # Keep reachability separate from the debug playback suites above: those exercise
@@ -203,7 +203,7 @@ def run_android_r8_reachability() -> None:
             "-p",
             "android",
             ":app:connectedMinifiedAndroidTest",
-            "-Pplezy.testBuildType=minified",
+            "-Pbask.testBuildType=minified",
             f"-Pandroid.testInstrumentationRunnerArguments.class={ANDROID_R8_REACHABILITY_CLASSES}",
         )
     )
