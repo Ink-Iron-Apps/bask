@@ -109,14 +109,57 @@ val prepareMpvFfmpegDevelopment = tasks.register("prepareMpvFfmpegDevelopment") 
       val includeDir = File(staging, "include")
       val nativeDir = File(staging, "native")
       staging.mkdirs()
-      try {
-        providers.exec {
-          commandLine("curl", "-sfL", mpvFfmpegSourceUrl, "-o", sourceArchive.absolutePath)
-        }.result.get().assertNormalExitValue()
-      } catch (error: Exception) {
-        throw GradleException("Failed to download FFmpeg $mpvFfmpegVersion headers", error)
+
+      // Kept in the Gradle home rather than under build/, so it survives
+      // `flutter clean` and every fresh checkout on a long-lived runner. The
+      // version and the digest are both in the name: a cache entry can only
+      // ever be the exact archive this build wants, and a corrupt or partial
+      // one fails the checksum below and is replaced rather than reused.
+      val cached = File(
+        File(project.gradle.gradleUserHomeDir, "ffmpeg-sources"),
+        "ffmpeg-$mpvFfmpegVersion-${mpvFfmpegSourceSha256.take(12)}.tar.xz"
+      )
+      if (cached.isFile) {
+        try {
+          verifySha256(cached, mpvFfmpegSourceSha256, "cached FFmpeg $mpvFfmpegVersion source")
+          cached.copyTo(sourceArchive, overwrite = true)
+        } catch (error: Exception) {
+          logger.lifecycle("Discarding unusable cached FFmpeg archive: ${error.message}")
+          cached.delete()
+        }
       }
-      verifySha256(sourceArchive, mpvFfmpegSourceSha256, "FFmpeg $mpvFfmpegVersion source")
+
+      if (!sourceArchive.isFile) {
+        try {
+          providers.exec {
+            commandLine(
+              "curl",
+              "-sfL",
+              // ffmpeg.org drops connections often enough to have cost three
+              // release builds; curl retrying is far cheaper than a rerun of
+              // a twenty-minute native build.
+              "--retry", "5",
+              "--retry-delay", "3",
+              "--retry-all-errors",
+              "--connect-timeout", "20",
+              mpvFfmpegSourceUrl,
+              "-o",
+              sourceArchive.absolutePath
+            )
+          }.result.get().assertNormalExitValue()
+        } catch (error: Exception) {
+          throw GradleException("Failed to download FFmpeg $mpvFfmpegVersion headers", error)
+        }
+        verifySha256(sourceArchive, mpvFfmpegSourceSha256, "FFmpeg $mpvFfmpegVersion source")
+        try {
+          cached.parentFile.mkdirs()
+          sourceArchive.copyTo(cached, overwrite = true)
+        } catch (error: Exception) {
+          // A cache that cannot be written costs a download next time and
+          // nothing else, so it must never fail the build.
+          logger.lifecycle("Could not cache the FFmpeg archive: ${error.message}")
+        }
+      }
 
       val extractedSource = File(staging, "source").apply { mkdirs() }
       try {
