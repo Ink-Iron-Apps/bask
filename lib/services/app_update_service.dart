@@ -9,28 +9,25 @@ import 'package:path_provider/path_provider.dart';
 
 import '../utils/app_logger.dart';
 
-/// Read-only token for the release mirror, supplied at build time.
+/// Optional read token for the releases API, supplied at build time.
 ///
-/// Empty in local builds, which surfaces as "updates must be installed
-/// manually" rather than as "no updates available" — a build that silently
-/// never updates is worse than one that says why.
+/// Normally empty, and meant to stay that way: this repository is public, so
+/// its releases and their assets are readable without credentials. A token is
+/// only useful if the releases ever move somewhere private, and it must not be
+/// supplied for a build that is published — a `--dart-define` is compiled into
+/// the APK, and an APK from a public repository is a public artifact, so the
+/// token would ship to anyone who downloads it.
 const _updateReadToken = String.fromEnvironment('UPDATE_READ_TOKEN');
 
-/// Releases are read straight from the private source repository.
+/// Releases are read straight from the source repository.
 ///
-/// A separate artifacts-only mirror would keep the embedded token away from
-/// source if a build were shared, which is worth doing for a distributed app.
-/// This one is built for a single device and never handed out, so the mirror
-/// would add a repository, a second token and a CI step to guard against
-/// something that cannot happen here.
 /// CI passes the repository it is building from, so a transfer or rename
 /// corrects this by itself; the default only covers a local build.
 ///
 /// It has to be right rather than merely redirect-able: GitHub answers a moved
 /// repository with a 301, and [AppUpdateService._get] deliberately drops the
-/// Authorization header across a redirect (asset storage rejects a request
-/// carrying both), so a redirected read of a private repository arrives
-/// unauthenticated and comes back as 404.
+/// Authorization header across a redirect, because asset storage rejects a
+/// request that carries both its own credentials and ours.
 const _releasesApiBase = String.fromEnvironment(
   'UPDATE_RELEASES_REPO',
   defaultValue: 'https://api.github.com/repos/Ink-Iron-Apps/bask',
@@ -142,18 +139,19 @@ class AppUpdateService {
   /// Latest release if it is newer than the running build, else null.
   ///
   /// Throws [AppUpdateException] with a specific message on a rejected or
-  /// missing mirror, so an expired token cannot masquerade as "up to date".
+  /// unreachable repository, so a failed check cannot masquerade as "up to
+  /// date". No token is required: a public repository answers both the release
+  /// read and the asset download unauthenticated.
   Future<AvailableUpdate?> checkForUpdate() async {
     if (!isSupported) return null;
-    if (!hasToken) {
-      throw const AppUpdateException('This build has no update token — updates must be installed manually.');
-    }
 
     final response = await _get(Uri.parse('$_releasesApiBase/releases/latest'), accept: 'application/vnd.github+json');
     if (response.statusCode != 200) {
       throw AppUpdateException(switch (response.statusCode) {
-        401 || 403 => 'Update check rejected (HTTP ${response.statusCode}) — the release token is expired or revoked.',
-        404 => 'Release mirror not found (HTTP 404) — the token may not cover it.',
+        401 || 403 =>
+          'Update check rejected (HTTP ${response.statusCode}) — too many checks from this network, or the releases '
+              'are no longer public.',
+        404 => 'No releases found (HTTP 404) — the update repository may have moved.',
         _ => 'Update check failed (HTTP ${response.statusCode}).',
       });
     }
@@ -219,15 +217,16 @@ class AppUpdateService {
     await _channel.invokeMethod<bool>('openInstallPermissionSettings');
   }
 
-  /// Issues a request carrying the token, following redirects by hand.
+  /// Issues the request, following redirects by hand.
   ///
-  /// A private asset answers with a 302 to pre-signed storage that carries its
-  /// own credentials and rejects a request that also sends ours, so the
-  /// Authorization header is dropped on the hop.
+  /// An asset answers with a 302 to storage that carries its own credentials
+  /// and rejects a request that also sends ours, so the Authorization header
+  /// is dropped on the hop. The header is only sent in the first place when a
+  /// token was built in, which a public repository does not need.
   Future<HttpClientResponse> _get(Uri uri, {required String accept}) async {
     final request = await _httpClient.getUrl(uri);
     request.followRedirects = false;
-    request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $_updateReadToken');
+    if (hasToken) request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $_updateReadToken');
     request.headers.set(HttpHeaders.acceptHeader, accept);
     request.headers.set('X-GitHub-Api-Version', '2022-11-28');
     request.headers.set(HttpHeaders.userAgentHeader, 'Bask');
