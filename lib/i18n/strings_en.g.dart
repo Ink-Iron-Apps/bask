@@ -875,6 +875,39 @@ class Translations$settings$en {
 	/// en: 'A previous version of this app is still installed and is holding your settings. Bringing them across copies your preferences; starting fresh leaves them at their defaults. Sign-ins do not travel this way.'
 	String get restoreHandoffFoundMessage => 'A previous version of this app is still installed and is holding your settings. Bringing them across copies your preferences; starting fresh leaves them at their defaults. Sign-ins do not travel this way.';
 
+	/// en: 'Bring your downloads across too?'
+	String get restoreDownloadsFoundTitle => 'Bring your downloads across too?';
+
+	/// en: 'The previous version is holding ${count} downloaded items, ${size} in total. They are copied rather than moved, so they stay in the old app as well and nothing is lost either way — remove it once you are happy. Large libraries take a while.'
+	String restoreDownloadsFoundMessage({required Object count, required Object size}) => 'The previous version is holding ${count} downloaded items, ${size} in total. They are copied rather than moved, so they stay in the old app as well and nothing is lost either way — remove it once you are happy. Large libraries take a while.';
+
+	/// en: 'Copy downloads'
+	String get restoreDownloadsConfirm => 'Copy downloads';
+
+	/// en: 'Not now'
+	String get restoreDownloadsDecline => 'Not now';
+
+	/// en: 'Bringing downloads across'
+	String get restoreDownloadsProgressTitle => 'Bringing downloads across';
+
+	/// en: '${done} of ${total} · ${size}'
+	String restoreDownloadsProgressDetail({required Object done, required Object total, required Object size}) => '${done} of ${total} · ${size}';
+
+	/// en: 'Stop'
+	String get restoreDownloadsStop => 'Stop';
+
+	/// en: 'Brought ${count} downloads across'
+	String restoreDownloadsDone({required Object count}) => 'Brought ${count} downloads across';
+
+	/// en: 'Brought ${done} of ${total} downloads across. Running it again retries the rest.'
+	String restoreDownloadsPartial({required Object done, required Object total}) => 'Brought ${done} of ${total} downloads across. Running it again retries the rest.';
+
+	/// en: 'Stopped. What arrived is kept, and running it again carries on from there.'
+	String get restoreDownloadsStopped => 'Stopped. What arrived is kept, and running it again carries on from there.';
+
+	/// en: 'The previous version has no downloads to bring across'
+	String get restoreDownloadsNothing => 'The previous version has no downloads to bring across';
+
 	/// en: 'This will replace your current settings. Continue?'
 	String get importSettingsConfirm => 'This will replace your current settings. Continue?';
 
@@ -8049,6 +8082,17 @@ extension on Translations {
 			'settings.restoreBackupDecline' => 'Start fresh',
 			'settings.restoreHandoffFoundTitle' => 'Bring your settings across?',
 			'settings.restoreHandoffFoundMessage' => 'A previous version of this app is still installed and is holding your settings. Bringing them across copies your preferences; starting fresh leaves them at their defaults. Sign-ins do not travel this way.',
+			'settings.restoreDownloadsFoundTitle' => 'Bring your downloads across too?',
+			'settings.restoreDownloadsFoundMessage' => ({required Object count, required Object size}) => 'The previous version is holding ${count} downloaded items, ${size} in total. They are copied rather than moved, so they stay in the old app as well and nothing is lost either way — remove it once you are happy. Large libraries take a while.',
+			'settings.restoreDownloadsConfirm' => 'Copy downloads',
+			'settings.restoreDownloadsDecline' => 'Not now',
+			'settings.restoreDownloadsProgressTitle' => 'Bringing downloads across',
+			'settings.restoreDownloadsProgressDetail' => ({required Object done, required Object total, required Object size}) => '${done} of ${total} · ${size}',
+			'settings.restoreDownloadsStop' => 'Stop',
+			'settings.restoreDownloadsDone' => ({required Object count}) => 'Brought ${count} downloads across',
+			'settings.restoreDownloadsPartial' => ({required Object done, required Object total}) => 'Brought ${done} of ${total} downloads across. Running it again retries the rest.',
+			'settings.restoreDownloadsStopped' => 'Stopped. What arrived is kept, and running it again carries on from there.',
+			'settings.restoreDownloadsNothing' => 'The previous version has no downloads to bring across',
 			'settings.importSettingsConfirm' => 'This will replace your current settings. Continue?',
 			'settings.importSettingsSuccess' => 'Settings imported',
 			'settings.importSettingsInvalidFile' => 'This file isn\'t a valid Bask settings export',
@@ -8286,6 +8330,8 @@ extension on Translations {
 			'settings.subtitleRateCorrectionAlwaysDescription' => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent',
 			'search.hint' => 'Search movies, shows, music...',
 			'search.tryDifferentTerm' => 'Try a different search term',
+			_ => null,
+		} ?? switch (path) {
 			'search.searchYourMedia' => 'Search your media',
 			'search.enterTitleActorOrKeyword' => 'Enter a title, actor, or keyword',
 			'hotkeys.setShortcutFor' => ({required Object actionName}) => 'Set Shortcut for ${actionName}',
@@ -8297,8 +8343,6 @@ extension on Translations {
 			'hotkeys.actions.playPause' => 'Play/Pause',
 			'hotkeys.actions.volumeUp' => 'Volume Up',
 			'hotkeys.actions.volumeDown' => 'Volume Down',
-			_ => null,
-		} ?? switch (path) {
 			'hotkeys.actions.seekForward' => ({required Object seconds}) => 'Seek Forward (${seconds}s)',
 			'hotkeys.actions.seekBackward' => ({required Object seconds}) => 'Seek Backward (${seconds}s)',
 			'hotkeys.actions.fullscreenToggle' => 'Toggle Fullscreen',
@@ -8800,6 +8844,8 @@ extension on Translations {
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Session expired for ${count} servers',
 			'connections.signInAgain' => 'Sign in again',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Edit ${product} connection',
+			_ => null,
+		} ?? switch (path) {
 			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Add or remove URLs for ${serverName}. Bask will use the reachable URL with the lowest latency.',
 			'accountPreferences.sectionTitle' => 'Account preferences',
 			'accountPreferences.hubSubtitleSingle' => ({required Object account}) => 'Audio, subtitle and library options saved on ${account}',
@@ -8811,8 +8857,6 @@ extension on Translations {
 			'accountPreferences.unavailable' => 'Can\'t reach this account',
 			'accountPreferences.loadFailed' => 'Couldn\'t load these preferences',
 			'accountPreferences.noPreference' => 'No preference',
-			_ => null,
-		} ?? switch (path) {
 			'accountPreferences.notSet' => 'Not set',
 			'accountPreferences.groups.audioAndSubtitles' => 'Audio & subtitles',
 			'accountPreferences.groups.libraryDisplay' => 'Library',
@@ -9314,6 +9358,8 @@ extension on Translations {
 			'playlists.errorLoading' => 'Failed to load playlists',
 			'playlists.errorAdding' => 'Failed to add to playlist',
 			'playlists.errorReordering' => 'Failed to reorder playlist item',
+			_ => null,
+		} ?? switch (path) {
 			'playlists.errorRemoving' => 'Failed to remove from playlist',
 			'music.goToAlbum' => 'Go to album',
 			'music.goToArtist' => 'Go to artist',
@@ -9325,8 +9371,6 @@ extension on Translations {
 			'music.nowPlaying' => 'Now Playing',
 			'music.playingFrom' => ({required Object title}) => 'Playing from ${title}',
 			'music.queue' => 'Queue',
-			_ => null,
-		} ?? switch (path) {
 			'music.clearQueue' => 'Clear queue',
 			'music.lyrics' => 'Lyrics',
 			'music.noLyrics' => 'No lyrics available',
@@ -9828,6 +9872,8 @@ extension on Translations {
 			'metadataEdit.preferredSubtitleLanguage' => 'Preferred Subtitle Language',
 			'metadataEdit.subtitleMode' => 'Auto-Select Subtitle Mode',
 			'metadataEdit.manuallySelected' => 'Manually selected',
+			_ => null,
+		} ?? switch (path) {
 			'metadataEdit.shownWithForeignAudio' => 'Shown with foreign audio',
 			'metadataEdit.alwaysEnabled' => 'Always enabled',
 			'metadataEdit.tags' => 'Tags',
@@ -9839,8 +9885,6 @@ extension on Translations {
 			'metadataEdit.country' => 'Country',
 			'metadataEdit.collection' => 'Collection',
 			'metadataEdit.label' => 'Label',
-			_ => null,
-		} ?? switch (path) {
 			'metadataEdit.style' => 'Style',
 			'metadataEdit.mood' => 'Mood',
 			'matchScreen.match' => 'Match...',

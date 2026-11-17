@@ -54,6 +54,7 @@ import '../database/app_database.dart';
 import '../services/first_run_restore.dart';
 import '../services/settings_credential_export.dart';
 import '../services/settings_export_service.dart';
+import '../services/download_handoff_service.dart';
 import '../services/settings_handoff_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/settings_restore_prompt.dart';
@@ -847,11 +848,51 @@ class _MainScreenState extends State<MainScreen>
         context,
         result.credentials != null ? t.settings.importCredentialsSuccess : t.settings.importSettingsSuccess,
       );
+      // Only after a handoff: a local backup file carries settings alone, so
+      // there is no predecessor install to take downloads from.
+      if (handoff != null) await _maybeOfferDownloadHandoff(database);
     } on WrongPassphraseException {
       if (mounted) showErrorSnackBar(context, t.settings.importCredentialsWrongPassphrase);
     } on SettingsExportException catch (error) {
       appLogger.w('Restoring the found settings failed', error: error);
       if (mounted) showErrorSnackBar(context, t.settings.importSettingsInvalidFile);
+    }
+  }
+
+  /// Offers to bring the previous install's downloaded media across.
+  ///
+  /// Separate from the settings handoff and asked second, because this is the
+  /// expensive half: a settings restore is a small file, and this is however
+  /// many gigabytes the viewer has downloaded. Declining leaves the old app
+  /// holding them, so nothing is lost and the offer can be taken up later.
+  Future<void> _maybeOfferDownloadHandoff(AppDatabase database) async {
+    final service = DownloadHandoffService();
+    final DownloadHandoffManifest? manifest;
+    try {
+      manifest = await service.manifest();
+    } catch (error, stackTrace) {
+      appLogger.w('Could not read the previous install\'s downloads', error: error, stackTrace: stackTrace);
+      return;
+    }
+    if (manifest == null || manifest.isEmpty || !mounted) return;
+
+    if (!await promptToBringDownloads(context, manifest) || !mounted) return;
+
+    final result = await runDownloadHandoff(context, service: service, manifest: manifest, database: database);
+    if (result == null || !mounted) return;
+
+    if (result.cancelled) {
+      showSuccessSnackBar(context, t.settings.restoreDownloadsStopped);
+    } else if (result.filesFailed > 0) {
+      showErrorSnackBar(
+        context,
+        t.settings.restoreDownloadsPartial(
+          done: result.filesCopied + result.filesSkipped,
+          total: manifest.entries.length,
+        ),
+      );
+    } else {
+      showSuccessSnackBar(context, t.settings.restoreDownloadsDone(count: result.rowsImported));
     }
   }
 
