@@ -1,11 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Bask">
-  <!-- The mark as a single shape, for the slots Android fills with one flat
-       colour: the themed launcher icon and the status bar notification.
-       Both throw the colours away and keep the alpha, so the play mark is
-       knocked out of the disc rather than painted on top of it — otherwise
-       the silhouette is a featureless circle. The rim is inside the disc's
-       outline here for the same reason: a 2 unit ring of the same colour as
-       the fill it surrounds is invisible once everything is one colour. -->
-  <path fill-rule="evenodd" fill="#FFFFFF"
-        d="M21 54 A33 33 0 1 0 87 54 A33 33 0 1 0 21 54 Z M45 37 L45 71 L73 54 Z"/>
+  <!-- The mark as one flat shape, for the slots Android fills with a single
+       colour: the themed launcher icon and the status bar notification. Both
+       throw the colours away and keep only the alpha.
+
+       So this is X1 reduced to its light parts — the paper rim and the play
+       mark — rather than its dark ones. Keeping the play solid is what stops
+       the figure inverting: in the icon proper the play mark is the brightest
+       thing in it, and a version that knocked it out of a solid disc would
+       read as its own negative. The teal disc is simply absent here, which is
+       correct: against a tinted plate it is the ground, not the figure.
+
+       The rim is at its true 2 unit weight, so it is faint at notification
+       size. That is the trade for staying honest to the icon at the sizes
+       anyone actually looks at it. -->
+  <circle cx="54" cy="54" r="32" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M45 37 L45 71 L73 54 Z" fill="#FFFFFF"/>
 </svg>
