@@ -1,5 +1,5 @@
-# JNI exports bind by name (Java_com_edde746_plezy_libmpv_MpvPlayer_native*); keep the names stable.
--keepclasseswithmembernames class com.edde746.plezy.libmpv.* {
+# JNI exports bind by name (Java_com_inknironapps_bask_libmpv_MpvPlayer_native*); keep the names stable.
+-keepclasseswithmembernames class com.inknironapps.bask.libmpv.* {
     native <methods>;
 }
 
@@ -9,7 +9,7 @@
 # Match callback names, return type and static access without duplicating JNI
 # argument descriptors here: adding the session token made the old signatures
 # silently stop matching. Native initialization resolves every exact descriptor.
--keep class com.edde746.plezy.libmpv.MpvPlayer {
+-keep class com.inknironapps.bask.libmpv.MpvPlayer {
     public static void onPropertyChanged(...);
     public static void onEvent(...);
     public static void onEndFile(...);
