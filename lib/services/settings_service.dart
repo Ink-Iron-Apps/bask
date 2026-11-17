@@ -762,6 +762,15 @@ class SettingsService extends BaseSharedPreferencesService {
   /// portable registry: an imported file must not be able to answer the
   /// question for the next install.
   static const restorePromptShown = BoolPref('restore_prompt_shown');
+
+  /// Whether this install has already been asked about copying the previous
+  /// install's downloaded media across. Kept apart from
+  /// [restorePromptShown] because the two offers are answered separately: a
+  /// rename hands over settings in seconds and downloads in however long
+  /// however many gigabytes take, so an install that took the first and
+  /// skipped the second must still be able to be asked. Outside the portable
+  /// registry for the same reason as [restorePromptShown].
+  static const downloadHandoffPromptShown = BoolPref('download_handoff_prompt_shown');
   static const showPerformanceOverlay = BoolPref('show_performance_overlay');
   static const autoHidePerformanceOverlay = BoolPref('auto_hide_performance_overlay', defaultValue: true);
   static const enableDiscordRPC = BoolPref('enable_discord_rpc');
@@ -1643,6 +1652,7 @@ class SettingsService extends BaseSharedPreferencesService {
   /// should travel between installations.
   static final List<Pref<Object?>> _resetOnlyPrefs = [
     restorePromptShown,
+    downloadHandoffPromptShown,
     customDownloadPathType,
     mediaVersionPreferences,
     localLastPlayedAt,

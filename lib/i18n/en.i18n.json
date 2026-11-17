@@ -288,6 +288,8 @@
     "restoreDownloadsDone": "Brought ${count} downloads across",
     "restoreDownloadsPartial": "Brought ${done} of ${total} downloads across. Running it again retries the rest.",
     "restoreDownloadsStopped": "Stopped. What arrived is kept, and running it again carries on from there.",
+    "restoreDownloadsAction": "Bring downloads from the old app",
+    "restoreDownloadsActionDescription": "Copies the downloaded media the previous version is still holding into this one",
     "restoreDownloadsNothing": "The previous version has no downloads to bring across",
     "importSettingsConfirm": "This will replace your current settings. Continue?",
     "importSettingsSuccess": "Settings imported",

@@ -31,6 +31,7 @@ import '../../database/app_database.dart';
 import '../../services/settings_credential_export.dart';
 import '../../widgets/settings_restore_prompt.dart';
 import '../../services/settings_export_service.dart';
+import '../../services/settings_handoff_service.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/seerr_account_provider.dart';
 import '../../services/account_preferences_accounts.dart';
@@ -131,6 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   static const _kWatchTogetherRelay = 'watch_together_relay';
   static const _kExportSettings = 'export_settings';
   static const _kImportSettings = 'import_settings';
+  static const _kBringDownloads = 'bring_downloads';
   static const _kAccountPreferences = 'account_preferences';
 
   KeyboardShortcutsService? _keyboardService;
@@ -784,6 +786,18 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           subtitle: t.settings.importSettingsDescription,
           onTap: _showImportSettingsDialog,
         ),
+        // The way back into the download handoff. Startup offers it once
+        // after a rename; this is here because that offer can be declined, or
+        // stopped part way, or answered on a version that could not yet do
+        // it, and the old app goes on holding the files either way.
+        if (SettingsHandoffService.isSupported)
+          SettingNavigationTile(
+            focusNode: _focusTracker.get(_kBringDownloads),
+            icon: Symbols.drive_file_move_rounded,
+            title: t.settings.restoreDownloadsAction,
+            subtitle: t.settings.restoreDownloadsActionDescription,
+            onTap: _handleBringDownloads,
+          ),
         SettingSwitchTile(
           pref: settings.SettingsService.autoExportSettings,
           icon: Symbols.history_rounded,
@@ -794,6 +808,14 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
         // sync backend exists (iCloud on Apple platforms, or the relay).
       ],
     );
+  }
+
+  /// Asks the previous install for its downloads, on demand.
+  ///
+  /// Reports an empty predecessor, unlike the startup offer: the viewer
+  /// pressed this and is owed an answer either way.
+  Future<void> _handleBringDownloads() async {
+    await offerDownloadHandoff(context, database: context.read<AppDatabase>(), announceNothing: true);
   }
 
   Widget _buildAutoCheckUpdatesOnStartupTile() => SettingSwitchTile(
