@@ -4,8 +4,10 @@ import '../database/app_database.dart';
 import '../i18n/strings.g.dart';
 import '../services/download_handoff_service.dart';
 import '../services/settings_export_service.dart';
+import '../utils/app_logger.dart';
 import '../utils/dialogs.dart';
 import '../utils/formatters.dart';
+import '../utils/snackbar_helper.dart';
 
 /// The passphrase that opens a credential section, asked for in the one place
 /// both callers can reach it: Settings' own import, and the first-run restore.
@@ -134,4 +136,56 @@ Future<DownloadHandoffResult?> runDownloadHandoff(
     await dialog;
     progress.dispose();
   }
+}
+
+/// The download handoff end to end: what the previous install is holding, the
+/// question, the copy behind its progress dialog, and what happened.
+///
+/// One function because there are two callers and the reporting is the same
+/// for both — Settings, where the viewer asked for this, and startup, where
+/// the app asks after a rename. [announceNothing] separates them: a viewer
+/// who pressed the button is owed an answer when the predecessor turns out to
+/// have nothing, and startup should say nothing at all in that case.
+///
+/// Returns the result, or null when there was nothing to offer, the offer was
+/// declined, or the context went away.
+Future<DownloadHandoffResult?> offerDownloadHandoff(
+  BuildContext context, {
+  required AppDatabase database,
+  DownloadHandoffService? service,
+  bool announceNothing = false,
+}) async {
+  final handoff = service ?? DownloadHandoffService();
+  final DownloadHandoffManifest? manifest;
+  try {
+    manifest = await handoff.manifest();
+  } catch (error, stackTrace) {
+    appLogger.w("Could not read the previous install's downloads", error: error, stackTrace: stackTrace);
+    return null;
+  }
+  if (!context.mounted) return null;
+  if (manifest == null || manifest.isEmpty) {
+    if (announceNothing) showSnackBar(context, t.settings.restoreDownloadsNothing);
+    return null;
+  }
+
+  if (!await promptToBringDownloads(context, manifest) || !context.mounted) return null;
+
+  final result = await runDownloadHandoff(context, service: handoff, manifest: manifest, database: database);
+  if (result == null || !context.mounted) return result;
+
+  if (result.cancelled) {
+    showSnackBar(context, t.settings.restoreDownloadsStopped);
+  } else if (result.filesFailed > 0) {
+    showErrorSnackBar(
+      context,
+      t.settings.restoreDownloadsPartial(
+        done: result.filesCopied + result.filesSkipped,
+        total: manifest.entries.length,
+      ),
+    );
+  } else {
+    showSuccessSnackBar(context, t.settings.restoreDownloadsDone(count: result.rowsImported));
+  }
+  return result;
 }

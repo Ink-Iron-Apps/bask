@@ -54,7 +54,6 @@ import '../database/app_database.dart';
 import '../services/first_run_restore.dart';
 import '../services/settings_credential_export.dart';
 import '../services/settings_export_service.dart';
-import '../services/download_handoff_service.dart';
 import '../services/settings_handoff_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/settings_restore_prompt.dart';
@@ -619,6 +618,9 @@ class _MainScreenState extends State<MainScreen>
         // in order to re-scope the preferences it carries.
         await _maybeOfferSettingsRestore();
         if (!mounted) return;
+
+        await _maybeOfferDownloadHandoff();
+        if (!mounted) return;
       }
 
       // Focus content initially (replaces autofocus which caused focus stealing issues)
@@ -848,9 +850,6 @@ class _MainScreenState extends State<MainScreen>
         context,
         result.credentials != null ? t.settings.importCredentialsSuccess : t.settings.importSettingsSuccess,
       );
-      // Only after a handoff: a local backup file carries settings alone, so
-      // there is no predecessor install to take downloads from.
-      if (handoff != null) await _maybeOfferDownloadHandoff(database);
     } on WrongPassphraseException {
       if (mounted) showErrorSnackBar(context, t.settings.importCredentialsWrongPassphrase);
     } on SettingsExportException catch (error) {
@@ -861,38 +860,43 @@ class _MainScreenState extends State<MainScreen>
 
   /// Offers to bring the previous install's downloaded media across.
   ///
-  /// Separate from the settings handoff and asked second, because this is the
-  /// expensive half: a settings restore is a small file, and this is however
-  /// many gigabytes the viewer has downloaded. Declining leaves the old app
-  /// holding them, so nothing is lost and the offer can be taken up later.
-  Future<void> _maybeOfferDownloadHandoff(AppDatabase database) async {
-    final service = DownloadHandoffService();
-    final DownloadHandoffManifest? manifest;
+  /// Asked after the settings restore but gated independently of it, because
+  /// the two offers answer different questions. A settings restore is a small
+  /// file and is only ever right for an install with nothing to lose, so it
+  /// is spent the moment it is answered either way. This one is the expensive
+  /// half — however many gigabytes the viewer has downloaded — and it is
+  /// right for any install that still has a predecessor sitting beside it
+  /// holding files. Tying it to the settings offer meant an install that took
+  /// its settings on an earlier version could never be asked for its
+  /// downloads at all, which is exactly what a rename produces.
+  ///
+  /// Declining, or stopping part way, leaves the old app holding the files,
+  /// so nothing is lost; an incomplete run clears the flag again so the
+  /// remainder is offered next launch, and the copy is idempotent. Settings
+  /// offers the same thing on demand, which is the way back in once this has
+  /// been answered.
+  Future<void> _maybeOfferDownloadHandoff() async {
+    if (SettingsService.instance.read(SettingsService.downloadHandoffPromptShown)) return;
+    if (!SettingsHandoffService.isSupported) return;
+
+    await _markDownloadHandoffOffered(true);
+    if (!mounted) return;
+
+    final result = await offerDownloadHandoff(context, database: context.read<AppDatabase>());
+    // Nothing offered, declined, or finished in full: the question is spent.
+    // Anything left behind brings it back, because there is still work to do.
+    if (result != null && !result.isComplete) await _markDownloadHandoffOffered(false);
+  }
+
+  /// Records whether the download offer has been put, so it is put once.
+  ///
+  /// Failing to write it is logged rather than surfaced: the cost is being
+  /// asked again next launch, and the copy skips whatever already arrived.
+  Future<void> _markDownloadHandoffOffered(bool offered) async {
     try {
-      manifest = await service.manifest();
+      await SettingsService.instance.write(SettingsService.downloadHandoffPromptShown, offered);
     } catch (error, stackTrace) {
-      appLogger.w('Could not read the previous install\'s downloads', error: error, stackTrace: stackTrace);
-      return;
-    }
-    if (manifest == null || manifest.isEmpty || !mounted) return;
-
-    if (!await promptToBringDownloads(context, manifest) || !mounted) return;
-
-    final result = await runDownloadHandoff(context, service: service, manifest: manifest, database: database);
-    if (result == null || !mounted) return;
-
-    if (result.cancelled) {
-      showSuccessSnackBar(context, t.settings.restoreDownloadsStopped);
-    } else if (result.filesFailed > 0) {
-      showErrorSnackBar(
-        context,
-        t.settings.restoreDownloadsPartial(
-          done: result.filesCopied + result.filesSkipped,
-          total: manifest.entries.length,
-        ),
-      );
-    } else {
-      showSuccessSnackBar(context, t.settings.restoreDownloadsDone(count: result.rowsImported));
+      appLogger.w('Could not record the download handoff prompt', error: error, stackTrace: stackTrace);
     }
   }
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# Generate Android notification and monochrome icons from assets/bask_icon.svg.
+# Generate Android notification and monochrome icons from assets/bask_silhouette.svg.
 
 set -e
 
-SVG_SOURCE="assets/bask_icon.svg"
+SVG_SOURCE="assets/bask_silhouette.svg"
 ANDROID_RES="android/app/src/main/res"
 TEMP_DIR="/tmp/android_icons_$$"
 
