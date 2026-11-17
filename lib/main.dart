@@ -340,9 +340,9 @@ Future<_StartupDependencies> _initializeApplication() async {
 /// `GIT_COMMIT`, so resolve that first and only pay the platform read — inside
 /// a guard — when there is no commit to use.
 String _sentryRelease() {
-  if (gitCommit.length >= 7) return 'plezy@${gitCommit.substring(0, 7)}';
-  if (gitCommit.isNotEmpty) return 'plezy@$gitCommit';
-  return 'plezy@unknown';
+  if (gitCommit.length >= 7) return 'bask@${gitCommit.substring(0, 7)}';
+  if (gitCommit.isNotEmpty) return 'bask@$gitCommit';
+  return 'bask@unknown';
 }
 
 const startupBootstrapProgressKey = Key('startup-bootstrap-progress');

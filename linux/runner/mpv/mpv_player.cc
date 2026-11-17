@@ -348,7 +348,7 @@ bool MpvPlayer::Initialize() {
     return false;
   }
 
-  plezy::mpv_common::ApplyCommonStartupOptions(mpv_, audio_only_);
+  bask::mpv_common::ApplyCommonStartupOptions(mpv_, audio_only_);
   mpv_set_option_string(mpv_, "terminal", "no");
 
   if (!audio_only_) {
@@ -368,7 +368,7 @@ bool MpvPlayer::Initialize() {
     // Declared by vo_gpu_next only, so inert for the render API this player
     // runs. Set anyway so the startup value agrees with what a later
     // `hdr-enabled` write puts here through SetHDREnabled.
-    mpv_set_option_string(mpv_, "target-colorspace-hint", plezy::mpv_common::TargetColorspaceHint(hdr_enabled_));
+    mpv_set_option_string(mpv_, "target-colorspace-hint", bask::mpv_common::TargetColorspaceHint(hdr_enabled_));
   }
 
   // Default to info-level logging. The vaapi hwdec probe and the "Using
@@ -775,7 +775,7 @@ void MpvPlayer::CommandAsync(const std::vector<std::string>& args, CommandCallba
     return;
   }
 
-  plezy::mpv_common::SubmitCommandAsync(mpv_, pending_requests_, args, std::move(callback));
+  bask::mpv_common::SubmitCommandAsync(mpv_, pending_requests_, args, std::move(callback));
 }
 
 void MpvPlayer::SetProperty(const std::string& name, const std::string& value) {
@@ -797,10 +797,10 @@ void MpvPlayer::SetPropertyAsync(const std::string& name, const std::string& val
   }
 
   if (name == "hdr-enabled") {
-    SetHDREnabled(plezy::mpv_common::ParseEnabledFlag(value), std::move(callback));
+    SetHDREnabled(bask::mpv_common::ParseEnabledFlag(value), std::move(callback));
     return;
   }
-  plezy::mpv_common::SubmitSetPropertyAsync(
+  bask::mpv_common::SubmitSetPropertyAsync(
       mpv_, pending_requests_, name, value, [this, name, value, cb = std::move(callback)](int error) mutable {
         // Native-side attribution for the same failure the platform channel
         // reports: the HDR transaction's property writes never reach the
@@ -810,8 +810,8 @@ void MpvPlayer::SetPropertyAsync(const std::string& name, const std::string& val
         // in a property value stays bounded.
         if (error < 0 && !disposed_) {
           std::string logged = value;
-          if (logged.size() > plezy::mpv_common::kSetPropertyErrorDescriptionLimit) {
-            logged.resize(plezy::mpv_common::kSetPropertyErrorDescriptionLimit);
+          if (logged.size() > bask::mpv_common::kSetPropertyErrorDescriptionLimit) {
+            logged.resize(bask::mpv_common::kSetPropertyErrorDescriptionLimit);
           }
           g_warning("MPV: setProperty '%s'='%s' failed: %s", name.c_str(), logged.c_str(), mpv_error_string(error));
         }
@@ -860,7 +860,7 @@ void MpvPlayer::GetPropertyAsync(const std::string& name, GetPropertyCallback ca
     return;
   }
 
-  plezy::mpv_common::SubmitGetPropertyAsync(mpv_, pending_requests_, name, std::move(callback));
+  bask::mpv_common::SubmitGetPropertyAsync(mpv_, pending_requests_, name, std::move(callback));
 }
 
 void MpvPlayer::ObserveProperty(const std::string& name, const std::string& format, int id) {
@@ -1075,11 +1075,11 @@ void MpvPlayer::TryAudioReload(const char* reason, int attempt, uint64_t request
 }
 
 void MpvPlayer::MaybeRunAudioRecovery() {
-  const auto action = audio_recovery_.NextReload(plezy::mpv_common::AudioRecoveryState::Clock::now());
-  if (action.reason == plezy::mpv_common::AudioReloadReason::kNone) {
+  const auto action = audio_recovery_.NextReload(bask::mpv_common::AudioRecoveryState::Clock::now());
+  if (action.reason == bask::mpv_common::AudioReloadReason::kNone) {
     return;
   }
-  const char* reason = action.reason == plezy::mpv_common::AudioReloadReason::kResume ? "resume" : "null-fallback";
+  const char* reason = action.reason == bask::mpv_common::AudioReloadReason::kResume ? "resume" : "null-fallback";
   TryAudioReload(reason, action.attempt, action.request_generation);
   if (action.exhausted) {
     LogRecovery("audio recovery budget exhausted; waiting for device list change");
@@ -1092,7 +1092,7 @@ void MpvPlayer::EnsureAudioRecoveryTimer() {
 }
 
 void MpvPlayer::HandleMpvEvent(mpv_event* event) {
-  if (plezy::mpv_common::DispatchReplyEvent(
+  if (bask::mpv_common::DispatchReplyEvent(
           pending_requests_, event, [](const char* value) { return SanitizeUtf8(value); })) {
     return;
   }
@@ -1114,7 +1114,7 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
     case MPV_EVENT_PROPERTY_CHANGE: {
       auto* prop = static_cast<mpv_event_property*>(event->data);
       if (!prop || !prop->name) break;
-      mpv_node node = plezy::mpv_common::ExtractPropertyNode(prop);
+      mpv_node node = bask::mpv_common::ExtractPropertyNode(prop);
 
       // This runner's own observation, which nothing on the Dart side asked
       // for and nothing there is waiting on. mpv delivers one event per
@@ -1130,7 +1130,7 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
         break;
       }
 
-      const auto notice = plezy::mpv_common::ObserveAudioRecoveryProperty(audio_recovery_, event, prop);
+      const auto notice = bask::mpv_common::ObserveAudioRecoveryProperty(audio_recovery_, event, prop);
       if (notice.message) LogRecovery(notice.message);
       // Recovery runs off a GLib timer here, so newly queued work has to arm it.
       if (notice.scheduled_work) EnsureAudioRecoveryTimer();
@@ -1209,7 +1209,7 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
         break;
       }
       ++pending_restart_positions_;
-      plezy::mpv_common::SubmitGetPropertyAsync(mpv_, pending_requests_, "time-pos", std::move(on_position));
+      bask::mpv_common::SubmitGetPropertyAsync(mpv_, pending_requests_, "time-pos", std::move(on_position));
       break;
     }
     default:
@@ -1247,10 +1247,10 @@ struct FlValueNodeBuilder {
 
 }  // namespace
 
-FlValue* MpvPlayer::NodeToFlValue(mpv_node* node) { return plezy::mpv_common::ConvertNode<FlValueNodeBuilder>(node); }
+FlValue* MpvPlayer::NodeToFlValue(mpv_node* node) { return bask::mpv_common::ConvertNode<FlValueNodeBuilder>(node); }
 
-FlValue* MpvPlayer::NodeToFlValue(mpv_node* node, plezy::mpv_common::NodeConversionBudget* budget) {
-  return plezy::mpv_common::ConvertNode<FlValueNodeBuilder>(node, 0, budget);
+FlValue* MpvPlayer::NodeToFlValue(mpv_node* node, bask::mpv_common::NodeConversionBudget* budget) {
+  return bask::mpv_common::ConvertNode<FlValueNodeBuilder>(node, 0, budget);
 }
 
 void MpvPlayer::SendPropertyChange(const char* name, mpv_node* data) {
@@ -1341,7 +1341,7 @@ void MpvPlayer::ApplyPropertySequence(
   }
   const PropertyChange& change = (*changes)[index];
   SetPropertyAsync(change.name, change.value, [this, changes, index, cb = std::move(callback)](int error) mutable {
-    if (plezy::mpv_common::SetPropertyStatusSucceeded(error)) {
+    if (bask::mpv_common::SetPropertyStatusSucceeded(error)) {
       ApplyPropertySequence(changes, index + 1, std::move(cb));
       return;
     }
@@ -1365,7 +1365,7 @@ void MpvPlayer::RollbackPropertySequence(
   const PropertyChange& change = (*changes)[index];
   SetPropertyAsync(
       change.name, change.rollback, [this, changes, index, failure, cb = std::move(callback)](int error) mutable {
-        if (plezy::mpv_common::SetPropertyStatusSucceeded(error)) {
+        if (bask::mpv_common::SetPropertyStatusSucceeded(error)) {
           RollbackPropertySequence(changes, index, failure, std::move(cb));
           return;
         }
@@ -1411,7 +1411,7 @@ void MpvPlayer::ForceSdrOutput(size_t index, int failure, StatusCallback callbac
     return;
   }
   SetPropertyAsync(kResetOrder[index], "auto", [this, index, failure, cb = std::move(callback)](int error) mutable {
-    if (plezy::mpv_common::SetPropertyStatusSucceeded(error)) {
+    if (bask::mpv_common::SetPropertyStatusSucceeded(error)) {
       // Recorded as it lands, not once the whole reset is through. Recording
       // only at the end would leave the cache naming the pre-reset curve for
       // every property that did move if a later one is refused, and the no-op
@@ -1627,7 +1627,7 @@ void MpvPlayer::RunPendingHdrOutput() {
   changes->push_back({"tone-mapping", operator_name, applied_tone_mapping_});
   changes->push_back({"target-peak", peak, applied_target_peak_});
   ApplyPropertySequence(changes, 0, [this, changes, callback = std::move(request.callback)](int error) {
-    const bool ok = plezy::mpv_common::SetPropertyStatusSucceeded(error);
+    const bool ok = bask::mpv_common::SetPropertyStatusSucceeded(error);
     // Only a fully applied set becomes the new rollback target; a failed one was
     // already unwound, and the unwinding updated these itself if it had to force
     // SDR.
@@ -1662,9 +1662,9 @@ void MpvPlayer::RunPendingHdrOutput() {
 
 void MpvPlayer::SetHDREnabled(bool enabled, StatusCallback callback) {
   SetPropertyAsync(
-      "target-colorspace-hint", plezy::mpv_common::TargetColorspaceHint(enabled),
+      "target-colorspace-hint", bask::mpv_common::TargetColorspaceHint(enabled),
       [this, enabled, callback = std::move(callback)](int error) mutable {
-        if (plezy::mpv_common::SetPropertyStatusSucceeded(error) && !disposed_) {
+        if (bask::mpv_common::SetPropertyStatusSucceeded(error) && !disposed_) {
           hdr_enabled_ = enabled;
         }
         if (callback) callback(error);

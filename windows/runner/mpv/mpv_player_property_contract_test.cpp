@@ -431,7 +431,7 @@ void TestCommandReplyCarriesPlaylistEntryId() {
       MpvPlayerPropertyContractTestPeer::RegisterPendingCommand(player, [&](int error, const mpv_node* result) {
         ++callback_count;
         status = error;
-        reported_entry = plezy::mpv_common::PlaylistEntryIdFromCommandResult(result, &reported_entry_id);
+        reported_entry = bask::mpv_common::PlaylistEntryIdFromCommandResult(result, &reported_entry_id);
       });
 
   const char* keys[] = {"playlist_entry_id"};
@@ -461,7 +461,7 @@ void TestCommandReplyCarriesPlaylistEntryId() {
   bool unexpected_entry = true;
   const uint64_t plain_request_id =
       MpvPlayerPropertyContractTestPeer::RegisterPendingCommand(player, [&](int, const mpv_node* result) {
-        unexpected_entry = plezy::mpv_common::PlaylistEntryIdFromCommandResult(result, &unexpected_entry_id);
+        unexpected_entry = bask::mpv_common::PlaylistEntryIdFromCommandResult(result, &unexpected_entry_id);
       });
   mpv_event_command plain_command{};
   plain_command.result.format = MPV_FORMAT_NONE;

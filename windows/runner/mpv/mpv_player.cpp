@@ -95,7 +95,7 @@ struct EncodableNodeBuilder {
 };
 
 flutter::EncodableValue NodeToEncodableValue(const mpv_node* node) {
-  return plezy::mpv_common::ConvertNode<EncodableNodeBuilder>(node);
+  return bask::mpv_common::ConvertNode<EncodableNodeBuilder>(node);
 }
 
 // Input ownership for the DComp video child.
@@ -567,7 +567,7 @@ bool MpvPlayer::Initialize(HWND view) {
     return false;
   }
 
-  plezy::mpv_common::ApplyCommonStartupOptions(mpv_, audio_only_);
+  bask::mpv_common::ApplyCommonStartupOptions(mpv_, audio_only_);
 
   if (!audio_only_) {
     // Create a child window for mpv to render into, parented to the Flutter
@@ -606,7 +606,7 @@ bool MpvPlayer::Initialize(HWND view) {
 
   if (!audio_only_) {
     // Let mpv use display/context detection instead of forcing HDR signaling.
-    mpv_set_option_string(mpv_, "target-colorspace-hint", plezy::mpv_common::TargetColorspaceHint(hdr_enabled_));
+    mpv_set_option_string(mpv_, "target-colorspace-hint", bask::mpv_common::TargetColorspaceHint(hdr_enabled_));
 
     // Fallback tone mapping when display doesn't support HDR. On Adreno,
     // per-frame tone-map LUT regeneration is pathological — see
@@ -697,7 +697,7 @@ void MpvPlayer::CommandAsync(const std::vector<std::string>& args, CommandCallba
     return;
   }
 
-  plezy::mpv_common::SubmitCommandAsync(mpv_, pending_requests_, args, std::move(callback));
+  bask::mpv_common::SubmitCommandAsync(mpv_, pending_requests_, args, std::move(callback));
 }
 
 void MpvPlayer::SetProperty(const std::string& name, const std::string& value) {
@@ -712,11 +712,11 @@ void MpvPlayer::SetPropertyAsync(const std::string& name, const std::string& val
 
   // Handle custom HDR toggle property (same pattern as iOS/macOS)
   if (name == "hdr-enabled") {
-    SetHDREnabled(plezy::mpv_common::ParseEnabledFlag(value), std::move(callback));
+    SetHDREnabled(bask::mpv_common::ParseEnabledFlag(value), std::move(callback));
     return;
   }
 
-  plezy::mpv_common::SubmitSetPropertyAsync(mpv_, pending_requests_, name, value, std::move(callback));
+  bask::mpv_common::SubmitSetPropertyAsync(mpv_, pending_requests_, name, value, std::move(callback));
 }
 
 void MpvPlayer::GetPropertyAsync(const std::string& name, GetPropertyCallback callback) {
@@ -725,7 +725,7 @@ void MpvPlayer::GetPropertyAsync(const std::string& name, GetPropertyCallback ca
     return;
   }
 
-  plezy::mpv_common::SubmitGetPropertyAsync(mpv_, pending_requests_, name, std::move(callback));
+  bask::mpv_common::SubmitGetPropertyAsync(mpv_, pending_requests_, name, std::move(callback));
 }
 
 void MpvPlayer::ObserveProperty(const std::string& name, const std::string& format, int id) {
@@ -810,11 +810,11 @@ void MpvPlayer::TryAudioReload(const char* reason, int attempt, uint64_t request
 }
 
 void MpvPlayer::MaybeRunAudioRecovery() {
-  const auto action = audio_recovery_.NextReload(plezy::mpv_common::AudioRecoveryState::Clock::now());
-  if (action.reason == plezy::mpv_common::AudioReloadReason::kNone) {
+  const auto action = audio_recovery_.NextReload(bask::mpv_common::AudioRecoveryState::Clock::now());
+  if (action.reason == bask::mpv_common::AudioReloadReason::kNone) {
     return;
   }
-  const char* reason = action.reason == plezy::mpv_common::AudioReloadReason::kResume ? "resume" : "null-fallback";
+  const char* reason = action.reason == bask::mpv_common::AudioReloadReason::kResume ? "resume" : "null-fallback";
   TryAudioReload(reason, action.attempt, action.request_generation);
   if (action.exhausted) {
     LogRecovery("audio recovery budget exhausted; waiting for device list change");
@@ -853,7 +853,7 @@ void MpvPlayer::EventLoop() {
 }
 
 void MpvPlayer::HandleMpvEvent(mpv_event* event) {
-  if (plezy::mpv_common::DispatchReplyEvent(
+  if (bask::mpv_common::DispatchReplyEvent(
           pending_requests_, event, [](const char* value) { return SanitizeUtf8(value); })) {
     return;
   }
@@ -874,10 +874,10 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
     }
     case MPV_EVENT_PROPERTY_CHANGE: {
       auto* prop = static_cast<mpv_event_property*>(event->data);
-      mpv_node node = plezy::mpv_common::ExtractPropertyNode(prop);
+      mpv_node node = bask::mpv_common::ExtractPropertyNode(prop);
 
       // The 100ms mpv_wait_event tick already polls for scheduled reloads.
-      const auto notice = plezy::mpv_common::ObserveAudioRecoveryProperty(audio_recovery_, event, prop);
+      const auto notice = bask::mpv_common::ObserveAudioRecoveryProperty(audio_recovery_, event, prop);
       if (notice.message) LogRecovery(notice.message);
 
       SendPropertyChange(prop->name, &node);
@@ -993,7 +993,7 @@ void MpvPlayer::SetHDREnabled(bool enabled, StatusCallback callback) {
     if (callback) callback(0);
     return;
   }
-  SetPropertyAsync("target-colorspace-hint", plezy::mpv_common::TargetColorspaceHint(enabled), std::move(callback));
+  SetPropertyAsync("target-colorspace-hint", bask::mpv_common::TargetColorspaceHint(enabled), std::move(callback));
 }
 
 }  // namespace mpv

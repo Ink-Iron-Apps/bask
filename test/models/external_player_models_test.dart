@@ -51,9 +51,9 @@ void main() {
       expect(
         probe.runs,
         unorderedEquals([
-          ['sh', '-c', _commandProbe, 'plezy-command-probe', 'vlc'],
-          ['sh', '-c', _commandProbe, 'plezy-command-probe', 'mpv'],
-          ['sh', '-c', _commandProbe, 'plezy-command-probe', 'celluloid'],
+          ['sh', '-c', _commandProbe, 'bask-command-probe', 'vlc'],
+          ['sh', '-c', _commandProbe, 'bask-command-probe', 'mpv'],
+          ['sh', '-c', _commandProbe, 'bask-command-probe', 'celluloid'],
         ]),
       );
     });
@@ -64,7 +64,7 @@ void main() {
 
       expect(probe.bundleLookups, unorderedEquals(['org.videolan.vlc', 'com.colliderli.iina']));
       expect(probe.runs, [
-        ['sh', '-c', _commandProbe, 'plezy-command-probe', 'mpv'],
+        ['sh', '-c', _commandProbe, 'bask-command-probe', 'mpv'],
       ]);
     });
 

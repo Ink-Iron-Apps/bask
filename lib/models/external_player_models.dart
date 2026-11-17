@@ -400,7 +400,7 @@ class KnownPlayers {
   /// permission classes, ACLs and `noexec` mounts are honoured exactly as they
   /// will be when [Process.start] execs the command.
   static Future<bool> _posixCommandExists(String command) async {
-    final result = await probe.run('sh', ['-c', r'command -v "$1" >/dev/null 2>&1', 'plezy-command-probe', command]);
+    final result = await probe.run('sh', ['-c', r'command -v "$1" >/dev/null 2>&1', 'bask-command-probe', command]);
     return result.exitCode == 0;
   }
 
