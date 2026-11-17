@@ -905,6 +905,12 @@ class Translations$settings$en {
 	/// en: 'Stopped. What arrived is kept, and running it again carries on from there.'
 	String get restoreDownloadsStopped => 'Stopped. What arrived is kept, and running it again carries on from there.';
 
+	/// en: 'Bring downloads from the old app'
+	String get restoreDownloadsAction => 'Bring downloads from the old app';
+
+	/// en: 'Copies the downloaded media the previous version is still holding into this one'
+	String get restoreDownloadsActionDescription => 'Copies the downloaded media the previous version is still holding into this one';
+
 	/// en: 'The previous version has no downloads to bring across'
 	String get restoreDownloadsNothing => 'The previous version has no downloads to bring across';
 
@@ -8092,6 +8098,8 @@ extension on Translations {
 			'settings.restoreDownloadsDone' => ({required Object count}) => 'Brought ${count} downloads across',
 			'settings.restoreDownloadsPartial' => ({required Object done, required Object total}) => 'Brought ${done} of ${total} downloads across. Running it again retries the rest.',
 			'settings.restoreDownloadsStopped' => 'Stopped. What arrived is kept, and running it again carries on from there.',
+			'settings.restoreDownloadsAction' => 'Bring downloads from the old app',
+			'settings.restoreDownloadsActionDescription' => 'Copies the downloaded media the previous version is still holding into this one',
 			'settings.restoreDownloadsNothing' => 'The previous version has no downloads to bring across',
 			'settings.importSettingsConfirm' => 'This will replace your current settings. Continue?',
 			'settings.importSettingsSuccess' => 'Settings imported',
@@ -8328,10 +8336,10 @@ extension on Translations {
 			'settings.subtitleRateCorrectionCertainDescription' => 'Only when subtitles run past the end of the video, which correctly timed ones never do',
 			'settings.subtitleRateCorrectionAlways' => 'Also when they stop short',
 			'settings.subtitleRateCorrectionAlwaysDescription' => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent',
-			'search.hint' => 'Search movies, shows, music...',
-			'search.tryDifferentTerm' => 'Try a different search term',
 			_ => null,
 		} ?? switch (path) {
+			'search.hint' => 'Search movies, shows, music...',
+			'search.tryDifferentTerm' => 'Try a different search term',
 			'search.searchYourMedia' => 'Search your media',
 			'search.enterTitleActorOrKeyword' => 'Enter a title, actor, or keyword',
 			'hotkeys.setShortcutFor' => ({required Object actionName}) => 'Set Shortcut for ${actionName}',
@@ -8842,10 +8850,10 @@ extension on Translations {
 			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Add to ${displayName}: Plex, Jellyfin, Emby, or another profile connection',
 			'connections.sessionExpiredOne' => ({required Object name}) => 'Session expired for ${name}',
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Session expired for ${count} servers',
-			'connections.signInAgain' => 'Sign in again',
-			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Edit ${product} connection',
 			_ => null,
 		} ?? switch (path) {
+			'connections.signInAgain' => 'Sign in again',
+			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Edit ${product} connection',
 			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Add or remove URLs for ${serverName}. Bask will use the reachable URL with the lowest latency.',
 			'accountPreferences.sectionTitle' => 'Account preferences',
 			'accountPreferences.hubSubtitleSingle' => ({required Object account}) => 'Audio, subtitle and library options saved on ${account}',
@@ -9356,10 +9364,10 @@ extension on Translations {
 			'playlists.errorCreating' => 'Failed to create playlist',
 			'playlists.errorDeleting' => 'Failed to delete playlist',
 			'playlists.errorLoading' => 'Failed to load playlists',
-			'playlists.errorAdding' => 'Failed to add to playlist',
-			'playlists.errorReordering' => 'Failed to reorder playlist item',
 			_ => null,
 		} ?? switch (path) {
+			'playlists.errorAdding' => 'Failed to add to playlist',
+			'playlists.errorReordering' => 'Failed to reorder playlist item',
 			'playlists.errorRemoving' => 'Failed to remove from playlist',
 			'music.goToAlbum' => 'Go to album',
 			'music.goToArtist' => 'Go to artist',
@@ -9870,10 +9878,10 @@ extension on Translations {
 			'metadataEdit.useOriginalTitle' => 'Use Original Title',
 			'metadataEdit.preferredAudioLanguage' => 'Preferred Audio Language',
 			'metadataEdit.preferredSubtitleLanguage' => 'Preferred Subtitle Language',
-			'metadataEdit.subtitleMode' => 'Auto-Select Subtitle Mode',
-			'metadataEdit.manuallySelected' => 'Manually selected',
 			_ => null,
 		} ?? switch (path) {
+			'metadataEdit.subtitleMode' => 'Auto-Select Subtitle Mode',
+			'metadataEdit.manuallySelected' => 'Manually selected',
 			'metadataEdit.shownWithForeignAudio' => 'Shown with foreign audio',
 			'metadataEdit.alwaysEnabled' => 'Always enabled',
 			'metadataEdit.tags' => 'Tags',
