@@ -1,4 +1,4 @@
-module github.com/edde746/plezy-relay
+module github.com/inknironapps/bask-relay
 
 go 1.26.6
 

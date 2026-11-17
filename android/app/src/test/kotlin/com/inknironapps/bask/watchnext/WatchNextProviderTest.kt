@@ -1132,7 +1132,7 @@ class WatchNextProviderTest {
         )
       )
       assertEquals(2, server.requestCount.get())
-      assertEquals(listOf("plezy_server_item"), tvProvider.lastQueryContentIds)
+      assertEquals(listOf("bask_server_item"), tvProvider.lastQueryContentIds)
       assertEquals(listOf(originalPoster.toString()), tvProvider.lastQueryPosters)
       assertEquals(originalPoster, committedPoster())
       assertEquals(
@@ -1216,7 +1216,7 @@ class WatchNextProviderTest {
       )
 
       assertEquals(2, server.requestCount.get())
-      assertEquals(listOf("plezy_server_item"), tvProvider.lastQueryContentIds)
+      assertEquals(listOf("bask_server_item"), tvProvider.lastQueryContentIds)
       assertEquals(listOf(originalPoster.toString()), tvProvider.lastQueryPosters)
       assertEquals(originalPoster, committedPoster())
       assertEquals(setOf(originalFile), artworkFiles().mapTo(HashSet()) { it.canonicalFile })
@@ -1526,7 +1526,7 @@ class WatchNextProviderTest {
   }
 
   private fun item(source: String) = WatchNextProvider.WatchNextItem(
-    contentId = "plezy_server_item",
+    contentId = "bask_server_item",
     title = "Private title",
     episodeTitle = null,
     description = "Private summary",

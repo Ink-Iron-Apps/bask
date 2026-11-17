@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace plezy {
+namespace bask {
 namespace mpv_common {
 
 using StatusCallback = std::function<void(int error)>;
@@ -639,6 +639,6 @@ inline AudioRecoveryNotice ObserveAudioRecoveryProperty(
 }
 
 }  // namespace mpv_common
-}  // namespace plezy
+}  // namespace bask
 
 #endif  // PLEZY_SHARED_MPV_PLAYER_COMMON_H_

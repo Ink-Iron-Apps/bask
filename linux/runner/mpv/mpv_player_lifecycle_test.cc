@@ -59,7 +59,7 @@ class MpvPlayerLifecycleTestPeer {
   static FlValue* ConvertNode(MpvPlayer& player, mpv_node* node) { return player.NodeToFlValue(node); }
   static FlValue* ConvertNodeWithBudget(
       MpvPlayer& player, mpv_node* node, size_t remaining_entries, size_t remaining_bytes) {
-    plezy::mpv_common::NodeConversionBudget budget{remaining_entries, remaining_bytes};
+    bask::mpv_common::NodeConversionBudget budget{remaining_entries, remaining_bytes};
     return player.NodeToFlValue(node, &budget);
   }
   static void RegisterObservedNode(MpvPlayer& player, const std::string& name, int id) {
@@ -601,7 +601,7 @@ void TestCommandReplyCarriesPlaylistEntryId() {
       MpvPlayerLifecycleTestPeer::RegisterPendingCommand(player, [&](int error, const mpv_node* result) {
         ++callback_count;
         status = error;
-        reported_entry = plezy::mpv_common::PlaylistEntryIdFromCommandResult(result, &reported_entry_id);
+        reported_entry = bask::mpv_common::PlaylistEntryIdFromCommandResult(result, &reported_entry_id);
       });
 
   const char* keys[] = {"playlist_entry_id"};
@@ -631,7 +631,7 @@ void TestCommandReplyCarriesPlaylistEntryId() {
   bool unexpected_entry = true;
   const uint64_t plain_request_id =
       MpvPlayerLifecycleTestPeer::RegisterPendingCommand(player, [&](int, const mpv_node* result) {
-        unexpected_entry = plezy::mpv_common::PlaylistEntryIdFromCommandResult(result, &unexpected_entry_id);
+        unexpected_entry = bask::mpv_common::PlaylistEntryIdFromCommandResult(result, &unexpected_entry_id);
       });
   mpv_event_command plain_command{};
   plain_command.result.format = MPV_FORMAT_NONE;

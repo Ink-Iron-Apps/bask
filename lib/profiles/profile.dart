@@ -195,6 +195,10 @@ enum ProfileKind {
 /// Salted SHA-256 of the PIN. The salt is fixed (per-app) — this is a
 /// social-barrier hash, not real authentication. The threat model is
 /// "kid bypassing parent's profile", not "adversary with device access".
+///
+/// Keeps the old app name deliberately: the salt is baked into every PIN
+/// hash already stored, so renaming it would reject every PIN anyone has
+/// set. It is a constant in a hash, not a label.
 const _pinSalt = 'plezy-app-profile-pin-v1';
 
 String computePinHash(String rawPin) {
