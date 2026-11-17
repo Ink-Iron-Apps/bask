@@ -33,7 +33,7 @@ const _updateReadToken = String.fromEnvironment('UPDATE_READ_TOKEN');
 /// unauthenticated and comes back as 404.
 const _releasesApiBase = String.fromEnvironment(
   'UPDATE_RELEASES_REPO',
-  defaultValue: 'https://api.github.com/repos/Ink-Iron-Apps/plexy',
+  defaultValue: 'https://api.github.com/repos/Ink-Iron-Apps/bask',
 );
 
 /// Whether [latest] is a higher version than [current].
@@ -181,7 +181,7 @@ class AppUpdateService {
   /// [onProgress] receives 0..1 while downloading.
   Future<void> downloadAndInstall(AvailableUpdate update, {void Function(double)? onProgress}) async {
     final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/plexy-update.apk');
+    final file = File('${dir.path}/bask-update.apk');
     if (file.existsSync()) await file.delete();
 
     final response = await _get(Uri.parse(update.assetUrl), accept: 'application/octet-stream');

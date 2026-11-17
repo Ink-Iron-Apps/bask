@@ -34,7 +34,7 @@ if (-not (Test-Path -LiteralPath $BundleDir -PathType Container)) {
 $bundle = (Resolve-Path -LiteralPath $BundleDir).Path
 
 $required = @(
-    'plezy.exe'
+    'bask.exe'
     'flutter_windows.dll'
     'libmpv-2.dll'
     'sqlite3.dll'
@@ -66,12 +66,12 @@ if ($ExpectedEngineSha) {
 # Smoke run from a copy, in portable mode: the scratch folder is the only
 # place it can write, so this cannot touch a real install's account or
 # downloads, and whatever appears there is evidence the app got that far.
-$scratch = Join-Path ([System.IO.Path]::GetTempPath()) ("plexy-smoke-" + [guid]::NewGuid().ToString('N'))
+$scratch = Join-Path ([System.IO.Path]::GetTempPath()) ("bask-smoke-" + [guid]::NewGuid().ToString('N'))
 try {
     Copy-Item -LiteralPath $bundle -Destination $scratch -Recurse
     Set-Content -LiteralPath (Join-Path $scratch 'portable.txt') -Value 'portable' -Encoding ascii
 
-    $exe = Join-Path $scratch 'plezy.exe'
+    $exe = Join-Path $scratch 'bask.exe'
     $proc = Start-Process -FilePath $exe -WorkingDirectory $scratch -PassThru
     Write-Host "launched $exe (pid $($proc.Id)); watching for $SmokeSeconds seconds"
 
@@ -85,7 +85,7 @@ try {
 
     # Written by PortableMode plus the stores that follow it. Their absence
     # means Dart never got as far as resolving a path.
-    $data = Join-Path $scratch 'plexy-data'
+    $data = Join-Path $scratch 'bask-data'
     if (-not (Test-Path -LiteralPath $data)) {
         throw 'the app started but never wrote its portable data folder'
     }
@@ -94,7 +94,7 @@ try {
         throw 'the app wrote no application support folder; the database never opened'
     }
     $wrote = @(Get-ChildItem -LiteralPath $data -Recurse -File -Force)
-    Write-Host "stayed up for ${SmokeSeconds}s and wrote $($wrote.Count) file(s) under plexy-data"
+    Write-Host "stayed up for ${SmokeSeconds}s and wrote $($wrote.Count) file(s) under bask-data"
     if ($wrote.Count -eq 0) {
         throw 'the portable data folder is empty; nothing initialized'
     }

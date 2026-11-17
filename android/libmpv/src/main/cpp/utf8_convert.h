@@ -15,7 +15,7 @@
 // with U+FFFD one unit at a time, matching shared/cpp/sanitize_utf8.h on
 // desktop. Header-only and JNI-free so the host test harness can exercise it.
 
-namespace plezy {
+namespace bask {
 namespace utf8 {
 
 // Decodes one scalar value at `s`. Returns the number of bytes consumed, or 0
@@ -123,4 +123,4 @@ inline std::string FromUtf16(const char16_t* input, size_t len) {
 }
 
 }  // namespace utf8
-}  // namespace plezy
+}  // namespace bask

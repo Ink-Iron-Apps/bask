@@ -126,9 +126,9 @@ class MpvPlayer {
   void Command(const std::vector<std::string>& args);
 
   /// Callback types for async mpv requests.
-  using StatusCallback = plezy::mpv_common::StatusCallback;
-  using CommandCallback = plezy::mpv_common::CommandCallback;
-  using GetPropertyCallback = plezy::mpv_common::GetPropertyCallback;
+  using StatusCallback = bask::mpv_common::StatusCallback;
+  using CommandCallback = bask::mpv_common::CommandCallback;
+  using GetPropertyCallback = bask::mpv_common::GetPropertyCallback;
 
   /// Executes an mpv command asynchronously to prevent UI blocking.
   void CommandAsync(const std::vector<std::string>& args, CommandCallback callback);
@@ -419,7 +419,7 @@ class MpvPlayer {
 
   /// Helper to convert mpv_node to FlValue, bounded by the shared node budget.
   ::_FlValue* NodeToFlValue(mpv_node* node);
-  ::_FlValue* NodeToFlValue(mpv_node* node, plezy::mpv_common::NodeConversionBudget* budget);
+  ::_FlValue* NodeToFlValue(mpv_node* node, bask::mpv_common::NodeConversionBudget* budget);
 
   const bool audio_only_;
   mpv_handle* mpv_ = nullptr;
@@ -491,9 +491,9 @@ class MpvPlayer {
   RedrawCallback redraw_callback_;
   SourceMetadataCallback source_metadata_callback_;
   std::mutex callback_mutex_;
-  plezy::mpv_common::AudioRecoveryState audio_recovery_;
-  plezy::mpv_common::AsyncRequestRegistry pending_requests_;
-  plezy::mpv_common::PropertyObservationRegistry observed_properties_;
+  bask::mpv_common::AudioRecoveryState audio_recovery_;
+  bask::mpv_common::AsyncRequestRegistry pending_requests_;
+  bask::mpv_common::PropertyObservationRegistry observed_properties_;
   // The playlist entry whose START_FILE event was most recently dequeued.
   // Payload construction consumes this value synchronously, before any
   // EventChannel fanout can outlive the corresponding mpv event.

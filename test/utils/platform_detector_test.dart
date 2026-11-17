@@ -146,7 +146,7 @@ void main() {
     test('a WindowsApps executable path is a packaged install', () {
       expect(
         PlatformDetector.isPackagedExecutablePath(
-          r'C:\Program Files\WindowsApps\edde746.Bask_2.11.0.0_x64__13q3sv6jzathm\plezy.exe',
+          r'C:\Program Files\WindowsApps\InkIronApps.Bask_2.11.0.0_x64__13q3sv6jzathm\bask.exe',
         ),
         isTrue,
       );
@@ -155,7 +155,7 @@ void main() {
     test('the package directory is matched however it is cased', () {
       expect(
         PlatformDetector.isPackagedExecutablePath(
-          r'c:\program files\windowsapps\edde746.Bask_2.11.0.0_x64__13q3sv6jzathm\plezy.exe',
+          r'c:\program files\windowsapps\InkIronApps.Bask_2.11.0.0_x64__13q3sv6jzathm\bask.exe',
         ),
         isTrue,
         reason:
@@ -165,13 +165,13 @@ void main() {
     });
 
     test('installed and portable executable paths are not packaged installs', () {
-      expect(PlatformDetector.isPackagedExecutablePath(r'C:\Program Files\Bask\plezy.exe'), isFalse);
-      expect(PlatformDetector.isPackagedExecutablePath(r'D:\portable\plezy-windows-x64\plezy.exe'), isFalse);
+      expect(PlatformDetector.isPackagedExecutablePath(r'C:\Program Files\Bask\bask.exe'), isFalse);
+      expect(PlatformDetector.isPackagedExecutablePath(r'D:\portable\bask-windows-x64\bask.exe'), isFalse);
     });
 
     test('a directory whose name merely starts the same is not a package', () {
       expect(
-        PlatformDetector.isPackagedExecutablePath(r'C:\Users\someone\Downloads\WindowsApps-backup\plezy.exe'),
+        PlatformDetector.isPackagedExecutablePath(r'C:\Users\someone\Downloads\WindowsApps-backup\bask.exe'),
         isFalse,
       );
     });

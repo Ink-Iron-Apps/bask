@@ -53,9 +53,9 @@ class MpvPlayer {
   void Command(const std::vector<std::string>& args);
 
   // Callback types for async mpv requests.
-  using StatusCallback = plezy::mpv_common::StatusCallback;
-  using CommandCallback = plezy::mpv_common::CommandCallback;
-  using GetPropertyCallback = plezy::mpv_common::GetPropertyCallback;
+  using StatusCallback = bask::mpv_common::StatusCallback;
+  using CommandCallback = bask::mpv_common::CommandCallback;
+  using GetPropertyCallback = bask::mpv_common::GetPropertyCallback;
 
   // Executes an mpv command asynchronously to prevent UI blocking.
   void CommandAsync(const std::vector<std::string>& args, CommandCallback callback);
@@ -124,10 +124,10 @@ class MpvPlayer {
   std::atomic<bool> running_{false};
   EventCallback event_callback_;
   std::mutex callback_mutex_;
-  plezy::mpv_common::AudioRecoveryState audio_recovery_;
+  bask::mpv_common::AudioRecoveryState audio_recovery_;
 
-  plezy::mpv_common::AsyncRequestRegistry pending_requests_;
-  plezy::mpv_common::PropertyObservationRegistry observed_properties_;
+  bask::mpv_common::AsyncRequestRegistry pending_requests_;
+  bask::mpv_common::PropertyObservationRegistry observed_properties_;
   // The playlist entry whose START_FILE event was most recently dequeued.
   // Event payloads copy this value before the plugin queues them to the
   // platform thread, so a later START_FILE cannot relabel delayed properties.

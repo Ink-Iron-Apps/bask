@@ -17,6 +17,11 @@ import '../../utils/app_logger.dart';
 /// identity available after sign-in, matching the same local-LAN trust model:
 /// peers that know the same backend identity can discover and authenticate
 /// each other without a central pairing round-trip.
+// The 'plezy-' prefixes in the HKDF nonces and info strings below keep the
+// old app name on purpose. They are domain-separation constants shared with
+// whatever is on the other end of a pairing, so both sides have to agree:
+// renaming them would stop this build pairing with any peer that has not
+// been updated in the same breath.
 class RemoteAuthService {
   RemoteAuthService._();
   static final instance = RemoteAuthService._();

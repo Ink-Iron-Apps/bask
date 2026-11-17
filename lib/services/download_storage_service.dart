@@ -150,7 +150,7 @@ class DownloadStorageService {
 
     // A portable copy downloads beside itself, on whatever drive it is run
     // from: the point of portable is that the folder is the whole install,
-    // and media buried under `plexy-data/support` is neither obvious nor
+    // and media buried under `bask-data/support` is neither obvious nor
     // easy to prune by hand. An explicit custom path above still wins — that
     // is the user pointing somewhere deliberately, including another drive.
     final portableRoot = PortableMode.root;
