@@ -1057,12 +1057,53 @@ void main() {
           await player.setAudioNormalization(false);
 
           expect(propertyWrites.where((write) => write.$1 == 'af').map((write) => write.$2), [
-            'loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
+            'format=srate=192000:format=double,loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
             'equalizer=f=2200:t=h:w=1800:g=9,acompressor=threshold=0.0625:ratio=4:attack=20:release=250,'
-                'loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
+                'format=srate=192000:format=double,loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
             'equalizer=f=2200:t=h:w=1800:g=9,acompressor=threshold=0.0625:ratio=4:attack=20:release=250,'
                 'format=srate=48000:format=floatp',
           ]);
+        } finally {
+          await player.dispose();
+        }
+      },
+    );
+  });
+
+  test('loudnorm is handed 192 kHz float64 rather than left to convert', () async {
+    // Anchor: dynamic-mode loudnorm takes only float64 at 192 kHz, and the
+    // bundled builds prune lavfi's resampler, so a chain that leaves the
+    // conversion to ffmpeg fails to configure and mpv disables the filter —
+    // "src: fltp / dst: dbl / failed to configure the filter graph" on a
+    // Pixel Tablet, with normalization silently off on every play.
+    final propertyWrites = <(String, String)>[];
+    await withMockPlayerChannels(
+      methodChannelName: 'com.plezy/mpv_player',
+      eventChannelName: 'com.plezy/mpv_player/events',
+      methodHandler: (call) async {
+        if (call.method == 'initialize') return true;
+        if (call.method == 'setProperty') {
+          final arguments = call.arguments as Map;
+          propertyWrites.add((arguments['name'] as String, arguments['value'] as String));
+        }
+        return null;
+      },
+      testBody: () async {
+        final player = PlayerNative();
+        try {
+          await player.setAudioNormalization(true);
+
+          final chain = propertyWrites.lastWhere((write) => write.$1 == 'af').$2;
+          expect(
+            chain.indexOf('format=srate=192000:format=double'),
+            lessThan(chain.indexOf('loudnorm')),
+            reason: 'the conversion has to precede the filter that needs it',
+          );
+          expect(
+            chain.endsWith('format=srate=48000:format=floatp'),
+            isTrue,
+            reason: 'and the chain still hands the audio output 48 kHz planar float',
+          );
         } finally {
           await player.dispose();
         }
@@ -1165,9 +1206,9 @@ void main() {
           await expectLater(player.setAudioPassthrough(true), throwsA(isA<PlatformException>()));
 
           expect(propertyWrites.where((write) => write.$1 == 'af').map((write) => write.$2), [
-            'loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
+            'format=srate=192000:format=double,loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
             '',
-            'loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
+            'format=srate=192000:format=double,loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp',
           ]);
           expect(player.audioPassthroughActive, isFalse);
         } finally {
