@@ -1161,6 +1161,23 @@ class DownloadManagerService {
     // strands files is the one with no Downloads tab.
     if (PlatformDetector.supportsDownloads()) return 0;
 
+    // Only ever app-private storage. The pass exists because a TV's own data
+    // partition is small — 4 GB on the one in the office, with two media apps
+    // on it — and files it can no longer reach are the difference between a
+    // working set-top box and one that cannot buffer. A folder the viewer
+    // pointed this install at is a different thing entirely: it is outside the
+    // app's lifecycle, it is the one place downloads survive a reinstall, and
+    // on at least two devices here it is shared with another install that
+    // still has rows pointing into it. Emptying that to reclaim space on a
+    // partition it does not occupy would delete somebody else's library.
+    if (_storageService.isUsingCustomPath()) {
+      appLogger.i(
+        'Not reclaiming downloads: this install has a custom download root, '
+        'which is outside app storage and may be shared',
+      );
+      return 0;
+    }
+
     var reclaimed = 0;
     try {
       final rows = await _database.allDownloadedMedia();

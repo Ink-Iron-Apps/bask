@@ -9,6 +9,7 @@ import 'package:bask/media/ids.dart';
 import 'package:bask/models/download_models.dart';
 import 'package:bask/services/download_manager_service.dart';
 import 'package:bask/services/download_storage_service.dart';
+import 'package:bask/services/settings_service.dart';
 import 'package:bask/utils/platform_detector.dart';
 
 import '../test_helpers/io_fakes.dart';
@@ -25,6 +26,7 @@ void main() {
   setUp(() async {
     resetSharedPreferencesForTest();
     DownloadStorageService.resetForTesting();
+    SettingsService.resetForTesting();
     tmpRoot = await Directory.systemTemp.createTemp('plexy-reclaim-test');
     previousPathProvider = PathProviderPlatform.instance;
     PathProviderPlatform.instance = FakePathProvider(tmpRoot);
@@ -35,6 +37,7 @@ void main() {
     await db.close();
     PathProviderPlatform.instance = previousPathProvider;
     DownloadStorageService.resetForTesting();
+    SettingsService.resetForTesting();
     TvDetectionService.debugSetTvDeviceOverride(null);
     if (tmpRoot.existsSync()) tmpRoot.deleteSync(recursive: true);
   });
@@ -85,6 +88,41 @@ void main() {
     expect(video.existsSync(), isFalse);
     expect(orphan.existsSync(), isFalse);
     expect(await db.getDownloadedMedia('srv:ep-1'), isNull);
+  });
+
+  test('a folder the viewer pointed this install at is never emptied', () async {
+    // Anchor: the pass exists to reclaim the app's own data partition. A
+    // custom root is outside the app's lifecycle, survives a reinstall, and on
+    // the devices here is shared with another install that still has rows
+    // pointing into it — so emptying it to free space on a partition it does
+    // not occupy would delete somebody else's library.
+    TvDetectionService.debugSetTvDeviceOverride(true);
+
+    final shared = Directory('${tmpRoot.path}/shared/Bask/downloads');
+    await shared.create(recursive: true);
+    final settings = await SettingsService.getInstance();
+    await settings.write(SettingsService.customDownloadPath, shared.path);
+    await settings.write(SettingsService.customDownloadPathType, 'file');
+    await DownloadStorageService.instance.initialize(settings);
+
+    final film = File('${shared.path}/Movies/Clue (1985)/Clue (1985).mkv');
+    await film.parent.create(recursive: true);
+    await film.writeAsBytes(List<int>.filled(4096, 7));
+
+    await db.insertDownload(
+      serverId: ServerId('srv'),
+      ratingKey: 'movie-1',
+      globalKey: 'srv:movie-1',
+      type: 'movie',
+      status: DownloadStatus.completed.index,
+    );
+    await db.updateVideoFilePath('srv:movie-1', film.path);
+
+    final reclaimed = await managerFor().reclaimUnsupportedDownloads();
+
+    expect(reclaimed, 0);
+    expect(film.existsSync(), isTrue, reason: 'the file belongs to the folder, not to this install');
+    expect(await db.getDownloadedMedia('srv:movie-1'), isNotNull);
   });
 
   test('a device that can download is left entirely alone', () async {
