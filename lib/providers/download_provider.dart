@@ -1748,7 +1748,73 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   /// How often a metadata walk publishes what it has resolved so far.
   static const Duration _metadataPublishInterval = Duration(milliseconds: 250);
 
-  Future<void> refreshMetadataFromCache({void Function(int done, int total)? onProgress}) async {
+  Future<void>? _metadataPass;
+  bool _metadataPassQueued = false;
+  final List<void Function(int done, int total)> _metadataProgressListeners = [];
+  int _metadataPassCount = 0;
+
+  /// How many metadata walks have run. Test-only, and the only way to assert
+  /// that identical callers were collapsed rather than merely tolerated.
+  @visibleForTesting
+  int get debugMetadataPassCount => _metadataPassCount;
+
+  /// Resolves metadata for every owned download, from the caches first and
+  /// then from the server for whatever the caches could not answer.
+  ///
+  /// Four callers reach this on a cold start — the splash, the first server
+  /// connecting, the profile load, and now a shared-library adoption — and
+  /// every one of them used to start its own walk. On a library of sixteen
+  /// downloads that was three concurrent passes fetching the same sixteen keys
+  /// from the server, observed on a tablet reporting "filled 12 of 16", "13 of
+  /// 16" and "14 of 16" from three passes racing each other to the same rows.
+  ///
+  /// So a pass in flight is joined rather than duplicated. Joining alone would
+  /// be wrong, though: a caller is often here *because* rows were just added,
+  /// and the running pass will never see them. One trailing pass is therefore
+  /// queued behind the current one — exactly one, however many callers arrive —
+  /// which collapses the stampede without losing the work it was asking for.
+  Future<void> refreshMetadataFromCache({void Function(int done, int total)? onProgress}) {
+    if (onProgress != null) _metadataProgressListeners.add(onProgress);
+    final inFlight = _metadataPass;
+    if (inFlight != null) {
+      _metadataPassQueued = true;
+      return inFlight;
+    }
+
+    final completer = Completer<void>();
+    _metadataPass = completer.future;
+    unawaited(
+      Future<void>(() async {
+        try {
+          await _runMetadataPass();
+          while (_metadataPassQueued && !isDisposed) {
+            _metadataPassQueued = false;
+            await _runMetadataPass();
+          }
+        } catch (error, stackTrace) {
+          appLogger.w('Metadata pass failed', error: error, stackTrace: stackTrace);
+        } finally {
+          _metadataPass = null;
+          _metadataPassQueued = false;
+          _metadataProgressListeners.clear();
+          if (!completer.isCompleted) completer.complete();
+        }
+      }),
+    );
+    return completer.future;
+  }
+
+  /// Publishes progress to whoever is listening, which may be several callers
+  /// now that passes are shared.
+  void _emitMetadataProgress(int done, int total) {
+    for (final listener in List.of(_metadataProgressListeners)) {
+      listener(done, total);
+    }
+  }
+
+  Future<void> _runMetadataPass() async {
+    _metadataPassCount++;
+    final onProgress = _emitMetadataProgress;
     final profileGeneration = _profileGeneration;
     bool isStale() => isDisposed || profileGeneration != _profileGeneration;
     // The initial load runs in the constructor and may still be in flight
@@ -1790,14 +1856,14 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     var walked = 0;
     var publishedHits = 0;
     var lastPublish = DateTime.now();
-    onProgress?.call(0, keys.length);
+    onProgress(0, keys.length);
     for (final globalKey in keys) {
       try {
         // Cache-only here: a miss must not reach the server from inside the
         // loop, which is what kept the splash up. Misses go to needNetwork.
         final result = await _hydrateDownloadMetadata(globalKey, pinned, isStale: isStale);
         if (result.stale) return;
-        onProgress?.call(++walked, keys.length);
+        onProgress(++walked, keys.length);
         if (result.metadata == null) {
           needNetwork.add(globalKey);
         } else {
