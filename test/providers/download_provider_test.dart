@@ -2116,6 +2116,65 @@ void main() {
       p.dispose();
     });
 
+    test('a key already being fetched is not fetched again by the next walk', () async {
+      // Anchor: the cache walk and the server fetch it starts are deliberately
+      // not awaited together, because the splash must not wait on the network.
+      // A walk that begins while an earlier fetch is still running therefore
+      // finds the same rows unresolved — on a phone adopting eighteen
+      // downloads that meant two overlapping fetches, one for all eighteen and
+      // one for the seven the second walk could not yet see.
+      await insertJellyfinConnection('user-a');
+      for (final id in ['ep-1', 'ep-2']) {
+        await db.insertDownload(
+          serverId: ServerId('jf-machine'),
+          clientScopeId: 'jf-machine/user-a',
+          ratingKey: id,
+          globalKey: 'jf-machine:$id',
+          type: 'episode',
+          status: DownloadStatus.completed.index,
+        );
+        await db.addDownloadOwner(profileId: 'test-profile', globalKey: 'jf-machine:$id');
+      }
+
+      final fetched = <String>[];
+      final gate = Completer<void>();
+      testClientResolver = (serverId, {clientScopeId}) => serverId == 'jf-machine'
+          ? _ScopedTestClient(
+              serverId: ServerId('jf-machine'),
+              scopedServerId: 'jf-machine/user-a',
+              fetchItemHandler: (id) async {
+                fetched.add(id);
+                // Held open so the second walk runs while this fetch is still
+                // in flight, which is the race being tested.
+                await gate.future;
+                return null;
+              },
+            )
+          : null;
+
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      await p.ensureInitialized();
+      p.debugSeedState(
+        downloads: {
+          for (final id in ['ep-1', 'ep-2'])
+            'jf-machine:$id': DownloadProgress(globalKey: 'jf-machine:$id', status: DownloadStatus.completed),
+        },
+      );
+
+      await p.refreshMetadataFromCache();
+      await p.refreshMetadataFromCache();
+      gate.complete();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        fetched.length,
+        lessThanOrEqualTo(2),
+        reason: 'two downloads, so at most two fetches however many walks ran: $fetched',
+      );
+
+      p.dispose();
+    });
+
     test('callers arriving together share one walk and one trailing walk', () async {
       // Anchor: the splash, the first server connecting and a profile load all
       // call this on a cold start, and a shared-library adoption now does too.
