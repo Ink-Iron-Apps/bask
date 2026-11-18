@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
+
 import '../database/app_database.dart';
 import '../media/ids.dart';
 import '../media/media_backend.dart';
 import '../media/media_server_client.dart';
+import '../utils/app_logger.dart';
 import 'multi_server_manager.dart';
 import 'playback_context.dart';
 import 'playback_initialization_service.dart';
@@ -37,6 +40,19 @@ class PlaybackSourceResolver {
       client: reportingClient,
       offlineLibraryMode: offlineLibraryMode,
     );
+
+    // One line per play naming what is actually about to be opened.
+    //
+    // There was no way to tell a local file from a stream after the fact: a
+    // 7 MB log of a successful playback of a downloaded film carried nothing
+    // about its source, so answering "did that play from the device or from
+    // the server?" meant physically pulling the device off the network. That
+    // is a silly price for a question this cheap to answer.
+    //
+    // The query string is dropped rather than logged: a streaming URL carries
+    // the access token, and a log is a thing people paste into messages.
+    appLogger.i('Playback source: ${describeSource(sourceKind, result.videoUrl)}');
+
     return PlaybackContext(
       metadata: metadata,
       result: result,
@@ -49,6 +65,37 @@ class PlaybackSourceResolver {
         sessionIdentifier: options.sessionIdentifier,
       ),
     );
+  }
+
+  /// A short, safe description of what playback is about to open.
+  @visibleForTesting
+  static String describeSource(PlaybackSourceKind kind, String? videoUrl) {
+    final label = switch (kind) {
+      PlaybackSourceKind.localFile => 'local file',
+      PlaybackSourceKind.remoteDirect => 'direct stream',
+      PlaybackSourceKind.remoteTranscode => 'server transcode',
+    };
+    if (videoUrl == null || videoUrl.isEmpty) return '$label (no target resolved)';
+
+    if (kind == PlaybackSourceKind.localFile) {
+      // A path is not a secret, and the whole point of the line is to show
+      // which file on which volume answered.
+      return '$label $videoUrl';
+    }
+
+    final parsed = Uri.tryParse(videoUrl);
+    if (parsed == null) return label;
+    // Rebuilt from the parts worth keeping rather than cleared in place:
+    // clearing the query and fragment leaves their punctuation behind, so the
+    // line ended in a bare "?#". Everything that identifies the viewer lives
+    // in the query, and nothing in the path needs hiding.
+    final redacted = Uri(
+      scheme: parsed.scheme,
+      host: parsed.host,
+      port: parsed.hasPort ? parsed.port : null,
+      path: parsed.path,
+    );
+    return '$label $redacted';
   }
 
   Map<String, String>? _streamHeaders({
