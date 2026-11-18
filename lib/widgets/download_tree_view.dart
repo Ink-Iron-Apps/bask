@@ -161,7 +161,14 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
     }
 
     final list = ListView.builder(
-      padding: .zero,
+      // Padded clear of the system navigation and gesture strip. Without it
+      // the last row ends exactly at the bottom of the screen — measured at
+      // [136,1478][2560,1600] on a 1600px tablet — which puts its tappable
+      // half inside the area Android reserves for the back gesture, so taps
+      // on it reach the system instead of the row. A show group sitting last
+      // in the list therefore refused to expand, with nothing in the log
+      // because the app never saw the gesture.
+      padding: EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom + 8),
       itemCount: flattenedNodes.length,
       itemBuilder: (context, index) {
         final item = flattenedNodes[index];

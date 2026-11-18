@@ -1290,6 +1290,24 @@ abstract class PlayerBase with PlayerStreamControllersMixin implements Player {
   /// ffmpeg prunes lavfi filters.
   static const _audioChainFormat = 'format=srate=48000:format=floatp';
 
+  /// What `loudnorm` needs on its input, converted before it rather than by it.
+  ///
+  /// Dynamic-mode `loudnorm` accepts only float64 at 192 kHz. ffmpeg would
+  /// normally insert that conversion itself, but the builds bundled here prune
+  /// lavfi's resampler, so the graph has no way to get from the decoder's
+  /// planar float to float64 and mpv throws the whole filter out: seen on a
+  /// Pixel Tablet as `src: fltp`, `dst: dbl`, "failed to configure the filter
+  /// graph", "Disabling filter loudnorm.00 because it has failed". Playback
+  /// carried on without it, which is why it went unnoticed: normalization was
+  /// silently off on every play, while the dialogue boost ahead of it — a
+  /// separate filter instance, happy with planar float — kept working.
+  ///
+  /// mpv's own `format` filter converts through libswresample instead of
+  /// libavfilter, so it is available exactly where the lavfi resampler is not.
+  /// The matching conversion back to 48 kHz float is [_audioChainFormat],
+  /// which was already here for the same family of reasons.
+  static const _loudnormInputFormat = 'format=srate=192000:format=double';
+
   /// The `af` value for a given pair of audio features.
   ///
   /// [dialogueBoostGainDb] of 0 means off, which is why the gain and the
@@ -1302,7 +1320,7 @@ abstract class PlayerBase with PlayerStreamControllersMixin implements Player {
   static String _audioFilterChainFor({required bool normalization, required int dialogueBoostGainDb}) {
     final filters = [
       if (dialogueBoostGainDb > 0) _dialogueBoostFilter(dialogueBoostGainDb),
-      if (normalization) _loudnormFilter,
+      if (normalization) ...[_loudnormInputFormat, _loudnormFilter],
     ];
     if (filters.isEmpty) return '';
     return [...filters, _audioChainFormat].join(',');
