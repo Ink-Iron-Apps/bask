@@ -172,12 +172,21 @@ Future<SharedLibraryAdoptionResult?> offerSharedLibraryAdoption(
   );
   if (result == null) return null;
 
-  // Reloads the list and claims the imported records for the active profile,
-  // which is what makes them visible: they arrive ownerless on purpose. Done
-  // before reporting, so the snackbar and the library agree.
-  if (result.rowsImported > 0) {
+  // Reloads the list, claims the imported records for the active profile, and
+  // resolves their metadata.
+  //
+  // All three, because the Downloads list is metadata-driven: a row with no
+  // resolved title is not rendered. The reload alone left a tablet reporting
+  // "44.68 GB used" above the words "No downloads" — the records were there
+  // and being summed, and nothing had fetched what they are called, because
+  // the imported rows carry keys and not titles. Only a restart fixed it,
+  // which is not a fix. The metadata pass reads caches first and then asks the
+  // server for the rest, so a device that is online fills in within a second
+  // and one that is offline fills in when it next is.
+  if (result.rowsImported > 0 && downloads != null) {
     try {
-      await downloads?.refresh();
+      await downloads.refresh();
+      await downloads.refreshMetadataFromCache();
     } catch (error, stackTrace) {
       appLogger.w('Could not reload downloads after adopting a library', error: error, stackTrace: stackTrace);
     }

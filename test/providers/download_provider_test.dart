@@ -2116,6 +2116,52 @@ void main() {
       p.dispose();
     });
 
+    test('callers arriving together share one walk and one trailing walk', () async {
+      // Anchor: the splash, the first server connecting and a profile load all
+      // call this on a cold start, and a shared-library adoption now does too.
+      // Three concurrent walks over the same keys were observed fetching the
+      // same sixteen downloads three times. Joining is not enough on its own —
+      // a caller is often here because rows were just added — so one trailing
+      // walk runs behind the first.
+      await insertJellyfinConnection('user-a');
+      await db.insertDownload(
+        serverId: ServerId('jf-machine'),
+        clientScopeId: 'jf-machine/user-a',
+        ratingKey: 'ep-1',
+        globalKey: 'jf-machine:ep-1',
+        type: 'episode',
+        status: DownloadStatus.completed.index,
+      );
+      await db.addDownloadOwner(profileId: 'test-profile', globalKey: 'jf-machine:ep-1');
+
+      final p = DownloadProvider.forTesting(downloadManager: downloadManager, database: db);
+      await p.ensureInitialized();
+      p.debugSeedState(
+        downloads: {
+          'jf-machine:ep-1': const DownloadProgress(globalKey: 'jf-machine:ep-1', status: DownloadStatus.completed),
+        },
+      );
+      final before = p.debugMetadataPassCount;
+
+      await Future.wait([
+        p.refreshMetadataFromCache(),
+        p.refreshMetadataFromCache(),
+        p.refreshMetadataFromCache(),
+      ]);
+
+      expect(
+        p.debugMetadataPassCount - before,
+        2,
+        reason: 'one walk for the first caller, one trailing walk for everyone who arrived during it',
+      );
+
+      // A later caller, with nothing in flight, gets its own walk.
+      await p.refreshMetadataFromCache();
+      expect(p.debugMetadataPassCount - before, 3);
+
+      p.dispose();
+    });
+
     test('reports how far the startup metadata pass has got', () async {
       // The splash renders this; without it a large library looks hung after
       // the servers have already reported connected.
