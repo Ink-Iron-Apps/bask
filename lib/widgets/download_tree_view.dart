@@ -1,5 +1,7 @@
 import '../utils/formatters.dart';
 import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import '../media/ids.dart';
 import 'package:bask/widgets/app_icon.dart';
@@ -142,6 +144,12 @@ class DownloadTreeView extends StatefulWidget {
 
 class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocusFirstMixin<DownloadTreeView> {
   final Set<String> _expandedNodes = {};
+  final ScrollController _scrollController = ScrollController();
+
+  /// One key per node, so a row that has just appeared can be scrolled to.
+  /// Keyed by node rather than by index because an expansion renumbers every
+  /// row below it.
+  final Map<String, GlobalKey> _rowKeys = {};
   DownloadSelection _selection = const DownloadSelection();
   bool _selecting = false;
 
@@ -160,20 +168,38 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
       return Center(child: Text(t.downloads.noDownloadsTree));
     }
 
-    final list = ListView.builder(
-      // Padded clear of the system navigation and gesture strip. Without it
-      // the last row ends exactly at the bottom of the screen — measured at
-      // [136,1478][2560,1600] on a 1600px tablet — which puts its tappable
-      // half inside the area Android reserves for the back gesture, so taps
-      // on it reach the system instead of the row. A show group sitting last
-      // in the list therefore refused to expand, with nothing in the log
-      // because the app never saw the gesture.
-      padding: EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom + 8),
-      itemCount: flattenedNodes.length,
-      itemBuilder: (context, index) {
-        final item = flattenedNodes[index];
-        return _buildTreeItem(item.node, item.depth, isFirst: index == 0);
-      },
+    // The viewport ends above the system gesture strip, rather than the
+    // content merely being padded past it.
+    //
+    // Android reserves the bottom of the screen for the back gesture and takes
+    // taps there before the app sees them, so a row rendered in that band
+    // looks live and does nothing — measured on a 1600-pixel tablet as a row
+    // occupying 1491 to 1600 being dead while one at 1369 to 1491 worked.
+    // Padding the list's content fixed only the last row as first rendered:
+    // expanding a group inserts rows below the tapped one without scrolling,
+    // so each expansion pushed a fresh row into the band, and the deeper the
+    // tree the more often it happened. Shrinking the viewport instead means no
+    // row is ever laid out there; anything past the fold is reached by
+    // scrolling, which works.
+    final gestureInset = math.max(
+      MediaQuery.viewPaddingOf(context).bottom,
+      MediaQuery.systemGestureInsetsOf(context).bottom,
+    );
+
+    final list = Padding(
+      padding: EdgeInsets.only(bottom: gestureInset),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: .zero,
+        itemCount: flattenedNodes.length,
+        itemBuilder: (context, index) {
+          final item = flattenedNodes[index];
+          return KeyedSubtree(
+            key: _rowKeys.putIfAbsent(item.node.key, () => GlobalKey()),
+            child: _buildTreeItem(item.node, item.depth, isFirst: index == 0),
+          );
+        },
+      ),
     );
 
     if (!_selecting) return list;
@@ -263,14 +289,47 @@ class _DownloadTreeViewState extends State<DownloadTreeView> with UnsuppressFocu
     return result;
   }
 
-  /// Toggle node expansion
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Toggle node expansion, bringing what was revealed into view.
   void _toggleExpansion(String key) {
+    final expanding = !_expandedNodes.contains(key);
     setState(() {
-      if (_expandedNodes.contains(key)) {
-        _expandedNodes.remove(key);
-      } else {
+      if (expanding) {
         _expandedNodes.add(key);
+      } else {
+        _expandedNodes.remove(key);
       }
+    });
+    if (expanding) _revealChildrenOf(key);
+  }
+
+  /// Scrolls a newly expanded group's children into view.
+  ///
+  /// Expanding inserts rows below the one that was tapped, which on a group
+  /// near the fold means the result of the tap is off screen: the row is now
+  /// expanded and nothing visibly happened. Worth doing on its own merits, and
+  /// it also keeps a revealed row from needing a scroll before it can be
+  /// tapped in turn.
+  void _revealChildrenOf(String key) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final rowContext = _rowKeys[key]?.currentContext;
+      if (rowContext == null) return;
+      // Aligned towards the top so the children below it have somewhere to be,
+      // rather than centring the parent and leaving them past the fold again.
+      unawaited(
+        Scrollable.ensureVisible(
+          rowContext,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        ),
+      );
     });
   }
 
