@@ -30,8 +30,10 @@ import '../../services/saf_storage_service.dart';
 import '../../database/app_database.dart';
 import '../../services/settings_credential_export.dart';
 import '../../widgets/settings_restore_prompt.dart';
+import '../../widgets/shared_library_prompt.dart';
 import '../../services/settings_export_service.dart';
 import '../../services/settings_handoff_service.dart';
+import '../../services/shared_storage_service.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/seerr_account_provider.dart';
 import '../../services/account_preferences_accounts.dart';
@@ -133,6 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   static const _kExportSettings = 'export_settings';
   static const _kImportSettings = 'import_settings';
   static const _kBringDownloads = 'bring_downloads';
+  static const _kAdoptLibrary = 'adopt_library';
   static const _kAccountPreferences = 'account_preferences';
 
   KeyboardShortcutsService? _keyboardService;
@@ -798,6 +801,18 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
             subtitle: t.settings.restoreDownloadsActionDescription,
             onTap: _handleBringDownloads,
           ),
+        // The way into adopting a library a predecessor left in shared
+        // storage. Startup offers it once on a fresh install; this is here
+        // because that offer can be declined, or answered before the
+        // permission was granted, and the folder goes on sitting there.
+        if (SharedStorageService.isSupported)
+          SettingNavigationTile(
+            focusNode: _focusTracker.get(_kAdoptLibrary),
+            icon: Symbols.drive_folder_upload_rounded,
+            title: t.settings.adoptLibraryAction,
+            subtitle: t.settings.adoptLibraryActionDescription,
+            onTap: _handleAdoptLibrary,
+          ),
         SettingSwitchTile(
           pref: settings.SettingsService.autoExportSettings,
           icon: Symbols.history_rounded,
@@ -816,6 +831,15 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   /// pressed this and is owed an answer either way.
   Future<void> _handleBringDownloads() async {
     await offerDownloadHandoff(context, database: context.read<AppDatabase>(), announceNothing: true);
+  }
+
+  /// Adopts a library sitting in shared storage, on demand.
+  ///
+  /// Reports an empty folder, unlike the startup offer, and is also the way
+  /// back in after the permission was granted on the second pass: the grant
+  /// happens on a Settings screen, so the first attempt can only ask for it.
+  Future<void> _handleAdoptLibrary() async {
+    await offerSharedLibraryAdoption(context, database: context.read<AppDatabase>(), announceNothing: true);
   }
 
   Widget _buildAutoCheckUpdatesOnStartupTile() => SettingSwitchTile(

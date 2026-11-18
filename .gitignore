@@ -77,3 +77,9 @@ maestro/**/*.png
 
 server/deploy.sh
 server/Caddyfile
+
+# Signing material. The repo is public: an upload key or the properties file
+# pointing at it must never be committable by accident, not even once.
+*.jks
+*.keystore
+key.properties

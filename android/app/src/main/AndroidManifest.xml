@@ -24,7 +24,16 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="remove" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="remove" />
+    <!-- Shared storage, so an offline library can outlive the app that downloaded it.
+         A predecessor install leaves its library in a folder on the shared volume and
+         this one adopts it as plain files, which needs read and write access to a path
+         outside app-private storage. Two eras: API 30+ grants this on a Settings screen
+         as MANAGE_EXTERNAL_STORAGE, while API 25-29 treat WRITE_EXTERNAL_STORAGE as an
+         ordinary runtime permission. The legacy one is capped at 29 so it is never
+         requested where it does nothing. -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" tools:node="replace" />
 
 
     <uses-feature android:name="android.software.leanback" android:required="false" />

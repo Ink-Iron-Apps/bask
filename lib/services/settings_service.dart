@@ -771,6 +771,15 @@ class SettingsService extends BaseSharedPreferencesService {
   /// skipped the second must still be able to be asked. Outside the portable
   /// registry for the same reason as [restorePromptShown].
   static const downloadHandoffPromptShown = BoolPref('download_handoff_prompt_shown');
+
+  /// Whether this install has already been asked about adopting a library
+  /// left in shared storage. Kept apart from [downloadHandoffPromptShown]
+  /// because the two answer different questions: that one copies out of a
+  /// predecessor that is still installed and signed with the same key, and
+  /// this one takes over a folder on the shared volume, which is the only
+  /// route left when the key changed. Outside the portable registry for the
+  /// same reason as [restorePromptShown].
+  static const sharedLibraryPromptShown = BoolPref('shared_library_prompt_shown');
   static const showPerformanceOverlay = BoolPref('show_performance_overlay');
   static const autoHidePerformanceOverlay = BoolPref('auto_hide_performance_overlay', defaultValue: true);
   static const enableDiscordRPC = BoolPref('enable_discord_rpc');
@@ -1653,6 +1662,7 @@ class SettingsService extends BaseSharedPreferencesService {
   static final List<Pref<Object?>> _resetOnlyPrefs = [
     restorePromptShown,
     downloadHandoffPromptShown,
+    sharedLibraryPromptShown,
     customDownloadPathType,
     mediaVersionPreferences,
     localLastPlayedAt,

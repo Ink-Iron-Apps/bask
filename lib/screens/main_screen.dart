@@ -55,8 +55,10 @@ import '../services/first_run_restore.dart';
 import '../services/settings_credential_export.dart';
 import '../services/settings_export_service.dart';
 import '../services/settings_handoff_service.dart';
+import '../services/shared_storage_service.dart';
 import '../services/storage_service.dart';
 import '../widgets/settings_restore_prompt.dart';
+import '../widgets/shared_library_prompt.dart';
 import '../services/settings_service.dart';
 import '../providers/offline_mode_provider.dart';
 import '../services/companion_remote/companion_remote_host_controller.dart';
@@ -621,6 +623,9 @@ class _MainScreenState extends State<MainScreen>
 
         await _maybeOfferDownloadHandoff();
         if (!mounted) return;
+
+        await _maybeOfferSharedLibraryAdoption();
+        if (!mounted) return;
       }
 
       // Focus content initially (replaces autofocus which caused focus stealing issues)
@@ -897,6 +902,63 @@ class _MainScreenState extends State<MainScreen>
       await SettingsService.instance.write(SettingsService.downloadHandoffPromptShown, offered);
     } catch (error, stackTrace) {
       appLogger.w('Could not record the download handoff prompt', error: error, stackTrace: stackTrace);
+    }
+  }
+
+  /// Offers the offline library a predecessor install left in shared storage.
+  ///
+  /// The last of the three first-run offers, and the one that survives a new
+  /// signing key: the handoff above reads the previous install's own storage
+  /// through a provider that re-checks the caller's signature, so a key change
+  /// closes it, while a folder on the shared volume is plain files and does
+  /// not care who signed either app.
+  ///
+  /// Asked once. Declining costs nothing — the folder is left exactly as it
+  /// is, and Settings offers the same thing on demand, which is also the way
+  /// back in after the permission has been granted on its own screen.
+  Future<void> _maybeOfferSharedLibraryAdoption() async {
+    if (SettingsService.instance.read(SettingsService.sharedLibraryPromptShown)) return;
+    if (!SharedStorageService.isSupported) return;
+
+    // An install that has already been pointed somewhere deliberately is left
+    // alone: that root was chosen, and replacing it with a folder somebody
+    // moved months ago would split the library across two of them. Settings
+    // still offers this on demand for anyone who wants exactly that.
+    //
+    // Deliberately not the wider "is this install unconfigured" test the
+    // settings restore uses. That one is spent by the restore itself, which
+    // runs first and writes portable preferences, so an install that took a
+    // backup could never be asked about its media.
+    final existingRoot = SettingsService.instance.read(SettingsService.customDownloadPath);
+    if (existingRoot != null && existingRoot.isNotEmpty) return;
+
+    await _markSharedLibraryOffered(true);
+    if (!mounted) return;
+
+    var askAgain = false;
+    final result = await offerSharedLibraryAdoption(
+      context,
+      database: context.read<AppDatabase>(),
+      // The grant happens on a Settings screen, so an offer that got as far
+      // as asking for it has not been answered yet.
+      onPermissionPending: () => askAgain = true,
+    );
+    // Nothing found, declined, or adopted in full: the question is spent.
+    // Anything short of that brings it back, because the folder is still
+    // sitting there with files in it.
+    if (askAgain || (result != null && !result.isComplete)) await _markSharedLibraryOffered(false);
+  }
+
+  /// Records whether the adoption offer has been put, so it is put once.
+  ///
+  /// Failing to write it is logged rather than surfaced: the cost is being
+  /// asked again next launch, and adopting a folder that is already adopted
+  /// is reported as such rather than done twice.
+  Future<void> _markSharedLibraryOffered(bool offered) async {
+    try {
+      await SettingsService.instance.write(SettingsService.sharedLibraryPromptShown, offered);
+    } catch (error, stackTrace) {
+      appLogger.w('Could not record the shared library prompt', error: error, stackTrace: stackTrace);
     }
   }
 

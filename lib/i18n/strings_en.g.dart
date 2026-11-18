@@ -914,6 +914,60 @@ class Translations$settings$en {
 	/// en: 'The previous version has no downloads to bring across'
 	String get restoreDownloadsNothing => 'The previous version has no downloads to bring across';
 
+	/// en: 'Look for a library on this device?'
+	String get adoptLibraryPermissionTitle => 'Look for a library on this device?';
+
+	/// en: 'A previous version of this app can leave your downloads in a folder on this device's storage so they survive a reinstall. Android grants access to that folder on its own settings screen, which opens next — switch on all-files access for Bask, then come back and ask again. Nothing is read until you do.'
+	String get adoptLibraryPermissionMessage => 'A previous version of this app can leave your downloads in a folder on this device\'s storage so they survive a reinstall. Android grants access to that folder on its own settings screen, which opens next — switch on all-files access for Bask, then come back and ask again. Nothing is read until you do.';
+
+	/// en: 'Open settings'
+	String get adoptLibraryPermissionConfirm => 'Open settings';
+
+	/// en: 'All-files access is still switched off, so the folder cannot be read'
+	String get adoptLibraryPermissionMissing => 'All-files access is still switched off, so the folder cannot be read';
+
+	/// en: 'Adopt the library on this device?'
+	String get adoptLibraryFoundTitle => 'Adopt the library on this device?';
+
+	/// en: '${location} holds ${count} downloaded items left there by a previous version. Adopting it takes them over where they are — nothing is copied or moved — and new downloads join them.'
+	String adoptLibraryFoundMessage({required Object location, required Object count}) => '${location} holds ${count} downloaded items left there by a previous version. Adopting it takes them over where they are — nothing is copied or moved — and new downloads join them.';
+
+	/// en: 'Adopt library'
+	String get adoptLibraryConfirm => 'Adopt library';
+
+	/// en: 'Not now'
+	String get adoptLibraryDecline => 'Not now';
+
+	/// en: 'Adopting the library'
+	String get adoptLibraryProgressTitle => 'Adopting the library';
+
+	/// en: 'Adopted ${count} downloads'
+	String adoptLibraryDone({required Object count}) => 'Adopted ${count} downloads';
+
+	/// en: 'Adopted ${done} of the ${total} files in the folder. The rest are still there and nothing was deleted.'
+	String adoptLibraryPartial({required Object done, required Object total}) => 'Adopted ${done} of the ${total} files in the folder. The rest are still there and nothing was deleted.';
+
+	/// en: 'The folder holds ${count} files but nothing describing them, so they cannot be listed yet. New downloads will land there.'
+	String adoptLibraryNoRecords({required Object count}) => 'The folder holds ${count} files but nothing describing them, so they cannot be listed yet. New downloads will land there.';
+
+	/// en: 'The folder could not be written to, so it was left alone'
+	String get adoptLibraryFailed => 'The folder could not be written to, so it was left alone';
+
+	/// en: 'No library was found on this device's storage'
+	String get adoptLibraryNothing => 'No library was found on this device\'s storage';
+
+	/// en: 'This library is already where the app is looking'
+	String get adoptLibraryAlready => 'This library is already where the app is looking';
+
+	/// en: 'This device cannot share a folder between apps'
+	String get adoptLibraryUnsupported => 'This device cannot share a folder between apps';
+
+	/// en: 'Adopt a library from this device'
+	String get adoptLibraryAction => 'Adopt a library from this device';
+
+	/// en: 'Takes over downloads a previous version left in a folder on this device's storage'
+	String get adoptLibraryActionDescription => 'Takes over downloads a previous version left in a folder on this device\'s storage';
+
 	/// en: 'This will replace your current settings. Continue?'
 	String get importSettingsConfirm => 'This will replace your current settings. Continue?';
 
@@ -8101,6 +8155,24 @@ extension on Translations {
 			'settings.restoreDownloadsAction' => 'Bring downloads from the old app',
 			'settings.restoreDownloadsActionDescription' => 'Copies the downloaded media the previous version is still holding into this one',
 			'settings.restoreDownloadsNothing' => 'The previous version has no downloads to bring across',
+			'settings.adoptLibraryPermissionTitle' => 'Look for a library on this device?',
+			'settings.adoptLibraryPermissionMessage' => 'A previous version of this app can leave your downloads in a folder on this device\'s storage so they survive a reinstall. Android grants access to that folder on its own settings screen, which opens next — switch on all-files access for Bask, then come back and ask again. Nothing is read until you do.',
+			'settings.adoptLibraryPermissionConfirm' => 'Open settings',
+			'settings.adoptLibraryPermissionMissing' => 'All-files access is still switched off, so the folder cannot be read',
+			'settings.adoptLibraryFoundTitle' => 'Adopt the library on this device?',
+			'settings.adoptLibraryFoundMessage' => ({required Object location, required Object count}) => '${location} holds ${count} downloaded items left there by a previous version. Adopting it takes them over where they are — nothing is copied or moved — and new downloads join them.',
+			'settings.adoptLibraryConfirm' => 'Adopt library',
+			'settings.adoptLibraryDecline' => 'Not now',
+			'settings.adoptLibraryProgressTitle' => 'Adopting the library',
+			'settings.adoptLibraryDone' => ({required Object count}) => 'Adopted ${count} downloads',
+			'settings.adoptLibraryPartial' => ({required Object done, required Object total}) => 'Adopted ${done} of the ${total} files in the folder. The rest are still there and nothing was deleted.',
+			'settings.adoptLibraryNoRecords' => ({required Object count}) => 'The folder holds ${count} files but nothing describing them, so they cannot be listed yet. New downloads will land there.',
+			'settings.adoptLibraryFailed' => 'The folder could not be written to, so it was left alone',
+			'settings.adoptLibraryNothing' => 'No library was found on this device\'s storage',
+			'settings.adoptLibraryAlready' => 'This library is already where the app is looking',
+			'settings.adoptLibraryUnsupported' => 'This device cannot share a folder between apps',
+			'settings.adoptLibraryAction' => 'Adopt a library from this device',
+			'settings.adoptLibraryActionDescription' => 'Takes over downloads a previous version left in a folder on this device\'s storage',
 			'settings.importSettingsConfirm' => 'This will replace your current settings. Continue?',
 			'settings.importSettingsSuccess' => 'Settings imported',
 			'settings.importSettingsInvalidFile' => 'This file isn\'t a valid Bask settings export',
@@ -8318,6 +8390,8 @@ extension on Translations {
 			'settings.bufferSizeAuto' => 'Auto (Recommended)',
 			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB memory available. A ${size}MB buffer may affect playback.',
 			'settings.autoSkip' => 'Auto Skip',
+			_ => null,
+		} ?? switch (path) {
 			'settings.autoSkipIntro' => 'Auto Skip Intro',
 			'settings.autoSkipIntroDescription' => 'Automatically skip intro markers after a few seconds',
 			'settings.autoSkipCredits' => 'Auto Skip Credits',
@@ -8336,8 +8410,6 @@ extension on Translations {
 			'settings.subtitleRateCorrectionCertainDescription' => 'Only when subtitles run past the end of the video, which correctly timed ones never do',
 			'settings.subtitleRateCorrectionAlways' => 'Also when they stop short',
 			'settings.subtitleRateCorrectionAlwaysDescription' => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent',
-			_ => null,
-		} ?? switch (path) {
 			'search.hint' => 'Search movies, shows, music...',
 			'search.tryDifferentTerm' => 'Try a different search term',
 			'search.searchYourMedia' => 'Search your media',
@@ -8832,6 +8904,8 @@ extension on Translations {
 			'profiles.pinProtectionOptional' => 'PIN protection (optional)',
 			'profiles.pinExplain' => '4-digit PIN required to switch profiles.',
 			'profiles.continueButton' => 'Continue',
+			_ => null,
+		} ?? switch (path) {
 			'profiles.pinsDontMatch' => 'PINs don\'t match',
 			'profiles.tokenIdentityMismatch' => 'The Plex profile token resolved to an unexpected server',
 			'profiles.plexEndpoints.title' => 'Server addresses',
@@ -8850,8 +8924,6 @@ extension on Translations {
 			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Add to ${displayName}: Plex, Jellyfin, Emby, or another profile connection',
 			'connections.sessionExpiredOne' => ({required Object name}) => 'Session expired for ${name}',
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Session expired for ${count} servers',
-			_ => null,
-		} ?? switch (path) {
 			'connections.signInAgain' => 'Sign in again',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Edit ${product} connection',
 			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Add or remove URLs for ${serverName}. Bask will use the reachable URL with the lowest latency.',
@@ -9346,6 +9418,8 @@ extension on Translations {
 			'playlists.noPlaylists' => 'No playlists found',
 			'playlists.create' => 'Create Playlist',
 			'playlists.playlistName' => 'Playlist Name',
+			_ => null,
+		} ?? switch (path) {
 			'playlists.enterPlaylistName' => 'Enter playlist name',
 			'playlists.delete' => 'Delete Playlist',
 			'playlists.removeItem' => 'Remove from Playlist',
@@ -9364,8 +9438,6 @@ extension on Translations {
 			'playlists.errorCreating' => 'Failed to create playlist',
 			'playlists.errorDeleting' => 'Failed to delete playlist',
 			'playlists.errorLoading' => 'Failed to load playlists',
-			_ => null,
-		} ?? switch (path) {
 			'playlists.errorAdding' => 'Failed to add to playlist',
 			'playlists.errorReordering' => 'Failed to reorder playlist item',
 			'playlists.errorRemoving' => 'Failed to remove from playlist',
@@ -9860,6 +9932,8 @@ extension on Translations {
 			'metadataEdit.allEpisodes' => 'All episodes',
 			'metadataEdit.latestEpisodes' => ({required Object count}) => '${count} latest episodes',
 			'metadataEdit.latestEpisode' => 'Latest episode',
+			_ => null,
+		} ?? switch (path) {
 			'metadataEdit.episodesAddedPastDays' => ({required Object count}) => 'Episodes added in the past ${count} days',
 			'metadataEdit.deleteAfterPlaying' => 'Delete Episodes After Playing',
 			'metadataEdit.never' => 'Never',
@@ -9878,8 +9952,6 @@ extension on Translations {
 			'metadataEdit.useOriginalTitle' => 'Use Original Title',
 			'metadataEdit.preferredAudioLanguage' => 'Preferred Audio Language',
 			'metadataEdit.preferredSubtitleLanguage' => 'Preferred Subtitle Language',
-			_ => null,
-		} ?? switch (path) {
 			'metadataEdit.subtitleMode' => 'Auto-Select Subtitle Mode',
 			'metadataEdit.manuallySelected' => 'Manually selected',
 			'metadataEdit.shownWithForeignAudio' => 'Shown with foreign audio',
