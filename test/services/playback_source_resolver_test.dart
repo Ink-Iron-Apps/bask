@@ -211,4 +211,47 @@ void main() {
     expect(context.sourceKind, PlaybackSourceKind.remoteDirect);
     expect(context.streamHeaders, isNot(contains('X-Plex-Session-Identifier')));
   });
+
+  group('the playback source line', () {
+    test('names a local file in full, because a path is not a secret', () {
+      expect(
+        PlaybackSourceResolver.describeSource(
+          PlaybackSourceKind.localFile,
+          '/storage/emulated/0/Bask/downloads/Movies/Clue (1985)/Clue (1985).mkv',
+        ),
+        'local file /storage/emulated/0/Bask/downloads/Movies/Clue (1985)/Clue (1985).mkv',
+      );
+    });
+
+    test('drops the query from a stream, because that is where the token is', () {
+      // Anchor: this line exists to be pasted into a message when somebody
+      // asks whether a download played locally, so it must not carry the
+      // credential that would let the reader into the server.
+      final line = PlaybackSourceResolver.describeSource(
+        PlaybackSourceKind.remoteDirect,
+        'http://10.0.0.5:32400/library/parts/12345/file.mkv?X-Plex-Token=supersecret&session=abc',
+      );
+
+      expect(line, 'direct stream http://10.0.0.5:32400/library/parts/12345/file.mkv');
+      expect(line, isNot(contains('supersecret')));
+      expect(line, isNot(contains('X-Plex-Token')));
+    });
+
+    test('names a transcode as a transcode', () {
+      expect(
+        PlaybackSourceResolver.describeSource(
+          PlaybackSourceKind.remoteTranscode,
+          'http://10.0.0.5:32400/video/:/transcode/universal/start.m3u8?X-Plex-Token=secret',
+        ),
+        'server transcode http://10.0.0.5:32400/video/:/transcode/universal/start.m3u8',
+      );
+    });
+
+    test('says so when nothing resolved rather than printing null', () {
+      expect(
+        PlaybackSourceResolver.describeSource(PlaybackSourceKind.remoteDirect, null),
+        'direct stream (no target resolved)',
+      );
+    });
+  });
 }
