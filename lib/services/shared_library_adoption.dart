@@ -194,10 +194,22 @@ class SharedLibraryRow {
 
   final String? parentRatingKey;
   final String? grandparentRatingKey;
+
+  /// The file's size, or null when the writer did not know it.
+  ///
+  /// Null covers a writer that left the key out and one that wrote zero or a
+  /// negative number: a download whose size was never learned is recorded as
+  /// zero in the row that describes it, and no file in a finished library is
+  /// genuinely zero bytes long. Taking that literally would import it as a
+  /// download of nothing, which the library would then display as nothing, so
+  /// an unusable size is treated as no size and the file is measured instead.
   final int? totalBytes;
   final int? downloadedAt;
   final int mediaIndex;
   final String? mediaSourceId;
+
+  /// A size worth believing, or null. See [totalBytes].
+  static int? _positive(int? value) => value != null && value > 0 ? value : null;
 
   static SharedLibraryRow? parse(Object? source) {
     if (source is! Map<String, dynamic>) return null;
@@ -224,7 +236,7 @@ class SharedLibraryRow {
       thumbFile: text('thumbFile'),
       parentRatingKey: text('parentRatingKey'),
       grandparentRatingKey: text('grandparentRatingKey'),
-      totalBytes: (source['totalBytes'] as num?)?.toInt(),
+      totalBytes: _positive((source['totalBytes'] as num?)?.toInt()),
       downloadedAt: (source['downloadedAt'] as num?)?.toInt(),
       mediaIndex: (source['mediaIndex'] as num?)?.toInt() ?? 0,
       mediaSourceId: text('mediaSourceId'),
@@ -306,7 +318,8 @@ class SharedLibraryRow {
 /// is derived from the first two when absent and everything else is optional.
 /// `videoFile` is relative to `downloadsFolder` with `/` separators, and
 /// `thumbFile` is a filename inside `artworkFolder`. `downloadedAt` is epoch
-/// milliseconds. Ownership, profile ids and client scopes are deliberately not
+/// milliseconds. A `totalBytes` of zero or less means the writer never learned
+/// the size and is read as absent, which has the file measured instead. Ownership, profile ids and client scopes are deliberately not
 /// part of the contract — see [importRows] for why carrying them would hide
 /// the library rather than hand it over.
 class SharedLibraryAdoptionService {
@@ -611,6 +624,11 @@ class SharedLibraryAdoptionService {
         if (await candidate.exists()) thumb = candidate.path;
       }
 
+      // Measured when the row does not say, so both columns agree and a size
+      // the writer never learned does not become a library entry reporting
+      // zero bytes.
+      final bytes = row.totalBytes ?? await video.length();
+
       try {
         await database.into(database.downloadedMedia).insert(
           DownloadedMediaCompanion.insert(
@@ -622,8 +640,8 @@ class SharedLibraryAdoptionService {
             grandparentRatingKey: Value(row.grandparentRatingKey),
             status: DownloadStatus.completed.index,
             progress: const Value(100),
-            totalBytes: Value(row.totalBytes),
-            downloadedBytes: Value(row.totalBytes ?? await video.length()),
+            totalBytes: Value(bytes),
+            downloadedBytes: Value(bytes),
             videoFilePath: Value(video.path),
             thumbPath: Value(thumb),
             downloadedAt: Value(row.downloadedAt),

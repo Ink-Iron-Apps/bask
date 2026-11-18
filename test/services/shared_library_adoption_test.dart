@@ -187,6 +187,45 @@ void main() {
       expect(row.clientScopeId, isNull);
     });
 
+    test('a size the writer never learned is measured from the file', () async {
+      // Anchor: a download whose size was never learned is recorded as zero,
+      // and no file in a finished library is genuinely zero bytes long. Taken
+      // literally it would import as a download of nothing and display as
+      // nothing, over a file that is sitting right there.
+      await placeMedia('Movies/Arrival (2016)/Arrival (2016).mkv', bytes: 4096);
+      await placeMedia('Movies/Dune (2021)/Dune (2021).mkv', bytes: 2048);
+      await writeDescriptor(descriptorBody(fileCount: 2));
+      await writeRows([
+        rowBody(totalBytes: 0),
+        rowBody(ratingKey: '2002', videoFile: 'Movies/Dune (2021)/Dune (2021).mkv', totalBytes: null),
+      ]);
+      final descriptor = (await build().descriptor())!;
+
+      expect(await build().importRows(descriptor: descriptor, database: db), 2);
+
+      final rows = {for (final row in await db.allDownloadedMedia()) row.ratingKey: row};
+      expect(rows['1001']!.totalBytes, 4096);
+      expect(rows['1001']!.downloadedBytes, 4096);
+      expect(rows['2002']!.totalBytes, 2048);
+      expect(rows['2002']!.downloadedBytes, 2048);
+    });
+
+    test('a size the writer does know is taken as given', () async {
+      await placeMedia('Movies/Arrival (2016)/Arrival (2016).mkv', bytes: 8);
+      await writeDescriptor(descriptorBody());
+      // Deliberately unequal to the file on disk: a row that names a real size
+      // is the authority, so a truncated or sparse copy is not quietly
+      // re-measured into looking complete.
+      await writeRows([rowBody(totalBytes: 2093775466)]);
+      final descriptor = (await build().descriptor())!;
+
+      await build().importRows(descriptor: descriptor, database: db);
+
+      final row = (await db.allDownloadedMedia()).single;
+      expect(row.totalBytes, 2093775466);
+      expect(row.downloadedBytes, 2093775466);
+    });
+
     test('a record whose file is not in the folder is not imported', () async {
       await writeDescriptor(descriptorBody());
       await writeRows([rowBody()]);
