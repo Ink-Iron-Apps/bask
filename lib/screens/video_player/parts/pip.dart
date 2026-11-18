@@ -131,6 +131,14 @@ extension _VideoPlayerPipMethods on VideoPlayerScreenState {
     route?.offstage = false;
     if (route is VideoPlayerRoute) route.handedToMiniPlayer = false;
     setStateIfMounted(() {});
+    // Focus has to be asked for again. The screen reclaims it whenever it
+    // loses it, but that listener fired while the subtree was excluded from
+    // focus for the corner player's sake, and the request it made then was a
+    // no-op. Nothing fires a second time on its own, so the keyboard would
+    // land nowhere until the next click.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_isExiting.value) _screenFocusNode.requestFocus();
+    });
   }
 
   void _onPipRequestFailed(String? error) {

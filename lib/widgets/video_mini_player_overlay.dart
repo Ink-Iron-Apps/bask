@@ -21,6 +21,10 @@ class VideoMiniPlayerOverlay extends StatelessWidget {
   /// cannot disagree about where the corner is.
   static const double width = 380;
 
+  /// Corner radius of the card, applied to the cut-out as well as the title
+  /// bar so the two halves agree about the shape.
+  static const double radius = 12;
+
   @override
   Widget build(BuildContext context) {
     if (!PlatformDetector.isDesktopOS()) return const SizedBox.shrink();
@@ -60,39 +64,44 @@ class _MiniVideoCard extends StatelessWidget {
     final controller = VideoMiniPlayerController.instance;
     final monoTokens = tokens(context);
 
-    // Transparent, not black. On Windows and Linux the picture is a native
-    // child window composited *below* the engine's UI visual, so anything
-    // Flutter paints over that rectangle hides it — a black card is an opaque
-    // lid on the video. The Video widget paints its own background until the
-    // first frame lands and then goes transparent, which is exactly the hole
-    // the plane needs; the title row below brings its own fill.
-    return Material(
-      elevation: 8,
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Clicking the picture goes back to full screen, which is what every
-          // mini player does and what nobody has to be told.
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Video(player: player),
-                Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: controller.expand,
-                    child: const SizedBox.expand(),
-                  ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Clicking the picture goes back to full screen, which is what every
+        // mini player does and what nobody has to be told.
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Painted before anything else in this rect and after everything
+              // underneath it, which is the whole job: see
+              // [NativeSurfaceHolePainter].
+              const CustomPaint(painter: NativeSurfaceHolePainter(radius: VideoMiniPlayerOverlay.radius)),
+              // Transparent, not black. The picture is a native plane behind
+              // the window, so the Video widget's own background would be an
+              // opaque lid on it — and this widget is handed no first-frame
+              // signal to lift that lid with. What it is here for is the
+              // layout: the plane is placed wherever this is laid out.
+              Video(player: player, backgroundColor: Colors.transparent),
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: controller.expand,
+                  child: const SizedBox.expand(),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          ColoredBox(
+        ),
+        // The title row brings its own fill, and its own shape: a Material
+        // around the picture would not do, because elevation and a clip put
+        // the cut-out inside a layer of their own, where erasing pixels erases
+        // that layer instead of the app behind it.
+        ClipRRect(
+          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(VideoMiniPlayerOverlay.radius)),
+          child: Material(
+            elevation: 8,
             color: monoTokens.surface,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 6, 4, 6),
@@ -135,8 +144,55 @@ class _MiniVideoCard extends StatelessWidget {
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+}
+
+/// Erases what the app painted where the video plane is.
+///
+/// On Windows and Linux the picture is a native surface *behind* the Flutter
+/// window — a child HWND under the engine's topmost DComp visual, a
+/// `wl_subsurface` placed below the parent — so it is visible exactly where
+/// Flutter leaves the window transparent. Full screen gets that for free: the
+/// route is opaque, nothing below it is allowed to paint, and nothing in it
+/// paints either.
+///
+/// The corner window is the opposite case on purpose. The library underneath
+/// has to be painted and usable, and every pixel it paints is a pixel the
+/// plane cannot be seen through. So the card cuts its own hole: the pixels in
+/// this rect are cleared back to transparent after the app has drawn them, and
+/// the plane shows through.
+///
+/// Nothing may paint over this afterwards. A background on the Video widget, a
+/// shadow, a scrim, a Material behind the picture — any of them is a lid, and
+/// the symptom is a corner window with sound and no video.
+class NativeSurfaceHolePainter extends CustomPainter {
+  const NativeSurfaceHolePainter({this.radius = 0});
+
+  /// Rounds the top corners, which are the card's own corners. A rounded
+  /// corner here is a corner the hole does not cover, so the app shows through
+  /// it — which is what makes the shape read as a rounded card.
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final clear = Paint()..blendMode = BlendMode.clear;
+    if (radius <= 0) {
+      canvas.drawRect(Offset.zero & size, clear);
+      return;
+    }
+    canvas.drawRRect(
+      RRect.fromRectAndCorners(
+        Offset.zero & size,
+        topLeft: Radius.circular(radius),
+        topRight: Radius.circular(radius),
+      ),
+      clear,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant NativeSurfaceHolePainter oldDelegate) => oldDelegate.radius != radius;
 }

@@ -67,6 +67,27 @@ class VideoPlayerRoute extends PageRouteBuilder<bool> {
     // only other thing that ever refreshes it, and never comes for a route
     // that is already settled.
     if (overlayEntries.isNotEmpty) overlayEntries.first.opaque = opaque;
+    // Rebuilds the barrier, which is the other thing that has to change: see
+    // [buildModalBarrier].
+    changedInternalState();
+  }
+
+  /// The modal barrier, made to let clicks through while the corner player has
+  /// the picture.
+  ///
+  /// A route's barrier is a full-screen gesture detector with
+  /// `HitTestBehavior.opaque`, and `ModalRoute` wraps it in an `IgnorePointer`
+  /// only while the route's animation is running
+  /// (`ModalRoute._buildModalBarrier`). A settled route therefore goes on
+  /// swallowing every pointer event in the window — so taking it offstage
+  /// leaves the library painted, visibly interactive, and completely deaf.
+  /// Nothing below reacts to a click, which is the mini player having made the
+  /// app unusable rather than usable.
+  @override
+  Widget buildModalBarrier() {
+    final barrier = super.buildModalBarrier();
+    if (!_handedToMiniPlayer) return barrier;
+    return IgnorePointer(child: barrier);
   }
 
   /// False while the mini player has the picture, so the routes underneath are
