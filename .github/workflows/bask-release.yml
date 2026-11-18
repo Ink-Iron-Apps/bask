@@ -102,7 +102,13 @@ jobs:
           sdkmanager="$sdk/cmdline-tools/latest/bin/sdkmanager"
           [ -x "$sdkmanager" ] || sdkmanager=$(find "$sdk" -name 'sdkmanager*' -type f | head -n1)
           echo "using $sdkmanager"
-          yes | "$sdkmanager" --install "ndk;${ANDROID_NDK_VERSION}" "cmake;${ANDROID_CMAKE_VERSION}" > /dev/null
+          # A finite stream of license answers rather than `yes |`. sdkmanager
+          # stops reading stdin once it has what it needs, which kills `yes`
+          # with SIGPIPE; every `run:` block here is `-o pipefail`, so that
+          # failure sinks the step after the install has already succeeded
+          # ("yes: standard output: Broken pipe"). Fifty lines fit inside the
+          # pipe buffer, so printf never blocks and never sees a closed pipe.
+          printf 'y\n%.0s' $(seq 1 50) | "$sdkmanager" --install "ndk;${ANDROID_NDK_VERSION}" "cmake;${ANDROID_CMAKE_VERSION}" > /dev/null
 
       - name: Cache Gradle
         # Same reason as the Flutter cache above.
