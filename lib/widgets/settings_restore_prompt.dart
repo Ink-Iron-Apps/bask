@@ -124,6 +124,15 @@ Future<DownloadHandoffResult?> runDownloadHandoff(
     ),
   );
 
+  // `showDialog` pushes onto the root navigator, so the dismissal has to
+  // target that same navigator. A tablet layout nests a navigator per tab and
+  // `Navigator.of(context)` finds the nested one: popping that leaves the
+  // dialog standing with no way out, because the Stop button only asks the
+  // copy to cancel and never pops. Resolved before the copy starts so
+  // dismissing does not depend on `context` still being mounted once it
+  // finishes — a check that could otherwise skip the dismissal silently.
+  final navigator = Navigator.of(context, rootNavigator: true);
+
   try {
     return await service.restore(
       manifest: manifest,
@@ -132,7 +141,7 @@ Future<DownloadHandoffResult?> runDownloadHandoff(
       isCancelled: () => stopped,
     );
   } finally {
-    if (context.mounted) Navigator.of(context).pop();
+    navigator.pop();
     await dialog;
     progress.dispose();
   }

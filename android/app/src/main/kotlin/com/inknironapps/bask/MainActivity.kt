@@ -31,6 +31,7 @@ import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import com.inknironapps.bask.car.CarRestrictionsMonitor
 import com.inknironapps.bask.handoff.SettingsHandoffClient
+import com.inknironapps.bask.handoff.SharedStorageChannel
 import com.inknironapps.bask.exoplayer.ExoPlayerPlugin
 import com.inknironapps.bask.mpv.MpvAudioPlayerPlugin
 import com.inknironapps.bask.mpv.MpvPlayerPlugin
@@ -102,6 +103,7 @@ class MainActivity : FlutterActivity() {
   private val CAR_RESTRICTIONS_CHANNEL = "com.plezy/car_restrictions"
   private val APK_INSTALL_CHANNEL = "com.plezy/apk_install"
   private val SETTINGS_HANDOFF_CHANNEL = "com.plezy/settings_handoff"
+  private val SHARED_STORAGE_CHANNEL = "com.plezy/shared_storage"
   private val ASSISTIVE_TECHNOLOGY_CHANNEL = "com.plezy/assistive_technology"
   private var watchNextPlugin: WatchNextPlugin? = null
   private var carRestrictions: CarRestrictionsMonitor? = null
@@ -857,6 +859,17 @@ class MainActivity : FlutterActivity() {
       result,
       ->
       settingsHandoff.handle(call, result)
+    }
+
+    // Takes the activity lazily rather than by value: granting shared-storage
+    // access needs an activity to start a screen from, and this engine outlives
+    // any one instance of it.
+    val sharedStorage = SharedStorageChannel(applicationContext) { this }
+    MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SHARED_STORAGE_CHANNEL).setMethodCallHandler {
+      call,
+      result,
+      ->
+      sharedStorage.handle(call, result)
     }
 
     val assistiveChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ASSISTIVE_TECHNOLOGY_CHANNEL)
