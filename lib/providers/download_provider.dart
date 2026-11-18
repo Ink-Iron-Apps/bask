@@ -1750,6 +1750,17 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
 
   Future<void>? _metadataPass;
   bool _metadataPassQueued = false;
+
+  /// Keys a server fetch is already in flight for.
+  ///
+  /// The cache walk and the fetch it kicks off are deliberately not awaited
+  /// together — the splash must not wait on the network — so a trailing walk
+  /// starts while the previous walk's fetches are still running and finds the
+  /// same rows still unresolved. On a phone adopting eighteen downloads that
+  /// showed up as two overlapping fetches, one for all eighteen and one for
+  /// the seven the second walk still could not see, asking the server twice
+  /// for the same items. A key in flight is left to the fetch that owns it.
+  final Set<String> _metadataFetchesInFlight = {};
   final List<void Function(int done, int total)> _metadataProgressListeners = [];
   int _metadataPassCount = 0;
 
@@ -1865,7 +1876,9 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
         if (result.stale) return;
         onProgress(++walked, keys.length);
         if (result.metadata == null) {
-          needNetwork.add(globalKey);
+          // Already being fetched by an earlier walk, so it will land without
+          // this one asking again.
+          if (!_metadataFetchesInFlight.contains(globalKey)) needNetwork.add(globalKey);
         } else {
           cacheHits++;
         }
@@ -1914,6 +1927,29 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     final stopwatch = Stopwatch()..start();
     var filled = 0;
 
+    _metadataFetchesInFlight.addAll(globalKeys);
+    try {
+      await _fetchMetadataSequentially(globalKeys, pinned, isStale, (count) => filled = count);
+    } finally {
+      _metadataFetchesInFlight.removeAll(globalKeys);
+    }
+
+    if (isStale()) return;
+    appLogger.i(
+      'refreshMetadataFromCache: filled $filled of ${globalKeys.length} from the server '
+      'in ${stopwatch.elapsedMilliseconds}ms',
+    );
+  }
+
+  /// The fetch loop itself, split out so the in-flight bookkeeping around it
+  /// cannot be skipped by an early return.
+  Future<void> _fetchMetadataSequentially(
+    List<String> globalKeys,
+    ({Map<String, MediaItem> items, Map<String, String?> scopesByServer}) pinned,
+    bool Function() isStale,
+    void Function(int filled) report,
+  ) async {
+    var filled = 0;
     var published = 0;
     var lastPublish = DateTime.now();
     for (final globalKey in globalKeys) {
@@ -1935,11 +1971,8 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       }
     }
 
+    report(filled);
     if (isStale()) return;
-    appLogger.i(
-      'refreshMetadataFromCache: filled $filled of ${globalKeys.length} from the server '
-      'in ${stopwatch.elapsedMilliseconds}ms',
-    );
     if (filled > published) safeNotifyListeners();
   }
 
