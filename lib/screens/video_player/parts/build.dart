@@ -173,6 +173,24 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
 
     // Back handling (sheet-close + player exit) is owned by the OverlaySheetHost
     // that wraps this widget — see video_player_screen.dart (canPop/onSystemBack).
+    //
+    // Focus leaves with the picture. An offstage route is still laid out and
+    // still the current route, so its focus scope keeps primary focus and the
+    // player's surface nodes go on claiming it — every key press would still
+    // be a playback shortcut while the library is the thing being used. The
+    // player gets its focus back on expand, where the subtree is rebuilt with
+    // this gate open again.
+    return ExcludeFocus(
+      excluding: VideoMiniPlayerController.instance.isActive,
+      child: _buildVideoPlayerSurface(context, isMobile: isMobile, hideChromeOnMouseExit: hideChromeOnMouseExit),
+    );
+  }
+
+  Widget _buildVideoPlayerSurface(
+    BuildContext context, {
+    required bool isMobile,
+    required bool hideChromeOnMouseExit,
+  }) {
     return Scaffold(
       // Use transparent background on macOS when native video layer is active
       backgroundColor: Colors.transparent,
