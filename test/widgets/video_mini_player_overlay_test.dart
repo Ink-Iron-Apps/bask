@@ -33,7 +33,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(extensions: const [testMonoTokens]),
-        home: const Scaffold(body: Stack(children: [Positioned.fill(child: VideoMiniPlayerOverlay())])),
+        home: const Scaffold(
+          body: Stack(children: [Positioned.fill(child: VideoMiniPlayerOverlay())]),
+        ),
       ),
     );
     await tester.pump();

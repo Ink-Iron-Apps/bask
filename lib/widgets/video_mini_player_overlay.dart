@@ -184,11 +184,7 @@ class NativeSurfaceHolePainter extends CustomPainter {
       return;
     }
     canvas.drawRRect(
-      RRect.fromRectAndCorners(
-        Offset.zero & size,
-        topLeft: Radius.circular(radius),
-        topRight: Radius.circular(radius),
-      ),
+      RRect.fromRectAndCorners(Offset.zero & size, topLeft: Radius.circular(radius), topRight: Radius.circular(radius)),
       clear,
     );
   }

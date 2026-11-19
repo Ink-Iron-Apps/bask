@@ -2202,11 +2202,7 @@ void main() {
       );
       final before = p.debugMetadataPassCount;
 
-      await Future.wait([
-        p.refreshMetadataFromCache(),
-        p.refreshMetadataFromCache(),
-        p.refreshMetadataFromCache(),
-      ]);
+      await Future.wait([p.refreshMetadataFromCache(), p.refreshMetadataFromCache(), p.refreshMetadataFromCache()]);
 
       expect(
         p.debugMetadataPassCount - before,

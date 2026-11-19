@@ -997,7 +997,10 @@ void main() {
           final rate = player.setRate(1.25);
           releaseNormalization.complete();
 
-          await expectLater(normalization, throwsA(isA<PlatformException>()));
+          // The refusal is absorbed by the chain's own fallback (see the
+          // group above); what matters here is that the queued speed write
+          // did not revive the normalization attempt.
+          await normalization;
           await rate;
 
           expect(normalizationAttempts, 1);
@@ -1068,6 +1071,126 @@ void main() {
         }
       },
     );
+  });
+
+  group('a build that cannot run a filter', () {
+    test('keeps the film when mpv refuses the dialogue-boost filter', () async {
+      // Anchor: a Sony Bravia's mpv has no `equalizer`, so it refuses the
+      // whole chain — and the refusal used to travel out of the player's
+      // "configuring player" phase, abort the open, and leave the viewer
+      // with no film at all.
+      final propertyWrites = <(String, String)>[];
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        methodHandler: (call) async {
+          if (call.method == 'initialize') return true;
+          if (call.method == 'setProperty') {
+            final arguments = call.arguments as Map;
+            final name = arguments['name'] as String;
+            final value = arguments['value'] as String;
+            propertyWrites.add((name, value));
+            if (name == 'af' && value.contains('equalizer')) {
+              throw PlatformException(code: 'SET_PROPERTY_FAILED', message: 'MPV property write was rejected');
+            }
+          }
+          return null;
+        },
+        testBody: () async {
+          final player = PlayerNative();
+          try {
+            await player.setAudioNormalization(true);
+            propertyWrites.clear();
+
+            // No throw: this is what the open depends on.
+            await player.setDialogueBoost(enabled: true, gainDb: 9);
+
+            final chains = propertyWrites.where((write) => write.$1 == 'af').map((write) => write.$2).toList();
+            expect(chains.first, contains('equalizer'), reason: 'the asked-for chain is tried first');
+            // Normalization survives the loss of the boost: the two features
+            // share one property, and the fallback must not take both.
+            expect(
+              chains.last,
+              'format=srate=192000:format=double,loudnorm=I=-14:TP=-3:LRA=4,'
+              'format=srate=48000:format=floatp',
+            );
+            expect(player.audioFilterUnavailable('dialogue boost'), isTrue);
+            expect(player.audioFilterUnavailable('audio normalization'), isFalse);
+          } finally {
+            await player.dispose();
+          }
+        },
+      );
+    });
+
+    test('does not ask again for a filter this player has already been refused', () async {
+      // Reconciliation rewrites the chain whenever anything about the audio
+      // changes — passthrough, a downmix, a track switch — and a refusal that
+      // was not remembered would mean a refused write, and an error in the
+      // log, on every one of them.
+      var equalizerAttempts = 0;
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        methodHandler: (call) async {
+          if (call.method == 'initialize') return true;
+          if (call.method == 'setProperty') {
+            final arguments = call.arguments as Map;
+            if ((arguments['name'] as String) == 'af' && (arguments['value'] as String).contains('equalizer')) {
+              equalizerAttempts++;
+              throw PlatformException(code: 'SET_PROPERTY_FAILED');
+            }
+          }
+          return null;
+        },
+        testBody: () async {
+          final player = PlayerNative();
+          try {
+            await player.setDialogueBoost(enabled: true, gainDb: 6);
+            await player.setDialogueBoost(enabled: true, gainDb: 12);
+            await player.setAudioNormalization(true);
+
+            expect(equalizerAttempts, 1, reason: 'the refusal should be remembered for this playback');
+          } finally {
+            await player.dispose();
+          }
+        },
+      );
+    });
+
+    test('clears the chain when it can run neither feature', () async {
+      final chains = <String>[];
+      await withMockPlayerChannels(
+        methodChannelName: 'com.plezy/mpv_player',
+        eventChannelName: 'com.plezy/mpv_player/events',
+        methodHandler: (call) async {
+          if (call.method == 'initialize') return true;
+          if (call.method == 'setProperty') {
+            final arguments = call.arguments as Map;
+            final name = arguments['name'] as String;
+            final value = arguments['value'] as String;
+            if (name == 'af') {
+              chains.add(value);
+              if (value.isNotEmpty) throw PlatformException(code: 'SET_PROPERTY_FAILED');
+            }
+          }
+          return null;
+        },
+        testBody: () async {
+          final player = PlayerNative();
+          try {
+            await player.setAudioFilterChain(normalization: true, dialogueBoostGainDb: 9);
+            // Every chain with a filter in it was refused, so the property is
+            // left empty rather than holding a previous file's filters.
+            expect(chains.last, '');
+            expect(player.audioFilterUnavailable('dialogue boost'), isTrue);
+            expect(player.audioFilterUnavailable('audio normalization'), isTrue);
+          } finally {
+            await player.dispose();
+          }
+        },
+      );
+    });
   });
 
   test('loudnorm is handed 192 kHz float64 rather than left to convert', () async {

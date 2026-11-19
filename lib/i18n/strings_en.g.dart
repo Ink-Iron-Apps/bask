@@ -5262,6 +5262,9 @@ class Translations$videoSettings$en {
 	/// en: 'Boost Strength'
 	String get dialogueBoostGain => 'Boost Strength';
 
+	/// en: 'This player build has no filter for it'
+	String get dialogueBoostUnavailable => 'This player build has no filter for it';
+
 	/// en: 'Downmix to Stereo'
 	String get audioDownmix => 'Downmix to Stereo';
 
@@ -9816,6 +9819,7 @@ extension on Translations {
 			'videoSettings.audioNormalization' => 'Normalize Loudness',
 			'videoSettings.dialogueBoost' => 'Dialogue Boost',
 			'videoSettings.dialogueBoostGain' => 'Boost Strength',
+			'videoSettings.dialogueBoostUnavailable' => 'This player build has no filter for it',
 			'videoSettings.audioDownmix' => 'Downmix to Stereo',
 			'videoSettings.downmixCenterBoost' => 'Center Channel Boost',
 			'videoSettings.audioDownmixNormalize' => 'Normalize on Downmix',
@@ -9931,9 +9935,9 @@ extension on Translations {
 			'metadataEdit.keep' => 'Keep',
 			'metadataEdit.allEpisodes' => 'All episodes',
 			'metadataEdit.latestEpisodes' => ({required Object count}) => '${count} latest episodes',
-			'metadataEdit.latestEpisode' => 'Latest episode',
 			_ => null,
 		} ?? switch (path) {
+			'metadataEdit.latestEpisode' => 'Latest episode',
 			'metadataEdit.episodesAddedPastDays' => ({required Object count}) => 'Episodes added in the past ${count} days',
 			'metadataEdit.deleteAfterPlaying' => 'Delete Episodes After Playing',
 			'metadataEdit.never' => 'Never',

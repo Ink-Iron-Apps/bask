@@ -20,10 +20,7 @@ void main() {
             navigator = Navigator.of(context);
             return Scaffold(
               body: Center(
-                child: ElevatedButton(
-                  onPressed: () => tapsOnTheLibrary++,
-                  child: const Text('Library'),
-                ),
+                child: ElevatedButton(onPressed: () => tapsOnTheLibrary++, child: const Text('Library')),
               ),
             );
           },

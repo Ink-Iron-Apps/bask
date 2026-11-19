@@ -1877,25 +1877,34 @@ class VideoPlayerScreenState extends State<VideoPlayerScreen> with WidgetsBindin
         await currentPlayer.setProperty('sub-speed', subtitleSpeed.toStringAsFixed(5));
       }
 
-      if (settingsService.read(SettingsService.audioNormalization)) {
-        await currentPlayer.setAudioNormalization(true);
-      }
+      // The audio effects are optional by nature and the builds underneath
+      // them are not identical — a device whose mpv lacks a filter refuses
+      // the write. None of that is worth a film: the player degrades to
+      // whichever effects it can run, and this guard is the backstop for
+      // anything the chain's own fallback does not absorb.
+      try {
+        if (settingsService.read(SettingsService.audioNormalization)) {
+          await currentPlayer.setAudioNormalization(true);
+        }
 
-      if (settingsService.read(SettingsService.dialogueBoost)) {
-        await currentPlayer.setDialogueBoost(
-          enabled: true,
-          gainDb: settingsService.read(SettingsService.dialogueBoostGain),
-        );
-      }
+        if (settingsService.read(SettingsService.dialogueBoost)) {
+          await currentPlayer.setDialogueBoost(
+            enabled: true,
+            gainDb: settingsService.read(SettingsService.dialogueBoostGain),
+          );
+        }
 
-      // After the passthrough apply: downmix wins on both backends (mpv
-      // clears audio-spdif, ExoPlayer force-decodes encoded audio).
-      if (settingsService.read(SettingsService.audioDownmix)) {
-        await currentPlayer.setAudioDownmix(
-          enabled: true,
-          centerBoostDb: settingsService.read(SettingsService.downmixCenterBoost),
-          normalize: settingsService.read(SettingsService.audioDownmixNormalize),
-        );
+        // After the passthrough apply: downmix wins on both backends (mpv
+        // clears audio-spdif, ExoPlayer force-decodes encoded audio).
+        if (settingsService.read(SettingsService.audioDownmix)) {
+          await currentPlayer.setAudioDownmix(
+            enabled: true,
+            centerBoostDb: settingsService.read(SettingsService.downmixCenterBoost),
+            normalize: settingsService.read(SettingsService.audioDownmixNormalize),
+          );
+        }
+      } catch (e) {
+        appLogger.w('VideoPlayerScreen: audio effects not applied', error: e);
       }
 
       if (PlatformDetector.isDesktopOS()) {

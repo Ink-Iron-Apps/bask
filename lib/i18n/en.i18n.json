@@ -2114,6 +2114,7 @@
     "audioNormalization": "Normalize Loudness",
     "dialogueBoost": "Dialogue Boost",
     "dialogueBoostGain": "Boost Strength",
+    "dialogueBoostUnavailable": "This player build has no filter for it",
     "audioDownmix": "Downmix to Stereo",
     "downmixCenterBoost": "Center Channel Boost",
     "audioDownmixNormalize": "Normalize on Downmix",

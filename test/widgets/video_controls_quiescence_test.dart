@@ -182,6 +182,9 @@ class _IdlePlayer implements Player {
   String get playerType => 'mpv';
 
   @override
+  bool audioFilterUnavailable(String feature) => false;
+
+  @override
   Future<String?> getProperty(String name) async => null;
 
   @override
