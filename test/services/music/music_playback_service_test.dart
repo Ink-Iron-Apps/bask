@@ -250,6 +250,9 @@ class FakePlayer implements Player {
   String get playerType => 'fake';
 
   @override
+  bool audioFilterUnavailable(String feature) => false;
+
+  @override
   Future<void> open(
     Media media, {
     bool play = true,
