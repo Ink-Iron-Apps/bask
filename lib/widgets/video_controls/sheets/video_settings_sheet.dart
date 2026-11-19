@@ -193,12 +193,18 @@ class _SettingsToggleItem extends StatefulWidget {
   final String? subtitle;
   final FutureOr<void> Function(bool value)? onAfterWrite;
 
+  /// False for something this player cannot do at all. The row stays, with
+  /// its subtitle carrying the reason: a switch that vanished would leave a
+  /// viewer looking for a feature the app has told them about elsewhere.
+  final bool enabled;
+
   const _SettingsToggleItem({
     required this.pref,
     required this.icon,
     required this.title,
     this.subtitle,
     this.onAfterWrite,
+    this.enabled = true,
   });
 
   @override
@@ -267,17 +273,17 @@ class _SettingsToggleItemState extends State<_SettingsToggleItem> {
     return ValueListenableBuilder<bool>(
       valueListenable: settings.listenable(widget.pref),
       builder: (context, value, _) {
-        final displayedValue = _pendingValue ?? value;
+        final displayedValue = widget.enabled && (_pendingValue ?? value);
         final isPending = _pendingValue != null;
+        final locked = !widget.enabled || isPending;
         final subtitle = widget.subtitle;
+        final muted = tokens(context).textMuted;
         return FocusableListTile(
-          leading: AppIcon(widget.icon, fill: 1, color: displayedValue ? Colors.amber : tokens(context).textMuted),
-          title: Text(widget.title),
-          subtitle: subtitle == null
-              ? null
-              : Text(subtitle, style: TextStyle(color: tokens(context).textMuted, fontSize: 12)),
-          trailing: Switch(value: displayedValue, onChanged: isPending ? null : _write, activeThumbColor: Colors.amber),
-          onTap: isPending ? null : () => _write(!displayedValue),
+          leading: AppIcon(widget.icon, fill: 1, color: displayedValue ? Colors.amber : muted),
+          title: Text(widget.title, style: widget.enabled ? null : TextStyle(color: muted)),
+          subtitle: subtitle == null ? null : Text(subtitle, style: TextStyle(color: muted, fontSize: 12)),
+          trailing: Switch(value: displayedValue, onChanged: locked ? null : _write, activeThumbColor: Colors.amber),
+          onTap: locked ? null : () => _write(!displayedValue),
         );
       },
     );
@@ -806,6 +812,15 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   /// offering switches that do nothing.
   bool get _usesFilterChain => widget.player.playerType != 'exoplayer';
 
+  /// Whether this player has been refused the dialogue boost's filters.
+  ///
+  /// The Android libmpv carries `loudnorm` and nothing else, so a build can
+  /// simply not have the `equalizer` and `acompressor` the boost is made of.
+  /// Discovered by being refused once — there is no asking in advance — and
+  /// from then on the switch is shown as unavailable rather than left to be
+  /// flipped at nothing.
+  bool get _dialogueBoostUnavailable => widget.player.audioFilterUnavailable(Player.dialogueBoostFeature);
+
   /// Why the filter switches are doing nothing, or null when they are not.
   ///
   /// While passthrough is carrying a Dolby or DTS track, mpv hands it to the
@@ -1109,13 +1124,24 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             pref: SettingsService.dialogueBoost,
             icon: Symbols.record_voice_over_rounded,
             title: t.videoSettings.dialogueBoost,
-            subtitle: _filtersSuspendedNote,
-            onAfterWrite: (enabled) => widget.player.setDialogueBoost(
-              enabled: enabled,
-              gainDb: SettingsService.instance.read(SettingsService.dialogueBoostGain),
-            ),
+            enabled: !_dialogueBoostUnavailable,
+            subtitle: _dialogueBoostUnavailable ? t.videoSettings.dialogueBoostUnavailable : _filtersSuspendedNote,
+            onAfterWrite: (enabled) async {
+              await widget.player.setDialogueBoost(
+                enabled: enabled,
+                gainDb: SettingsService.instance.read(SettingsService.dialogueBoostGain),
+              );
+              if (!enabled || !_dialogueBoostUnavailable) return;
+              // The write is also how this build's answer arrives. Redraw the
+              // row as unavailable, then refuse the write: nothing is stored
+              // for something the device would not take, which is the same
+              // contract _applyThenPersist already keeps for a refused HDR
+              // mode.
+              if (mounted) setState(() {});
+              throw StateError('this player build cannot run the dialogue boost');
+            },
           ),
-        if (_usesFilterChain) _dialogueBoostGainRow(),
+        if (_usesFilterChain && !_dialogueBoostUnavailable) _dialogueBoostGainRow(),
 
         _SettingsToggleItem(
           pref: SettingsService.audioDownmix,

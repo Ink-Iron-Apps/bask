@@ -70,6 +70,19 @@ abstract class Player {
   /// The type of player backend being used (e.g., 'mpv', 'exoplayer').
   String get playerType;
 
+  /// Whether this build turned out to be unable to run an audio effect.
+  ///
+  /// The filters behind the effects are not in every build — the Android
+  /// libmpv carries `loudnorm` and nothing else — and the only way to find
+  /// out is to be refused once. A switch for something this player has been
+  /// refused is a switch that does nothing, so the interface disables it
+  /// rather than leaving the viewer to wonder.
+  bool audioFilterUnavailable(String feature) => false;
+
+  /// The names [audioFilterUnavailable] answers for.
+  static const dialogueBoostFeature = 'dialogue boost';
+  static const audioNormalizationFeature = 'audio normalization';
+
   /// Open a media source for playback.
   ///
   /// [media] - The media source to open.

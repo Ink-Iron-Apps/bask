@@ -1339,6 +1339,23 @@ abstract class PlayerBase with PlayerStreamControllersMixin implements Player {
     dialogueBoostGainDb: enabled ? gainDb.clamp(1, 24) : 0,
   );
 
+  /// Names for the two halves of the chain, used in logs and to remember
+  /// which of them this build cannot run. Declared on [Player] because the
+  /// interface is what asks the question.
+  static const _dialogueBoostFeature = Player.dialogueBoostFeature;
+  static const _normalizationFeature = Player.audioNormalizationFeature;
+
+  /// The features this player's mpv refused.
+  ///
+  /// Per player rather than per process: the probe below costs two refused
+  /// writes on a build that lacks a filter, which is worth paying once per
+  /// film to keep this out of global state — reconciliation rewrites the
+  /// chain many times during one playback, and those are what this spares.
+  final Set<String> _unavailableAudioFilters = <String>{};
+
+  @override
+  bool audioFilterUnavailable(String feature) => _unavailableAudioFilters.contains(feature);
+
   /// Write both features in one property set.
   ///
   /// `af` is the whole chain, not a list to append to, so the two features
@@ -1346,13 +1363,71 @@ abstract class PlayerBase with PlayerStreamControllersMixin implements Player {
   /// both answers (PlayerNative's audio-state reconciliation) apply them
   /// together; the single-feature setters above remember the other's last
   /// request.
+  ///
+  /// A chain this build cannot run is dropped, not thrown. These are optional
+  /// effects, and the mpv builds this ships against are not identical: a Sony
+  /// Bravia's has no `equalizer`, so a dialogue-boost chain is refused
+  /// outright — and while that refusal travelled, it aborted the whole
+  /// "configuring player" phase and the viewer got no film at all, which is
+  /// an expensive way to not boost dialogue. Each feature is therefore tried
+  /// on its own before being given up, so a missing filter costs that feature
+  /// and nothing else.
   Future<void> setAudioFilterChain({required bool normalization, required int dialogueBoostGainDb}) async {
     _normalizationFilterRequested = normalization;
     _dialogueBoostGainRequested = dialogueBoostGainDb;
-    await setProperty(
-      'af',
-      _audioFilterChainFor(normalization: normalization, dialogueBoostGainDb: dialogueBoostGainDb),
-    );
+
+    final wantsNormalization = normalization && !_unavailableAudioFilters.contains(_normalizationFeature);
+    final wantsBoost = _unavailableAudioFilters.contains(_dialogueBoostFeature) ? 0 : dialogueBoostGainDb;
+
+    if (await _writeAudioFilterChain(normalization: wantsNormalization, boost: wantsBoost)) return;
+    if (!wantsNormalization && wantsBoost == 0) {
+      // Even an empty chain was refused, so there is nothing left to drop and
+      // nothing to blame on a filter.
+      return;
+    }
+
+    if (wantsNormalization && wantsBoost > 0) {
+      // Which half? Ask, rather than guess: a viewer who turned both on
+      // should keep whichever one this build can actually run.
+      if (await _writeAudioFilterChain(normalization: true, boost: 0)) {
+        _noteAudioFilterUnavailable(_dialogueBoostFeature);
+        return;
+      }
+      if (await _writeAudioFilterChain(normalization: false, boost: wantsBoost)) {
+        _noteAudioFilterUnavailable(_normalizationFeature);
+        return;
+      }
+      _noteAudioFilterUnavailable(_dialogueBoostFeature);
+      _noteAudioFilterUnavailable(_normalizationFeature);
+    } else {
+      _noteAudioFilterUnavailable(wantsBoost > 0 ? _dialogueBoostFeature : _normalizationFeature);
+    }
+
+    // Nothing left that this build can run: clear the chain, so the filters
+    // a previous file set do not stay on under a file that asked for none.
+    await _writeAudioFilterChain(normalization: false, boost: 0);
+  }
+
+  /// Writes one chain, reporting whether mpv took it.
+  ///
+  /// A refusal is an answer about the filters. Anything else — a core that is
+  /// gone, a channel that is not there — is about the player and is rethrown,
+  /// which is what every caller already handles.
+  Future<bool> _writeAudioFilterChain({required bool normalization, required int boost}) async {
+    try {
+      await setProperty('af', _audioFilterChainFor(normalization: normalization, dialogueBoostGainDb: boost));
+      return true;
+    } on PlatformException catch (error) {
+      if (error.code != 'SET_PROPERTY_FAILED') rethrow;
+      return false;
+    }
+  }
+
+  void _noteAudioFilterUnavailable(String feature) {
+    if (!_unavailableAudioFilters.add(feature)) return;
+    final message = 'this player build cannot run $feature; carrying on without it';
+    appLogger.w('MPV: $message');
+    logController.add(PlayerLog(prefix: 'audio', level: PlayerLogLevel.warn, text: message));
   }
 
   @override
