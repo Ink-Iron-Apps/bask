@@ -630,25 +630,27 @@ class SharedLibraryAdoptionService {
       final bytes = row.totalBytes ?? await video.length();
 
       try {
-        await database.into(database.downloadedMedia).insert(
-          DownloadedMediaCompanion.insert(
-            serverId: row.serverId,
-            ratingKey: row.ratingKey,
-            globalKey: row.globalKey,
-            type: row.type,
-            parentRatingKey: Value(row.parentRatingKey),
-            grandparentRatingKey: Value(row.grandparentRatingKey),
-            status: DownloadStatus.completed.index,
-            progress: const Value(100),
-            totalBytes: Value(bytes),
-            downloadedBytes: Value(bytes),
-            videoFilePath: Value(video.path),
-            thumbPath: Value(thumb),
-            downloadedAt: Value(row.downloadedAt),
-            mediaIndex: Value(row.mediaIndex),
-            mediaSourceId: Value(row.mediaSourceId),
-          ),
-        );
+        await database
+            .into(database.downloadedMedia)
+            .insert(
+              DownloadedMediaCompanion.insert(
+                serverId: row.serverId,
+                ratingKey: row.ratingKey,
+                globalKey: row.globalKey,
+                type: row.type,
+                parentRatingKey: Value(row.parentRatingKey),
+                grandparentRatingKey: Value(row.grandparentRatingKey),
+                status: DownloadStatus.completed.index,
+                progress: const Value(100),
+                totalBytes: Value(bytes),
+                downloadedBytes: Value(bytes),
+                videoFilePath: Value(video.path),
+                thumbPath: Value(thumb),
+                downloadedAt: Value(row.downloadedAt),
+                mediaIndex: Value(row.mediaIndex),
+                mediaSourceId: Value(row.mediaSourceId),
+              ),
+            );
         existing.add(row.globalKey);
         imported++;
       } catch (error, stackTrace) {
@@ -666,10 +668,7 @@ class SharedLibraryAdoptionService {
   /// storage is this install's own and is none of this operation's business,
   /// however broken it may be.
   @visibleForTesting
-  Future<int> pruneUnplayableRows({
-    required SharedLibraryDescriptor descriptor,
-    required AppDatabase database,
-  }) async {
+  Future<int> pruneUnplayableRows({required SharedLibraryDescriptor descriptor, required AppDatabase database}) async {
     final root = descriptor.downloadsPath;
     final orphaned = <String>[];
 
@@ -687,10 +686,7 @@ class SharedLibraryAdoptionService {
   }
 
   /// How many files in the adopted folder a record now points at.
-  Future<int> _claimedFileCount({
-    required SharedLibraryDescriptor descriptor,
-    required AppDatabase database,
-  }) async {
+  Future<int> _claimedFileCount({required SharedLibraryDescriptor descriptor, required AppDatabase database}) async {
     final root = descriptor.downloadsPath;
     final claimed = <String>{};
     for (final row in await database.allDownloadedMedia()) {
