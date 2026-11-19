@@ -186,11 +186,7 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
     );
   }
 
-  Widget _buildVideoPlayerSurface(
-    BuildContext context, {
-    required bool isMobile,
-    required bool hideChromeOnMouseExit,
-  }) {
+  Widget _buildVideoPlayerSurface(BuildContext context, {required bool isMobile, required bool hideChromeOnMouseExit}) {
     return Scaffold(
       // Use transparent background on macOS when native video layer is active
       backgroundColor: Colors.transparent,

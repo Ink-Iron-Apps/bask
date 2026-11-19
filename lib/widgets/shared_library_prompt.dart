@@ -38,10 +38,7 @@ Future<bool> promptToAdoptLibrary(BuildContext context, SharedLibraryDescriptor 
   return showConfirmDialog(
     context,
     title: t.settings.adoptLibraryFoundTitle,
-    message: t.settings.adoptLibraryFoundMessage(
-      count: descriptor.fileCount,
-      location: descriptor.downloadsPath,
-    ),
+    message: t.settings.adoptLibraryFoundMessage(count: descriptor.fileCount, location: descriptor.downloadsPath),
     confirmText: t.settings.adoptLibraryConfirm,
     cancelText: t.settings.adoptLibraryDecline,
   );
@@ -66,17 +63,15 @@ Future<SharedLibraryAdoptionResult?> runLibraryAdoption(
       canPop: false,
       child: AlertDialog(
         title: Text(t.settings.adoptLibraryProgressTitle),
-        content: const Center(child: Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator())),
+        content: const Center(
+          child: Padding(padding: EdgeInsets.all(8), child: CircularProgressIndicator()),
+        ),
       ),
     ),
   );
 
   try {
-    return await service.adopt(
-      descriptor: descriptor,
-      database: database,
-      passphraseProvider: passphraseProvider,
-    );
+    return await service.adopt(descriptor: descriptor, database: database, passphraseProvider: passphraseProvider);
   } catch (error, stackTrace) {
     appLogger.w('Could not adopt the shared library', error: error, stackTrace: stackTrace);
     return null;
@@ -112,8 +107,7 @@ Future<SharedLibraryAdoptionResult?> offerSharedLibraryAdoption(
   final library =
       service ??
       SharedLibraryAdoptionService(
-        setDownloadLocation: (path, pathType) =>
-            downloads!.setDownloadLocation(path: path, pathType: pathType),
+        setDownloadLocation: (path, pathType) => downloads!.setDownloadLocation(path: path, pathType: pathType),
       );
   final shared = storage ?? SharedStorageService.instance;
 
@@ -201,10 +195,7 @@ Future<SharedLibraryAdoptionResult?> offerSharedLibraryAdoption(
     // empty. Said plainly rather than reported as a success.
     showErrorSnackBar(context, t.settings.adoptLibraryNoRecords(count: result.filesOnDisk));
   } else if (result.filesUnclaimed > 0) {
-    showSnackBar(
-      context,
-      t.settings.adoptLibraryPartial(done: result.filesClaimed, total: result.filesOnDisk),
-    );
+    showSnackBar(context, t.settings.adoptLibraryPartial(done: result.filesClaimed, total: result.filesOnDisk));
   } else {
     showSuccessSnackBar(context, t.settings.adoptLibraryDone(count: result.filesClaimed));
   }

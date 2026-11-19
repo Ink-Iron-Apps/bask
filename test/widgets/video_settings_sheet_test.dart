@@ -470,6 +470,43 @@ void main() {
       expect(find.text('+6 dB'), findsOneWidget);
     });
 
+    testWidgets('are shown as unavailable on a build without the filters', (tester) async {
+      // Anchor: the Android libmpv carries loudnorm and nothing else, so the
+      // boost's `equalizer` is refused outright. A switch that cannot do
+      // anything should say so rather than sit there waiting to be flipped.
+      final player = _FakeSettingsPlayer(backend: 'mpv', unavailableFilters: {Player.dialogueBoostFeature});
+      await _pumpSheet(tester, player: player, height: 2000);
+      await tester.scrollUntilVisible(find.text('Dialogue Boost'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('This player build has no filter for it'), findsOneWidget);
+      expect(find.text('Boost Strength'), findsNothing);
+
+      await tester.tap(find.text('Dialogue Boost'));
+      await tester.pumpAndSettle();
+
+      expect(player.dialogueBoostCalls, isEmpty, reason: 'a disabled row must not reach the player');
+      expect(SettingsService.instance.read(SettingsService.dialogueBoost), isFalse);
+    });
+
+    testWidgets('give the switch back when the player turns out to refuse it', (tester) async {
+      // There is no asking in advance: the write is how a build's answer
+      // arrives. So the switch goes on, comes straight back off, and the row
+      // explains itself.
+      final player = _FakeSettingsPlayer(backend: 'mpv', refuseDialogueBoost: true);
+      await _pumpSheet(tester, player: player, height: 2000);
+      await tester.scrollUntilVisible(find.text('Dialogue Boost'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Dialogue Boost'));
+      await tester.pumpAndSettle();
+
+      expect(player.dialogueBoostCalls, [(enabled: true, gainDb: 6)]);
+      expect(SettingsService.instance.read(SettingsService.dialogueBoost), isFalse);
+      expect(find.text('This player build has no filter for it'), findsOneWidget);
+      expect(find.text('Boost Strength'), findsNothing);
+    });
+
     testWidgets('push a new boost strength to the player and store it', (tester) async {
       await SettingsService.instance.write(SettingsService.dialogueBoost, true);
       final player = _FakeSettingsPlayer(backend: 'mpv');
@@ -609,7 +646,16 @@ class _FakeSettingsPlayer implements Player {
     this.hdrOutputSupported = false,
     this.backend = 'exoplayer',
     this.passthroughActive = false,
-  });
+    Set<String>? unavailableFilters,
+    this.refuseDialogueBoost = false,
+  }) : unavailableFilters = unavailableFilters ?? <String>{};
+
+  /// What a build that has been refused a filter reports from then on.
+  final Set<String> unavailableFilters;
+
+  /// Whether [setDialogueBoost] discovers the refusal, the way a real player
+  /// does: the write is the only way to find out.
+  final bool refuseDialogueBoost;
 
   /// What [playerType] answers. The audio-filter rows are gated on it, so the
   /// tests about them need a backend that has an `af` chain.
@@ -622,8 +668,12 @@ class _FakeSettingsPlayer implements Player {
   bool get audioPassthroughActive => passthroughActive;
 
   @override
+  bool audioFilterUnavailable(String feature) => unavailableFilters.contains(feature);
+
+  @override
   Future<void> setDialogueBoost({required bool enabled, required int gainDb}) async {
     dialogueBoostCalls.add((enabled: enabled, gainDb: gainDb));
+    if (enabled && refuseDialogueBoost) unavailableFilters.add(Player.dialogueBoostFeature);
   }
 
   @override

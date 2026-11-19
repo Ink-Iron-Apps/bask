@@ -50,12 +50,7 @@ void main() {
   Future<void> writeDescriptor(Map<String, Object?> body) =>
       File(p.join(library.path, SharedLibraryAdoptionService.descriptorName)).writeAsString(json.encode(body));
 
-  Map<String, Object?> descriptorBody({
-    int version = 1,
-    int fileCount = 1,
-    String? settingsFile,
-    String? rowsFile,
-  }) => {
+  Map<String, Object?> descriptorBody({int version = 1, int fileCount = 1, String? settingsFile, String? rowsFile}) => {
     'version': version,
     'writtenAt': '2026-11-18T10:04:51.629798Z',
     'downloadsFolder': 'downloads',
@@ -248,16 +243,18 @@ void main() {
 
     test("this install's own row for the same item wins", () async {
       await placeMedia('Movies/Arrival (2016)/Arrival (2016).mkv');
-      await db.into(db.downloadedMedia).insert(
-        DownloadedMediaCompanion.insert(
-          serverId: 'server-1',
-          ratingKey: '1001',
-          globalKey: 'server-1:1001',
-          type: 'movie',
-          status: DownloadStatus.completed.index,
-          videoFilePath: const Value('downloads/own-copy.mkv'),
-        ),
-      );
+      await db
+          .into(db.downloadedMedia)
+          .insert(
+            DownloadedMediaCompanion.insert(
+              serverId: 'server-1',
+              ratingKey: '1001',
+              globalKey: 'server-1:1001',
+              type: 'movie',
+              status: DownloadStatus.completed.index,
+              videoFilePath: const Value('downloads/own-copy.mkv'),
+            ),
+          );
       await writeDescriptor(descriptorBody());
       await writeRows([rowBody()]);
       final descriptor = (await build().descriptor())!;
@@ -271,16 +268,18 @@ void main() {
     test('a record pointing into the folder at nothing is dropped', () async {
       await writeDescriptor(descriptorBody());
       final descriptor = (await build().descriptor())!;
-      await db.into(db.downloadedMedia).insert(
-        DownloadedMediaCompanion.insert(
-          serverId: 'server-1',
-          ratingKey: '1001',
-          globalKey: 'server-1:1001',
-          type: 'movie',
-          status: DownloadStatus.completed.index,
-          videoFilePath: Value(p.join(descriptor.downloadsPath, 'Movies', 'Gone.mkv')),
-        ),
-      );
+      await db
+          .into(db.downloadedMedia)
+          .insert(
+            DownloadedMediaCompanion.insert(
+              serverId: 'server-1',
+              ratingKey: '1001',
+              globalKey: 'server-1:1001',
+              type: 'movie',
+              status: DownloadStatus.completed.index,
+              videoFilePath: Value(p.join(descriptor.downloadsPath, 'Movies', 'Gone.mkv')),
+            ),
+          );
 
       expect(await build().pruneUnplayableRows(descriptor: descriptor, database: db), 1);
       expect(await db.allDownloadedMedia(), isEmpty);
@@ -289,16 +288,18 @@ void main() {
     test("a record outside the folder is none of the adoption's business", () async {
       await writeDescriptor(descriptorBody());
       final descriptor = (await build().descriptor())!;
-      await db.into(db.downloadedMedia).insert(
-        DownloadedMediaCompanion.insert(
-          serverId: 'server-1',
-          ratingKey: '1001',
-          globalKey: 'server-1:1001',
-          type: 'movie',
-          status: DownloadStatus.completed.index,
-          videoFilePath: const Value('downloads/app-private/Gone.mkv'),
-        ),
-      );
+      await db
+          .into(db.downloadedMedia)
+          .insert(
+            DownloadedMediaCompanion.insert(
+              serverId: 'server-1',
+              ratingKey: '1001',
+              globalKey: 'server-1:1001',
+              type: 'movie',
+              status: DownloadStatus.completed.index,
+              videoFilePath: const Value('downloads/app-private/Gone.mkv'),
+            ),
+          );
 
       expect(await build().pruneUnplayableRows(descriptor: descriptor, database: db), 0);
       expect(await db.allDownloadedMedia(), hasLength(1));
@@ -393,10 +394,7 @@ void main() {
       await DownloadStorageService.instance.initialize(settings);
       await placeMedia('Movies/Arrival (2016)/Arrival (2016).mkv');
       await writeDescriptor(descriptorBody(fileCount: 2));
-      await writeRows([
-        rowBody(),
-        rowBody(ratingKey: '2002', videoFile: 'Movies/Dune (2021)/Dune (2021).mkv'),
-      ]);
+      await writeRows([rowBody(), rowBody(ratingKey: '2002', videoFile: 'Movies/Dune (2021)/Dune (2021).mkv')]);
       final service = build();
       final descriptor = (await service.descriptor())!;
 
