@@ -524,5 +524,55 @@ class SetNativeRevisionTest(unittest.TestCase):
         self.assertIn("linux has published no libraries", result.stdout)
 
 
+    def test_a_group_may_publish_more_than_the_library_bask_consumes(self) -> None:
+        """Android publishes a packaged AAR of upstream's own Java layer beside
+        libmpv. Bask has its own Java layer, so the pin is about libmpv and the
+        extra library is reported rather than guessed at."""
+        artifacts = artifacts_fixture()
+        artifacts["platforms"]["android"]["libraries"]["mpv-android"] = {
+            "asset": "mpv-android-aed5544638b6.aar",
+            "checksum": "7" * 64,
+            "key": "aed5544638b6",
+        }
+        repo, commit = self._make_mpv_build(artifacts=artifacts)
+
+        result = self._run(commit, "--repo", str(repo))
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        lock = json.loads((self.root / "mpv-build.lock.json").read_text(encoding="utf-8"))
+        self.assertEqual(lock["artifacts"]["android"]["key"], NEW_KEY_ANDROID)
+        self.assertIn("also publishes mpv-android", result.stdout)
+
+    def test_the_release_an_asset_names_is_the_one_the_lock_carries(self) -> None:
+        """Assets are published per commit, not to the group's rolling release.
+        A lock naming the rolling one downloads something else, or nothing."""
+        artifacts = artifacts_fixture()
+        android = artifacts["platforms"]["android"]["libraries"]["libmpv-android"]
+        per_commit = "https://github.com/edde746/mpv-build/releases/download/binaries-206225df9862"
+        for value in android["prebuilt"].values():
+            value["assetBase"] = per_commit
+        repo, commit = self._make_mpv_build(artifacts=artifacts)
+
+        result = self._run(commit, "--repo", str(repo))
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        lock = json.loads((self.root / "mpv-build.lock.json").read_text(encoding="utf-8"))
+        self.assertEqual(lock["artifacts"]["android"]["assetBase"], per_commit)
+
+    def test_variants_published_to_different_releases_are_refused(self) -> None:
+        artifacts = artifacts_fixture()
+        android = artifacts["platforms"]["android"]["libraries"]["libmpv-android"]
+        for index, value in enumerate(android["prebuilt"].values()):
+            value["assetBase"] = f"https://example.invalid/release-{index}"
+        repo, commit = self._make_mpv_build(artifacts=artifacts)
+        before = self._snapshot()
+
+        result = self._run(commit, "--repo", str(repo))
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("different releases", result.stderr)
+        self.assertEqual(self._snapshot(), before)
+
+
 if __name__ == "__main__":
     unittest.main()

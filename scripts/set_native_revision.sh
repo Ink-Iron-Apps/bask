@@ -29,7 +29,9 @@
 #     "artifacts": {                        one entry per published non-apple group
 #       "<group>": {                        android | linux | windows
 #         "key": "<12-hex>",               the group's content-address key
-#         "assetBase": "https://...",       release download base for the assets
+#         "assetBase": "https://...",       release download base for the assets,
+#                                           the per-commit release where the
+#                                           manifest names one
 #         "assets": {                       one entry per platform variant
 #           "<variant>": {                  e.g. an Android ABI
 #             "asset": "<file name>",       downloaded as <assetBase>/<asset>
@@ -443,13 +445,26 @@ def build_lock() -> str | None:
                 f"omitted from {LOCK_PATH}"
             )
             continue
-        if len(libraries) != 1:
+        # One group may publish several libraries: Android carries libmpv
+        # beside a packaged AAR of upstream's own Java layer, which Bask does
+        # not consume because it has its own. The one this pin is about is
+        # named after the group, and anything else is noted and left alone.
+        library = f"libmpv-{group}"
+        if library not in libraries and len(libraries) == 1:
+            ((library, _),) = libraries.items()
+        if library not in libraries:
             errors.append(
-                f"{label}: {LOCK_PATH} formatVersion 1 records exactly one "
-                f"library per group, found {sorted(libraries)}; bump the lock format"
+                f"{label}.libraries: no {library} among {sorted(libraries)}; "
+                f"{LOCK_PATH} records the library named after its group"
             )
             continue
-        ((library, entry),) = libraries.items()
+        for other in sorted(libraries):
+            if other != library:
+                notes.append(
+                    f"note: {group} also publishes {other} at this commit; "
+                    f"not consumed by Bask, omitted from {LOCK_PATH}"
+                )
+        entry = libraries[library]
         label = f"{label}.libraries.{library}"
         if not isinstance(entry, dict):
             errors.append(f"{label}: expected an object")
@@ -463,6 +478,7 @@ def build_lock() -> str | None:
             errors.append(f"{label}.prebuilt: no per-variant assets recorded")
             continue
         assets: dict[str, dict[str, str]] = {}
+        bases: set[str] = set()
         for variant in sorted(prebuilt):
             value = prebuilt[variant]
             if not isinstance(value, dict):
@@ -483,8 +499,23 @@ def build_lock() -> str | None:
                 )
                 continue
             assets[variant] = {"asset": asset, "checksum": checksum}
+            # An asset may name the release it was published to, which is the
+            # per-commit one rather than the group's rolling release. The
+            # lock carries one base per group, so every variant has to agree;
+            # consumers download <assetBase>/<asset> and nothing else.
+            where = value.get("assetBase")
+            if isinstance(where, str) and where:
+                bases.add(where)
         if len(assets) != len(prebuilt):
             continue
+        if len(bases) > 1:
+            errors.append(
+                f"{label}.prebuilt: variants are published to different "
+                f"releases {sorted(bases)}; {LOCK_PATH} carries one base per group"
+            )
+            continue
+        if bases:
+            (asset_base,) = tuple(bases)
         artifacts[group] = {"assetBase": asset_base, "assets": assets, "key": key}
 
     for group in EXPECTED_GROUPS:
