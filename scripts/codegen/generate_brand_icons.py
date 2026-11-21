@@ -143,6 +143,20 @@ def main() -> int:
             render(compose(body, width=width, height=height, scale=0.78, plate=None),
                    ROOT / "windows/msix/assets" / name, width, height, workdir)
 
+        print("Android TV banner, which is the whole app on a television's home row:")
+        # A banner carries no mask and sits on the launcher's own wallpaper,
+        # so it brings its own ground. 0.62 of the short edge leaves the mark
+        # comfortable at 320x180 without crowding the 16:9 frame — Google's
+        # guidance is that the banner reads at a distance, across a room.
+        for density, width, height in [
+            ("xhdpi", 320, 180),
+            ("xxhdpi", 480, 270),
+            ("xxxhdpi", 640, 360),
+        ]:
+            render(compose(body, width=width, height=height, scale=0.62, plate=INK),
+                   ROOT / f"android/app/src/main/res/drawable-{density}/tv_banner.png",
+                   width, height, workdir)
+
         print("tvOS layered icon and top shelf:")
         stacks = {
             "App Icon.imagestack": [("", 400, 240), ("@2x", 800, 480)],
