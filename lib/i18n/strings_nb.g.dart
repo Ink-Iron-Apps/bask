@@ -99,7 +99,7 @@ class _Translations$app$nb extends Translations$app$en {
 	final TranslationsNb _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'Bask';
+	@override String get title => 'Bask Media Player';
 }
 
 // Path: auth
@@ -2939,7 +2939,7 @@ class _Translations$services$libraryFilter$nb extends Translations$services$libr
 extension on TranslationsNb {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
-			'app.title' => 'Bask',
+			'app.title' => 'Bask Media Player',
 			'auth.signInWithPlex' => 'Logg inn med Plex',
 			'auth.showQRCode' => 'Vis QR-kode',
 			'auth.authenticate' => 'Autentiser',
