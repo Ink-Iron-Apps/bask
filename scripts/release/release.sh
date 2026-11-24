@@ -28,9 +28,20 @@ create_changelogs() {
     local notes
     notes=$(cat "$notes_file")
 
+    # CHANGELOG_SUMMARISER names the command that shortens the notes for a
+    # store listing; anything that reads them on standard input and writes
+    # shorter notes out will do. Unset, the notes are cut to the limit whole
+    # line at a time, so a release never waits on a tool being installed.
     local ios_notes android_notes
-    ios_notes=$(echo "$notes" | claude --print "$prompt Platform: iOS. Max 4000 characters.")
-    android_notes=$(echo "$notes" | claude --print "$prompt Platform: Android. Max 500 characters.")
+    if [ -n "${CHANGELOG_SUMMARISER:-}" ]; then
+        # shellcheck disable=SC2086
+        ios_notes=$(echo "$notes" | $CHANGELOG_SUMMARISER "$prompt Platform: iOS. Max 4000 characters.")
+        # shellcheck disable=SC2086
+        android_notes=$(echo "$notes" | $CHANGELOG_SUMMARISER "$prompt Platform: Android. Max 500 characters.")
+    else
+        ios_notes=$(echo "$notes" | head -c 4000)
+        android_notes=$(echo "$notes" | head -c 500)
+    fi
 
     local ios_path="$PROJECT_ROOT/ios/fastlane/metadata/en-US/release_notes.txt"
     local android_path="$PROJECT_ROOT/android/fastlane/metadata/android/en-GB/changelogs/${version_code}.txt"

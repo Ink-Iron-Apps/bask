@@ -17,7 +17,7 @@ One command releases to every channel:
 
 Phases (in order):
     preflight   validate tools, credentials, git state
-    changelog   generate per-channel release notes via the claude CLI
+    changelog   generate per-channel release notes for each store listing
     bump        bump pubspec version, commit, push (replaces release.yml)
     farm_start  trigger .github/workflows/build.yml for a tagged draft release
     play        build AAB, upload symbols, publish to Google Play production
@@ -106,7 +106,7 @@ PHASES = [
     "publish",
 ]
 
-# channel -> (claude platform description, hard character limit)
+# channel -> (platform description, hard character limit)
 CHANNEL_SPECS = {
     "appstore": ("iOS", 4000),
     "play": ("Android", 500),
@@ -456,7 +456,9 @@ def phase_preflight(ctx: Context) -> None:
         require_tool("gh", "GitHub CLI")
         run(["gh", "auth", "status"], capture=True, echo=False)
     if "changelog" in pending and not ctx.dry_run:
-        require_tool("claude", "used to generate per-channel changelogs")
+        command = summariser_command()
+        if command:
+            require_tool(command[0], f"named by {SUMMARISER_ENV}")
 
     notes = getattr(ctx.args, "notes", None)
     if "changelog" in pending:
@@ -526,6 +528,42 @@ def phase_preflight(ctx: Context) -> None:
 # Phase: changelog
 # ---------------------------------------------------------------------------
 
+# The command that shortens the changelog for a store listing is named by the
+# environment, not by this file. Anything that reads notes on standard input
+# and writes shorter notes to standard output will do, so the choice of tool
+# belongs to whoever is cutting the release.
+#
+# Unset, the notes are trimmed to fit instead. That keeps a release possible on
+# a machine with nothing extra installed, which matters because a store listing
+# must not be the thing that blocks shipping a build.
+SUMMARISER_ENV = "CHANGELOG_SUMMARISER"
+
+
+def summariser_command() -> list[str] | None:
+    raw = os.environ.get(SUMMARISER_ENV, "").strip()
+    return shlex.split(raw) if raw else None
+
+
+def trim_to_limit(notes_text: str, limit: int) -> str:
+    """Keep whole lines, in order, until the next one would not fit.
+
+    Cutting mid-sentence reads worse than stopping early, and a section header
+    left with nothing under it reads worse still, so a trailing header is
+    dropped.
+    """
+    kept: list[str] = []
+    length = 0
+    for line in notes_text.splitlines():
+        cost = len(line) + 1
+        if length + cost > limit:
+            break
+        kept.append(line)
+        length += cost
+    while kept and (not kept[-1].strip() or kept[-1].lstrip().startswith("#")):
+        kept.pop()
+    return "\n".join(kept).strip()
+
+
 CHANGELOG_PROMPT = (
     "Below is a changelog for a cross-platform Flutter app (iOS, Android, macOS, "
     "Linux, Windows). Return ONLY the entries relevant to the given platform. "
@@ -538,8 +576,15 @@ CHANGELOG_PROMPT = (
 
 
 def generate_channel_notes(notes_text: str, platform: str, limit: int) -> str:
-    # Retries ask for progressively less than the real limit: models routinely
-    # land a few characters over an exact target, so build in headroom.
+    command = summariser_command()
+    if not command:
+        text = trim_to_limit(notes_text, limit)
+        log(f"changelog for {platform!r}: trimmed to fit ({SUMMARISER_ENV} is unset)")
+        return text
+
+    # Retries ask for progressively less than the real limit: a summariser
+    # routinely lands a few characters over an exact target, so build in
+    # headroom rather than failing the release over it.
     target = limit
     previous_length = 0
     for attempt in (1, 2, 3):
@@ -551,7 +596,7 @@ def generate_channel_notes(notes_text: str, platform: str, limit: int) -> str:
                 "exceeding the limit."
             )
         result = run(
-            ["claude", "--print", prompt],
+            [*command, prompt],
             input_text=notes_text,
             capture=True,
             echo=False,
@@ -577,7 +622,8 @@ def phase_changelog(ctx: Context) -> None:
     notes_file = Path(ctx.args.notes)
     notes_text = notes_file.read_text(encoding="utf-8")
 
-    if dry_guard(ctx, f"generate channel notes from {notes_file} via claude"):
+    via = " ".join(summariser_command() or []) or "trimming"
+    if dry_guard(ctx, f"generate channel notes from {notes_file} via {via}"):
         return
 
     NOTES_DIR.mkdir(parents=True, exist_ok=True)
