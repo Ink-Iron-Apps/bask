@@ -16,9 +16,13 @@
 - Run `scripts/run_tests.sh` to run the test suite (same as `flutter test`, but scaled to your core count)
 - Test your changes thoroughly
 
-### AI-assisted contributions
+### What a pull request has to say for itself
 
-AI-assisted pull requests must state in the PR description which model(s) were used (e.g. Claude Sonnet 4.5, GPT-5, Gemini 3 Pro).
+A pull request is judged on the change, not on how it was produced. Say what
+the change does and why, and what you did to convince yourself it works — the
+tests you ran, the device you tried it on, the case you expected to break. A
+description that explains the reasoning is worth more than one that explains
+the process.
 
 ### Code Quality Checks
 

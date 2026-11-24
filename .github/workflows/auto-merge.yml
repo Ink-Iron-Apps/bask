@@ -1,9 +1,9 @@
-name: Auto-merge claude/dev
+name: Auto-merge dev
 
-# Lands work pushed to claude/dev on main and starts the release build.
+# Lands work pushed to dev on main and starts the release build.
 #
 # Nothing merges before it is verified: the same analysis and tests the release
-# runs happen here first, so a broken commit fails on claude/dev instead of
+# runs happen here first, so a broken commit fails on dev instead of
 # landing on main and failing the release afterwards.
 #
 # The merge is made with GITHUB_TOKEN, and GitHub deliberately does not fire
@@ -14,7 +14,7 @@ name: Auto-merge claude/dev
 
 on:
   push:
-    branches: [claude/dev]
+    branches: [dev]
 
 # Every step is written in bash. A Windows runner would otherwise get
 # PowerShell and fail on the first pipeline, so pin the shell rather than write
@@ -30,7 +30,7 @@ permissions:
 
 concurrency:
   # Two pushes in quick succession must not race to merge the same branch.
-  group: auto-merge-claude-dev
+  group: auto-merge-dev
   cancel-in-progress: false
 
 env:
@@ -109,7 +109,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Merge claude/dev into main
+      - name: Merge dev into main
         id: merge
         env:
           GH_TOKEN: ${{ github.token }}
@@ -127,17 +127,17 @@ jobs:
             exit 0
           fi
           if git merge-base --is-ancestor HEAD origin/main; then
-            echo "claude/dev is already contained in main; nothing to merge"
+            echo "dev is already contained in main; nothing to merge"
             echo "merged=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          number=$(gh pr list --head claude/dev --base main --state open --json number --jq '.[0].number // empty')
+          number=$(gh pr list --head dev --base main --state open --json number --jq '.[0].number // empty')
           if [ -z "$number" ]; then
             title=$(git log -1 --format=%s)
             body=$(git log --format='- %s' origin/main..HEAD)
-            gh pr create --base main --head claude/dev --title "$title" --body "$body"
-            number=$(gh pr list --head claude/dev --base main --state open --json number --jq '.[0].number')
+            gh pr create --base main --head dev --title "$title" --body "$body"
+            number=$(gh pr list --head dev --base main --state open --json number --jq '.[0].number')
           fi
           echo "merging PR #$number"
 
