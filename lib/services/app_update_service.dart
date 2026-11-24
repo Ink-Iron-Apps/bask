@@ -30,7 +30,7 @@ const _updateReadToken = String.fromEnvironment('UPDATE_READ_TOKEN');
 /// request that carries both its own credentials and ours.
 const _releasesApiBase = String.fromEnvironment(
   'UPDATE_RELEASES_REPO',
-  defaultValue: 'https://api.github.com/repos/Ink-Iron-Apps/bask',
+  defaultValue: 'https://api.github.com/repos/Ink-Iron-Apps/bask-media-player',
 );
 
 /// Whether [latest] is a higher version than [current].

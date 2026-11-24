@@ -23,7 +23,7 @@ A media client for Plex, Jellyfin and Emby on desktop, mobile and TV. Built with
 
 ## Download
 
-Bask is self-hosted. It ships from this repository's [Releases](https://github.com/Ink-Iron-Apps/bask/releases/latest) and nowhere
+Bask is self-hosted. It ships from this repository's [Releases](https://github.com/Ink-Iron-Apps/bask-media-player/releases/latest) and nowhere
 else — there is no App Store, Play Store, Amazon or Microsoft Store listing, and no Homebrew, WinGet, AUR, Nix or distribution
 package. A copy of Bask offered anywhere else did not come from here.
 
@@ -156,7 +156,7 @@ Older relays still accept explicit create/join, but failed recovery requires joi
 ### Setup
 
 ```bash
-git clone https://github.com/Ink-Iron-Apps/bask.git
+git clone https://github.com/Ink-Iron-Apps/bask-media-player.git
 cd bask
 flutter pub get
 scripts/codegen.sh
