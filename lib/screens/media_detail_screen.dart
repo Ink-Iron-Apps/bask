@@ -4433,6 +4433,21 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
   Future<bool> _handleTvDetailRailItemActivated(MediaHub hub, MediaItem item) async {
     if (_isTvDetailEpisodeHub(hub) && item.isEpisode) {
+      // The TV layout activates episodes here rather than through
+      // [_buildEpisodesList], so the Episode Action setting has to be read in
+      // both places. This one used to play unconditionally, which left the
+      // setting with no effect on the only episode surface a TV ever shows.
+      final episodeAction =
+          SettingsService.instanceOrNull?.read(SettingsService.episodeAction) ?? EpisodeAction.details;
+      if (episodeAction == EpisodeAction.details) {
+        await navigateToMediaItemDetails(
+          context,
+          item,
+          isOffline: widget.isOffline,
+          onRefresh: (source) => unawaited(_refreshItemInPlace(source)),
+        );
+        return true;
+      }
       await navigateToVideoPlayerWithRefresh(
         context,
         metadata: item,

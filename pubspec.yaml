@@ -1,7 +1,7 @@
 name: bask
 description: "A beautiful Plex and Jellyfin client for Flutter"
 publish_to: "none"
-version: 2.55.9+18
+version: 2.55.11+20
 
 environment:
   # Dart floor stays 3.12: freezed 3.x emits `final` constructor parameters,
