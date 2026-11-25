@@ -31,7 +31,7 @@ Phases (in order):
     msstore     submit the Store msixbundle via the Microsoft Store
                 Submission API (replaces the manual Partner Center upload)
     publish     flip the GitHub release out of draft; the release event updates
-                Homebrew, WinGet, and the appcast branch
+                WinGet and the appcast branch
 
 State is checkpointed to build/deploy/state.json; a failed run resumes where
 it stopped (`release` again, optionally with --only/--skip). `--dry-run`
@@ -52,12 +52,27 @@ Credentials come from .env at the repository root (same file fastlane used):
                                              Azure AD app linked to Partner Center
     MSSTORE_APP_ID                           Store application id (from the
                                              Partner Center product URL)
+    MSSTORE_PRICE_ID                         Store price tier to keep on every
+                                             submission (see the Store caveat)
 GitHub auth comes from the `gh` CLI login.
 
 Amazon caveat: the "touch capabilities" / "offline capabilities" questions are
 not exposed by the public App Submission API (verified against its OpenAPI
 spec), so the amazon phase pauses for those two checkboxes before it commits
 the edit. Everything else, including the submit, is automated.
+
+Microsoft Store caveat: the packaged submission API cannot echo back the
+priceId "Base" it reports for a base price set in Partner Center's current
+pricing UI, and a submission sent without a priceId publishes as free. The
+msstore phase therefore refuses to submit unless MSSTORE_PRICE_ID names a
+price tier the API accepts, and it verifies the tier the API stored before
+committing.
+
+Tier ids run Tier1012 - Tier1424 for this account (advanced pricing model),
+one id per row of the Partner Center conversion table in ascending order:
+Tier1012 is 0.99 USD and Tier1424 is 1999.99 USD, so 5.99 USD is Tier1062.
+Read the table at Pricing and availability -> view conversion table when the
+price changes.
 """
 
 from __future__ import annotations
@@ -69,6 +84,7 @@ import plistlib
 import re
 import shlex
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -108,7 +124,8 @@ PHASES = [
 
 # channel -> (platform description, hard character limit)
 CHANNEL_SPECS = {
-    "appstore": ("iOS", 4000),
+    # One What's New text serves both the iOS and the tvOS App Store versions.
+    "appstore": ("iOS and tvOS (Apple TV)", 4000),
     "play": ("Android", 500),
     "amazon": ("Android (Amazon Appstore: Fire TV and Fire tablets)", 4000),
 }
@@ -233,23 +250,40 @@ def resolve_phases(only: list[str] | None, skip: list[str] | None) -> list[str]:
     return selected
 
 
+# Price tiers the ingestion API echoes on GET but refuses on PUT.
+MSSTORE_UNUSABLE_PRICE_IDS = frozenset({"Base"})
 
 
+def resolve_msstore_pricing(submission: dict, price_id: str | None) -> str:
+    """Pin a cloned Store submission's base price, or refuse to submit.
 
+    The ingestion API echoes priceId "Base" for a base price set through
+    Partner Center's current pricing UI, then rejects it on PUT ("'Base' is not
+    a valid PriceId for base price"). Dropping priceId is worse: the PUT
+    defaults the submission to Free, which is how 2.19.1 published at $0.
+    Microsoft's own msstore CLI just refuses to update such products. So send a
+    real tier when one is configured, otherwise stop before anything uploads.
 
-def sanitize_msstore_pricing(submission: dict) -> None:
-    """Make a cloned Store submission's pricing acceptable to PUT.
-
-    The ingestion API echoes priceId "Base" for apps on the advanced pricing
-    model but rejects it on PUT ("'Base' is not a valid PriceId"), while
-    omitting the pricing node entirely is also an error. Dropping priceId and
-    the read-only isAdvancedPricingModel flag keeps Partner Center pricing
-    unchanged; the API re-resolves the real tier itself (verified 2.14.0).
+    isAdvancedPricingModel is read-only; it describes which tier table the
+    account has, not the price, and is dropped rather than echoed back.
     """
     pricing = submission.get("pricing")
-    if isinstance(pricing, dict):
-        pricing.pop("priceId", None)
-        pricing.pop("isAdvancedPricingModel", None)
+    if not isinstance(pricing, dict):
+        pricing = {}
+        submission["pricing"] = pricing
+    pricing.pop("isAdvancedPricingModel", None)
+
+    resolved = price_id or pricing.get("priceId")
+    if not resolved or resolved in MSSTORE_UNUSABLE_PRICE_IDS:
+        raise DeployError(
+            f"msstore: the cloned submission reports priceId {pricing.get('priceId')!r}, "
+            "which the ingestion API rejects on PUT, and submitting without one "
+            "publishes the app as free (that is how 2.19.1 shipped at $0). Set "
+            "MSSTORE_PRICE_ID in .env to the price tier this app must keep, or "
+            "upload the package in Partner Center by hand"
+        )
+    pricing["priceId"] = resolved
+    return resolved
 
 
 # ---------------------------------------------------------------------------
@@ -833,41 +867,31 @@ def _execute_google_request(request):
 
 
 def _execute_resumable_google_upload(request, label: str):
+    # next_chunk retries HTTP status failures but raises on a dropped connection.
+    # Calling it again after a raise asks the server how much it holds and
+    # resumes there, or returns the finished resource when the last chunk
+    # landed before the response was lost (Play closed the socket that way
+    # after accepting the 2.21.0 bundle).
     response = None
+    transport_failures = 0
     while response is None:
-        status, response = request.next_chunk(num_retries=5)
+        try:
+            status, response = request.next_chunk(num_retries=5)
+        except (ConnectionError, TimeoutError) as error:
+            transport_failures += 1
+            if transport_failures > 5:
+                raise
+            log(f"{label}: upload connection lost ({error!r}); resuming")
+            time.sleep(2**transport_failures)
+            continue
         if status:
             log(f"{label}: upload {status.progress():.0%}")
     return response
 
 
-def phase_play(ctx: Context) -> None:
-    package = ctx.env["SUPPLY_PACKAGE_NAME"]
-    aab = ROOT / "build/app/outputs/bundle/release/app-release.aab"
-    if dry_guard(ctx, f"build AAB, upload symbols, publish {package} to Play production"):
-        return
-
-    commit = short_sha()
-    run([
-        "flutter", "build", "appbundle",
-        "--dart-define=ENABLE_SENTRY=true",
-        f"--dart-define=GIT_COMMIT={commit}",
-        "--dart-define=SENTRY_ENVIRONMENT=play-store",
-        "--dart-define=SENTRY_DIST=play-store",
-        "--obfuscate",
-        "--split-debug-info=debug-info/android-aab",
-        "--extra-gen-snapshot-options=--save-obfuscation-map=debug-info/android-aab/obfuscation.map.json",
-    ])
-    run(
-        [str(SCRIPTS_DIR / "upload-symbols.sh"), "android-aab"],
-        env={"SENTRY_DIST": "play-store"},
-    )
-    if not aab.is_file():
-        raise DeployError(f"play: AAB not found at {aab}")
-
+def _play_publisher(ctx: Context):
     from google.oauth2 import service_account  # noqa: PLC0415
     from googleapiclient.discovery import build as gapi_build  # noqa: PLC0415
-    from googleapiclient.http import MediaFileUpload  # noqa: PLC0415
 
     if ctx.env.get("SUPPLY_JSON_KEY_DATA"):
         info = json.loads(ctx.env["SUPPLY_JSON_KEY_DATA"])
@@ -876,27 +900,98 @@ def phase_play(ctx: Context) -> None:
     credentials = service_account.Credentials.from_service_account_info(
         info, scopes=["https://www.googleapis.com/auth/androidpublisher"]
     )
-    publisher = gapi_build("androidpublisher", "v3", credentials=credentials, cache_discovery=False)
-    edits = publisher.edits()
-
-    edit_id = _execute_google_request(edits.insert(packageName=package, body={}))["id"]
-    log(f"play: created edit {edit_id}")
-    upload = edits.bundles().upload(
-        packageName=package,
-        editId=edit_id,
-        media_body=MediaFileUpload(
-            str(aab),
-            mimetype="application/octet-stream",
-            chunksize=10 * 1024 * 1024,
-            resumable=True,
-        ),
-    )
-    uploaded = _execute_resumable_google_upload(upload, "play")
-    version_code = uploaded["versionCode"]
-    if version_code != ctx.build_number:
-        raise DeployError(
-            f"play: uploaded versionCode {version_code} != expected {ctx.build_number}"
+    # build_http() takes its read timeout from the socket default, else 60 s, and
+    # Play processes a ~300 MB bundle for longer than that after the last chunk:
+    # the upload is accepted but the response read times out and the edit is lost.
+    previous_timeout = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(1800)
+    try:
+        return gapi_build(
+            "androidpublisher", "v3", credentials=credentials, cache_discovery=False
         )
+    finally:
+        socket.setdefaulttimeout(previous_timeout)
+
+
+def _play_pending_edit(ctx: Context, edits, package: str) -> str | None:
+    """The recorded edit id when it is still open and already holds this build."""
+    from googleapiclient.errors import HttpError  # noqa: PLC0415
+
+    edit_id = ctx.state.data.get("play_pending_edit_id")
+    if not edit_id:
+        return None
+    try:
+        _execute_google_request(edits.get(packageName=package, editId=edit_id))
+        bundles = _execute_google_request(
+            edits.bundles().list(packageName=package, editId=edit_id)
+        ).get("bundles", [])
+    except HttpError as error:
+        log(f"play: recorded edit {edit_id} is gone ({error.status_code}); starting over")
+        bundles = None
+    if bundles is not None and any(b.get("versionCode") == ctx.build_number for b in bundles):
+        return str(edit_id)
+    if bundles is not None:
+        log(f"play: recorded edit {edit_id} holds no versionCode {ctx.build_number}; starting over")
+    ctx.state.data.pop("play_pending_edit_id", None)
+    ctx.state.save()
+    return None
+
+
+def phase_play(ctx: Context) -> None:
+    package = ctx.env["SUPPLY_PACKAGE_NAME"]
+    aab = ROOT / "build/app/outputs/bundle/release/app-release.aab"
+    if dry_guard(ctx, f"build AAB, upload symbols, publish {package} to Play production"):
+        return
+
+    from googleapiclient.http import MediaFileUpload  # noqa: PLC0415
+
+    edits = _play_publisher(ctx).edits()
+    edit_id = _play_pending_edit(ctx, edits, package)
+    if edit_id:
+        log(f"play: resuming edit {edit_id}, which already holds versionCode {ctx.build_number}")
+        version_code = ctx.build_number
+    else:
+        commit = short_sha()
+        run([
+            "flutter", "build", "appbundle",
+            "--dart-define=ENABLE_SENTRY=true",
+            f"--dart-define=GIT_COMMIT={commit}",
+            "--dart-define=SENTRY_ENVIRONMENT=play-store",
+            "--dart-define=SENTRY_DIST=play-store",
+            "--dart-define=SUPPORTER_MODE=iap",
+            "--obfuscate",
+            "--split-debug-info=debug-info/android-aab",
+            "--extra-gen-snapshot-options=--save-obfuscation-map=debug-info/android-aab/obfuscation.map.json",
+        ])
+        run(
+            [str(SCRIPTS_DIR / "upload-symbols.sh"), "android-aab"],
+            env={"SENTRY_DIST": "play-store"},
+        )
+        if not aab.is_file():
+            raise DeployError(f"play: AAB not found at {aab}")
+
+        edit_id = _execute_google_request(edits.insert(packageName=package, body={}))["id"]
+        log(f"play: created edit {edit_id}")
+        # Recorded before the upload so a run that dies after Play accepted the
+        # bundle resumes this edit instead of rebuilding and re-uploading.
+        ctx.state.data["play_pending_edit_id"] = edit_id
+        ctx.state.save()
+        upload = edits.bundles().upload(
+            packageName=package,
+            editId=edit_id,
+            media_body=MediaFileUpload(
+                str(aab),
+                mimetype="application/octet-stream",
+                chunksize=10 * 1024 * 1024,
+                resumable=True,
+            ),
+        )
+        uploaded = _execute_resumable_google_upload(upload, "play")
+        version_code = uploaded["versionCode"]
+        if version_code != ctx.build_number:
+            raise DeployError(
+                f"play: uploaded versionCode {version_code} != expected {ctx.build_number}"
+            )
     release_notes = notes_path("play").read_text(encoding="utf-8").strip()
     _execute_google_request(
         edits.tracks().update(
@@ -944,6 +1039,8 @@ def phase_play(ctx: Context) -> None:
             "for review (Play refused automatic submission for this app's current "
             "state); open the Play Console and press 'Send for review'"
         )
+    ctx.state.data.pop("play_pending_edit_id", None)
+    ctx.state.save()
 
 
 # ---------------------------------------------------------------------------
@@ -1033,6 +1130,7 @@ def phase_amazon(ctx: Context) -> None:
             f"--dart-define=GIT_COMMIT={commit}",
             "--dart-define=SENTRY_ENVIRONMENT=amazon",
             "--dart-define=SENTRY_DIST=amazon",
+            "--dart-define=SUPPORTER_MODE=unlocked",
             "--obfuscate",
             "--split-debug-info=debug-info/android-apk",
             "--extra-gen-snapshot-options=--save-obfuscation-map=debug-info/android-apk/obfuscation.map.json",
@@ -1183,11 +1281,12 @@ def phase_ios(ctx: Context) -> None:
         f"--dart-define=GIT_COMMIT={commit}",
         "--dart-define=SENTRY_ENVIRONMENT=app-store",
         "--dart-define=SENTRY_DIST=app-store",
+        "--dart-define=SUPPORTER_MODE=iap",
         "--split-debug-info=debug-info/ios",
     ])
     run(
         [str(SCRIPTS_DIR / "upload-symbols.sh"), "ios"],
-        env={"SENTRY_DIST": "app-store", "BUGS_APPLE_ARCHIVE": "build/ios/archive/Runner.xcarchive"},
+        env={"SENTRY_DIST": "app-store", "BUGS_APPLE_ARCHIVE": "build/ios/archive/Bask.xcarchive"},
     )
     _upload_ipa(ctx, ROOT / "build/ios/ipa/Bask.ipa", "ios")
 
@@ -1198,6 +1297,12 @@ def phase_tvos(ctx: Context) -> None:
     if _asc_has_uploaded_build(ctx, "TV_OS"):
         log(f"tvos: App Store Connect already has build {ctx.build_number}; skipping upload")
         return
+    # The tvOS build reads gitignored inputs that nothing else refreshes:
+    # Generated.xcconfig (engine path, version, deployment target) and the Pods
+    # project. Prepare them the way CI does so a stale checkout cannot archive
+    # an old version or a deployment target the current Xcode rejects.
+    run([str(ROOT / "tvos/scripts/fetch_engine.sh")])
+    run([str(ROOT / "tvos/scripts/pod_install.sh")])
     archive = ROOT / "build/tvos/Runner.xcarchive"
     run([
         "xcodebuild",
@@ -1557,7 +1662,16 @@ def phase_msstore(ctx: Context) -> None:
             "minimumSystemRam": "None",
         }
     )
-    sanitize_msstore_pricing(submission)
+    try:
+        price_id = resolve_msstore_pricing(submission, ctx.env.get("MSSTORE_PRICE_ID"))
+    except DeployError:
+        api("DELETE", f"/submissions/{submission_id}")
+        log(
+            f"msstore: deleted submission {submission_id}; nothing was uploaded. "
+            f"Upload {bundle} in Partner Center and rerun with --skip msstore"
+        )
+        raise
+    log(f"msstore: base price pinned to {price_id}")
 
     upload_zip = DEPLOY_DIR / "msstore-upload.zip"
     with zipfile.ZipFile(upload_zip, "w", zipfile.ZIP_STORED) as archive:
@@ -1573,7 +1687,15 @@ def phase_msstore(ctx: Context) -> None:
     if blob.status_code >= 400:
         raise DeployError(f"msstore: blob upload failed ({blob.status_code})")
 
-    api("PUT", f"/submissions/{submission_id}", json=submission)
+    updated = api("PUT", f"/submissions/{submission_id}", json=submission).json()
+    stored_price_id = (updated.get("pricing") or {}).get("priceId")
+    if stored_price_id != price_id:
+        api("DELETE", f"/submissions/{submission_id}")
+        raise DeployError(
+            f"msstore: the API stored priceId {stored_price_id!r} instead of "
+            f"{price_id!r}; deleted submission {submission_id} instead of "
+            "committing a price change"
+        )
     api("POST", f"/submissions/{submission_id}/commit")
     log("msstore: committed; polling status")
 
@@ -1605,7 +1727,7 @@ def phase_publish(ctx: Context) -> None:
         return
     if not ctx.confirm(
         f"Publish GitHub release {ctx.tag}? "
-        "The release event will update Homebrew, WinGet, and the appcast branch."
+        "The release event will update WinGet and the appcast branch."
     ):
         log("publish: skipped; rerun with --only publish when ready")
         raise PhaseDeferred

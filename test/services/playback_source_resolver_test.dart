@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:bask/media/ids.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bask/database/app_database.dart';
@@ -9,7 +10,6 @@ import 'package:bask/media/media_backend.dart';
 
 import 'package:bask/media/media_kind.dart';
 import 'package:bask/media/media_server_client.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:bask/models/download_models.dart';
 import 'package:bask/models/transcode_quality_preset.dart';
 import 'package:bask/services/download_storage_service.dart';
@@ -54,10 +54,12 @@ class _PlaybackClient implements MediaServerClient {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('a downloaded copy plays from disk whatever the quality preset says', () async {
+  test('a downloaded copy plays from disk under a preset nobody picked for this playback', () async {
     // A preset caps what to ask the server for, and local playback asks for
-    // nothing — so a device set to 1080p used to stream a file it already
-    // had, at a cost in bandwidth and a server transcode.
+    // nothing — so a device left on its saved 1080p default used to stream a
+    // file it already had, at a cost in bandwidth and a server transcode. A
+    // quality picked in the player for this session still wins (issue #2466),
+    // which is what `downloadOutranksQuality: false` says.
     final tmpRoot = await Directory.systemTemp.createTemp('playback_resolver_test_');
     final videoFile = File('${tmpRoot.path}/movie-1.mkv');
     await videoFile.writeAsString('video');
@@ -99,6 +101,7 @@ void main() {
         qualityPreset: TranscodeQualityPreset.p1080_10mbps,
       ),
       offlineLibraryMode: false,
+      downloadOutranksQuality: true,
     );
 
     expect(context.sourceKind, PlaybackSourceKind.localFile);

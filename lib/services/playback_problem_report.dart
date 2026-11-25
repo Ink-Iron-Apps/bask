@@ -59,7 +59,7 @@ String buildPlaybackProblemReport({
         '@ ${_num(stats.videoFps)} fps',
       )
       ..writeln('Decoder: ${stats.videoDecoderName ?? 'unknown'} (hwdec ${stats.hwdecCurrent ?? 'none'})')
-      ..writeln('Output: ${stats.currentVo ?? 'unknown'}, tunneled ${stats.tunneledPlayback}')
+      ..writeln('Tunneled playback: ${stats.tunneledPlayback}')
       ..writeln('Pixel format: ${stats.pixelformat ?? 'unknown'} / hw ${stats.hwPixelformat ?? 'none'}')
       ..writeln('Colour: ${stats.colormatrix ?? '?'} ${stats.primaries ?? '?'} ${stats.gamma ?? '?'}')
       ..writeln(

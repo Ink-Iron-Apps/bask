@@ -68,6 +68,7 @@ import androidx.media3.extractor.ts.TsExtractor
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.SubtitleView
+import com.edde746.mpv.MediaCodecQuery
 import com.inknironapps.bask.AndroidRuntimeDiagnostics
 import com.inknironapps.bask.libass.media.AssHandler
 import com.inknironapps.bask.libass.media.parser.AssSubtitleParserFactory
@@ -76,7 +77,6 @@ import com.inknironapps.bask.shared.AudioFocusManager
 import com.inknironapps.bask.shared.DeviceQuirks
 import com.inknironapps.bask.shared.FlutterOverlayHelper
 import com.inknironapps.bask.shared.FrameRateManager
-import com.inknironapps.bask.shared.MediaCodecQuery
 import com.inknironapps.bask.shared.PlayerSurfaceHost
 import com.inknironapps.bask.shared.SurfacePlayerCore
 import java.util.concurrent.Executors

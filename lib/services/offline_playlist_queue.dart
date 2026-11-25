@@ -43,7 +43,6 @@ class OfflinePlaylistQueue {
   /// Returns null when nothing is playable, so callers can tell the difference
   /// between an empty result and a queue of one.
   static LocalPlayQueue? build({
-    required String id,
     required List<MediaItem> members,
     bool shuffle = false,
     String? startKey,
@@ -62,14 +61,14 @@ class OfflinePlaylistQueue {
           final start = items.removeAt(index);
           items.shuffle(random ?? Random());
           items.insert(0, start);
-          return LocalPlayQueue(id: id, items: items, currentIndex: 0, shuffled: true);
+          return LocalPlayQueue(items: items, currentIndex: 0, shuffled: true);
         }
       }
       items.shuffle(random ?? Random());
-      return LocalPlayQueue(id: id, items: items, currentIndex: 0, shuffled: true);
+      return LocalPlayQueue(items: items, currentIndex: 0, shuffled: true);
     }
 
     final startIndex = startKey == null ? 0 : items.indexWhere((item) => item.globalKey == startKey);
-    return LocalPlayQueue(id: id, items: items, currentIndex: startIndex == -1 ? 0 : startIndex, shuffled: false);
+    return LocalPlayQueue(items: items, currentIndex: startIndex == -1 ? 0 : startIndex, shuffled: false);
   }
 }

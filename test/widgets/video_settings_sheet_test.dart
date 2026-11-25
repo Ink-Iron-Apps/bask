@@ -5,22 +5,34 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/media/ids.dart';
+import 'package:bask/media/media_backend.dart';
+import 'package:bask/media/media_file_info.dart';
+import 'package:bask/media/media_item.dart';
+import 'package:bask/media/media_server_client.dart';
+import 'package:bask/models/audio_channel_limit.dart';
 import 'package:bask/mpv/models.dart';
 import 'package:bask/mpv/player/player.dart';
 import 'package:bask/mpv/player/player_native.dart';
 import 'package:bask/mpv/player/player_state.dart';
 import 'package:bask/mpv/player/player_streams.dart';
+import 'package:bask/providers/multi_server_provider.dart';
 import 'package:bask/screens/settings/subtitle_styling_screen.dart';
 import 'package:bask/services/base_shared_preferences_service.dart';
+import 'package:bask/services/multi_server_manager.dart';
 import 'package:bask/services/settings_service.dart';
 import 'package:bask/services/sleep_timer_service.dart';
 import 'package:bask/widgets/overlay_sheet.dart';
 import 'package:bask/widgets/video_controls/models/track_controls_state.dart';
 import 'package:bask/widgets/video_controls/sheets/video_settings_sheet.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 import 'package:shared_preferences_platform_interface/types.dart';
 
+import '../test_helpers/media_items.dart';
+import '../test_helpers/multi_server_fixtures.dart';
+import '../test_helpers/player_streams.dart';
 import '../test_helpers/prefs.dart';
 import '../test_helpers/theme.dart';
 
@@ -55,7 +67,7 @@ void main() {
     // throws when the block is missing entirely, so the guard fails loudly instead.
     await tester.scrollUntilVisible(find.text('Normalize Loudness'), 300, scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    expect(find.text('Downmix to Stereo'), findsOneWidget);
+    expect(find.text('Audio Channels'), findsOneWidget);
 
     expect(find.text('Audio Passthrough'), findsNothing);
   });
@@ -101,6 +113,78 @@ void main() {
     expect(appliedRates, [8.0]);
     expect(SettingsService.instance.read(SettingsService.defaultPlaybackSpeed), 8.0);
   });
+
+  testWidgets('applies a picked audio channel limit to the player and stores it', (tester) async {
+    await SettingsService.instance.write(SettingsService.downmixCenterBoost, 4);
+    await SettingsService.instance.write(SettingsService.audioDownmixNormalize, false);
+    final applied = <(AudioChannelLimit, int, bool)>[];
+    final player = _FakeSettingsPlayer(
+      onSetAudioChannelLimit: (limit, centerBoostDb, normalize) async {
+        applied.add((limit, centerBoostDb, normalize));
+      },
+    );
+    await _pumpSheetViaOverlayRoute(tester, player);
+
+    await tester.scrollUntilVisible(find.text('Audio Channels'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Audio Channels'));
+    await tester.pumpAndSettle();
+    for (final label in ['Original', 'Up to 5.1', 'Stereo']) {
+      expect(find.text(label), findsOneWidget);
+    }
+    expect(_tickOn('Original'), findsOneWidget);
+
+    await tester.tap(find.text('Up to 5.1'));
+    await tester.pumpAndSettle();
+
+    expect(applied, [(AudioChannelLimit.surround51, 4, false)]);
+    expect(SettingsService.instance.read(SettingsService.audioChannelLimit), AudioChannelLimit.surround51);
+    expect(find.byType(VideoSettingsSheet), findsNothing);
+  });
+
+  // #2744: the pick has to outlive this player, or every new video starts back
+  // on "Autoselect device". The Audio Output row is a desktop/TV control.
+  testWidgets('remembers a picked audio output for later players', (tester) async {
+    final applied = <String>[];
+    final player = _FakeSettingsPlayer(
+      state: const PlayerState(
+        audioDevices: [
+          AudioDevice(name: 'auto', description: 'Autoselect device'),
+          AudioDevice(name: 'alsa', description: 'Default (alsa)'),
+        ],
+      ),
+      onSetAudioDevice: (device) async => applied.add(device.name),
+    );
+    await _pumpSheetViaOverlayRoute(tester, player);
+
+    await tester.scrollUntilVisible(find.text('Audio Output'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Audio Output'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Default (alsa)'));
+    await tester.pumpAndSettle();
+
+    expect(applied, ['alsa']);
+    expect(SettingsService.instance.read(SettingsService.audioOutputDevice), 'alsa');
+    expect(find.byType(VideoSettingsSheet), findsNothing);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('keeps the remembered audio output when the player refuses the pick', (tester) async {
+    await SettingsService.instance.write(SettingsService.audioOutputDevice, 'pipewire');
+    final player = _FakeSettingsPlayer(
+      state: const PlayerState(
+        audioDevices: [AudioDevice(name: 'alsa', description: 'Default (alsa)')],
+      ),
+      onSetAudioDevice: (_) async => throw StateError('rejected'),
+    );
+    await _pumpSheetViaOverlayRoute(tester, player);
+
+    await tester.scrollUntilVisible(find.text('Audio Output'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Audio Output'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Default (alsa)'));
+    await tester.pumpAndSettle();
+
+    expect(SettingsService.instance.read(SettingsService.audioOutputDevice), 'pipewire');
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
   testWidgets('localizes every ASS subtitle override enum label', (tester) async {
     LocaleSettings.setLocaleSync(AppLocale.ru);
@@ -526,20 +610,31 @@ void main() {
   });
 
   group('the downmix detail rows', () {
-    testWidgets('appear only while the downmix is on', (tester) async {
+    testWidgets('appear only while the channel limit folds the mix', (tester) async {
       final player = _FakeSettingsPlayer(backend: 'mpv');
       await _pumpSheet(tester, player: player, height: 2000);
-      await tester.scrollUntilVisible(find.text('Downmix to Stereo'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(
+        find.text(t.settings.audioChannelLimit),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
       expect(find.text('Center Channel Boost'), findsNothing);
 
-      await tester.tap(find.text('Downmix to Stereo'));
+      // Written rather than picked: the picker's "done" step closes a nested
+      // page, which needs the overlay host the richer harness installs.
+      await SettingsService.instance.write(SettingsService.audioChannelLimit, AudioChannelLimit.stereo);
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.text('Center Channel Boost'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(find.text('Center Channel Boost'), findsOneWidget);
       expect(find.text('Normalize on Downmix'), findsOneWidget);
       // 0 dB is swresample's own default, so the row has to say the boost is
-      // off rather than imply the downmix is already helping dialogue.
+      // off rather than imply the fold is already helping dialogue.
       expect(
         find.descendant(
           of: find.ancestor(of: find.text('Center Channel Boost'), matching: find.byType(ListTile)).first,
@@ -550,8 +645,13 @@ void main() {
     });
 
     testWidgets('push a new center boost to the player and store it', (tester) async {
-      await SettingsService.instance.write(SettingsService.audioDownmix, true);
-      final player = _FakeSettingsPlayer(backend: 'mpv');
+      await SettingsService.instance.write(SettingsService.audioChannelLimit, AudioChannelLimit.stereo);
+      final limits = <(AudioChannelLimit, int, bool)>[];
+      final player = _FakeSettingsPlayer(
+        backend: 'mpv',
+        onSetAudioChannelLimit: (limit, centerBoostDb, normalize) async =>
+            limits.add((limit, centerBoostDb, normalize)),
+      );
       await _pumpSheet(tester, player: player, height: 2000);
       await tester.scrollUntilVisible(
         find.text('Center Channel Boost'),
@@ -565,10 +665,64 @@ void main() {
       await tester.tap(find.text('+6 dB'));
       await tester.pumpAndSettle();
 
-      // The downmix stays on through the change: the boost is an argument to
-      // it, not a separate switch.
-      expect(player.downmixCalls, [(enabled: true, centerBoostDb: 6, normalize: true)]);
+      // The channel limit stays on through the change: the boost is an
+      // argument to it, not a separate switch.
+      expect(limits, [(AudioChannelLimit.stereo, 6, true)]);
       expect(SettingsService.instance.read(SettingsService.downmixCenterBoost), 6);
+    });
+  });
+
+  group('File Info', () {
+    testWidgets('opens the playing item as a nested page whose back button returns to the menu', (tester) async {
+      final client = _FileInfoClient();
+      final item = testMediaItem(title: 'Inception', serverId: client.serverId.value);
+      await _pumpFileInfoSheet(tester, client, TrackControlsState(metadata: item, serverId: item.serverId));
+
+      await _scrollMenuToEnd(tester);
+      await tester.tap(find.text(t.mediaMenu.fileInfo));
+      await tester.pump();
+      expect(client.requested, [item]);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      client.response.complete(const MediaFileInfo(versions: [MediaFileVersion(container: 'mkv')]));
+      await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('Inception'), findsOneWidget);
+      expect(find.text('MKV'), findsWidgets);
+
+      await tester.tapAt(tester.getCenter(find.byIcon(Symbols.arrow_back_rounded)));
+      await tester.pumpAndSettle();
+      expect(find.text('MKV'), findsNothing);
+      await _scrollMenuToEnd(tester);
+      expect(find.text(t.videoSettings.performanceOverlay), findsOneWidget);
+    });
+
+    testWidgets('says so when the server has no file info for the item', (tester) async {
+      final client = _FileInfoClient();
+      final item = testMediaItem(serverId: client.serverId.value);
+      await _pumpFileInfoSheet(tester, client, TrackControlsState(metadata: item, serverId: item.serverId));
+
+      await _scrollMenuToEnd(tester);
+      await tester.tap(find.text(t.mediaMenu.fileInfo));
+      client.response.complete(null);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text(t.messages.fileInfoNotAvailable), findsOneWidget);
+    });
+
+    testWidgets('is not offered for live TV, which has no file', (tester) async {
+      final client = _FileInfoClient();
+      final item = testMediaItem(serverId: client.serverId.value);
+      await _pumpFileInfoSheet(
+        tester,
+        client,
+        TrackControlsState(metadata: item, serverId: item.serverId, isLive: true),
+      );
+
+      await _scrollMenuToEnd(tester);
+      expect(find.text(t.videoSettings.performanceOverlay), findsOneWidget);
+      expect(find.text(t.mediaMenu.fileInfo), findsNothing);
     });
   });
 }
@@ -578,6 +732,81 @@ Finder _tickOn(String label) => find.descendant(
   of: find.ancestor(of: find.text(label), matching: find.byType(ListTile)).first,
   matching: find.byIcon(Symbols.check_rounded),
 );
+
+/// Opens the settings sheet through a real host, as the player does, with
+/// [client] registered for the playing item's server.
+Future<void> _pumpFileInfoSheet(WidgetTester tester, _FileInfoClient client, TrackControlsState state) async {
+  // Tall enough that the lazy menu builds every row. This fork's sheet carries
+  // the two audio-filter rows and their detail pickers on top of upstream's,
+  // so the menu is longer than 4000px.
+  tester.view.physicalSize = const Size(1200, 6000);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  final manager = MultiServerManager()..debugRegisterClientForTesting(client);
+  final provider = testMultiServerProvider(manager);
+  addTearDown(() {
+    provider.dispose();
+    manager.dispose();
+  });
+
+  await tester.pumpWidget(
+    ChangeNotifierProvider<MultiServerProvider>.value(
+      value: provider,
+      child: MaterialApp(
+        theme: ThemeData(extensions: const [testMonoTokensAnimated]),
+        home: OverlaySheetHost(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => unawaited(
+                  OverlaySheetController.of(context).show<void>(
+                    builder: (_) => VideoSettingsSheet(player: _FakeSettingsPlayer(), trackControlsState: state),
+                  ),
+                ),
+                child: const Text('Open settings'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text('Open settings'));
+  await tester.pumpAndSettle();
+}
+
+/// Brings a menu row into view before asserting on it.
+///
+/// The sheet caps its own height, so the rows below the fold are not built
+/// until they are scrolled to — and this fork's menu is long enough that the
+/// last few always start below it.
+Future<void> _scrollMenuToEnd(WidgetTester tester) async {
+  await tester.drag(find.byType(ListView).last, const Offset(0, -4000));
+  await tester.pumpAndSettle();
+}
+
+class _FileInfoClient implements MediaServerClient {
+  final response = Completer<MediaFileInfo?>();
+  final requested = <MediaItem>[];
+
+  @override
+  ServerId get serverId => ServerId('file-info-server');
+
+  @override
+  MediaBackend get backend => MediaBackend.plex;
+
+  @override
+  Future<MediaFileInfo?> getFileInfo(MediaItem item) {
+    requested.add(item);
+    return response.future;
+  }
+
+  @override
+  void close() {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 Future<void> _pumpSheet(
   WidgetTester tester, {
@@ -643,6 +872,9 @@ class _FakeSettingsPlayer implements Player {
   _FakeSettingsPlayer({
     this.onSetProperty,
     this.onSetRate,
+    this.onSetAudioChannelLimit,
+    this.onSetAudioDevice,
+    this.state = const PlayerState(),
     this.hdrOutputSupported = false,
     this.backend = 'exoplayer',
     this.passthroughActive = false,
@@ -662,7 +894,6 @@ class _FakeSettingsPlayer implements Player {
   final String backend;
   final bool passthroughActive;
   final dialogueBoostCalls = <({bool enabled, int gainDb})>[];
-  final downmixCalls = <({bool enabled, int centerBoostDb, bool normalize})>[];
 
   @override
   bool get audioPassthroughActive => passthroughActive;
@@ -676,11 +907,6 @@ class _FakeSettingsPlayer implements Player {
     if (enabled && refuseDialogueBoost) unavailableFilters.add(Player.dialogueBoostFeature);
   }
 
-  @override
-  Future<void> setAudioDownmix({required bool enabled, required int centerBoostDb, required bool normalize}) async {
-    downmixCalls.add((enabled: enabled, centerBoostDb: centerBoostDb, normalize: normalize));
-  }
-
   /// The plane's notice that the output under the window changed, which is the
   /// only thing that moves [isHdrOutputSupported]'s answer while a sheet is up.
   /// Closed by [dispose], which the tests that emit on it call through
@@ -692,30 +918,12 @@ class _FakeSettingsPlayer implements Player {
     await hdrOutputChanged.close();
   }
 
-  late final PlayerStreams _streams = PlayerStreams(
-    playing: const Stream<bool>.empty(),
-    completed: const Stream<bool>.empty(),
-    buffering: const Stream<bool>.empty(),
-    position: const Stream<Duration>.empty(),
-    duration: const Stream<Duration>.empty(),
-    seekable: const Stream<bool>.empty(),
-    buffer: const Stream<Duration>.empty(),
-    volume: const Stream<double>.empty(),
-    rate: const Stream<double>.empty(),
-    tracks: const Stream<Tracks>.empty(),
-    track: const Stream<TrackSelection>.empty(),
-    log: const Stream<PlayerLog>.empty(),
-    error: const Stream<PlayerError>.empty(),
-    audioDevice: const Stream<AudioDevice>.empty(),
-    audioDevices: const Stream<List<AudioDevice>>.empty(),
-    bufferRanges: const Stream<List<BufferRange>>.empty(),
-    playbackRestart: const Stream<void>.empty(),
-    backendSwitched: const Stream<void>.empty(),
-    hdrOutputChanged: hdrOutputChanged.stream,
-  );
+  late final PlayerStreams _streams = emptyPlayerStreams(hdrOutputChanged: hdrOutputChanged.stream);
 
   final Future<void> Function(String name, String value)? onSetProperty;
   final Future<void> Function(double rate)? onSetRate;
+  final Future<void> Function(AudioChannelLimit limit, int centerBoostDb, bool normalize)? onSetAudioChannelLimit;
+  final Future<void> Function(AudioDevice device)? onSetAudioDevice;
   bool hdrOutputSupported;
   int probeCount = 0;
 
@@ -726,7 +934,7 @@ class _FakeSettingsPlayer implements Player {
   }
 
   @override
-  PlayerState get state => const PlayerState();
+  final PlayerState state;
 
   @override
   PlayerStreams get streams => _streams;
@@ -745,6 +953,16 @@ class _FakeSettingsPlayer implements Player {
   @override
   Future<void> setRate(double rate) {
     return onSetRate?.call(rate) ?? Future<void>.value();
+  }
+
+  @override
+  Future<void> setAudioChannelLimit(AudioChannelLimit limit, {required int centerBoostDb, required bool normalize}) {
+    return onSetAudioChannelLimit?.call(limit, centerBoostDb, normalize) ?? Future<void>.value();
+  }
+
+  @override
+  Future<void> setAudioDevice(AudioDevice device) {
+    return onSetAudioDevice?.call(device) ?? Future<void>.value();
   }
 
   @override

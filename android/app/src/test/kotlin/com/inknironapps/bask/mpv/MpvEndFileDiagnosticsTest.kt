@@ -1,10 +1,9 @@
 package com.inknironapps.bask.mpv
 
-import com.inknironapps.bask.libmpv.EndFileReason
-import com.inknironapps.bask.libmpv.LogLevel
-import com.inknironapps.bask.libmpv.LogMessage
-import com.inknironapps.bask.libmpv.MpvError
-import com.inknironapps.bask.libmpv.MpvEvent
+import com.edde746.mpv.EndFileReason
+import com.edde746.mpv.LogLevel
+import com.edde746.mpv.MpvError
+import com.edde746.mpv.MpvEvent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -15,17 +14,36 @@ class MpvEndFileDiagnosticsTest {
   @Test
   fun `an AO failure ends the file with the audio-output cause and the last error line`() {
     diagnostics.onStartFile()
-    diagnostics.onLogMessage(LogMessage("cplayer", LogLevel.Error, "Audio output stopped responding; stopping playback."))
+    diagnostics.onLogMessage(MpvEvent.LogMessage("cplayer", LogLevel.Error, "Audio output stopped responding; stopping playback."))
     val data = diagnostics.onEndFile(MpvEvent.EndFile(EndFileReason.Error, 7, MpvError.AoInitFailed))
     assertEquals(
       mapOf(
         "sourceId" to 7L,
         "reason" to EndFileReason.Error.id,
+        "error" to MpvError.AoInitFailed.code,
         "message" to "Audio output stopped responding; stopping playback.",
         "cause" to MpvEndFileDiagnostics.CAUSE_AUDIO_OUTPUT_FAILED
       ),
       data
     )
+  }
+
+  @Test
+  fun `a failure nothing logged at error level falls back to mpv's own error text`() {
+    diagnostics.onStartFile()
+    val data = diagnostics.onEndFile(MpvEvent.EndFile(EndFileReason.Error, 7, MpvError.LoadingFailed, "loading failed"))
+    assertEquals(
+      mapOf("sourceId" to 7L, "reason" to EndFileReason.Error.id, "error" to MpvError.LoadingFailed.code, "message" to "loading failed"),
+      data
+    )
+  }
+
+  @Test
+  fun `the latched error line is preferred over mpv's error text`() {
+    diagnostics.onStartFile()
+    diagnostics.onLogMessage(MpvEvent.LogMessage("ffmpeg", LogLevel.Error, "Invalid data found when processing input"))
+    val data = diagnostics.onEndFile(MpvEvent.EndFile(EndFileReason.Error, 7, MpvError.LoadingFailed, "loading failed"))
+    assertEquals("Invalid data found when processing input", data?.get("message"))
   }
 
   @Test
@@ -36,7 +54,7 @@ class MpvEndFileDiagnosticsTest {
 
   @Test
   fun `a clean stop never reports a cause even after an earlier error line`() {
-    diagnostics.onLogMessage(LogMessage("ao/audiotrack", LogLevel.Error, "AudioTrack.write failed with -32"))
+    diagnostics.onLogMessage(MpvEvent.LogMessage("ao/audiotrack", LogLevel.Error, "AudioTrack.write failed with -32"))
     val data = diagnostics.onEndFile(MpvEvent.EndFile(EndFileReason.Stop, 7))
     assertEquals(mapOf("sourceId" to 7L, "reason" to EndFileReason.Stop.id), data)
   }

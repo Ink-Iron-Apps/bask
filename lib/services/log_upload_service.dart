@@ -37,7 +37,7 @@ String get logUploadEndpoint => LogUploadEndpoint.value;
 /// only ever fail is worse than no control.
 bool get logUploadConfigured => logUploadEndpoint.isNotEmpty;
 
-/// Relay `/logs` accepts 1 MiB. The in-memory buffer intentionally remains
+/// The server's `/logs` accepts 1 MiB. The in-memory buffer intentionally remains
 /// larger for local viewing and copying; uploads retain the device header and
 /// newest log lines within this transport contract.
 const int maxLogUploadBytes = 1 * 1024 * 1024;

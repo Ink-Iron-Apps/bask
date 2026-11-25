@@ -4,8 +4,6 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +12,7 @@ import '../database/app_database.dart';
 import '../models/shader_preset.dart';
 import '../i18n/strings.g.dart';
 import '../utils/app_logger.dart';
+import '../utils/app_version.dart';
 import '../utils/formatters.dart';
 import '../utils/platform_detector.dart';
 import 'file_picker_service.dart';
@@ -140,8 +139,12 @@ class SettingsExportService {
     for (final pref in SettingsService.portablePrefs) pref.key: _PreferencePolicy(_storageTypeFor(pref)),
   };
 
-  static final Map<String, String> _obsoleteSkipMarkerKeys = {
-    for (final entry in SettingsService.legacySkipMarkerPrefs.entries) entry.value.key: entry.key,
+  static final Map<String, Pref<Object?>> _portablePrefsByKey = {
+    for (final pref in SettingsService.portablePrefs) pref.key: pref,
+  };
+
+  static final Map<String, String> _obsoleteLegacyBoolKeys = {
+    for (final entry in SettingsService.legacyBoolPrefs.entries) entry.value.key: entry.key,
   };
 
   static const Set<String> _jsonStringListPreferenceKeys = {'hidden_libraries', 'library_order'};
@@ -231,7 +234,7 @@ class SettingsExportService {
 
     // A snapshot must preserve cold-upgrade choices without mutating storage
     // or depending on which typed preferences have been read by the UI.
-    for (final entry in SettingsService.legacySkipMarkerPrefs.entries) {
+    for (final entry in SettingsService.legacyBoolPrefs.entries) {
       final pref = entry.value;
       if (prefs.containsKey(pref.key)) continue;
       final legacyValue = prefs.get(entry.key);
@@ -308,7 +311,7 @@ class SettingsExportService {
 
       var type = rawEntry['type'];
       var value = rawEntry['value'];
-      final legacyPref = SettingsService.legacySkipMarkerPrefs[baseKey];
+      final legacyPref = SettingsService.legacyBoolPrefs[baseKey];
       if (version == 1 && legacyPref != null) {
         if (rawPrefs.containsKey(legacyPref.key)) {
           skipped++;
@@ -344,13 +347,17 @@ class SettingsExportService {
         skipped++;
         continue;
       }
+      if (_portablePrefsByKey[baseKey] case final pref? when !_isAcceptedValue(pref, value)) {
+        skipped++;
+        continue;
+      }
 
       pending.add(
         _PendingImport(
           targetKey: policy.userScoped ? '$userPrefix$baseKey' : baseKey,
           type: type,
           value: value,
-          obsoleteKey: _obsoleteSkipMarkerKeys[baseKey],
+          obsoleteKey: _obsoleteLegacyBoolKeys[baseKey],
         ),
       );
     }
@@ -388,6 +395,25 @@ class SettingsExportService {
     }
 
     return ImportResult(keysImported: pending.length, keysSkipped: skipped);
+  }
+
+  /// Whether [stored], already checked against the storage type, is a value
+  /// the settings screens could have saved for [pref]: an enum name this build
+  /// knows, JSON its codec reads, a number in range, and so on — the checks
+  /// every typed write runs. A value that fails them would otherwise be stored
+  /// as is and either read back as the default or reach the feature unchecked.
+  static bool _isAcceptedValue(Pref<Object?> pref, Object? stored) {
+    try {
+      final value = switch (pref) {
+        EnumPref() || NullableEnumPref() || StringListPref() || DoublePref() => pref.fromJson(stored),
+        JsonPref() => pref.fromJson(jsonDecode(stored! as String)),
+        _ => stored,
+      };
+      SettingsService.validateEditableValue(pref, value);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   static bool _isValidValue(String type, Object? value) {
@@ -467,14 +493,7 @@ class SettingsExportService {
   static Future<String?> exportToFile({AppDatabase? database, String? credentialPassphrase}) async {
     final prefs = (await SettingsService.getInstance()).prefs;
     final storage = await StorageService.getInstance();
-    String appVersion = '';
-    try {
-      final info = await PackageInfo.fromPlatform();
-      appVersion = info.version;
-    } on PlatformException {
-      // Best-effort metadata; platforms without PackageInfo still export.
-    }
-
+    final appVersion = (await AppVersion.current()).versionOrUnknown;
     final exportMap = buildExportMap(prefs, currentUserUuid: storage.activeUserScope(), appVersion: appVersion);
     if (database != null && credentialPassphrase != null && credentialPassphrase.isNotEmpty) {
       final payload = await CredentialPortability.gather(database: database, prefs: prefs);

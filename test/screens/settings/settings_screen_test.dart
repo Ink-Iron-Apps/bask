@@ -334,7 +334,7 @@ void main() {
 
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.text(t.settings.watchTogetherRelayInvalid), findsOneWidget);
-    expect(SettingsService.instance.read(SettingsService.customRelayUrl), isNull);
+    expect(SettingsService.instance.read(SettingsService.watchPartyRelayUrl), isNull);
   });
 
   testWidgets('relay dialog saves and reopens the canonical base', (tester) async {
@@ -348,7 +348,7 @@ void main() {
     await _pumpUi(tester);
 
     expect(find.byType(AlertDialog), findsNothing);
-    expect(SettingsService.instance.read(SettingsService.customRelayUrl), 'http://relay.example.test:8080/prefix');
+    expect(SettingsService.instance.read(SettingsService.watchPartyRelayUrl), 'http://relay.example.test:8080/prefix');
 
     await tester.tap(find.text(t.settings.watchTogetherRelay));
     await _pumpUi(tester);
@@ -725,7 +725,7 @@ Future<_SettingsHarness> _pumpSettingsScreen(
           ChangeNotifierProvider<AccountPreferencesController>.value(value: accountPreferences),
         ],
         child: MaterialApp(
-          theme: monoTheme(dark: true).copyWith(platform: TargetPlatform.android),
+          theme: monoTheme(MonoPalette.dark).copyWith(platform: TargetPlatform.android),
           home: pushSettingsRoute
               ? Builder(
                   builder: (context) => Scaffold(

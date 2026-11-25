@@ -121,8 +121,8 @@ void main() {
         StartupBootstrap<int>(
           initialize: () => completion.future,
           buildApp: (_, value) => MaterialApp(home: Text('ready $value')),
-          lightTheme: monoTheme(dark: false),
-          darkTheme: monoTheme(dark: true),
+          lightTheme: monoTheme(MonoPalette.light),
+          darkTheme: monoTheme(MonoPalette.dark),
           transparentWhileLoading: true,
         ),
       ),
@@ -143,13 +143,13 @@ void main() {
         StartupBootstrap<int>(
           initialize: () => completion.future,
           buildApp: (_, value) => MaterialApp(home: Text('ready $value')),
-          lightTheme: monoTheme(dark: false),
-          darkTheme: monoTheme(dark: true),
+          lightTheme: monoTheme(MonoPalette.light),
+          darkTheme: monoTheme(MonoPalette.dark),
         ),
       ),
     );
 
-    expect(await windowPixel(tester), monoTheme(dark: false).scaffoldBackgroundColor.toARGB32());
+    expect(await windowPixel(tester), monoTheme(MonoPalette.light).scaffoldBackgroundColor.toARGB32());
 
     completion.complete(1);
     await tester.pump();
@@ -161,8 +161,8 @@ void main() {
         StartupBootstrap<int>(
           initialize: () async => throw StateError('database unavailable'),
           buildApp: (_, value) => MaterialApp(home: Text('ready $value')),
-          lightTheme: monoTheme(dark: false),
-          darkTheme: monoTheme(dark: true),
+          lightTheme: monoTheme(MonoPalette.light),
+          darkTheme: monoTheme(MonoPalette.dark),
           transparentWhileLoading: true,
         ),
       ),
@@ -170,7 +170,7 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(startupBootstrapFailureKey), findsOneWidget);
-    expect(await windowPixel(tester), monoTheme(dark: false).scaffoldBackgroundColor.toARGB32());
+    expect(await windowPixel(tester), monoTheme(MonoPalette.light).scaffoldBackgroundColor.toARGB32());
   });
 
   testWidgets('adopts the persisted theme instead of platform brightness', (tester) async {
@@ -186,16 +186,17 @@ void main() {
       StartupBootstrap<int>(
         initialize: () => completion.future,
         buildApp: (_, value) => MaterialApp(home: Text('ready $value')),
-        lightTheme: monoTheme(dark: false),
-        darkTheme: monoTheme(dark: true),
+        lightTheme: monoTheme(MonoPalette.light),
+        darkTheme: monoTheme(MonoPalette.dark),
         resolveTheme: () => resolved.future,
       ),
     );
 
-    expect(bootstrapTheme(tester).scaffoldBackgroundColor, monoTheme(dark: false).scaffoldBackgroundColor);
+    expect(bootstrapTheme(tester).scaffoldBackgroundColor, monoTheme(MonoPalette.light).scaffoldBackgroundColor);
 
     resolved.complete((
       themeMode: ThemeProvider.materialThemeModeFor(settings.ThemeMode.oled),
+      lightTheme: ThemeProvider.lightThemeFor(settings.ThemeMode.oled),
       darkTheme: ThemeProvider.darkThemeFor(settings.ThemeMode.oled),
     ));
     await tester.pump();

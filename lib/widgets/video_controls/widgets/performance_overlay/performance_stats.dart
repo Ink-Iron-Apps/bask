@@ -1,6 +1,34 @@
 import '../../../../i18n/strings.g.dart';
 import '../../../../utils/codec_utils.dart';
 
+/// What decodes a Dolby Vision file on Android mpv. Wire ids match the
+/// mpv-android library's `com.edde746.mpv.GpuVoPolicy.DvRoute`.
+enum DvRoute {
+  /// The Dolby Vision MediaCodec decoder takes the stream as it is.
+  dvDecoder('dv-decoder'),
+
+  /// Profile 7 converted to 8.1 for a profile 8 Dolby Vision decoder.
+  dvDecoderP81('dv-decoder-p81'),
+
+  /// No Dolby Vision decoder: the base layer decodes on its own.
+  baseLayer('base-layer'),
+
+  /// Software decode on gpu-next, which applies the RPU itself.
+  reshaped('reshaped');
+
+  const DvRoute(this.id);
+
+  final String id;
+
+  /// Null for an absent or unknown id, which hides the row.
+  static DvRoute? fromId(String? id) {
+    for (final route in values) {
+      if (route.id == id) return route;
+    }
+    return null;
+  }
+}
+
 /// Data model for video player performance statistics.
 ///
 /// Contains metrics queried from the video player (MPV or ExoPlayer)
@@ -13,10 +41,6 @@ class PerformanceStats {
   final int? videoHeight;
   final double? videoFps;
   final String? hwdecCurrent;
-
-  /// mpv's active video output (`current-vo`), when the producing platform
-  /// knows it. Null on the ExoPlayer path and wherever it is not polled.
-  final String? currentVo;
   final int? videoBitrate;
   final String? aspectName;
   final int? rotate;
@@ -68,6 +92,9 @@ class PerformanceStats {
   final int? dvSourceProfile;
   final String? dvPlaybackPath;
 
+  /// Android mpv's Dolby Vision route; ExoPlayer reports [dvPlaybackPath] instead.
+  final DvRoute? dvRoute;
+
   final int? appMemoryBytes;
   final double? uiFps;
 
@@ -78,7 +105,6 @@ class PerformanceStats {
     this.videoHeight,
     this.videoFps,
     this.hwdecCurrent,
-    this.currentVo,
     this.videoBitrate,
     this.aspectName,
     this.rotate,
@@ -119,63 +145,14 @@ class PerformanceStats {
     this.dvAvgSampleProcessingUs,
     this.dvSourceProfile,
     this.dvPlaybackPath,
+    this.dvRoute,
     this.appMemoryBytes,
     this.uiFps,
   });
 
   /// Creates an empty stats object (used as initial state).
-  const PerformanceStats.empty()
-    : playerType = 'unknown',
-      videoCodec = null,
-      videoWidth = null,
-      videoHeight = null,
-      videoFps = null,
-      hwdecCurrent = null,
-      currentVo = null,
-      videoBitrate = null,
-      aspectName = null,
-      rotate = null,
-      videoDecoderName = null,
-      pixelformat = null,
-      hwPixelformat = null,
-      colormatrix = null,
-      primaries = null,
-      gamma = null,
-      maxLuma = null,
-      minLuma = null,
-      maxCll = null,
-      maxFall = null,
-      audioCodec = null,
-      audioSamplerate = null,
-      audioChannels = null,
-      audioBitrate = null,
-      audioDecoderName = null,
-      audioPassthroughFormat = null,
-      tunneledPlayback = false,
-      tunnelingStatus = null,
-      actualFps = null,
-      avsyncChange = null,
-      displayFps = null,
-      frameDropCount = null,
-      decoderFrameDropCount = null,
-      cacheUsed = null,
-      cacheLimit = null,
-      cacheSpeed = null,
-      cacheDuration = null,
-      bufferTargetBytes = null,
-      bufferMaxMs = null,
-      dvConversionActive = false,
-      dvConversionMode = '',
-      dvConvertedRpus = null,
-      dvRpuConversionFailures = null,
-      dvAvgRpuConversionUs = null,
-      dvAvgSampleProcessingUs = null,
-      dvSourceProfile = null,
-      dvPlaybackPath = null,
-      appMemoryBytes = null,
-      uiFps = null;
+  const PerformanceStats.empty() : this();
 
-  /// Format video resolution as "WxH".
   String get resolution {
     if (videoWidth == null || videoHeight == null) return t.common.notAvailable;
     return '${videoWidth}x$videoHeight';
@@ -199,14 +176,12 @@ class PerformanceStats {
     return '$duration / ${targetBufferMb}MB';
   }
 
-  /// Format audio bitrate in kbps.
   String get audioBitrateFormatted {
     if (audioBitrate == null || audioBitrate == 0) return t.common.notAvailable;
     final kbps = audioBitrate! / 1000;
     return '${kbps.toStringAsFixed(0)} kbps';
   }
 
-  /// Format audio sample rate in kHz.
   String get sampleRateFormatted {
     if (audioSamplerate == null) return t.common.notAvailable;
     final khz = audioSamplerate! / 1000;
@@ -243,7 +218,6 @@ class PerformanceStats {
     return '${ms > 0 ? '+' : ''}${ms}ms';
   }
 
-  /// Format cache used in MB.
   String get cacheUsedFormatted {
     if (cacheUsed == null) return t.common.notAvailable;
     final mb = cacheUsed! / (1024 * 1024);
@@ -275,31 +249,20 @@ class PerformanceStats {
     return '${cacheDuration!.toStringAsFixed(1)}s';
   }
 
-  /// Format display FPS.
   String get displayFpsFormatted {
     if (displayFps == null) return t.common.notAvailable;
     return displayFps!.toStringAsFixed(0);
   }
 
-  /// Whether the active video output can count dropped frames at all.
-  ///
-  /// mpv's `frame-drop-count` only increments for a frame admitted after its
-  /// own end time (`vo.c`), and the fork's `vo_mediacodec` declares
-  /// `prepare_frame`, which makes mpv hand frames over a full preparation
-  /// lead *before* their pts - so that condition is never true in normal
-  /// playback. `decoder-frame-drop-count` is the `--framedrop=decoder` path,
-  /// which Bask does not enable. A GL vo (`gpu`/`gpu-next`, every software
-  /// Android session and every desktop/Apple one) has no `prepare_frame` and
-  /// mpv's counters do work there.
-  bool get _voCountsDroppedFrames => currentVo != 'mediacodec';
-
   /// Format dropped frames count.
   ///
-  /// Reported unavailable rather than as a confident `0` where the vo cannot
-  /// produce the number: an overlay showing no drops through visible stutter
-  /// sent reporters and maintainers looking in the wrong place.
+  /// `frame-drop-count` is the video output's own count. A GL vo drops a
+  /// frame that is a whole duration late on admission; the fork's
+  /// `vo_mediacodec` never drops, so it counts what the viewer sees instead:
+  /// a frame that was due before it reached the codec, and a timed frame the
+  /// display confirms it showed off its vsync (Android 13+ feedback).
+  /// `decoder-frame-drop-count` is the `--framedrop=decoder` path.
   String get droppedFramesFormatted {
-    if (!_voCountsDroppedFrames) return t.common.notAvailable;
     final total = (frameDropCount ?? 0) + (decoderFrameDropCount ?? 0);
     return total.toString();
   }
@@ -338,23 +301,32 @@ class PerformanceStats {
   /// Raw video decoder name (e.g. c2.qti.video.decoder.hevc).
   String get videoDecoderRaw => videoDecoderName ?? t.common.notAvailable;
 
-  /// Format audio decoder name for display.
   String get audioDecoderFormatted => audioDecoderName ?? t.common.notAvailable;
 
-  /// Format tunneled playback status with reason.
   String get tunneledPlaybackFormatted =>
       tunnelingStatus ?? (tunneledPlayback ? t.performanceOverlay.tunnelingActive : t.common.off);
 
-  /// Format DV conversion mode for display.
   String get dvConversionFormatted => dvConversionMode == 'DV81' ? '7→8.1' : '7→HEVC';
 
-  /// Format Dolby Vision source profile.
   String get dvSourceProfileFormatted => dvSourceProfile == null ? t.common.notAvailable : 'P$dvSourceProfile';
 
-  /// Format Dolby Vision playback path.
-  String get dvPlaybackPathFormatted => dvPlaybackPath ?? t.common.notAvailable;
+  /// Format Dolby Vision playback path. mpv's base layer is named by the
+  /// transfer it decodes to, so a P8.1 fallback reads as HDR10 (#2534).
+  String get dvPlaybackPathFormatted => switch (dvRoute) {
+    DvRoute.dvDecoder => t.performanceOverlay.dvRouteDecoder,
+    DvRoute.dvDecoderP81 => t.performanceOverlay.dvRouteDecoderP81,
+    DvRoute.reshaped => t.performanceOverlay.dvRouteReshaped,
+    DvRoute.baseLayer => switch (gamma) {
+      'pq' => t.performanceOverlay.dvRouteBaseLayerHdr10,
+      'hlg' => t.performanceOverlay.dvRouteBaseLayerHlg,
+      null || '' || 'auto' => t.performanceOverlay.dvRouteBaseLayer,
+      _ => t.performanceOverlay.dvRouteBaseLayerSdr,
+    },
+    null => dvPlaybackPath ?? t.common.notAvailable,
+  };
 
-  /// Format DV RPU conversion totals.
+  bool get hasDvPlaybackPath => dvRoute != null || dvPlaybackPath != null;
+
   String get dvRpuCountFormatted {
     final converted = dvConvertedRpus ?? 0;
     final failures = dvRpuConversionFailures ?? 0;
@@ -442,7 +414,6 @@ class PerformanceStats {
     return audioBitrate != null && audioBitrate! > 0;
   }
 
-  /// Format player type for display.
   String get playerTypeFormatted {
     return switch (playerType.toLowerCase()) {
       'mpv' => 'MPV',

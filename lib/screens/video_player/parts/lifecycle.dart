@@ -67,9 +67,17 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
       return;
     }
 
-    // Suppress Watch Together heartbeats while backgrounded so App Nap
-    // doesn't cause stale position broadcasts that make guests loop.
-    _watchTogetherProvider?.setBackgrounded(true);
+    final isTv = PlatformDetector.isTV();
+    final isAutomotive = PlatformDetector.isAutomotive();
+    final shouldPauseForBackground = shouldPauseVideoForBackground(
+      isHandheld: PlatformDetector.isMobile(context),
+      isTv: isTv,
+      isAutomotive: isAutomotive,
+    );
+
+    // A Watch Together room stops waiting for a player the background pauses.
+    // A covered desktop window keeps playing, so its player stays in the room.
+    if (shouldPauseForBackground) _watchTogetherProvider?.setBackgrounded(true);
 
     final currentPlayer = player;
     if (currentPlayer == null || !_isPlayerInitialized) {
@@ -77,7 +85,6 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
       return;
     }
 
-    final isTv = PlatformDetector.isTV();
     if (widget.isLive && shouldStopLiveSessionForTvBackground(isTv: isTv, policy: _live.session?.backgroundPolicy)) {
       _stopLiveSessionForTvBackground();
 
@@ -95,13 +102,6 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
       _recordLifecycleState('hidden', action: 'live_stopped_exit_on_resume');
       return;
     }
-
-    final isAutomotive = PlatformDetector.isAutomotive();
-    final shouldPauseForBackground = shouldPauseVideoForBackground(
-      isHandheld: PlatformDetector.isHandheld(context),
-      isTv: isTv,
-      isAutomotive: isAutomotive,
-    );
 
     // Pause first so Android MPV does not keep decoding against a transient
     // background surface while the app is locking or hiding.
@@ -221,6 +221,33 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
     _recordLifecycleState('resumed', action: 'complete');
   }
 
+  /// The resume profile picker now covers this player
+  /// ([VideoPlayerScreenState.holdActivePlaybackUntil]); the play-intent gates
+  /// stay shut until [until] completes. Whatever already started is paused:
+  /// the app's return races the picker's push, and the resume restore, a
+  /// room's catch-up or a native resume may have got there first. A room stops
+  /// waiting for this user meanwhile instead of pausing for everyone, and
+  /// catches the player up once a profile is chosen.
+  void _holdPlaybackForProfileSelection(Future<void> until) {
+    if (!mounted || _shuttingDown) return;
+    _profileSelectionHolds++;
+    _recordLifecycleState('profile_selection', action: 'hold');
+    _watchTogetherProvider?.setAwaitingProfileSelection(true);
+    final currentPlayer = player;
+    if (currentPlayer != null && (currentPlayer.state.playing || _playbackIntentShouldPlay)) {
+      _dispatchPlaybackIntent(_pauseWithPlaybackIntent(currentPlayer), source: 'Profile selection');
+    }
+    unawaited(
+      until.catchError((Object _) {}).whenComplete(() {
+        if (!mounted) return;
+        _profileSelectionHolds--;
+        if (_playbackHeldForProfileSelection) return;
+        _recordLifecycleState('profile_selection', action: 'released');
+        _watchTogetherProvider?.setAwaitingProfileSelection(false);
+      }),
+    );
+  }
+
   /// Arm the grace timer that releases the native AV pipeline if the app
   /// stays backgrounded (Android TV only). Returns whether it was armed.
   bool _armTvBackgroundPlayerSuspendTimer() {
@@ -277,6 +304,11 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
       subtitleTrack: currentPlayer.state.track.subtitle,
       secondarySubtitleTrack: currentPlayer.state.track.secondarySubtitle,
     );
+    _tvSuspendedMetadata = _currentMetadata;
+    // A Play Next countdown only holds while the app counts as backgrounded;
+    // returning before the restore runs would let it advance over a released
+    // player. The restore puts it back once the item has reopened.
+    _episode.autoPlayTimer?.cancel();
     // Stop the heartbeat timer first: its paused tick also pings any Plex
     // transcode session, which would keep that alive past the stop report.
     // Start the stopped report before releasing the native stream — the same
@@ -291,6 +323,8 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
       _recordLifecycleState('hidden', action: 'tv_background_suspend');
     } catch (e) {
       _tvSuspend.clear();
+      _tvSuspendedMetadata = null;
+      if (_episode.showPlayNextDialog && _episode.autoPlayCountdown.value > 0) _startAutoPlayTimer();
       // The player still holds its native state, so re-arm reporting: the
       // next paused heartbeat re-opens a server session at the same position
       // and the pause stays resumable in place.
@@ -300,6 +334,16 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
       _progressTracker?.startTracking();
       appLogger.w('TV background suspend failed; player left paused', error: e);
       return;
+    }
+    // stop() releases the pipeline but leaves the display mode; a parked TV
+    // must hand the panel back to the launcher's mode, as dispose does. The
+    // restore reload re-runs the frame-rate startup plan for the next open.
+    if (mounted && !_shuttingDown && player == currentPlayer && !currentPlayer.disposed) {
+      try {
+        await currentPlayer.clearVideoFrameRate();
+      } catch (e) {
+        appLogger.w('TV background suspend: failed to clear the display mode', error: e);
+      }
     }
     await stoppedReport;
     if (!(_progressTracker?.stoppedReportDelivered ?? true)) {
@@ -337,9 +381,22 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
   /// position must remain intact across backgrounding.
   Future<void> _restorePlayerAfterTvBackgroundSuspend() async {
     final restore = _tvSuspend.consumeForRestore();
+    final suspendedMetadata = _tvSuspendedMetadata;
+    _tvSuspendedMetadata = null;
 
     final currentPlayer = player;
     if (!mounted || _shuttingDown || currentPlayer == null || !_isPlayerInitialized) return;
+    if (suspendedMetadata == null || suspendedMetadata.globalKey != _currentMetadata.globalKey) {
+      // The viewer moved to another item while the suspend was settling; that
+      // item's own open already replaced the released stream.
+      _recordLifecycleState('resumed', action: 'tv_background_suspend_restore_skipped_item_changed');
+      return;
+    }
+
+    // The countdown holds while backgrounded, so a suspend can land with the
+    // Play Next prompt up. The reload below clears the prompt; without it the
+    // finished episode parks at its last frame with nothing to advance it.
+    final playNextCountdown = _episode.showPlayNextDialog ? _episode.autoPlayCountdown.value : null;
 
     _recordLifecycleState('resumed', action: 'tv_background_suspend_reload');
     final outcome = await _reloadMediaInPlace(
@@ -350,12 +407,20 @@ extension _VideoPlayerLifecycleMethods on VideoPlayerScreenState {
       preservedSubtitleTrack: SubtitlePreference.trackOrNull(restore.subtitleTrack),
       preservedSecondarySubtitleTrack: SubtitlePreference.trackOrNull(restore.secondarySubtitleTrack),
       startPaused: true,
+      // A failure raises the failure view below instead: a snackbar would sit
+      // over a player whose pipeline the suspend already released.
+      showErrorUi: false,
       reason: 'TV background suspend restore',
     );
-    if (outcome == MediaReloadOutcome.rejected) {
+    if (outcome == MediaReloadOutcome.opened) {
+      if (playNextCountdown != null) await _restorePlayNextPrompt(countdown: playNextCountdown);
+    } else if (outcome == MediaReloadOutcome.rejected) {
       appLogger.w('TV background suspend restore: in-place reload rejected');
     } else if (outcome == MediaReloadOutcome.failed) {
       appLogger.w('TV background suspend restore: in-place reload failed');
+      // The rollback kept the suspended session, which stop() left with
+      // nothing to play; Retry re-runs the open from the playhead.
+      if (mounted && _playbackFailureMessage == null) _presentPlaybackFailure(t.messages.playbackFailed);
     }
   }
 }

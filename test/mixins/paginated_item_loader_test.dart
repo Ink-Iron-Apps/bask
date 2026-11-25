@@ -225,6 +225,59 @@ void main() {
       }
     });
 
+    testWidgets('a count that runs ahead of the served items ends at the last served item', (tester) async {
+      late _PaginatedProbeState state;
+      const served = 30;
+      await tester.pumpWidget(
+        _PaginatedProbe(
+          onState: (s) => state = s,
+          // Claims 50 items, serves 30 (a library mid-scan).
+          fetcher: (start, size, abort) async =>
+              _result(start: start, size: (served - start).clamp(0, size), totalSize: 50),
+        ),
+      );
+
+      await state.loadInitialPage(10);
+      await tester.pump();
+
+      await state.ensureRangeLoaded(10, 10);
+      for (var i = 0; i < 10; i++) {
+        await tester.pump();
+      }
+      final settledFetches = state.fetchCalls;
+      for (var i = 0; i < 10; i++) {
+        await tester.pump();
+      }
+
+      expect(state.totalSize, served);
+      expect(state.loadedItems.length, served);
+      expect(state.fetchCalls, settledFetches, reason: 'no request may repeat once the end is known');
+    });
+
+    testWidgets('a skeleton past a short page asks only for the part still missing', (tester) async {
+      late _PaginatedProbeState state;
+      const served = 90;
+      await tester.pumpWidget(
+        _PaginatedProbe(
+          onState: (s) => state = s,
+          fetcher: (start, size, abort) async =>
+              _result(start: start, size: (served - start).clamp(0, size), totalSize: 100),
+        ),
+      );
+
+      await state.loadInitialPage(10);
+      state.ensureIndexLoaded(95, pageSize: 50);
+      await tester.pumpAndSettle();
+      expect(state.loadedItems.containsKey(95), isFalse);
+
+      // The skeleton at 95 rebuilds and asks again.
+      state.ensureIndexLoaded(95, pageSize: 50);
+      await tester.pumpAndSettle();
+
+      expect(state.fetchArgs.skip(1), [(start: 50, size: 50), (start: 90, size: 10)]);
+      expect(state.totalSize, served);
+    });
+
     testWidgets('ensureIndexLoaded fetches the page containing the requested index', (tester) async {
       late _PaginatedProbeState state;
       await tester.pumpWidget(
@@ -245,6 +298,62 @@ void main() {
       final pageFetch = state.fetchArgs.last;
       expect(pageFetch.start, 200);
       expect(state.loadedItems.containsKey(350), isTrue);
+    });
+
+    testWidgets('prefetchAhead look-behind fetches the page ending at the gap', (tester) async {
+      late _PaginatedProbeState state;
+      await tester.pumpWidget(
+        _PaginatedProbe(
+          onState: (s) => state = s,
+          fetcher: (start, size, abort) async => _result(start: start, size: size, totalSize: 1000),
+        ),
+      );
+
+      await state.loadInitialPage(10);
+      state.ensureIndexLoaded(500, pageSize: 100);
+      await tester.pumpAndSettle();
+      expect(state.loadedItems.containsKey(499), isFalse);
+
+      // Everything ahead of the viewport at 500 is loaded, so the look-behind
+      // runs: its gap ends at 499, and the page must cover the items above.
+      state.prefetchAhead(500, 20, pageSize: 100);
+      await tester.pumpAndSettle();
+
+      expect(state.fetchArgs.last, (start: 400, size: 100));
+      expect(state.loadedItems.containsKey(400), isTrue);
+      expect(state.loadedItems.containsKey(499), isTrue);
+    });
+
+    testWidgets('a fallback total pages by full pages, not one-item tails', (tester) async {
+      late _PaginatedProbeState state;
+      // A backend that reports no count: each page claims one past itself
+      // while it comes back full (fallbackPageTotal).
+      const serverItems = 450;
+      await tester.pumpWidget(
+        _PaginatedProbe(
+          onState: (s) => state = s,
+          fetcher: (start, size, abort) async {
+            final count = (serverItems - start).clamp(0, size);
+            return LibraryPage<MediaItem>(
+              items: List<MediaItem>.generate(count, (i) => _meta(start + i)),
+              totalCount: fallbackPageTotal(offset: start, itemCount: count, requestedSize: size),
+              offset: start,
+            );
+          },
+        ),
+      );
+
+      await state.loadInitialPage(200);
+      expect(state.totalSize, 201);
+
+      state.ensureIndexLoaded(200, pageSize: 200);
+      await tester.pumpAndSettle();
+      state.ensureIndexLoaded(400, pageSize: 200);
+      await tester.pumpAndSettle();
+
+      expect(state.fetchArgs, [(start: 0, size: 200), (start: 200, size: 200), (start: 400, size: 200)]);
+      expect(state.totalSize, serverItems);
+      expect(state.loadedItems.length, serverItems);
     });
 
     testWidgets('failed fetch schedules a retry and the retry eventually succeeds', (tester) async {

@@ -14,6 +14,9 @@ protocol MpvPluginShared: AnyObject, MpvPlayerDelegate {
 
   func setPlayerVisible(_ visible: Bool, restoreOnWindowVisible: Bool)
   func updatePlayerFrame()
+  /// Viewer zoom as a transform on the display layer: mpv's `video-zoom`
+  /// would push every frame through vo_avfoundation's Core Image path.
+  func setPlayerVideoZoom(_ scale: Double)
 
   /// Invoked after the `pause` property is applied via setProperty so each
   /// platform can sync its PiP/idle bookkeeping (iOS: invalidate the PiP
@@ -50,15 +53,19 @@ extension MpvPluginShared {
         }
         result(nil)
       case .failure(let error):
-        let lifecycleUnavailable = error is MpvLifecycleUnavailableError
+        if error is MpvLifecycleUnavailableError {
+          result(
+            FlutterError(
+              code: "NOT_INITIALIZED", message: "MPV player is not initialized", details: nil))
+          return
+        }
+        // The mpv error string is the only thing that tells a rejected option
+        // apart from a cancelled write; the property name says which write.
         result(
           FlutterError(
-            code: lifecycleUnavailable ? "NOT_INITIALIZED" : "SET_PROPERTY_FAILED",
-            message:
-              lifecycleUnavailable
-              ? "MPV player is not initialized"
-              : "MPV rejected or cancelled the property write",
-            details: nil))
+            code: "SET_PROPERTY_FAILED",
+            message: "MPV rejected or cancelled the property write '\(name)': \(error.localizedDescription)",
+            details: name))
       }
     }
   }
@@ -150,6 +157,23 @@ extension MpvPluginShared {
     }
   }
 
+  func handleSetVideoZoom(call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let rawScale = (call.arguments as? [String: Any])?["scale"]
+    let scale: Double?
+    switch rawScale {
+    case let value as Double: scale = value
+    case let value as NSNumber: scale = value.doubleValue
+    case let value as String: scale = Double(value)
+    default: scale = nil
+    }
+    guard let scale else {
+      result(FlutterError(code: "INVALID_ARGS", message: "setVideoZoom requires scale", details: nil))
+      return
+    }
+    setPlayerVideoZoom(scale)
+    result(nil)
+  }
+
   func handleSetLogLevel(call: FlutterMethodCall, result: @escaping FlutterResult) {
     guard let args = call.arguments as? [String: Any],
       let level = args["level"] as? String
@@ -157,6 +181,9 @@ extension MpvPluginShared {
       result(FlutterError(code: "INVALID_ARGS", message: "Missing 'level'", details: nil))
       return
     }
+    // The same switch drives mpv's own verbosity and the Swift-side traces, so
+    // enabling "Debug Logging" in the app opens both.
+    MpvLog.isDebugEnabled = MpvLog.isVerbose(level)
     coreBase?.setLogLevel(level)
     result(nil)
   }

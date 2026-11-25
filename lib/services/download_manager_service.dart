@@ -3123,7 +3123,7 @@ class DownloadManagerService {
       await _transitionStatus(
         globalKey,
         DownloadStatus.failed,
-        errorMessage: t.downloads.errorPostProcessing(error: e),
+        errorMessage: t.downloads.errorPostProcessing(reason: '$e'),
       );
       await _database.removeFromQueue(globalKey);
     } finally {

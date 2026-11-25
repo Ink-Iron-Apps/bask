@@ -39,62 +39,65 @@ class TranslationsPt extends Translations with BaseTranslations<AppLocale, Trans
 	TranslationsPt $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsPt(meta: meta ?? this.$meta);
 
 	// Translations
-	@override late final _Translations$app$pt app = _Translations$app$pt._(_root);
-	@override late final _Translations$auth$pt auth = _Translations$auth$pt._(_root);
-	@override late final _Translations$common$pt common = _Translations$common$pt._(_root);
-	@override late final _Translations$screens$pt screens = _Translations$screens$pt._(_root);
-	@override late final _Translations$update$pt update = _Translations$update$pt._(_root);
-	@override late final _Translations$settings$pt settings = _Translations$settings$pt._(_root);
-	@override late final _Translations$search$pt search = _Translations$search$pt._(_root);
-	@override late final _Translations$hotkeys$pt hotkeys = _Translations$hotkeys$pt._(_root);
-	@override late final _Translations$fileInfo$pt fileInfo = _Translations$fileInfo$pt._(_root);
-	@override late final _Translations$mediaMenu$pt mediaMenu = _Translations$mediaMenu$pt._(_root);
-	@override late final _Translations$rateSheet$pt rateSheet = _Translations$rateSheet$pt._(_root);
-	@override late final _Translations$accessibility$pt accessibility = _Translations$accessibility$pt._(_root);
-	@override late final _Translations$tooltips$pt tooltips = _Translations$tooltips$pt._(_root);
-	@override late final _Translations$audioTracks$pt audioTracks = _Translations$audioTracks$pt._(_root);
-	@override late final _Translations$videoControls$pt videoControls = _Translations$videoControls$pt._(_root);
-	@override late final _Translations$messages$pt messages = _Translations$messages$pt._(_root);
-	@override late final _Translations$subtitlingStyling$pt subtitlingStyling = _Translations$subtitlingStyling$pt._(_root);
-	@override late final _Translations$mpvConfig$pt mpvConfig = _Translations$mpvConfig$pt._(_root);
-	@override late final _Translations$dialog$pt dialog = _Translations$dialog$pt._(_root);
-	@override late final _Translations$profiles$pt profiles = _Translations$profiles$pt._(_root);
-	@override late final _Translations$connections$pt connections = _Translations$connections$pt._(_root);
-	@override late final _Translations$accountPreferences$pt accountPreferences = _Translations$accountPreferences$pt._(_root);
-	@override late final _Translations$discover$pt discover = _Translations$discover$pt._(_root);
-	@override late final _Translations$errors$pt errors = _Translations$errors$pt._(_root);
-	@override late final _Translations$libraries$pt libraries = _Translations$libraries$pt._(_root);
-	@override late final _Translations$about$pt about = _Translations$about$pt._(_root);
-	@override late final _Translations$serverSelection$pt serverSelection = _Translations$serverSelection$pt._(_root);
-	@override late final _Translations$hubDetail$pt hubDetail = _Translations$hubDetail$pt._(_root);
-	@override late final _Translations$logs$pt logs = _Translations$logs$pt._(_root);
-	@override late final _Translations$startup$pt startup = _Translations$startup$pt._(_root);
-	@override late final _Translations$licenses$pt licenses = _Translations$licenses$pt._(_root);
-	@override late final _Translations$navigation$pt navigation = _Translations$navigation$pt._(_root);
-	@override late final _Translations$explore$pt explore = _Translations$explore$pt._(_root);
-	@override late final _Translations$liveTv$pt liveTv = _Translations$liveTv$pt._(_root);
-	@override late final _Translations$collections$pt collections = _Translations$collections$pt._(_root);
-	@override late final _Translations$playlists$pt playlists = _Translations$playlists$pt._(_root);
-	@override late final _Translations$music$pt music = _Translations$music$pt._(_root);
-	@override late final _Translations$watchTogether$pt watchTogether = _Translations$watchTogether$pt._(_root);
-	@override late final _Translations$downloads$pt downloads = _Translations$downloads$pt._(_root);
-	@override late final _Translations$shaders$pt shaders = _Translations$shaders$pt._(_root);
-	@override late final _Translations$companionRemote$pt companionRemote = _Translations$companionRemote$pt._(_root);
-	@override late final _Translations$videoSettings$pt videoSettings = _Translations$videoSettings$pt._(_root);
-	@override late final _Translations$performanceOverlay$pt performanceOverlay = _Translations$performanceOverlay$pt._(_root);
-	@override late final _Translations$externalPlayer$pt externalPlayer = _Translations$externalPlayer$pt._(_root);
-	@override late final _Translations$metadataEdit$pt metadataEdit = _Translations$metadataEdit$pt._(_root);
-	@override late final _Translations$matchScreen$pt matchScreen = _Translations$matchScreen$pt._(_root);
-	@override late final _Translations$serverTasks$pt serverTasks = _Translations$serverTasks$pt._(_root);
-	@override late final _Translations$trakt$pt trakt = _Translations$trakt$pt._(_root);
-	@override late final _Translations$seerr$pt seerr = _Translations$seerr$pt._(_root);
-	@override late final _Translations$services$pt services = _Translations$services$pt._(_root);
-	@override late final _Translations$addServer$pt addServer = _Translations$addServer$pt._(_root);
+	@override late final Translations$app$pt app = Translations$app$pt.internal(_root);
+	@override late final Translations$appIcon$pt appIcon = Translations$appIcon$pt.internal(_root);
+	@override late final Translations$auth$pt auth = Translations$auth$pt.internal(_root);
+	@override late final Translations$common$pt common = Translations$common$pt.internal(_root);
+	@override late final Translations$screens$pt screens = Translations$screens$pt.internal(_root);
+	@override late final Translations$update$pt update = Translations$update$pt.internal(_root);
+	@override late final Translations$supporter$pt supporter = Translations$supporter$pt.internal(_root);
+	@override late final Translations$settings$pt settings = Translations$settings$pt.internal(_root);
+	@override late final Translations$themeEditor$pt themeEditor = Translations$themeEditor$pt.internal(_root);
+	@override late final Translations$search$pt search = Translations$search$pt.internal(_root);
+	@override late final Translations$hotkeys$pt hotkeys = Translations$hotkeys$pt.internal(_root);
+	@override late final Translations$fileInfo$pt fileInfo = Translations$fileInfo$pt.internal(_root);
+	@override late final Translations$mediaMenu$pt mediaMenu = Translations$mediaMenu$pt.internal(_root);
+	@override late final Translations$rateSheet$pt rateSheet = Translations$rateSheet$pt.internal(_root);
+	@override late final Translations$accessibility$pt accessibility = Translations$accessibility$pt.internal(_root);
+	@override late final Translations$tooltips$pt tooltips = Translations$tooltips$pt.internal(_root);
+	@override late final Translations$audioTracks$pt audioTracks = Translations$audioTracks$pt.internal(_root);
+	@override late final Translations$videoControls$pt videoControls = Translations$videoControls$pt.internal(_root);
+	@override late final Translations$messages$pt messages = Translations$messages$pt.internal(_root);
+	@override late final Translations$subtitlingStyling$pt subtitlingStyling = Translations$subtitlingStyling$pt.internal(_root);
+	@override late final Translations$mpvConfig$pt mpvConfig = Translations$mpvConfig$pt.internal(_root);
+	@override late final Translations$dialog$pt dialog = Translations$dialog$pt.internal(_root);
+	@override late final Translations$profiles$pt profiles = Translations$profiles$pt.internal(_root);
+	@override late final Translations$connections$pt connections = Translations$connections$pt.internal(_root);
+	@override late final Translations$accountPreferences$pt accountPreferences = Translations$accountPreferences$pt.internal(_root);
+	@override late final Translations$discover$pt discover = Translations$discover$pt.internal(_root);
+	@override late final Translations$errors$pt errors = Translations$errors$pt.internal(_root);
+	@override late final Translations$libraries$pt libraries = Translations$libraries$pt.internal(_root);
+	@override late final Translations$about$pt about = Translations$about$pt.internal(_root);
+	@override late final Translations$serverSelection$pt serverSelection = Translations$serverSelection$pt.internal(_root);
+	@override late final Translations$hubDetail$pt hubDetail = Translations$hubDetail$pt.internal(_root);
+	@override late final Translations$logs$pt logs = Translations$logs$pt.internal(_root);
+	@override late final Translations$startup$pt startup = Translations$startup$pt.internal(_root);
+	@override late final Translations$licenses$pt licenses = Translations$licenses$pt.internal(_root);
+	@override late final Translations$navigation$pt navigation = Translations$navigation$pt.internal(_root);
+	@override late final Translations$explore$pt explore = Translations$explore$pt.internal(_root);
+	@override late final Translations$liveTv$pt liveTv = Translations$liveTv$pt.internal(_root);
+	@override late final Translations$collections$pt collections = Translations$collections$pt.internal(_root);
+	@override late final Translations$playlists$pt playlists = Translations$playlists$pt.internal(_root);
+	@override late final Translations$music$pt music = Translations$music$pt.internal(_root);
+	@override late final Translations$watchTogether$pt watchTogether = Translations$watchTogether$pt.internal(_root);
+	@override late final Translations$downloads$pt downloads = Translations$downloads$pt.internal(_root);
+	@override late final Translations$shaders$pt shaders = Translations$shaders$pt.internal(_root);
+	@override late final Translations$companionRemote$pt companionRemote = Translations$companionRemote$pt.internal(_root);
+	@override late final Translations$videoSettings$pt videoSettings = Translations$videoSettings$pt.internal(_root);
+	@override late final Translations$performanceOverlay$pt performanceOverlay = Translations$performanceOverlay$pt.internal(_root);
+	@override late final Translations$externalPlayer$pt externalPlayer = Translations$externalPlayer$pt.internal(_root);
+	@override late final Translations$metadataEdit$pt metadataEdit = Translations$metadataEdit$pt.internal(_root);
+	@override late final Translations$matchScreen$pt matchScreen = Translations$matchScreen$pt.internal(_root);
+	@override late final Translations$serverTasks$pt serverTasks = Translations$serverTasks$pt.internal(_root);
+	@override late final Translations$trakt$pt trakt = Translations$trakt$pt.internal(_root);
+	@override late final Translations$seerr$pt seerr = Translations$seerr$pt.internal(_root);
+	@override late final Translations$services$pt services = Translations$services$pt.internal(_root);
+	@override late final Translations$addServer$pt addServer = Translations$addServer$pt.internal(_root);
 }
 
 // Path: app
-class _Translations$app$pt extends Translations$app$en {
-	_Translations$app$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$app$pt extends Translations$app$en {
+	Translations$app$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -102,9 +105,27 @@ class _Translations$app$pt extends Translations$app$en {
 	@override String get title => 'Bask Media Player';
 }
 
+// Path: appIcon
+class Translations$appIcon$pt extends Translations$appIcon$en {
+	Translations$appIcon$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Ícone do app';
+	@override String get defaultIcon => 'Padrão';
+	@override String get current => 'Ícone atual';
+	@override String get locked => 'Incluído no Pacote de temas e ícones';
+	@override String get lockedHint => 'Os ícones alternativos estão incluídos no Pacote de temas e ícones.';
+	@override String get changeFailed => 'Não foi possível alterar o ícone do app';
+	@override String get launcherHint => 'O novo ícone aparece na tela inicial assim que você sair do Bask.';
+	@override String get tvLauncherHint => 'O novo banner aparece assim que você sair do Bask. O Android TV pode continuar mostrando o antigo até a TV ser reiniciada.';
+	@override late final Translations$appIcon$names$pt names = Translations$appIcon$names$pt.internal(_root);
+}
+
 // Path: auth
-class _Translations$auth$pt extends Translations$auth$en {
-	_Translations$auth$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$auth$pt extends Translations$auth$en {
+	Translations$auth$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -129,8 +150,8 @@ class _Translations$auth$pt extends Translations$auth$en {
 }
 
 // Path: common
-class _Translations$common$pt extends Translations$common$en {
-	_Translations$common$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$common$pt extends Translations$common$en {
+	Translations$common$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -181,16 +202,16 @@ class _Translations$common$pt extends Translations$common$en {
 	@override String get fullscreen => 'Tela cheia';
 	@override String get exitFullscreen => 'Sair da tela cheia';
 	@override String get pressBackAgainToExit => 'Pressione voltar novamente para sair';
-	@override late final _Translations$common$ratingSource$pt ratingSource = _Translations$common$ratingSource$pt._(_root);
+	@override late final Translations$common$ratingSource$pt ratingSource = Translations$common$ratingSource$pt.internal(_root);
 	@override String get notAvailable => 'N/D';
 	@override String get url => 'URL';
 	@override String get letterKeys => 'ABC';
-	@override late final _Translations$common$mediaKind$pt mediaKind = _Translations$common$mediaKind$pt._(_root);
+	@override late final Translations$common$mediaKind$pt mediaKind = Translations$common$mediaKind$pt.internal(_root);
 }
 
 // Path: screens
-class _Translations$screens$pt extends Translations$screens$en {
-	_Translations$screens$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$screens$pt extends Translations$screens$en {
+	Translations$screens$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -203,8 +224,8 @@ class _Translations$screens$pt extends Translations$screens$en {
 }
 
 // Path: update
-class _Translations$update$pt extends Translations$update$en {
-	_Translations$update$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$update$pt extends Translations$update$en {
+	Translations$update$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -218,9 +239,36 @@ class _Translations$update$pt extends Translations$update$en {
 	@override String get checkFailed => 'Falha ao verificar atualizações';
 }
 
+// Path: supporter
+class Translations$supporter$pt extends Translations$supporter$en {
+	Translations$supporter$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Pacote de temas e ícones';
+	@override String get intro => 'Uma compra única e opcional que adiciona extras visuais:';
+	@override String get presetThemes => 'Temas predefinidos';
+	@override String get presetThemesDescription => 'Brasa, Geleira, Floresta, Ameixa e Papel';
+	@override String get customTheme => 'Tema personalizado';
+	@override String get customThemeDescription => 'Escolha você mesmo cada cor';
+	@override String get appIcons => 'Ícones do app';
+	@override String get appIconsDescription => 'Escolha um ícone alternativo do Bask';
+	@override String buy({required Object price}) => 'Comprar por ${price}';
+	@override String get loadingPrice => 'Carregando preço...';
+	@override String get restore => 'Restaurar compras';
+	@override String get pending => 'Sua compra está aguardando pagamento ou aprovação. Os extras serão desbloqueados assim que a loja concluí-la.';
+	@override String get thankYouTitle => 'Obrigado pela sua compra';
+	@override String get thankYouBody => 'O Pacote de temas e ícones está desbloqueado.';
+	@override String get tileSubtitle => 'Desbloqueie temas e ícones do app com uma compra única';
+	@override String get tileSubtitleThemesOnly => 'Desbloqueie temas com uma compra única';
+	@override String get tileUnlocked => 'Desbloqueado — obrigado pela sua compra';
+	@override late final Translations$supporter$errors$pt errors = Translations$supporter$errors$pt.internal(_root);
+}
+
 // Path: settings
-class _Translations$settings$pt extends Translations$settings$en {
-	_Translations$settings$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$settings$pt extends Translations$settings$en {
+	Translations$settings$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -248,6 +296,11 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get lightTheme => 'Claro';
 	@override String get darkTheme => 'Escuro';
 	@override String get oledTheme => 'OLED';
+	@override String get emberTheme => 'Brasa';
+	@override String get glacierTheme => 'Geleira';
+	@override String get forestTheme => 'Floresta';
+	@override String get plumTheme => 'Ameixa';
+	@override String get paperTheme => 'Papel';
 	@override String get libraryDensity => 'Densidade da Biblioteca';
 	@override String get displayScale => 'Escala de exibição';
 	@override String get compact => 'Compacto';
@@ -278,6 +331,8 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get alwaysKeepSidebarOpenDescription => 'A barra lateral fica expandida e a área de conteúdo se ajusta';
 	@override String get showUnwatchedCount => 'Mostrar Contagem de Não Assistidos';
 	@override String get showUnwatchedCountDescription => 'Exibir contagem de episódios não assistidos em séries e temporadas';
+	@override String get showWatchedIndicators => 'Mostrar Indicadores de Assistidos';
+	@override String get showWatchedIndicatorsDescription => 'Exibir uma marca de verificação em filmes, séries e episódios assistidos';
 	@override String get showEpisodeNumberOnCards => 'Mostrar Número do Episódio nos Cards';
 	@override String get showEpisodeNumberOnCardsDescription => 'Mostrar temporada e episódio nos cartões de episódio';
 	@override String get tvFullCardLayout => 'Cartões TV completos';
@@ -305,6 +360,11 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get defaultQualityTitle => 'Qualidade padrão';
 	@override String get cellularQualityTitle => 'Qualidade padrão nos dados móveis';
 	@override String get cellularQualitySameAsDefault => 'Igual à qualidade padrão';
+	@override String get directPlayCoveredQuality => 'Reproduzir Vídeos Menores na Qualidade Original';
+	@override String get directPlayCoveredQualityDescription => 'Reproduzir diretamente os vídeos que já estão dentro do limite de qualidade em vez de transcodificá-los';
+	@override String get videoCodecs => 'Codecs de vídeo';
+	@override String get videoCodecsDescription => 'Codecs desmarcados são transcodificados pelo servidor';
+	@override String get videoCodecsAlwaysAccepted => 'Sempre aceito';
 	@override String get musicQualityTitle => 'Qualidade da música';
 	@override String get subtitleStyling => 'Estilo de Legendas';
 	@override String get subtitleStylingDescription => 'Personalizar aparência das legendas';
@@ -316,6 +376,7 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String minutesUnit({required Object minutes}) => '${minutes} minutos';
 	@override String get rememberTrackSelections => 'Lembrar seleção de faixas por série/filme';
 	@override String get rememberTrackSelectionsDescription => 'Lembrar escolhas de áudio e legendas por título';
+	@override String get rememberTrackSelectionsBackendRule => 'O Plex salva cada escolha no servidor por arquivo; o Jellyfin também ativa a opção Lembrar seleções da conta; o Emby não é compatível';
 	@override String get followServerTrackSelections => 'Usar a seleção de faixas do servidor por episódio';
 	@override String get followServerTrackSelectionsDescription => 'Ao mudar de episódio, aplicar o áudio e as legendas selecionados no servidor em vez de manter a escolha atual';
 	@override String get resumeMusicOnLaunch => 'Lembrar a sessão de música';
@@ -335,7 +396,7 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get videoPlayerNavigation => 'Navegação do reprodutor de vídeo';
 	@override String get videoPlayerNavigationDescription => 'Usar as teclas de seta para navegar pelos controles do reprodutor';
 	@override String get watchTogetherRelay => 'Servidor de retransmissão do Assistir Juntos';
-	@override String get watchTogetherRelayDescription => 'Definir um servidor de retransmissão personalizado. Todos devem usar o mesmo servidor.';
+	@override String get watchTogetherRelayDescription => 'Servidores de retransmissão públicos do Open Watch Party, a menos que você defina o seu';
 	@override String get watchTogetherRelayHint => 'https://minha-retransmissao.exemplo.com.br';
 	@override String get watchTogetherRelayInvalid => 'Insira uma URL base de retransmissão HTTP ou HTTPS válida.';
 	@override String get crashReporting => 'Relatório de Erros';
@@ -361,6 +422,7 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get importSettingsInvalidFile => 'Este arquivo não é uma exportação válida do Bask';
 	@override String get importSettingsNoUser => 'Entre na conta antes de importar as configurações';
 	@override String get shortcutsReset => 'Atalhos redefinidos para o padrão';
+	@override String get resetShortcutsConfirm => 'Isso substituirá seus atalhos personalizados pelos padrões. Continuar?';
 	@override String get about => 'Sobre';
 	@override String get aboutDescription => 'Informações do app e licenças';
 	@override String get updates => 'Atualizações';
@@ -376,8 +438,21 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get autoPlayAndSkip => 'Reprodução automática e pulos';
 	@override String get autoPlayNextEpisode => 'Reproduzir próximo episódio automaticamente';
 	@override String get autoPlayNextEpisodeDescription => 'Iniciar o próximo episódio automaticamente quando um terminar';
+	@override String get shuffleStartsFromBeginning => 'Reprodução Aleatória Começa do Início';
+	@override String get shuffleStartsFromBeginningDescription => 'Iniciar cada episódio do início na reprodução aleatória em vez de retomá-lo';
 	@override String get playNextCountdown => 'Contagem regressiva do próximo episódio';
 	@override String get playNextCountdownImmediate => 'Reproduzir imediatamente';
+	@override String get skipIntroMode => 'Pular Abertura';
+	@override String get skipIntroModeOffDescription => 'Reproduzir as aberturas normalmente sem botão de pulo';
+	@override String get skipIntroModeButtonDescription => 'Mostrar um botão de pulo quando uma abertura começar';
+	@override String get skipIntroModeAutoDescription => 'Pular as aberturas automaticamente após o atraso abaixo';
+	@override String get skipCreditsMode => 'Pular Créditos';
+	@override String get skipCreditsModeOffDescription => 'Reproduzir os créditos normalmente sem botão de pulo';
+	@override String get skipCreditsModeButtonDescription => 'Mostrar um botão de pulo quando os créditos começarem';
+	@override String get skipCreditsModeAutoDescription => 'Pular os créditos automaticamente e reproduzir o próximo episódio';
+	@override String get skipMarkerModeOff => 'Desativado';
+	@override String get skipMarkerModeButton => 'Mostrar botão';
+	@override String get skipMarkerModeAuto => 'Automático';
 	@override String get forceSkipMarkerFallback => 'Forçar marcadores alternativos';
 	@override String get forceSkipMarkerFallbackDescription => 'Usar padrões de títulos de capítulos mesmo quando o Plex tiver marcadores';
 	@override String get autoSkipDelay => 'Atraso para pular automaticamente';
@@ -414,6 +489,8 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get manageLibrariesDescription => 'Reordene e oculte bibliotecas';
 	@override String get companionRemoteServer => 'Servidor de controle remoto';
 	@override String get companionRemoteServerDescription => 'Permitir que dispositivos móveis na sua rede controlem este app';
+	@override String get companionRemoteServerStartFailed => 'Não foi possível iniciar o servidor de controle remoto';
+	@override String get companionRemoteServerStopFailed => 'Não foi possível parar o servidor de controle remoto';
 	@override String get autoPip => 'Picture-in-picture automático';
 	@override String get autoPipDescription => 'Entrar automaticamente no modo picture-in-picture ao sair do app durante a reprodução';
 	@override String get matchContentFrameRate => 'Ajustar à taxa de quadros do conteúdo';
@@ -426,12 +503,20 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get matchDynamicRangeDescription => 'Ativar HDR para conteúdo HDR e depois voltar para SDR';
 	@override String get displaySwitchDelay => 'Atraso na troca do modo de exibição';
 	@override String get tunneledPlayback => 'Reprodução em túnel';
-	@override String get tunneledPlaybackDescription => 'Usar o tunelamento de vídeo. Desative se o vídeo ficar preto ao reproduzir em HDR.';
+	@override String get tunneledPlaybackDescription => 'Usar o tunelamento de vídeo. Desative se o vídeo ficar preto ao reproduzir em HDR ou o movimento travar.';
 	@override String get audioPassthrough => 'Passagem direta de áudio';
 	@override String get audioPassthroughDescription => 'Enviar o áudio Dolby/DTS ao receptor ou à TV sem recodificação, preservando o som surround. Desative se não houver som.';
-	@override String get audioPassthroughDescriptionAppleTv => 'Usar o decodificador Dolby nativo da Apple para Dolby Digital Plus, incluindo Atmos. DTS e TrueHD continuam sendo reproduzidos como PCM multicanal. Desative se não houver som.';
-	@override String get audioDownmix => 'Conversão para estéreo';
-	@override String get audioDownmixDescription => 'Converter o áudio surround em dois canais para alto-falantes estéreo ou fones de ouvido';
+	@override String get audioPassthroughDescriptionApple => 'Usar o decodificador Dolby nativo da Apple para Dolby Digital Plus, incluindo Atmos. DTS e TrueHD continuam sendo reproduzidos como PCM multicanal. Desative se não houver som.';
+	@override String get audioPassthroughDescriptionAppleSpatial => 'Usar o decodificador Dolby nativo da Apple para Dolby Digital Plus, incluindo Atmos. No iOS, iPadOS e tvOS 26 ou posterior, TrueHD Atmos e DTS:X são reproduzidos como áudio espacial. As demais faixas DTS e TrueHD são reproduzidas como PCM multicanal. Desative se não houver som.';
+	@override String get audioPassthroughOverriddenByNormalization => 'Desativada enquanto a normalização de intensidade sonora estiver ativa';
+	@override String get audioChannelLimit => 'Canais de áudio';
+	@override String get audioChannelLimitDescription => 'Mixar o áudio decodificado em menos canais para alto-falantes, fones de ouvido ou sistemas HDMI que não reproduzem todos os canais';
+	@override String get audioChannelLimitOriginal => 'Original';
+	@override String get audioChannelLimitOriginalDescription => 'Reproduzir todos os canais da faixa';
+	@override String get audioChannelLimitSurround51 => 'Até 5.1';
+	@override String get audioChannelLimitSurround51Description => 'Mixar 7.1 em 5.1 para TVs e receptores que só aceitam PCM 5.1. A passagem direta não é afetada.';
+	@override String get audioChannelLimitStereo => 'Estéreo';
+	@override String get audioChannelLimitStereoDescription => 'Mixar em dois canais para alto-falantes estéreo ou fones de ouvido. Desativa a passagem direta.';
 	@override String get downmixCenterBoost => 'Reforço do canal central';
 	@override String downmixCenterBoostValue({required Object db}) => '${db} dB';
 	@override String get downmixCenterBoostLabel => 'Reforço (dB)';
@@ -439,7 +524,7 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get audioDownmixNormalize => 'Normalizar volume na conversão para estéreo';
 	@override String get audioDownmixNormalizeDescription => 'Reduzir o volume da mixagem para evitar saturação. Desative para manter o volume original, que pode distorcer em cenas muito altas.';
 	@override String get dvConversionMode => 'Conversão Dolby Vision';
-	@override String get dvConversionModeDescription => 'Escolha como o ExoPlayer lida com arquivos Dolby Vision Profile 7.';
+	@override String get dvConversionModeDescription => 'Escolha como os arquivos Dolby Vision Profile 7 são tratados.';
 	@override String get dvConversionAuto => 'Automático';
 	@override String get dvConversionNative => 'Nativo / desativado';
 	@override String get dvConversionDv81 => 'P7 → P8.1';
@@ -448,8 +533,24 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Forçar DV7 nativo e impedir uma nova tentativa de conversão de DV';
 	@override String get dvConversionDv81Description => 'Forçar a conversão RPU integrada para Dolby Vision perfil 8.1';
 	@override String get dvConversionHevcStripDescription => 'Remover as camadas RPU/EL do Dolby Vision e apresentar HEVC sem Dolby Vision';
+	@override String get disableDolbyVision => 'Desativar Dolby Vision';
+	@override String get disableDolbyVisionDescription => 'Reproduzir a camada HDR10 ou HLG do arquivo em vez de Dolby Vision, quando houver';
+	@override String get hdrSdrConversion => 'Conversão de HDR para SDR';
+	@override String get hdrSdrConversionDescription => 'Escolha o que converte vídeos HDR quando a tela não consegue exibir HDR.';
+	@override String get hdrSdrConversionAuto => 'Automático';
+	@override String get hdrSdrConversionAutoDescription => 'Dispositivo no Android 9 ou posterior, reprodutor em versões anteriores';
+	@override String get hdrSdrConversionDevice => 'Dispositivo';
+	@override String get hdrSdrConversionDeviceDescription => 'O hardware de vídeo do dispositivo faz a conversão. Mais rápido, mas as cores dependem do dispositivo';
+	@override String get hdrSdrConversionPlayer => 'Reprodutor';
+	@override String get hdrSdrConversionPlayerDescription => 'O reprodutor faz a conversão. Cores consistentes, mas o 4K pode travar em TV boxes mais simples';
 	@override String get deinterlace => 'Desentrelaçamento';
 	@override String get deinterlaceDescription => 'Remover artefatos de pente de vídeo entrelaçado (apenas no reprodutor mpv)';
+	@override String get deinterlaceOff => 'Desativado';
+	@override String get deinterlaceOffDescription => 'Exibir o vídeo entrelaçado como é decodificado';
+	@override String get deinterlaceVideo => 'Vídeo';
+	@override String get deinterlaceVideoDescription => 'Transformar cada campo em um quadro completo. Para vídeos gravados para TV, como esportes, noticiários e shows';
+	@override String get deinterlaceFilm => 'Filme';
+	@override String get deinterlaceFilmDescription => 'Restaurar os quadros originais de filmes e animações convertidos por telecine para 29,97 fps, comum em DVDs NTSC. Vídeos gravados para TV travam. A TV ao vivo usa Vídeo';
 	@override String get requireProfileSelectionOnOpen => 'Pedir perfil ao abrir o app';
 	@override String get requireProfileSelectionOnOpenDescription => 'Mostrar a seleção de perfil sempre que o app for aberto';
 	@override String get forceTvMode => 'Forçar modo TV';
@@ -491,12 +592,15 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get gestureVolumeSwipeDescription => 'Deslize para cima ou para baixo na borda direita para ajustar o volume';
 	@override String get gesturePinchToZoom => 'Pinça para zoom';
 	@override String get gesturePinchToZoomDescription => 'Pince o vídeo para ampliar ou reduzir';
+	@override String get rememberBrightnessLevel => 'Lembrar Nível de Brilho';
+	@override String get rememberBrightnessLevelDescription => 'Iniciar a reprodução com o brilho definido pelo último deslize';
 	@override String get controls => 'Controles';
 	@override String get rememberPlayerChanges => 'Lembrar alterações do reprodutor';
 	@override String get rememberPlayerChangesDescription => 'Onde uma alteração feita durante a reprodução é salva e reaplicada';
 	@override String get scopePlaybackSpeed => 'Velocidade de reprodução';
 	@override String get scopeShaderPreset => 'Predefinição de shader';
 	@override String get scopeAspectRatio => 'Proporção da tela';
+	@override String get scopeZoom => 'Zoom';
 	@override String get scopeSyncOffsets => 'Sincronização de áudio e legendas';
 	@override String get playerScopeOff => 'Não salvar';
 	@override String get playerScopeGlobal => 'Em todos os lugares';
@@ -505,9 +609,45 @@ class _Translations$settings$pt extends Translations$settings$en {
 	@override String get exportDialogTitle => 'Exportar configurações do Bask';
 }
 
+// Path: themeEditor
+class Translations$themeEditor$pt extends Translations$themeEditor$en {
+	Translations$themeEditor$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get builtIn => 'Integrados';
+	@override String get presets => 'Predefinidos';
+	@override String get custom => 'Personalizado';
+	@override String get customEmpty => 'Ainda não criado';
+	@override String get editCustom => 'Editar tema personalizado';
+	@override String get editCustomDescription => 'Escolha você mesmo cada cor';
+	@override String get locked => 'Desbloqueie com o Pacote de temas e ícones';
+	@override String get savedLocked => 'Salvo — desbloqueia com o Pacote de temas e ícones';
+	@override String get title => 'Tema personalizado';
+	@override String get startFrom => 'Começar a partir de';
+	@override String get startFromDescription => 'Copiar todas as cores de outro tema';
+	@override String get colors => 'Cores';
+	@override String get preview => 'Pré-visualização';
+	@override late final Translations$themeEditor$slots$pt slots = Translations$themeEditor$slots$pt.internal(_root);
+	@override String get opacity => 'Opacidade';
+	@override String get hexHint => '#RRGGBB ou #AARRGGBB';
+	@override String get fromOtherThemes => 'De outros temas';
+	@override String swatchLabel({required Object color, required Object theme}) => '${color} (${theme})';
+	@override late final Translations$themeEditor$contrast$pt contrast = Translations$themeEditor$contrast$pt.internal(_root);
+	@override String lowContrast({required Object pair, required Object ratio, required Object minimum}) => '${pair}: ${ratio}:1, abaixo dos ${minimum}:1 recomendados';
+	@override String get discardTitle => 'Descartar alterações?';
+	@override String get discardMessage => 'Suas alterações de cor não salvas serão perdidas.';
+	@override String get discard => 'Descartar';
+	@override String previewCardTitle({required Object number}) => 'Episódio ${number}';
+	@override String previewCardSubtitle({required Object minutes}) => '${minutes} min restantes';
+	@override String get previewSwitch => 'Reprodução automática';
+	@override String get previewMutedText => 'O texto secundário fica assim';
+}
+
 // Path: search
-class _Translations$search$pt extends Translations$search$en {
-	_Translations$search$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$search$pt extends Translations$search$en {
+	Translations$search$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -516,11 +656,12 @@ class _Translations$search$pt extends Translations$search$en {
 	@override String get tryDifferentTerm => 'Tente um termo de busca diferente';
 	@override String get searchYourMedia => 'Buscar suas mídias';
 	@override String get enterTitleActorOrKeyword => 'Insira um título, ator ou palavra-chave';
+	@override String get people => 'Pessoas';
 }
 
 // Path: hotkeys
-class _Translations$hotkeys$pt extends Translations$hotkeys$en {
-	_Translations$hotkeys$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$hotkeys$pt extends Translations$hotkeys$en {
+	Translations$hotkeys$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -531,12 +672,12 @@ class _Translations$hotkeys$pt extends Translations$hotkeys$en {
 	@override String get currentShortcut => 'Atalho atual:';
 	@override String get pressToRecord => 'Selecionar para gravar um atalho';
 	@override String get recordingShortcut => 'Pressione o atalho agora';
-	@override late final _Translations$hotkeys$actions$pt actions = _Translations$hotkeys$actions$pt._(_root);
+	@override late final Translations$hotkeys$actions$pt actions = Translations$hotkeys$actions$pt.internal(_root);
 }
 
 // Path: fileInfo
-class _Translations$fileInfo$pt extends Translations$fileInfo$en {
-	_Translations$fileInfo$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$fileInfo$pt extends Translations$fileInfo$en {
+	Translations$fileInfo$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -659,8 +800,8 @@ class _Translations$fileInfo$pt extends Translations$fileInfo$en {
 }
 
 // Path: mediaMenu
-class _Translations$mediaMenu$pt extends Translations$mediaMenu$en {
-	_Translations$mediaMenu$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$mediaMenu$pt extends Translations$mediaMenu$en {
+	Translations$mediaMenu$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -710,8 +851,8 @@ class _Translations$mediaMenu$pt extends Translations$mediaMenu$en {
 }
 
 // Path: rateSheet
-class _Translations$rateSheet$pt extends Translations$rateSheet$en {
-	_Translations$rateSheet$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$rateSheet$pt extends Translations$rateSheet$en {
+	Translations$rateSheet$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -726,8 +867,8 @@ class _Translations$rateSheet$pt extends Translations$rateSheet$en {
 }
 
 // Path: accessibility
-class _Translations$accessibility$pt extends Translations$accessibility$en {
-	_Translations$accessibility$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accessibility$pt extends Translations$accessibility$en {
+	Translations$accessibility$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -762,8 +903,8 @@ class _Translations$accessibility$pt extends Translations$accessibility$en {
 }
 
 // Path: tooltips
-class _Translations$tooltips$pt extends Translations$tooltips$en {
-	_Translations$tooltips$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$tooltips$pt extends Translations$tooltips$en {
+	Translations$tooltips$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -775,8 +916,8 @@ class _Translations$tooltips$pt extends Translations$tooltips$en {
 }
 
 // Path: audioTracks
-class _Translations$audioTracks$pt extends Translations$audioTracks$en {
-	_Translations$audioTracks$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$audioTracks$pt extends Translations$audioTracks$en {
+	Translations$audioTracks$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -785,8 +926,8 @@ class _Translations$audioTracks$pt extends Translations$audioTracks$en {
 }
 
 // Path: videoControls
-class _Translations$videoControls$pt extends Translations$videoControls$en {
-	_Translations$videoControls$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$videoControls$pt extends Translations$videoControls$en {
+	Translations$videoControls$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -844,15 +985,16 @@ class _Translations$videoControls$pt extends Translations$videoControls$en {
 	@override String get rotationLockButton => 'Travar rotação';
 	@override String get lockScreen => 'Travar tela';
 	@override String get screenLockButton => 'Travar tela';
-	@override String get longPressToUnlock => 'Pressione e segure para destravar';
 	@override String get timelineSlider => 'Linha do tempo do vídeo';
 	@override String get volumeSlider => 'Nível de volume';
 	@override String endsAt({required Object time}) => 'Termina às ${time}';
 	@override String get pipActive => 'Reproduzindo em Picture-in-Picture';
 	@override String get pipFailed => 'Falha ao iniciar picture-in-picture';
 	@override String get screenshotSaved => 'Captura de tela salva';
+	@override String get screenshotFailed => 'Não foi possível fazer a captura de tela';
 	@override String zoomPercent({required Object percent}) => 'Zoom ${percent}%';
-	@override late final _Translations$videoControls$pipErrors$pt pipErrors = _Translations$videoControls$pipErrors$pt._(_root);
+	@override String volumePercent({required Object percent}) => 'Volume ${percent}%';
+	@override late final Translations$videoControls$pipErrors$pt pipErrors = Translations$videoControls$pipErrors$pt.internal(_root);
 	@override String get chapters => 'Capítulos';
 	@override String get noChaptersAvailable => 'Nenhum capítulo disponível';
 	@override String get queue => 'Fila';
@@ -864,6 +1006,7 @@ class _Translations$videoControls$pt extends Translations$videoControls$en {
 	@override String get subtitleDownloaded => 'Legenda baixada';
 	@override String get subtitleDownloadedNotApplied => 'A legenda foi baixada, mas não foi possível selecioná-la';
 	@override String get subtitleDownloadFailed => 'Falha ao baixar legenda';
+	@override String get subtitleDownloadTimedOut => 'A legenda não apareceu a tempo. O download pode ter falhado';
 	@override String get searchLanguages => 'Pesquisar idiomas...';
 	@override String get skipIntro => 'Pular abertura';
 	@override String get skipCredits => 'Pular créditos';
@@ -882,8 +1025,8 @@ class _Translations$videoControls$pt extends Translations$videoControls$en {
 }
 
 // Path: messages
-class _Translations$messages$pt extends Translations$messages$en {
-	_Translations$messages$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$messages$pt extends Translations$messages$en {
+	Translations$messages$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -908,6 +1051,9 @@ class _Translations$messages$pt extends Translations$messages$en {
 	@override String get playbackDataInvalid => 'O servidor retornou informações de reprodução inválidas.';
 	@override String get playbackCancelled => 'A reprodução foi cancelada.';
 	@override String get playbackFailed => 'Não foi possível iniciar a reprodução.';
+	@override String playbackFailedDetail({required Object error}) => 'Não foi possível iniciar a reprodução: ${error}';
+	@override String get audioOutputFailed => 'A saída de áudio parou de responder. Verifique a conexão de áudio da TV ou do receptor; se outros aplicativos também estiverem sem som, reinicie o dispositivo.';
+	@override String get mediaUnavailable => 'Este conteúdo não está mais disponível.';
 	@override String errorLoadingFileInfo({required Object error}) => 'Erro ao carregar as informações do arquivo: ${error}';
 	@override String get errorLoadingSeries => 'Erro ao carregar série';
 	@override String get musicNotSupported => 'A reprodução de música ainda não é compatível';
@@ -942,6 +1088,8 @@ class _Translations$messages$pt extends Translations$messages$en {
 	@override String get mediaUnreadableBody => 'O servidor encontrou este item, mas não conseguiu ler o arquivo (HTTP 404). O arquivo provavelmente foi movido, excluído ou o armazenamento está offline. Peça ao responsável pelo servidor para verificar o arquivo e reexaminar a biblioteca.';
 	@override String get serverBusyTitle => 'Transmissão indisponível';
 	@override String get serverBusyBody => 'O servidor continuou se recusando a transmitir este arquivo (HTTP 503). Ele pode estar reiniciando ou ocupado, ou o armazenamento do arquivo pode estar offline. Tente novamente em instantes — se isso continuar acontecendo, peça ao proprietário do servidor para verificar o servidor e o armazenamento do arquivo.';
+	@override String get playbackNotAllowedTitle => 'Reprodução não permitida';
+	@override String get playbackNotAllowedBody => 'O servidor se recusou a transmitir este item (HTTP 403). Sua conta pode não ter permissão para reproduzi-lo, ou o servidor pode permitir a reprodução apenas na própria rede local.';
 	@override String get logsUploaded => 'Logs enviados';
 	@override String get logsUploadFailed => 'Falha ao enviar logs';
 	@override String get logId => 'ID do log';
@@ -951,12 +1099,13 @@ class _Translations$messages$pt extends Translations$messages$en {
 	@override String get playbackDataNotPrepared => 'A reprodução foi iniciada antes que os dados estivessem prontos';
 	@override String get streamSelectionUnavailable => 'A seleção de fluxos não está disponível para esta fonte';
 	@override String get streamSelectionFailed => 'Não foi possível aplicar os fluxos selecionados';
+	@override String get trackSelectionNotRemembered => 'Esta escolha de faixa se aplica apenas à reprodução atual.';
 	@override String get serverUnavailableForProfile => 'Nenhum servidor está disponível para o perfil ativo';
 }
 
 // Path: subtitlingStyling
-class _Translations$subtitlingStyling$pt extends Translations$subtitlingStyling$en {
-	_Translations$subtitlingStyling$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$subtitlingStyling$pt extends Translations$subtitlingStyling$en {
+	Translations$subtitlingStyling$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -977,6 +1126,8 @@ class _Translations$subtitlingStyling$pt extends Translations$subtitlingStyling$
 	@override String get overrideStrip => 'Remover estilo';
 	@override String get positionTop => 'Superior';
 	@override String get positionBottom => 'Inferior';
+	@override String get useMargins => 'Usar margens';
+	@override String get useMarginsDescription => 'Permitir legendas de texto no espaço fora do vídeo. Legendas estilizadas podem manter sua posição original.';
 	@override String get anchorToScreen => 'Ancorar à tela';
 	@override String get anchorToScreenDescription => 'Exibir as legendas de texto nas faixas pretas abaixo de vídeos em tela ampla';
 	@override String get bold => 'Negrito';
@@ -987,8 +1138,8 @@ class _Translations$subtitlingStyling$pt extends Translations$subtitlingStyling$
 }
 
 // Path: mpvConfig
-class _Translations$mpvConfig$pt extends Translations$mpvConfig$en {
-	_Translations$mpvConfig$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$mpvConfig$pt extends Translations$mpvConfig$en {
+	Translations$mpvConfig$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1007,12 +1158,15 @@ class _Translations$mpvConfig$pt extends Translations$mpvConfig$en {
 	@override String get presetDeleted => 'Predefinição excluída';
 	@override String get confirmDeletePreset => 'Tem certeza de que deseja excluir esta predefinição?';
 	@override String get configPlaceholder => 'gpu-api=vulkan\nhwdec=auto\n# comment';
+	@override String get lineHint => 'option=value';
+	@override String get addLine => 'Adicionar linha';
+	@override String get removeLine => 'Remover linha';
 	@override String get embeddedVoHint => 'vo, gpu-context e gpu-api são ignorados no Linux: o vídeo incorporado é sempre renderizado via vo=libmpv no plano de vídeo, e gpu-next (necessário para shaders de computação como ArtCNN) não pode ser executado incorporado.';
 }
 
 // Path: dialog
-class _Translations$dialog$pt extends Translations$dialog$en {
-	_Translations$dialog$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$dialog$pt extends Translations$dialog$en {
+	Translations$dialog$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1021,8 +1175,8 @@ class _Translations$dialog$pt extends Translations$dialog$en {
 }
 
 // Path: profiles
-class _Translations$profiles$pt extends Translations$profiles$en {
-	_Translations$profiles$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$profiles$pt extends Translations$profiles$en {
+	Translations$profiles$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1037,6 +1191,8 @@ class _Translations$profiles$pt extends Translations$profiles$en {
 	@override String get signOut => 'Sair';
 	@override String get signOutPlexTitle => 'Sair do Plex?';
 	@override String signOutPlexMessage({required Object displayName}) => 'Remover ${displayName} e todos os usuários do Plex Home? Você pode entrar novamente quando quiser.';
+	@override String get signOutPlexDeleteDownloads => 'Também excluir downloads';
+	@override String get signOutPlexDeleteDownloadsDescription => 'Caso contrário, eles permanecem neste dispositivo e voltam quando você entrar novamente nesta conta.';
 	@override String get signedOutPlex => 'Saiu do Plex.';
 	@override String get signOutFailed => 'Falha ao sair.';
 	@override String get sectionTitle => 'Perfis';
@@ -1073,7 +1229,7 @@ class _Translations$profiles$pt extends Translations$profiles$en {
 	@override String borrowAddTo({required Object displayName}) => 'Adicionar a ${displayName}';
 	@override String get borrowExplain => 'Use a conexão de outro perfil. Perfis protegidos por PIN exigem PIN.';
 	@override String get borrowEmpty => 'Nenhuma conexão disponível ainda.';
-	@override String get borrowEmptySubtitle => 'Conecte Plex ou Jellyfin a outro perfil primeiro.';
+	@override String get borrowEmptySubtitle => 'Conecte Plex, Jellyfin ou Emby a outro perfil primeiro.';
 	@override String get borrowLoadFailed => 'Não foi possível carregar as conexões disponíveis. Tente novamente.';
 	@override String borrowFromProfile({required Object displayName}) => 'De ${displayName}';
 	@override String get borrowConnectionBorrowed => 'Conexão adicionada ao perfil.';
@@ -1093,26 +1249,28 @@ class _Translations$profiles$pt extends Translations$profiles$en {
 }
 
 // Path: connections
-class _Translations$connections$pt extends Translations$connections$en {
-	_Translations$connections$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$connections$pt extends Translations$connections$en {
+	Translations$connections$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
 	@override String get sectionTitle => 'Conexões';
 	@override String get addConnection => 'Adicionar conexão';
-	@override String get addConnectionSubtitleNoProfile => 'Entre com Plex ou conecte um servidor Jellyfin';
-	@override String addConnectionSubtitleScoped({required Object displayName}) => 'Adicionar a ${displayName}: Plex, Jellyfin ou outra conexão de perfil';
+	@override String get addConnectionSubtitleNoProfile => 'Entre com Plex ou conecte um servidor Jellyfin ou Emby';
+	@override String addConnectionSubtitleScoped({required Object displayName}) => 'Adicionar a ${displayName}: Plex, Jellyfin, Emby ou outra conexão de perfil';
 	@override String sessionExpiredOne({required Object name}) => 'Sessão de ${name} expirada';
 	@override String sessionExpiredMany({required Object count}) => 'Sessões expiradas em ${count} servidores';
+	@override String accessDeniedOne({required Object name}) => '${name} negou acesso a esta conta';
+	@override String accessDeniedMany({required Object count}) => '${count} servidores negaram acesso a esta conta';
 	@override String get signInAgain => 'Entrar novamente';
 	@override String editMediaBrowserTitle({required Object product}) => 'Editar conexão do ${product}';
 	@override String editMediaBrowserIntro({required Object serverName}) => 'Adicione ou remova URLs para ${serverName}. O Bask usará a URL acessível com menor latência.';
 }
 
 // Path: accountPreferences
-class _Translations$accountPreferences$pt extends Translations$accountPreferences$en {
-	_Translations$accountPreferences$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accountPreferences$pt extends Translations$accountPreferences$en {
+	Translations$accountPreferences$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1128,17 +1286,17 @@ class _Translations$accountPreferences$pt extends Translations$accountPreference
 	@override String get loadFailed => 'Não foi possível carregar estas preferências';
 	@override String get noPreference => 'Sem preferência';
 	@override String get notSet => 'Não definido';
-	@override late final _Translations$accountPreferences$groups$pt groups = _Translations$accountPreferences$groups$pt._(_root);
+	@override late final Translations$accountPreferences$groups$pt groups = Translations$accountPreferences$groups$pt.internal(_root);
 	@override String get preferredAudioLanguage => 'Idioma de áudio preferido';
 	@override String get autoSelectAudio => 'Escolher áudio pelo idioma';
 	@override String get autoSelectAudioDescription => 'Desativado mantém a faixa de áudio que o arquivo marca como padrão.';
 	@override String get preferredSubtitleLanguage => 'Idioma de legenda preferido';
 	@override String get subtitleMode => 'Ativar legendas';
-	@override late final _Translations$accountPreferences$subtitleModes$pt subtitleModes = _Translations$accountPreferences$subtitleModes$pt._(_root);
+	@override late final Translations$accountPreferences$subtitleModes$pt subtitleModes = Translations$accountPreferences$subtitleModes$pt.internal(_root);
 	@override String get subtitleAccessibility => 'Legendas SDH';
-	@override late final _Translations$accountPreferences$subtitleAccessibilityOptions$pt subtitleAccessibilityOptions = _Translations$accountPreferences$subtitleAccessibilityOptions$pt._(_root);
+	@override late final Translations$accountPreferences$subtitleAccessibilityOptions$pt subtitleAccessibilityOptions = Translations$accountPreferences$subtitleAccessibilityOptions$pt.internal(_root);
 	@override String get forcedSubtitles => 'Legendas forçadas';
-	@override late final _Translations$accountPreferences$forcedSubtitleOptions$pt forcedSubtitleOptions = _Translations$accountPreferences$forcedSubtitleOptions$pt._(_root);
+	@override late final Translations$accountPreferences$forcedSubtitleOptions$pt forcedSubtitleOptions = Translations$accountPreferences$forcedSubtitleOptions$pt.internal(_root);
 	@override String get displayMissingEpisodes => 'Mostrar episódios ausentes';
 	@override String get displayMissingEpisodesDescription => 'Listar episódios que o servidor conhece, mas para os quais não há arquivo.';
 	@override String get hidePlayedInLatest => 'Ocultar itens assistidos em Recentes';
@@ -1148,14 +1306,14 @@ class _Translations$accountPreferences$pt extends Translations$accountPreference
 	@override String get rewatchingInNextUp => 'Manter séries reassistidas em A seguir';
 	@override String get rewatchingInNextUpDescription => 'Ao terminar uma série, comece a assistir de novo e A seguir acompanha a reexibição em vez de remover a série.';
 	@override String get watchedIndicator => 'Indicadores de assistido';
-	@override late final _Translations$accountPreferences$watchedIndicatorOptions$pt watchedIndicatorOptions = _Translations$accountPreferences$watchedIndicatorOptions$pt._(_root);
+	@override late final Translations$accountPreferences$watchedIndicatorOptions$pt watchedIndicatorOptions = Translations$accountPreferences$watchedIndicatorOptions$pt.internal(_root);
 	@override String get mediaReviewsVisibility => 'Avaliações e resenhas';
-	@override late final _Translations$accountPreferences$mediaReviewsOptions$pt mediaReviewsOptions = _Translations$accountPreferences$mediaReviewsOptions$pt._(_root);
+	@override late final Translations$accountPreferences$mediaReviewsOptions$pt mediaReviewsOptions = Translations$accountPreferences$mediaReviewsOptions$pt.internal(_root);
 }
 
 // Path: discover
-class _Translations$discover$pt extends Translations$discover$en {
-	_Translations$discover$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$discover$pt extends Translations$discover$en {
+	Translations$discover$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1188,11 +1346,12 @@ class _Translations$discover$pt extends Translations$discover$en {
 		one: '${n} título',
 		other: '${n} títulos',
 	);
+	@override late final Translations$discover$person$pt person = Translations$discover$person$pt.internal(_root);
 }
 
 // Path: errors
-class _Translations$errors$pt extends Translations$errors$en {
-	_Translations$errors$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$errors$pt extends Translations$errors$en {
+	Translations$errors$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1209,11 +1368,18 @@ class _Translations$errors$pt extends Translations$errors$en {
 	@override String failedToSwitchProfile({required Object displayName}) => 'Falha ao trocar para ${displayName}';
 	@override String failedToDeleteProfile({required Object displayName}) => 'Falha ao excluir ${displayName}';
 	@override String get failedToRate => 'Não foi possível atualizar a classificação';
+	@override String get reasonTimedOut => 'o tempo de conexão se esgotou';
+	@override String get reasonUnreachable => 'não foi possível alcançar o servidor';
+	@override String get reasonRefused => 'o servidor recusou a solicitação';
+	@override String get reasonNotFound => 'o item não está mais no servidor';
+	@override String get reasonServerError => 'o servidor relatou um erro';
+	@override String get reasonCancelled => 'a solicitação foi cancelada';
+	@override String get reasonUnexpected => 'ocorreu um erro inesperado';
 }
 
 // Path: libraries
-class _Translations$libraries$pt extends Translations$libraries$en {
-	_Translations$libraries$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$libraries$pt extends Translations$libraries$en {
+	Translations$libraries$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1259,15 +1425,16 @@ class _Translations$libraries$pt extends Translations$libraries$en {
 	@override String get noCollections => 'Nenhuma coleção nesta biblioteca';
 	@override String get noFoldersFound => 'Nenhuma pasta encontrada';
 	@override String get folders => 'pastas';
-	@override late final _Translations$libraries$tabs$pt tabs = _Translations$libraries$tabs$pt._(_root);
-	@override late final _Translations$libraries$groupings$pt groupings = _Translations$libraries$groupings$pt._(_root);
-	@override late final _Translations$libraries$filterCategories$pt filterCategories = _Translations$libraries$filterCategories$pt._(_root);
-	@override late final _Translations$libraries$sortLabels$pt sortLabels = _Translations$libraries$sortLabels$pt._(_root);
+	@override late final Translations$libraries$tabs$pt tabs = Translations$libraries$tabs$pt.internal(_root);
+	@override late final Translations$libraries$groupings$pt groupings = Translations$libraries$groupings$pt.internal(_root);
+	@override late final Translations$libraries$filterCategories$pt filterCategories = Translations$libraries$filterCategories$pt.internal(_root);
+	@override late final Translations$libraries$sortLabels$pt sortLabels = Translations$libraries$sortLabels$pt.internal(_root);
+	@override late final Translations$libraries$advancedFilters$pt advancedFilters = Translations$libraries$advancedFilters$pt.internal(_root);
 }
 
 // Path: about
-class _Translations$about$pt extends Translations$about$en {
-	_Translations$about$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$about$pt extends Translations$about$en {
+	Translations$about$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1275,13 +1442,13 @@ class _Translations$about$pt extends Translations$about$en {
 	@override String get title => 'Sobre';
 	@override String get openSourceLicenses => 'Licenças de código aberto';
 	@override String versionLabel({required Object version}) => 'Versão ${version}';
-	@override String get appDescription => 'Um belo cliente de Plex e Jellyfin feito com Flutter';
+	@override String get appDescription => 'Um belo cliente de Plex, Jellyfin e Emby feito com Flutter';
 	@override String get viewLicensesDescription => 'Ver as licenças de bibliotecas de terceiros';
 }
 
 // Path: serverSelection
-class _Translations$serverSelection$pt extends Translations$serverSelection$en {
-	_Translations$serverSelection$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$serverSelection$pt extends Translations$serverSelection$en {
+	Translations$serverSelection$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1292,8 +1459,8 @@ class _Translations$serverSelection$pt extends Translations$serverSelection$en {
 }
 
 // Path: hubDetail
-class _Translations$hubDetail$pt extends Translations$hubDetail$en {
-	_Translations$hubDetail$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$hubDetail$pt extends Translations$hubDetail$en {
+	Translations$hubDetail$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1306,8 +1473,8 @@ class _Translations$hubDetail$pt extends Translations$hubDetail$en {
 }
 
 // Path: logs
-class _Translations$logs$pt extends Translations$logs$en {
-	_Translations$logs$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$logs$pt extends Translations$logs$en {
+	Translations$logs$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1318,8 +1485,8 @@ class _Translations$logs$pt extends Translations$logs$en {
 }
 
 // Path: startup
-class _Translations$startup$pt extends Translations$startup$en {
-	_Translations$startup$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$startup$pt extends Translations$startup$en {
+	Translations$startup$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1357,8 +1524,8 @@ class _Translations$startup$pt extends Translations$startup$en {
 }
 
 // Path: licenses
-class _Translations$licenses$pt extends Translations$licenses$en {
-	_Translations$licenses$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$licenses$pt extends Translations$licenses$en {
+	Translations$licenses$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1370,8 +1537,8 @@ class _Translations$licenses$pt extends Translations$licenses$en {
 }
 
 // Path: navigation
-class _Translations$navigation$pt extends Translations$navigation$en {
-	_Translations$navigation$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$navigation$pt extends Translations$navigation$en {
+	Translations$navigation$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1383,16 +1550,16 @@ class _Translations$navigation$pt extends Translations$navigation$en {
 }
 
 // Path: explore
-class _Translations$explore$pt extends Translations$explore$en {
-	_Translations$explore$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$pt extends Translations$explore$en {
+	Translations$explore$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
 	@override String get title => 'Explorar';
 	@override String get selectSource => 'Selecionar fonte';
-	@override late final _Translations$explore$rows$pt rows = _Translations$explore$rows$pt._(_root);
-	@override late final _Translations$explore$status$pt status = _Translations$explore$status$pt._(_root);
+	@override late final Translations$explore$rows$pt rows = Translations$explore$rows$pt.internal(_root);
+	@override late final Translations$explore$status$pt status = Translations$explore$status$pt.internal(_root);
 	@override String episodeCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n,
 		one: '${n} episódio',
 		other: '${n} episódios',
@@ -1408,22 +1575,26 @@ class _Translations$explore$pt extends Translations$explore$en {
 	@override String get notInLibrary => 'Não está na sua biblioteca';
 	@override String get inTheseLibraries => 'Nestas bibliotecas';
 	@override String get checkingLibrary => 'Verificando sua biblioteca...';
+	@override String libraryCheckFailed({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n,
+		one: 'Não foi possível verificar ${n} servidor',
+		other: 'Não foi possível verificar ${n} servidores',
+	);
 	@override String get emptyTitle => 'Ainda não há nada aqui';
 	@override String emptyMessage({required Object source}) => 'As linhas de ${source} aparecerão aqui quando tiverem conteúdo.';
 	@override String searchHint({required Object source}) => 'Buscar em ${source}';
 	@override String searchEmpty({required Object query}) => 'Nenhum resultado para "${query}"';
 	@override String searchPrompt({required Object source}) => 'Busque filmes e séries em ${source}.';
 	@override String get searchFailed => 'Falha na busca. Verifique sua conexão e tente novamente.';
-	@override late final _Translations$explore$badge$pt badge = _Translations$explore$badge$pt._(_root);
-	@override late final _Translations$explore$stats$pt stats = _Translations$explore$stats$pt._(_root);
-	@override late final _Translations$explore$season$pt season = _Translations$explore$season$pt._(_root);
-	@override late final _Translations$explore$format$pt format = _Translations$explore$format$pt._(_root);
-	@override late final _Translations$explore$sourceMaterial$pt sourceMaterial = _Translations$explore$sourceMaterial$pt._(_root);
-	@override late final _Translations$explore$creditRole$pt creditRole = _Translations$explore$creditRole$pt._(_root);
-	@override late final _Translations$explore$relation$pt relation = _Translations$explore$relation$pt._(_root);
+	@override late final Translations$explore$badge$pt badge = Translations$explore$badge$pt.internal(_root);
+	@override late final Translations$explore$stats$pt stats = Translations$explore$stats$pt.internal(_root);
+	@override late final Translations$explore$season$pt season = Translations$explore$season$pt.internal(_root);
+	@override late final Translations$explore$format$pt format = Translations$explore$format$pt.internal(_root);
+	@override late final Translations$explore$sourceMaterial$pt sourceMaterial = Translations$explore$sourceMaterial$pt.internal(_root);
+	@override late final Translations$explore$creditRole$pt creditRole = Translations$explore$creditRole$pt.internal(_root);
+	@override late final Translations$explore$relation$pt relation = Translations$explore$relation$pt.internal(_root);
 	@override String broadcast({required Object day, required Object time}) => 'Vai ao ar ${day} às ${time}';
 	@override String broadcastWithZone({required Object day, required Object time, required Object timezone}) => 'Vai ao ar ${day} às ${time} ${timezone}';
-	@override late final _Translations$explore$detail$pt detail = _Translations$explore$detail$pt._(_root);
+	@override late final Translations$explore$detail$pt detail = Translations$explore$detail$pt.internal(_root);
 	@override String totalResults({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n,
 		one: '${n} resultado',
 		other: '${n} resultados',
@@ -1431,8 +1602,8 @@ class _Translations$explore$pt extends Translations$explore$en {
 }
 
 // Path: liveTv
-class _Translations$liveTv$pt extends Translations$liveTv$en {
-	_Translations$liveTv$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$liveTv$pt extends Translations$liveTv$en {
+	Translations$liveTv$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1510,19 +1681,23 @@ class _Translations$liveTv$pt extends Translations$liveTv$en {
 	@override String get editRuleAction => 'Editar';
 	@override String get recordingRuleUpdated => 'Regra de gravação atualizada';
 	@override String get guideReloadRequested => 'Atualização do guia solicitada';
+	@override String get guideReloadFailed => 'Não foi possível atualizar o guia';
 	@override String get rulesProcessRequested => 'Reavaliação de regras solicitada';
+	@override String get rulesProcessFailed => 'Não foi possível reavaliar as regras de gravação';
 	@override String get recordShow => 'Gravar programa';
-	@override late final _Translations$liveTv$recordSettings$pt recordSettings = _Translations$liveTv$recordSettings$pt._(_root);
+	@override late final Translations$liveTv$recordSettings$pt recordSettings = Translations$liveTv$recordSettings$pt.internal(_root);
 	@override String startingInMinutes({required Object minutes}) => 'Começa em ${minutes} min';
 	@override String dayAtTime({required Object day, required Object time}) => '${day} às ${time}';
 	@override String invalidPlaybackData({required Object product}) => '${product} retornou dados inválidos de reprodução de TV ao Vivo';
 	@override String get failedToStartChannel => 'Não foi possível iniciar o canal ao vivo';
 	@override String get failedToBuildStreamUrl => 'Não foi possível gerar a URL da transmissão';
+	@override String playbackStartFailed({required Object reason}) => 'Não foi possível iniciar o canal: ${reason}';
+	@override String channelSwitchFailed({required Object reason}) => 'Não foi possível trocar de canal: ${reason}';
 }
 
 // Path: collections
-class _Translations$collections$pt extends Translations$collections$en {
-	_Translations$collections$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$collections$pt extends Translations$collections$en {
+	Translations$collections$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1550,8 +1725,8 @@ class _Translations$collections$pt extends Translations$collections$en {
 }
 
 // Path: playlists
-class _Translations$playlists$pt extends Translations$playlists$en {
-	_Translations$playlists$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$playlists$pt extends Translations$playlists$en {
+	Translations$playlists$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1585,8 +1760,8 @@ class _Translations$playlists$pt extends Translations$playlists$en {
 }
 
 // Path: music
-class _Translations$music$pt extends Translations$music$en {
-	_Translations$music$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$music$pt extends Translations$music$en {
+	Translations$music$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1620,88 +1795,130 @@ class _Translations$music$pt extends Translations$music$en {
 	@override String get instantMixFailed => 'Falha ao carregar o mix instantâneo';
 	@override String get instantMixEmpty => 'O mix instantâneo não retornou nenhuma faixa';
 	@override String noAudioUrl({required Object track}) => 'Nenhuma URL de áudio está disponível para ${track}';
-	@override late final _Translations$music$discography$pt discography = _Translations$music$discography$pt._(_root);
+	@override late final Translations$music$discography$pt discography = Translations$music$discography$pt.internal(_root);
 }
 
 // Path: watchTogether
-class _Translations$watchTogether$pt extends Translations$watchTogether$en {
-	_Translations$watchTogether$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$watchTogether$pt extends Translations$watchTogether$en {
+	Translations$watchTogether$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
 	@override String get title => 'Assistir Juntos';
 	@override String get description => 'Assista a conteúdos sincronizados com amigos e familiares';
-	@override String get createSession => 'Criar sessão';
-	@override String get creating => 'Criando...';
-	@override String get joinSession => 'Entrar na sessão';
-	@override String get joining => 'Entrando...';
-	@override String get controlMode => 'Modo de controle';
-	@override String get controlModeQuestion => 'Quem pode controlar a reprodução?';
-	@override String get hostOnly => 'Apenas o anfitrião';
-	@override String get anyone => 'Qualquer pessoa';
-	@override String get hostingSession => 'Hospedando uma sessão';
-	@override String get inSession => 'Em uma sessão';
-	@override String get sessionCode => 'Código da sessão';
-	@override String get openSessionControls => 'Abrir os controles da sessão Assistir Juntos';
-	@override String get copySessionCode => 'Copiar código da sessão';
-	@override String get hostControlsPlayback => 'O anfitrião controla a reprodução';
-	@override String get anyoneCanControl => 'Qualquer pessoa pode controlar a reprodução';
-	@override String get hostControls => 'Controle do anfitrião';
-	@override String get anyoneControls => 'Controle por qualquer pessoa';
-	@override String get participants => 'Participantes';
-	@override String get host => 'Anfitrião';
-	@override String get hostBadge => 'ANFITRIÃO';
-	@override String get youAreHost => 'Você é o anfitrião';
-	@override String get watchingWithOthers => 'Assistindo com outras pessoas';
-	@override String get endSession => 'Encerrar sessão';
-	@override String get leaveSession => 'Sair da sessão';
-	@override String get endSessionQuestion => 'Encerrar sessão?';
-	@override String get leaveSessionQuestion => 'Sair da sessão?';
-	@override String get endSessionConfirm => 'Isso encerrará a sessão para todos os participantes.';
-	@override String get leaveSessionConfirm => 'Você será removido da sessão.';
-	@override String get endSessionConfirmOverlay => 'Isso encerrará a sessão do Assistir Juntos para todos os participantes.';
-	@override String get leaveSessionConfirmOverlay => 'Você será desconectado da sessão do Assistir Juntos.';
-	@override String get end => 'Encerrar';
-	@override String get leave => 'Sair';
-	@override String get syncing => 'Sincronizando...';
-	@override String get joinWatchSession => 'Entrar na sessão';
-	@override String get enterCodeHint => 'Insira o código de 5 caracteres';
-	@override String get pasteFromClipboard => 'Colar da área de transferência';
-	@override String get pleaseEnterCode => 'Insira um código de sessão';
-	@override String get codeMustBe5Chars => 'O código da sessão deve ter 5 caracteres';
-	@override String get joinInstructions => 'Insira o código de sessão do anfitrião para entrar.';
-	@override String get failedToCreate => 'Falha ao criar sessão';
-	@override String get failedToJoin => 'Falha ao entrar na sessão';
-	@override String get sessionCodeCopied => 'Código da sessão copiado para a área de transferência';
-	@override String get relayUnreachable => 'Servidor de retransmissão inacessível. O bloqueio pelo provedor de internet pode impedir o uso do Assistir Juntos.';
-	@override String get reconnectingToHost => 'Reconectando ao anfitrião...';
-	@override String get currentPlayback => 'Reprodução atual';
-	@override String get joinCurrentPlayback => 'Entrar na reprodução atual';
-	@override String get joinCurrentPlaybackDescription => 'Voltar ao conteúdo que o anfitrião está assistindo agora';
-	@override String get failedToOpenCurrentPlayback => 'Falha ao abrir a reprodução atual';
-	@override String participantJoined({required Object name}) => '${name} entrou';
-	@override String participantLeft({required Object name}) => '${name} saiu';
-	@override String participantPaused({required Object name}) => '${name} pausou';
-	@override String participantResumed({required Object name}) => '${name} retomou';
-	@override String participantSeeked({required Object name}) => '${name} mudou a posição da reprodução';
-	@override String participantBuffering({required Object name}) => '${name} está aguardando o carregamento';
-	@override String participantNeedsUpdate({required Object name}) => '${name} está usando uma versão mais antiga do app — sincronização indisponível';
-	@override String resumingWithout({required Object name}) => 'Retomando sem ${name}';
-	@override String get waitingForParticipants => 'Aguardando o carregamento dos outros participantes...';
-	@override String waitingForName({required Object name}) => 'Aguardando ${name}...';
+	@override String get createRoom => 'Criar sala';
+	@override String get creatingRoom => 'Criando sala...';
+	@override String get joinRoom => 'Entrar na sala';
+	@override String get joiningRoom => 'Entrando na sala...';
+	@override String get connecting => 'Conectando...';
+	@override String get relayPublic => 'As salas usam os servidores de retransmissão públicos do Open Watch Party.';
+	@override String relayCustom({required Object url}) => 'As salas usam seu servidor de retransmissão em ${url}.';
 	@override String get recentRooms => 'Salas recentes';
+	@override String get roomActions => 'Ações da sala';
 	@override String get renameRoom => 'Renomear sala';
 	@override String get removeRoom => 'Remover';
-	@override String get guestSwitchUnavailable => 'Não foi possível trocar — servidor indisponível para sincronização';
-	@override String get guestSwitchFailed => 'Não foi possível trocar — conteúdo não encontrado neste servidor';
-	@override String get defaultDisplayName => 'Usuário';
-	@override late final _Translations$watchTogether$errors$pt errors = _Translations$watchTogether$errors$pt._(_root);
+	@override String get enterRoomCode => 'Insira o código de 6 caracteres do anfitrião.';
+	@override String get roomCode => 'Código da sala';
+	@override String get paste => 'Colar';
+	@override String get noCodeInClipboard => 'A área de transferência não contém um código de sala';
+	@override String get copyCode => 'Copiar código';
+	@override String get codeCopied => 'Código da sala copiado';
+	@override String get shareInvite => 'Compartilhar convite';
+	@override String get inviteCopied => 'Convite copiado. Cole-o em uma mensagem.';
+	@override String inviteMessage({required Object code}) => 'Entre na minha sala do Assistir Juntos no Bask: abra "Assistir Juntos", escolha "Entrar na sala" e insira ${code}.';
+	@override String get openSessionControls => 'Abrir os controles da sessão Assistir Juntos';
+	@override String get reconnecting => 'Reconectando...';
+	@override String get reconnectingDescription => 'A conexão caiu. Você voltará à sala automaticamente.';
+	@override String get connected => 'Conectado';
+	@override String get disconnected => 'Desconectado';
+	@override String get youAreHost => 'Você é o anfitrião';
+	@override String hostedBy({required Object name}) => 'Anfitrião: ${name}';
+	@override String get hostControlsPlayback => 'O anfitrião controla a reprodução';
+	@override String get anyoneCanControl => 'Qualquer pessoa pode controlar a reprodução';
+	@override String get roomLocked => 'Sala bloqueada';
+	@override String get nowPlaying => 'Reproduzindo agora';
+	@override String get nothingPlaying => 'Nada em reprodução';
+	@override String get nothingPlayingHost => 'Reproduza algo de qualquer biblioteca para compartilhar com a sala.';
+	@override String get nothingPlayingGuest => 'Quando o anfitrião reproduzir algo, o conteúdo será aberto aqui.';
+	@override String get notShareable => 'Este vídeo não corresponde a nenhum item do catálogo, então apenas pessoas com acesso ao mesmo servidor podem reproduzi-lo.';
+	@override String get searching => 'Procurando este vídeo nas suas bibliotecas...';
+	@override String get yourCopy => 'Sua cópia';
+	@override String get sharingYourCopy => 'Você está compartilhando sua cópia';
+	@override String playingOtherLength({required Object difference}) => 'Reproduzindo sua cópia, ${difference}';
+	@override String get mismatchTitle => 'Sua cópia tem outra duração';
+	@override String mismatchDescription({required Object difference}) => 'Sua cópia mais próxima é ${difference} que o vídeo da sala. Pode ser outro corte ou outra versão.';
+	@override String get playAnyway => 'Reproduzir mesmo assim';
+	@override String get chooseAnotherCopy => 'Escolher outra cópia';
+	@override String get dontPlay => 'Não reproduzir';
+	@override String get unavailableTitle => 'Você não tem este vídeo';
+	@override String get unavailableDescription => 'O Bask não o encontrou nas suas bibliotecas. Escolha uma cópia manualmente ou busque novamente.';
+	@override String get chooseCopy => 'Escolher uma cópia';
+	@override String get searchAgain => 'Buscar novamente';
+	@override String get noCandidates => 'Nenhuma cópia encontrada nas suas bibliotecas.';
+	@override String get choiceFailed => 'Não foi possível reproduzir esta cópia para a sala';
+	@override String lengthLonger({required Object duration}) => '${duration} mais longa';
+	@override String lengthShorter({required Object duration}) => '${duration} mais curta';
+	@override String get lengthSame => 'Mesma duração';
+	@override String get lengthUnknown => 'Duração desconhecida';
+	@override String get joinCurrentPlayback => 'Entrar na reprodução atual';
+	@override String get joinCurrentPlaybackDescription => 'Voltar ao conteúdo que o anfitrião está assistindo agora';
+	@override String get stopMedia => 'Parar o vídeo para todos';
+	@override String get syncOffset => 'Ajuste de sincronia';
+	@override String get syncOffsetDescription => 'Ajuste seu vídeo se ele estiver adiantado ou atrasado em relação à sala.';
+	@override String offsetHint({required Object difference}) => 'Sua cópia é ${difference} que o vídeo da sala.';
+	@override String applyDifference({required Object offset}) => 'Usar ${offset}';
+	@override String get offsetMinusSecond => '-1 s';
+	@override String get offsetMinusTenth => '-100 ms';
+	@override String get offsetPlusTenth => '+100 ms';
+	@override String get offsetPlusSecond => '+1 s';
+	@override String get participants => 'Participantes';
+	@override String participantCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n,
+		one: '${n} participante',
+		other: '${n} participantes',
+	);
+	@override String get hostBadge => 'ANFITRIÃO';
+	@override String nameYou({required Object name}) => '${name} (você)';
+	@override String get playerIdle => 'Ocioso';
+	@override String get playerLoading => 'Carregando';
+	@override String get playerReady => 'Pronto';
+	@override String get playerBuffering => 'Em buffer';
+	@override String get matchSearching => 'Procurando';
+	@override String get matchMatched => 'Tem o vídeo';
+	@override String get matchMismatched => 'Duração diferente';
+	@override String get matchUnavailable => 'Não tem o vídeo';
+	@override String participantOffset({required Object offset}) => 'Ajuste ${offset}';
+	@override String get makeHost => 'Tornar anfitrião';
+	@override String get makeHostQuestion => 'Transferir anfitrião?';
+	@override String makeHostConfirm({required Object name}) => '${name} controlará a reprodução e conduzirá a sessão para todos.';
+	@override String get transfer => 'Transferir';
+	@override String get removeParticipant => 'Remover da sala';
+	@override String removeParticipantQuestion({required Object name}) => 'Remover ${name}?';
+	@override String removeParticipantConfirm({required Object name}) => '${name} sairá da sala. A pessoa poderá entrar novamente com o código, a menos que você bloqueie a sala.';
+	@override String get remove => 'Remover';
+	@override String get roomSettings => 'Configurações da sala';
+	@override String get letEveryoneControl => 'Permitir que todos controlem a reprodução';
+	@override String get lockRoom => 'Bloquear sala';
+	@override String get lockRoomDescription => 'Ninguém novo pode entrar';
+	@override String get leaveRoom => 'Sair da sala';
+	@override String get leaveRoomQuestion => 'Sair da sala?';
+	@override String get leaveRoomConfirm => 'Você pode entrar novamente com o código da sala.';
+	@override String get leave => 'Sair';
+	@override String get endRoom => 'Encerrar sala';
+	@override String get endRoomQuestion => 'Encerrar sala?';
+	@override String get endRoomConfirm => 'Isso encerra a sala para todos.';
+	@override String get end => 'Encerrar';
+	@override String get playBlockedTitle => 'A reprodução não começou';
+	@override String get playBlockedDescription => 'Pressione reproduzir para começar a assistir com a sala.';
+	@override late final Translations$watchTogether$notices$pt notices = Translations$watchTogether$notices$pt.internal(_root);
+	@override late final Translations$watchTogether$ended$pt ended = Translations$watchTogether$ended$pt.internal(_root);
+	@override late final Translations$watchTogether$errors$pt errors = Translations$watchTogether$errors$pt.internal(_root);
+	@override String untitledEpisode({required Object number}) => 'Episódio ${number}';
 }
 
 // Path: downloads
-class _Translations$downloads$pt extends Translations$downloads$en {
-	_Translations$downloads$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$downloads$pt extends Translations$downloads$en {
+	Translations$downloads$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1720,10 +1937,14 @@ class _Translations$downloads$pt extends Translations$downloads$en {
 	@override String get downloadQueued => 'Download na fila';
 	@override String get downloadResumed => 'Download retomado';
 	@override String get serverErrorBitrate => 'Erro do servidor: o arquivo pode exceder o limite remoto de taxa de bits';
-	@override String get storageFull => 'Os downloads foram interrompidos porque o armazenamento do dispositivo está cheio. Libere espaço e tente novamente.';
+	@override String get storageFull => 'Os downloads foram interrompidos para proteger o espaço disponível. Libere espaço ou escolha outro local de download e tente novamente.';
+	@override String get storageUnavailable => 'Os downloads foram interrompidos porque não foi possível verificar o armazenamento disponível. Verifique o local de download e tente novamente.';
 	@override String episodesQueued({required Object count}) => '${count} episódios na fila de download';
 	@override String get downloadDeleted => 'Download excluído';
 	@override String deleteConfirm({required Object title}) => 'Excluir "${title}" deste dispositivo?';
+	@override String get deleteCollectionDownloads => 'Excluir downloads';
+	@override String deleteCollectionDownloadsConfirm({required Object title}) => 'Excluir todos os downloads de "${title}" deste dispositivo?';
+	@override String get collectionDownloadsDeleted => 'Downloads excluídos';
 	@override String get cancelledDownloadTitle => 'Download cancelado';
 	@override String get cancelledDownloadMessage => 'Este download foi cancelado. O que você deseja fazer?';
 	@override String get allEpisodesAlreadyDownloaded => 'Todos os episódios já foram baixados';
@@ -1741,6 +1962,8 @@ class _Translations$downloads$pt extends Translations$downloads$en {
 	@override String get noDownloadsTree => 'Nenhum download';
 	@override String get pauseAll => 'Pausar todos';
 	@override String get resumeAll => 'Retomar todos';
+	@override String get retryAll => 'Tentar todos novamente';
+	@override String get retryFailed => 'Tentar novamente os downloads com falha';
 	@override String get deleteAll => 'Excluir todos';
 	@override String get selectVersion => 'Selecionar versão';
 	@override String get allEpisodes => 'Todos os episódios';
@@ -1777,25 +2000,35 @@ class _Translations$downloads$pt extends Translations$downloads$en {
 	@override String get syncRuleAvailable => 'Disponível';
 	@override String get syncRuleOffline => 'Offline';
 	@override String get syncRuleSignInRequired => 'É necessário entrar';
+	@override String get syncRuleAccessDenied => 'Acesso negado';
 	@override String get syncRuleNotAvailableForProfile => 'Indisponível para o perfil atual';
 	@override String get syncRuleUnknownServer => 'Servidor desconhecido';
 	@override String get syncRuleListCreated => 'Regra de sincronização criada';
-	@override late final _Translations$downloads$backgroundWarning$pt backgroundWarning = _Translations$downloads$backgroundWarning$pt._(_root);
+	@override late final Translations$downloads$backgroundWarning$pt backgroundWarning = Translations$downloads$backgroundWarning$pt.internal(_root);
+	@override String get options => 'Opções de downloads';
+	@override late final Translations$downloads$groupings$pt groupings = Translations$downloads$groupings$pt.internal(_root);
+	@override String get unknownLibrary => 'Biblioteca desconhecida';
 	@override String get unknownShow => 'Série desconhecida';
 	@override String get unknownSeason => 'Temporada desconhecida';
 	@override String get unknownAlbum => 'Álbum desconhecido';
 	@override String completedOfTotal({required Object completed, required Object total}) => '${completed}/${total} concluídos';
 	@override String get errorFileNotFound => 'Arquivo não encontrado (404)';
+	@override String get errorDownloadNotAllowed => 'Download não permitido pelo servidor (403)';
 	@override String get errorDownloadFailed => 'Falha no download';
-	@override String errorPostProcessing({required Object error}) => 'Falha no pós-processamento: ${error}';
+	@override String errorDownloadFailedWithReason({required Object reason}) => 'Falha no download: ${reason}';
+	@override String errorHttpStatus({required Object status}) => 'Falha no download (HTTP ${status})';
+	@override String errorPostProcessing({required Object reason}) => 'Falha no pós-processamento: ${reason}';
+	@override String get reasonFileNotSaved => 'não foi possível salvar o arquivo neste dispositivo';
+	@override String get reasonCannotResume => 'não foi possível retomar o download parcial';
+	@override String get reasonDeviceStorageFull => 'este dispositivo está sem espaço de armazenamento';
 	@override String get notificationDownloading => 'Baixando...';
 	@override String get notificationComplete => 'Download concluído';
 	@override String get notificationPaused => 'Download pausado';
 }
 
 // Path: shaders
-class _Translations$shaders$pt extends Translations$shaders$en {
-	_Translations$shaders$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$shaders$pt extends Translations$shaders$en {
+	Translations$shaders$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1818,8 +2051,8 @@ class _Translations$shaders$pt extends Translations$shaders$en {
 }
 
 // Path: companionRemote
-class _Translations$companionRemote$pt extends Translations$companionRemote$en {
-	_Translations$companionRemote$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$companionRemote$pt extends Translations$companionRemote$en {
+	Translations$companionRemote$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1827,16 +2060,16 @@ class _Translations$companionRemote$pt extends Translations$companionRemote$en {
 	@override String get title => 'Controle remoto';
 	@override String connectedTo({required Object name}) => 'Conectado a ${name}';
 	@override String get unknownDevice => 'Dispositivo desconhecido';
-	@override late final _Translations$companionRemote$session$pt session = _Translations$companionRemote$session$pt._(_root);
-	@override late final _Translations$companionRemote$pairing$pt pairing = _Translations$companionRemote$pairing$pt._(_root);
-	@override late final _Translations$companionRemote$remote$pt remote = _Translations$companionRemote$remote$pt._(_root);
-	@override late final _Translations$companionRemote$errors$pt errors = _Translations$companionRemote$errors$pt._(_root);
+	@override late final Translations$companionRemote$session$pt session = Translations$companionRemote$session$pt.internal(_root);
+	@override late final Translations$companionRemote$pairing$pt pairing = Translations$companionRemote$pairing$pt.internal(_root);
+	@override late final Translations$companionRemote$remote$pt remote = Translations$companionRemote$remote$pt.internal(_root);
+	@override late final Translations$companionRemote$errors$pt errors = Translations$companionRemote$errors$pt.internal(_root);
 	@override String get closedBeforeAuth => 'A conexão foi encerrada antes da autenticação';
 }
 
 // Path: videoSettings
-class _Translations$videoSettings$pt extends Translations$videoSettings$en {
-	_Translations$videoSettings$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$videoSettings$pt extends Translations$videoSettings$en {
+	Translations$videoSettings$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1864,12 +2097,12 @@ class _Translations$videoSettings$pt extends Translations$videoSettings$en {
 	@override String get audioOutputSpatial => 'Áudio espacial';
 	@override String get audioOutputStereo => 'Estéreo';
 	@override String get audioNormalization => 'Normalizar intensidade sonora';
-	@override String get audioDownmix => 'Conversão para estéreo';
+	@override String get audioNormalizationDisablesPassthrough => 'Decodifica o áudio para PCM; a passagem direta fica desativada enquanto esta opção estiver ativa';
 }
 
 // Path: performanceOverlay
-class _Translations$performanceOverlay$pt extends Translations$performanceOverlay$en {
-	_Translations$performanceOverlay$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$performanceOverlay$pt extends Translations$performanceOverlay$en {
+	Translations$performanceOverlay$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1886,6 +2119,13 @@ class _Translations$performanceOverlay$pt extends Translations$performanceOverla
 	@override String get rotation => 'Rotação';
 	@override String get dvSource => 'Fonte DV';
 	@override String get dvPath => 'Caminho DV';
+	@override String get dvRouteDecoder => 'Decodificador Dolby Vision';
+	@override String get dvRouteDecoderP81 => 'Decodificador Dolby Vision (P7→8.1)';
+	@override String get dvRouteBaseLayer => 'Camada base';
+	@override String get dvRouteBaseLayerHdr10 => 'Camada base HDR10';
+	@override String get dvRouteBaseLayerHlg => 'Camada base HLG';
+	@override String get dvRouteBaseLayerSdr => 'Camada base SDR';
+	@override String get dvRouteReshaped => 'Remodelagem RPU (gpu-next)';
 	@override String get p7Conversion => 'Conv. P7';
 	@override String get sampleRate => 'Taxa de amostragem';
 	@override String get pixelFormat => 'Formato de pixel';
@@ -1923,8 +2163,8 @@ class _Translations$performanceOverlay$pt extends Translations$performanceOverla
 }
 
 // Path: externalPlayer
-class _Translations$externalPlayer$pt extends Translations$externalPlayer$en {
-	_Translations$externalPlayer$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$externalPlayer$pt extends Translations$externalPlayer$en {
+	Translations$externalPlayer$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -1948,8 +2188,8 @@ class _Translations$externalPlayer$pt extends Translations$externalPlayer$en {
 }
 
 // Path: metadataEdit
-class _Translations$metadataEdit$pt extends Translations$metadataEdit$en {
-	_Translations$metadataEdit$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$metadataEdit$pt extends Translations$metadataEdit$en {
+	Translations$metadataEdit$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2030,11 +2270,12 @@ class _Translations$metadataEdit$pt extends Translations$metadataEdit$en {
 	@override String get label => 'Rótulo';
 	@override String get style => 'Estilo';
 	@override String get mood => 'Humor';
+	@override String get quickTag => 'Tag rápida...';
 }
 
 // Path: matchScreen
-class _Translations$matchScreen$pt extends Translations$matchScreen$en {
-	_Translations$matchScreen$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$matchScreen$pt extends Translations$matchScreen$en {
+	Translations$matchScreen$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2054,8 +2295,8 @@ class _Translations$matchScreen$pt extends Translations$matchScreen$en {
 }
 
 // Path: serverTasks
-class _Translations$serverTasks$pt extends Translations$serverTasks$en {
-	_Translations$serverTasks$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$serverTasks$pt extends Translations$serverTasks$en {
+	Translations$serverTasks$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2066,8 +2307,8 @@ class _Translations$serverTasks$pt extends Translations$serverTasks$en {
 }
 
 // Path: trakt
-class _Translations$trakt$pt extends Translations$trakt$en {
-	_Translations$trakt$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$trakt$pt extends Translations$trakt$en {
+	Translations$trakt$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2084,8 +2325,8 @@ class _Translations$trakt$pt extends Translations$trakt$en {
 }
 
 // Path: seerr
-class _Translations$seerr$pt extends Translations$seerr$en {
-	_Translations$seerr$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$seerr$pt extends Translations$seerr$en {
+	Translations$seerr$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2112,6 +2353,10 @@ class _Translations$seerr$pt extends Translations$seerr$en {
 	@override String get qualityProfile => 'Perfil de qualidade';
 	@override String get rootFolder => 'Pasta raiz';
 	@override String get languageProfile => 'Perfil de idioma';
+	@override String get tags => 'Etiquetas';
+	@override String get noTags => 'Sem etiquetas';
+	@override String defaultOption({required Object name}) => '${name} (padrão)';
+	@override String get animeNote => 'Esta série é um anime.';
 	@override String get requestSubmitted => 'Solicitação enviada';
 	@override String requestFailed({required Object error}) => 'Falha na solicitação: ${error}';
 	@override String get requestsLoadFailed => 'Não foi possível carregar as opções de solicitação';
@@ -2123,6 +2368,7 @@ class _Translations$seerr$pt extends Translations$seerr$en {
 	@override String get statusBlocklisted => 'Na lista de bloqueio';
 	@override String couldNotReach({required Object url, required Object error}) => 'Não foi possível acessar ${url}: ${error}';
 	@override String noInstanceAtUrl({required Object url, required Object status}) => 'Nenhuma instância do Seerr em ${url} (HTTP ${status})';
+	@override String get behindAuthProxy => 'Um proxy reverso com autenticação (SSO ou autenticação HTTP) respondeu no lugar do Seerr. O Bask não consegue entrar através dele: permita que o caminho /api/v1 do Seerr ignore o proxy para este aplicativo, ou use um endereço que alcance o Seerr diretamente.';
 	@override String get invalidUrl => 'Insira um endereço de servidor como https://seerr.example.com';
 	@override String get quickConnectUnsupported => 'Esta instância do Seerr não oferece suporte a Quick Connect. Ela precisa do Seerr 3.4 ou mais recente.';
 	@override String get notInitialized => 'Esta instância do Seerr não concluiu a configuração inicial';
@@ -2133,11 +2379,13 @@ class _Translations$seerr$pt extends Translations$seerr$en {
 	@override String get freshCookieRejected => 'O Seerr rejeitou o novo cookie de sessão';
 	@override String get noUserInformation => 'O Seerr não retornou informações do usuário';
 	@override String get sessionRejectedAfterReauth => 'A sessão foi rejeitada após entrar novamente';
+	@override String get permissionDenied => 'O Seerr negou esta ação: sua conta não tem mais a permissão necessária';
+	@override String get permissionRevoked => 'Você não tem mais permissão para solicitar isso';
 }
 
 // Path: services
-class _Translations$services$pt extends Translations$services$en {
-	_Translations$services$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$services$pt extends Translations$services$en {
+	Translations$services$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2152,16 +2400,17 @@ class _Translations$services$pt extends Translations$services$en {
 	@override String disconnectConfirm({required Object service}) => 'Desconectar ${service}?';
 	@override String disconnectConfirmBody({required Object service}) => 'O Bask deixará de atualizar ${service}. Reconecte quando quiser.';
 	@override String connectFailed({required Object service}) => 'Não foi possível conectar ao ${service}. Tente novamente.';
-	@override late final _Translations$services$names$pt names = _Translations$services$names$pt._(_root);
-	@override late final _Translations$services$deviceCode$pt deviceCode = _Translations$services$deviceCode$pt._(_root);
-	@override late final _Translations$services$oauthProxy$pt oauthProxy = _Translations$services$oauthProxy$pt._(_root);
-	@override late final _Translations$services$pendingAuth$pt pendingAuth = _Translations$services$pendingAuth$pt._(_root);
-	@override late final _Translations$services$libraryFilter$pt libraryFilter = _Translations$services$libraryFilter$pt._(_root);
+	@override late final Translations$services$names$pt names = Translations$services$names$pt.internal(_root);
+	@override late final Translations$services$simklReconnect$pt simklReconnect = Translations$services$simklReconnect$pt.internal(_root);
+	@override late final Translations$services$deviceCode$pt deviceCode = Translations$services$deviceCode$pt.internal(_root);
+	@override late final Translations$services$oauthProxy$pt oauthProxy = Translations$services$oauthProxy$pt.internal(_root);
+	@override late final Translations$services$pendingAuth$pt pendingAuth = Translations$services$pendingAuth$pt.internal(_root);
+	@override late final Translations$services$libraryFilter$pt libraryFilter = Translations$services$libraryFilter$pt.internal(_root);
 }
 
 // Path: addServer
-class _Translations$addServer$pt extends Translations$addServer$en {
-	_Translations$addServer$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$addServer$pt extends Translations$addServer$en {
+	Translations$addServer$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2215,9 +2464,41 @@ class _Translations$addServer$pt extends Translations$addServer$en {
 	@override String redirectUnsupportedEnterFinal({required Object product}) => 'O servidor redirecionou para uma URL não compatível. Insira diretamente a URL final do ${product}.';
 }
 
+// Path: appIcon.names
+class Translations$appIcon$names$pt extends Translations$appIcon$names$en {
+	Translations$appIcon$names$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get midnight => 'Meia-noite';
+	@override String get ember => 'Brasa';
+	@override String get paper => 'Papel';
+	@override String get oled => 'OLED';
+	@override String get line => 'Traço';
+	@override String get ocean => 'Oceano';
+	@override String get ultraviolet => 'Ultravioleta';
+	@override String get matcha => 'Matcha';
+	@override String get sunset => 'Pôr do sol';
+	@override String get gold => 'Dourado';
+	@override String get titanium => 'Titânio';
+	@override String get glass => 'Vidro';
+	@override String get crt => 'CRT';
+	@override String get vhs => 'VHS';
+	@override String get synthwave => 'Synthwave';
+	@override String get pixel => 'Pixel';
+	@override String get neon => 'Neon';
+	@override String get sticker => 'Adesivo';
+	@override String get ticket => 'Ingresso';
+	@override String get pop => 'Pop';
+	@override String get strata => 'Estratos';
+	@override String get facet => 'Faceta';
+	@override String get tilde => 'Til';
+}
+
 // Path: common.ratingSource
-class _Translations$common$ratingSource$pt extends Translations$common$ratingSource$en {
-	_Translations$common$ratingSource$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$common$ratingSource$pt extends Translations$common$ratingSource$en {
+	Translations$common$ratingSource$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2233,11 +2514,13 @@ class _Translations$common$ratingSource$pt extends Translations$common$ratingSou
 	@override String get trakt => 'Trakt';
 	@override String get rottenTomatoesCritic => 'Críticos do Rotten Tomatoes';
 	@override String get rottenTomatoesAudience => 'Público do Rotten Tomatoes';
+	@override String get metacritic => 'Metacritic';
+	@override String get letterboxd => 'Letterboxd';
 }
 
 // Path: common.mediaKind
-class _Translations$common$mediaKind$pt extends Translations$common$mediaKind$en {
-	_Translations$common$mediaKind$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$common$mediaKind$pt extends Translations$common$mediaKind$en {
+	Translations$common$mediaKind$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2256,9 +2539,55 @@ class _Translations$common$mediaKind$pt extends Translations$common$mediaKind$en
 	@override String get folder => 'Pasta';
 }
 
+// Path: supporter.errors
+class Translations$supporter$errors$pt extends Translations$supporter$errors$en {
+	Translations$supporter$errors$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get storeUnavailable => 'As compras não estão disponíveis. Verifique se você entrou na sua conta da loja e se as compras são permitidas neste dispositivo.';
+	@override String get productNotFound => 'O Pacote de temas e ícones não está disponível na sua loja no momento.';
+	@override String get productQueryFailed => 'Não foi possível carregar o preço. Verifique sua conexão e tente novamente.';
+	@override String get purchaseFailed => 'A compra não foi concluída. Tente novamente.';
+	@override String get restoreFailed => 'Não foi possível acessar a loja para restaurar sua compra. Tente novamente.';
+	@override String get nothingToRestore => 'Nenhuma compra do Pacote de temas e ícones foi encontrada para esta conta da loja.';
+}
+
+// Path: themeEditor.slots
+class Translations$themeEditor$slots$pt extends Translations$themeEditor$slots$en {
+	Translations$themeEditor$slots$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get bg => 'Fundo';
+	@override String get surface => 'Superfície';
+	@override String get outline => 'Contorno';
+	@override String get text => 'Texto';
+	@override String get textMuted => 'Texto secundário';
+	@override String get accent => 'Destaque';
+}
+
+// Path: themeEditor.contrast
+class Translations$themeEditor$contrast$pt extends Translations$themeEditor$contrast$en {
+	Translations$themeEditor$contrast$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get textOnBg => 'Texto sobre o fundo';
+	@override String get textOnSurface => 'Texto sobre a superfície';
+	@override String get textMutedOnBg => 'Texto secundário sobre o fundo';
+	@override String get textMutedOnSurface => 'Texto secundário sobre a superfície';
+	@override String get accentOnBg => 'Destaque sobre o fundo';
+	@override String get accentOnSurface => 'Destaque sobre a superfície';
+	@override String get labelOnAccent => 'Rótulo do botão sobre o destaque';
+}
+
 // Path: hotkeys.actions
-class _Translations$hotkeys$actions$pt extends Translations$hotkeys$actions$en {
-	_Translations$hotkeys$actions$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$hotkeys$actions$pt extends Translations$hotkeys$actions$en {
+	Translations$hotkeys$actions$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2291,8 +2620,8 @@ class _Translations$hotkeys$actions$pt extends Translations$hotkeys$actions$en {
 }
 
 // Path: videoControls.pipErrors
-class _Translations$videoControls$pipErrors$pt extends Translations$videoControls$pipErrors$en {
-	_Translations$videoControls$pipErrors$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$videoControls$pipErrors$pt extends Translations$videoControls$pipErrors$en {
+	Translations$videoControls$pipErrors$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2308,8 +2637,8 @@ class _Translations$videoControls$pipErrors$pt extends Translations$videoControl
 }
 
 // Path: accountPreferences.groups
-class _Translations$accountPreferences$groups$pt extends Translations$accountPreferences$groups$en {
-	_Translations$accountPreferences$groups$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accountPreferences$groups$pt extends Translations$accountPreferences$groups$en {
+	Translations$accountPreferences$groups$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2320,8 +2649,8 @@ class _Translations$accountPreferences$groups$pt extends Translations$accountPre
 }
 
 // Path: accountPreferences.subtitleModes
-class _Translations$accountPreferences$subtitleModes$pt extends Translations$accountPreferences$subtitleModes$en {
-	_Translations$accountPreferences$subtitleModes$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accountPreferences$subtitleModes$pt extends Translations$accountPreferences$subtitleModes$en {
+	Translations$accountPreferences$subtitleModes$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2339,8 +2668,8 @@ class _Translations$accountPreferences$subtitleModes$pt extends Translations$acc
 }
 
 // Path: accountPreferences.subtitleAccessibilityOptions
-class _Translations$accountPreferences$subtitleAccessibilityOptions$pt extends Translations$accountPreferences$subtitleAccessibilityOptions$en {
-	_Translations$accountPreferences$subtitleAccessibilityOptions$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accountPreferences$subtitleAccessibilityOptions$pt extends Translations$accountPreferences$subtitleAccessibilityOptions$en {
+	Translations$accountPreferences$subtitleAccessibilityOptions$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2352,8 +2681,8 @@ class _Translations$accountPreferences$subtitleAccessibilityOptions$pt extends T
 }
 
 // Path: accountPreferences.forcedSubtitleOptions
-class _Translations$accountPreferences$forcedSubtitleOptions$pt extends Translations$accountPreferences$forcedSubtitleOptions$en {
-	_Translations$accountPreferences$forcedSubtitleOptions$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accountPreferences$forcedSubtitleOptions$pt extends Translations$accountPreferences$forcedSubtitleOptions$en {
+	Translations$accountPreferences$forcedSubtitleOptions$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2365,8 +2694,8 @@ class _Translations$accountPreferences$forcedSubtitleOptions$pt extends Translat
 }
 
 // Path: accountPreferences.watchedIndicatorOptions
-class _Translations$accountPreferences$watchedIndicatorOptions$pt extends Translations$accountPreferences$watchedIndicatorOptions$en {
-	_Translations$accountPreferences$watchedIndicatorOptions$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accountPreferences$watchedIndicatorOptions$pt extends Translations$accountPreferences$watchedIndicatorOptions$en {
+	Translations$accountPreferences$watchedIndicatorOptions$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2378,8 +2707,8 @@ class _Translations$accountPreferences$watchedIndicatorOptions$pt extends Transl
 }
 
 // Path: accountPreferences.mediaReviewsOptions
-class _Translations$accountPreferences$mediaReviewsOptions$pt extends Translations$accountPreferences$mediaReviewsOptions$en {
-	_Translations$accountPreferences$mediaReviewsOptions$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$accountPreferences$mediaReviewsOptions$pt extends Translations$accountPreferences$mediaReviewsOptions$en {
+	Translations$accountPreferences$mediaReviewsOptions$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2390,9 +2719,23 @@ class _Translations$accountPreferences$mediaReviewsOptions$pt extends Translatio
 	@override String get nobody => 'Oculto';
 }
 
+// Path: discover.person
+class Translations$discover$person$pt extends Translations$discover$person$en {
+	Translations$discover$person$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get born => 'Nascimento';
+	@override String get died => 'Falecimento';
+	@override String get birthplace => 'Local de nascimento';
+	@override String dateWithAge({required Object date, required Object age}) => '${date} (${age} anos)';
+	@override String dateWithAgeAtDeath({required Object date, required Object age}) => '${date} (aos ${age} anos)';
+}
+
 // Path: libraries.tabs
-class _Translations$libraries$tabs$pt extends Translations$libraries$tabs$en {
-	_Translations$libraries$tabs$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$libraries$tabs$pt extends Translations$libraries$tabs$en {
+	Translations$libraries$tabs$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2404,8 +2747,8 @@ class _Translations$libraries$tabs$pt extends Translations$libraries$tabs$en {
 }
 
 // Path: libraries.groupings
-class _Translations$libraries$groupings$pt extends Translations$libraries$groupings$en {
-	_Translations$libraries$groupings$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$libraries$groupings$pt extends Translations$libraries$groupings$en {
+	Translations$libraries$groupings$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2423,8 +2766,8 @@ class _Translations$libraries$groupings$pt extends Translations$libraries$groupi
 }
 
 // Path: libraries.filterCategories
-class _Translations$libraries$filterCategories$pt extends Translations$libraries$filterCategories$en {
-	_Translations$libraries$filterCategories$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$libraries$filterCategories$pt extends Translations$libraries$filterCategories$en {
+	Translations$libraries$filterCategories$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2436,11 +2779,12 @@ class _Translations$libraries$filterCategories$pt extends Translations$libraries
 	@override String get unwatched => 'Não assistidos';
 	@override String get unplayed => 'Não reproduzidos';
 	@override String get favorites => 'Favoritos';
+	@override String get filePath => 'Caminho do arquivo';
 }
 
 // Path: libraries.sortLabels
-class _Translations$libraries$sortLabels$pt extends Translations$libraries$sortLabels$en {
-	_Translations$libraries$sortLabels$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$libraries$sortLabels$pt extends Translations$libraries$sortLabels$en {
+	Translations$libraries$sortLabels$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2465,11 +2809,49 @@ class _Translations$libraries$sortLabels$pt extends Translations$libraries$sortL
 	@override String get dateShared => 'Data de compartilhamento';
 	@override String get latestEpisodeAirDate => 'Última data de exibição do episódio';
 	@override String get lastEpisodeDateAdded => 'Data de adição do último episódio';
+	@override String get dateDownloaded => 'Data de download';
+	@override String get size => 'Tamanho';
+	@override String get library => 'Biblioteca';
+}
+
+// Path: libraries.advancedFilters
+class Translations$libraries$advancedFilters$pt extends Translations$libraries$advancedFilters$en {
+	Translations$libraries$advancedFilters$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get include => 'Incluir';
+	@override String get exclude => 'Excluir';
+	@override String get any => 'Qualquer';
+	@override String get yes => 'Sim';
+	@override String get no => 'Não';
+	@override String not({required Object value}) => 'Exceto ${value}';
+	@override String valueCount({required Object count}) => '${count} selecionados';
+	@override String valueCountExcluded({required Object count}) => '${count} excluídos';
+	@override String get searchValues => 'Buscar valores';
+	@override String get noValues => 'Nenhum valor';
+	@override String get matchContains => 'Contém';
+	@override String get matchNotContains => 'Não contém';
+	@override String get matchIs => 'É';
+	@override String get matchIsNot => 'Não é';
+	@override String get matchBeginsWith => 'Começa com';
+	@override String get matchEndsWith => 'Termina com';
+	@override String get textHint => 'Digite para filtrar';
+	@override String get from => 'De';
+	@override String get to => 'Até';
+	@override String range({required Object from, required Object to}) => '${from} a ${to}';
+	@override String atLeast({required Object value}) => '${value} ou mais';
+	@override String atMost({required Object value}) => 'Até ${value}';
+	@override String dateLastDays({required Object count}) => 'Últimos ${count} dias';
+	@override String get dateLastYear => 'Último ano';
+	@override String dateOlderThanDays({required Object count}) => 'Há mais de ${count} dias';
+	@override String get dateOlderThanYear => 'Há mais de um ano';
 }
 
 // Path: explore.rows
-class _Translations$explore$rows$pt extends Translations$explore$rows$en {
-	_Translations$explore$rows$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$rows$pt extends Translations$explore$rows$en {
+	Translations$explore$rows$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2491,8 +2873,8 @@ class _Translations$explore$rows$pt extends Translations$explore$rows$en {
 }
 
 // Path: explore.status
-class _Translations$explore$status$pt extends Translations$explore$status$en {
-	_Translations$explore$status$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$status$pt extends Translations$explore$status$en {
+	Translations$explore$status$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2504,8 +2886,8 @@ class _Translations$explore$status$pt extends Translations$explore$status$en {
 }
 
 // Path: explore.badge
-class _Translations$explore$badge$pt extends Translations$explore$badge$en {
-	_Translations$explore$badge$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$badge$pt extends Translations$explore$badge$en {
+	Translations$explore$badge$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2535,8 +2917,8 @@ class _Translations$explore$badge$pt extends Translations$explore$badge$en {
 }
 
 // Path: explore.stats
-class _Translations$explore$stats$pt extends Translations$explore$stats$en {
-	_Translations$explore$stats$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$stats$pt extends Translations$explore$stats$en {
+	Translations$explore$stats$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2562,8 +2944,8 @@ class _Translations$explore$stats$pt extends Translations$explore$stats$en {
 }
 
 // Path: explore.season
-class _Translations$explore$season$pt extends Translations$explore$season$en {
-	_Translations$explore$season$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$season$pt extends Translations$explore$season$en {
+	Translations$explore$season$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2576,8 +2958,8 @@ class _Translations$explore$season$pt extends Translations$explore$season$en {
 }
 
 // Path: explore.format
-class _Translations$explore$format$pt extends Translations$explore$format$en {
-	_Translations$explore$format$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$format$pt extends Translations$explore$format$en {
+	Translations$explore$format$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2593,8 +2975,8 @@ class _Translations$explore$format$pt extends Translations$explore$format$en {
 }
 
 // Path: explore.sourceMaterial
-class _Translations$explore$sourceMaterial$pt extends Translations$explore$sourceMaterial$en {
-	_Translations$explore$sourceMaterial$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$sourceMaterial$pt extends Translations$explore$sourceMaterial$en {
+	Translations$explore$sourceMaterial$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2611,12 +2993,13 @@ class _Translations$explore$sourceMaterial$pt extends Translations$explore$sourc
 }
 
 // Path: explore.creditRole
-class _Translations$explore$creditRole$pt extends Translations$explore$creditRole$en {
-	_Translations$explore$creditRole$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$creditRole$pt extends Translations$explore$creditRole$en {
+	Translations$explore$creditRole$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
+	@override String get actor => 'Ator';
 	@override String get director => 'Diretor';
 	@override String get writer => 'Roteirista';
 	@override String get producer => 'Produtor';
@@ -2625,8 +3008,8 @@ class _Translations$explore$creditRole$pt extends Translations$explore$creditRol
 }
 
 // Path: explore.relation
-class _Translations$explore$relation$pt extends Translations$explore$relation$en {
-	_Translations$explore$relation$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$relation$pt extends Translations$explore$relation$en {
+	Translations$explore$relation$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2643,8 +3026,8 @@ class _Translations$explore$relation$pt extends Translations$explore$relation$en
 }
 
 // Path: explore.detail
-class _Translations$explore$detail$pt extends Translations$explore$detail$en {
-	_Translations$explore$detail$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$explore$detail$pt extends Translations$explore$detail$en {
+	Translations$explore$detail$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2668,6 +3051,8 @@ class _Translations$explore$detail$pt extends Translations$explore$detail$en {
 	@override String get watchOn => 'Assistir em';
 	@override String get watchTrailer => 'Ver trailer';
 	@override String openOn({required Object site}) => 'Abrir em ${site}';
+	@override String get trailerUnavailable => 'Não foi possível abrir o trailer neste dispositivo';
+	@override String get linkUnavailable => 'Não foi possível abrir o link neste dispositivo';
 	@override String get crew => 'Equipe';
 	@override String get ratings => 'Avaliações';
 	@override String get schedule => 'Programação';
@@ -2684,8 +3069,8 @@ class _Translations$explore$detail$pt extends Translations$explore$detail$en {
 }
 
 // Path: liveTv.recordSettings
-class _Translations$liveTv$recordSettings$pt extends Translations$liveTv$recordSettings$en {
-	_Translations$liveTv$recordSettings$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$liveTv$recordSettings$pt extends Translations$liveTv$recordSettings$en {
+	Translations$liveTv$recordSettings$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2701,8 +3086,8 @@ class _Translations$liveTv$recordSettings$pt extends Translations$liveTv$recordS
 }
 
 // Path: music.discography
-class _Translations$music$discography$pt extends Translations$music$discography$en {
-	_Translations$music$discography$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$music$discography$pt extends Translations$music$discography$en {
+	Translations$music$discography$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2712,22 +3097,80 @@ class _Translations$music$discography$pt extends Translations$music$discography$
 	@override String get compilations => 'Compilações';
 }
 
-// Path: watchTogether.errors
-class _Translations$watchTogether$errors$pt extends Translations$watchTogether$errors$en {
-	_Translations$watchTogether$errors$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+// Path: watchTogether.notices
+class Translations$watchTogether$notices$pt extends Translations$watchTogether$notices$en {
+	Translations$watchTogether$notices$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
 	// Translations
-	@override String get timedOut => 'O servidor de retransmissão não respondeu a tempo';
-	@override String get connectionLost => 'A conexão foi encerrada antes de a sessão ficar pronta';
-	@override String get invalidRelayResponse => 'O servidor de retransmissão enviou uma resposta inesperada';
-	@override String get sessionEnded => 'O anfitrião encerrou a sessão';
+	@override String pressedPlay({required Object name}) => '${name} iniciou a reprodução';
+	@override String get playbackStarted => 'Reprodução iniciada';
+	@override String paused({required Object name}) => '${name} pausou';
+	@override String get playbackPaused => 'Reprodução pausada';
+	@override String jumpedTo({required Object name, required Object position}) => '${name} pulou para ${position}';
+	@override String roomJumpedTo({required Object position}) => 'Pulou para ${position}';
+	@override String changedSpeed({required Object name, required Object speed}) => '${name} definiu a velocidade para ${speed}';
+	@override String speedChanged({required Object speed}) => 'Velocidade definida para ${speed}';
+	@override String startedMedia({required Object name, required Object title}) => '${name} iniciou ${title}';
+	@override String mediaStarted({required Object title}) => 'Reproduzindo agora: ${title}';
+	@override String stoppedMedia({required Object name}) => '${name} parou o vídeo';
+	@override String get mediaStopped => 'O vídeo parou';
+	@override String waitingFor({required Object name}) => 'Aguardando ${name}...';
+	@override String get waitingForSomeone => 'Aguardando alguém se sincronizar...';
+	@override String get finished => 'Concluído';
+	@override String hostChangedTo({required Object name}) => '${name} agora é o anfitrião';
+	@override String get youAreNowHost => 'Agora você é o anfitrião';
+	@override String joined({required Object name}) => '${name} entrou';
+	@override String left({required Object name}) => '${name} saiu';
+	@override String get controlRefused => 'Apenas o anfitrião pode controlar a reprodução';
+	@override String get searchFailed => 'Não foi possível buscar o vídeo da sala em alguns servidores';
+	@override String get playBlocked => 'Pressione reproduzir para começar';
+	@override String get shareFailed => 'Não foi possível compartilhar este vídeo com a sala';
+	@override String get downloadNotShared => 'Os downloads não são compartilhados com a sala enquanto o servidor de origem estiver offline';
+	@override String get openFailed => 'Não foi possível abrir o vídeo da sala';
+}
+
+// Path: watchTogether.ended
+class Translations$watchTogether$ended$pt extends Translations$watchTogether$ended$en {
+	Translations$watchTogether$ended$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get ended => 'O anfitrião encerrou a sala';
+	@override String get kicked => 'Você foi removido da sala';
+	@override String get expired => 'A sala expirou';
+	@override String get replaced => 'Você entrou nesta sala em outro dispositivo';
+	@override String get lost => 'A conexão com a sala foi perdida';
+}
+
+// Path: watchTogether.errors
+class Translations$watchTogether$errors$pt extends Translations$watchTogether$errors$en {
+	Translations$watchTogether$errors$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get invalidCode => 'Isso não é um código de sala. Os códigos têm 6 letras e números, sem 0, 1, I, L ou O.';
+	@override String get roomNotFound => 'Nenhuma sala tem esse código. Ela pode ter sido encerrada.';
+	@override String get roomFull => 'Essa sala está cheia.';
+	@override String get roomLocked => 'O anfitrião bloqueou essa sala.';
+	@override String get relayFull => 'O Assistir Juntos está sobrecarregado no momento. Tente novamente mais tarde.';
+	@override String get unreachable => 'Não foi possível acessar o servidor de retransmissão do Assistir Juntos. Verifique sua conexão.';
+	@override String get rateLimited => 'Muitas tentativas. Aguarde um momento e tente novamente.';
+	@override String get clientBlocked => 'Esta versão do Bask não pode usar o servidor de retransmissão. Atualize o app.';
+	@override String get forbidden => 'Apenas o anfitrião pode fazer isso.';
+	@override String get notInRoom => 'Você não está em uma sala.';
+	@override String get alreadyInRoom => 'Você já está em uma sala.';
+	@override String get resumeFailed => 'Não foi possível voltar à sala.';
+	@override String get unsupported => 'O servidor de retransmissão não é compatível com isso.';
+	@override String get generic => 'Algo deu errado. Tente novamente.';
 }
 
 // Path: downloads.backgroundWarning
-class _Translations$downloads$backgroundWarning$pt extends Translations$downloads$backgroundWarning$en {
-	_Translations$downloads$backgroundWarning$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$downloads$backgroundWarning$pt extends Translations$downloads$backgroundWarning$en {
+	Translations$downloads$backgroundWarning$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2760,9 +3203,20 @@ class _Translations$downloads$backgroundWarning$pt extends Translations$download
 	@override String get linkUnavailable => 'Não foi possível abrir dontkillmyapp.com neste dispositivo';
 }
 
+// Path: downloads.groupings
+class Translations$downloads$groupings$pt extends Translations$downloads$groupings$en {
+	Translations$downloads$groupings$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get library => 'Biblioteca';
+	@override String get collections => 'Coleções';
+}
+
 // Path: companionRemote.session
-class _Translations$companionRemote$session$pt extends Translations$companionRemote$session$en {
-	_Translations$companionRemote$session$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$companionRemote$session$pt extends Translations$companionRemote$session$en {
+	Translations$companionRemote$session$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2782,8 +3236,8 @@ class _Translations$companionRemote$session$pt extends Translations$companionRem
 }
 
 // Path: companionRemote.pairing
-class _Translations$companionRemote$pairing$pt extends Translations$companionRemote$pairing$en {
-	_Translations$companionRemote$pairing$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$companionRemote$pairing$pt extends Translations$companionRemote$pairing$en {
+	Translations$companionRemote$pairing$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2806,8 +3260,8 @@ class _Translations$companionRemote$pairing$pt extends Translations$companionRem
 }
 
 // Path: companionRemote.remote
-class _Translations$companionRemote$remote$pt extends Translations$companionRemote$remote$en {
-	_Translations$companionRemote$remote$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$companionRemote$remote$pt extends Translations$companionRemote$remote$en {
+	Translations$companionRemote$remote$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2820,7 +3274,7 @@ class _Translations$companionRemote$remote$pt extends Translations$companionRemo
 	@override String get tabPlay => 'Reproduzir';
 	@override String get tabMore => 'Mais';
 	@override String get menu => 'Menu';
-	@override String get tabNavigation => 'Navegação';
+	@override String get tabNavigation => 'Navegação por abas';
 	@override String get tabDiscover => 'Descobrir';
 	@override String get tabLibraries => 'Bibliotecas';
 	@override String get tabSearch => 'Buscar';
@@ -2842,8 +3296,8 @@ class _Translations$companionRemote$remote$pt extends Translations$companionRemo
 }
 
 // Path: companionRemote.errors
-class _Translations$companionRemote$errors$pt extends Translations$companionRemote$errors$en {
-	_Translations$companionRemote$errors$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$companionRemote$errors$pt extends Translations$companionRemote$errors$en {
+	Translations$companionRemote$errors$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2859,8 +3313,8 @@ class _Translations$companionRemote$errors$pt extends Translations$companionRemo
 }
 
 // Path: services.names
-class _Translations$services$names$pt extends Translations$services$names$en {
-	_Translations$services$names$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$services$names$pt extends Translations$services$names$en {
+	Translations$services$names$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2872,9 +3326,20 @@ class _Translations$services$names$pt extends Translations$services$names$en {
 	@override String get mdblist => 'MDBList';
 }
 
+// Path: services.simklReconnect
+class Translations$services$simklReconnect$pt extends Translations$services$simklReconnect$en {
+	Translations$services$simklReconnect$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
+
+	final TranslationsPt _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Reconectar o Simkl';
+	@override String get subtitle => 'O Simkl está desativando o método de acesso usado por esta conexão. Ao reconectar, o simkl.com será aberto para aprovar o Bask — o Bask nunca vê sua senha. Seu histórico de exibição continua no Simkl.';
+}
+
 // Path: services.deviceCode
-class _Translations$services$deviceCode$pt extends Translations$services$deviceCode$en {
-	_Translations$services$deviceCode$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$services$deviceCode$pt extends Translations$services$deviceCode$en {
+	Translations$services$deviceCode$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2888,8 +3353,8 @@ class _Translations$services$deviceCode$pt extends Translations$services$deviceC
 }
 
 // Path: services.oauthProxy
-class _Translations$services$oauthProxy$pt extends Translations$services$oauthProxy$en {
-	_Translations$services$oauthProxy$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$services$oauthProxy$pt extends Translations$services$oauthProxy$en {
+	Translations$services$oauthProxy$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2900,8 +3365,8 @@ class _Translations$services$oauthProxy$pt extends Translations$services$oauthPr
 }
 
 // Path: services.pendingAuth
-class _Translations$services$pendingAuth$pt extends Translations$services$pendingAuth$en {
-	_Translations$services$pendingAuth$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$services$pendingAuth$pt extends Translations$services$pendingAuth$en {
+	Translations$services$pendingAuth$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2911,8 +3376,8 @@ class _Translations$services$pendingAuth$pt extends Translations$services$pendin
 }
 
 // Path: services.libraryFilter
-class _Translations$services$libraryFilter$pt extends Translations$services$libraryFilter$en {
-	_Translations$services$libraryFilter$pt._(TranslationsPt root) : this._root = root, super.internal(root);
+class Translations$services$libraryFilter$pt extends Translations$services$libraryFilter$en {
+	Translations$services$libraryFilter$pt.internal(TranslationsPt root) : this._root = root, super.internal(root);
 
 	final TranslationsPt _root; // ignore: unused_field
 
@@ -2940,6 +3405,37 @@ extension on TranslationsPt {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
 			'app.title' => 'Bask Media Player',
+			'appIcon.title' => 'Ícone do app',
+			'appIcon.defaultIcon' => 'Padrão',
+			'appIcon.current' => 'Ícone atual',
+			'appIcon.locked' => 'Incluído no Pacote de temas e ícones',
+			'appIcon.lockedHint' => 'Os ícones alternativos estão incluídos no Pacote de temas e ícones.',
+			'appIcon.changeFailed' => 'Não foi possível alterar o ícone do app',
+			'appIcon.launcherHint' => 'O novo ícone aparece na tela inicial assim que você sair do Bask.',
+			'appIcon.tvLauncherHint' => 'O novo banner aparece assim que você sair do Bask. O Android TV pode continuar mostrando o antigo até a TV ser reiniciada.',
+			'appIcon.names.midnight' => 'Meia-noite',
+			'appIcon.names.ember' => 'Brasa',
+			'appIcon.names.paper' => 'Papel',
+			'appIcon.names.oled' => 'OLED',
+			'appIcon.names.line' => 'Traço',
+			'appIcon.names.ocean' => 'Oceano',
+			'appIcon.names.ultraviolet' => 'Ultravioleta',
+			'appIcon.names.matcha' => 'Matcha',
+			'appIcon.names.sunset' => 'Pôr do sol',
+			'appIcon.names.gold' => 'Dourado',
+			'appIcon.names.titanium' => 'Titânio',
+			'appIcon.names.glass' => 'Vidro',
+			'appIcon.names.crt' => 'CRT',
+			'appIcon.names.vhs' => 'VHS',
+			'appIcon.names.synthwave' => 'Synthwave',
+			'appIcon.names.pixel' => 'Pixel',
+			'appIcon.names.neon' => 'Neon',
+			'appIcon.names.sticker' => 'Adesivo',
+			'appIcon.names.ticket' => 'Ingresso',
+			'appIcon.names.pop' => 'Pop',
+			'appIcon.names.strata' => 'Estratos',
+			'appIcon.names.facet' => 'Faceta',
+			'appIcon.names.tilde' => 'Til',
 			'auth.signInWithPlex' => 'Entrar com Plex',
 			'auth.showQRCode' => 'Mostrar código QR',
 			'auth.authenticate' => 'Autenticar',
@@ -3014,6 +3510,8 @@ extension on TranslationsPt {
 			'common.ratingSource.trakt' => 'Trakt',
 			'common.ratingSource.rottenTomatoesCritic' => 'Críticos do Rotten Tomatoes',
 			'common.ratingSource.rottenTomatoesAudience' => 'Público do Rotten Tomatoes',
+			'common.ratingSource.metacritic' => 'Metacritic',
+			'common.ratingSource.letterboxd' => 'Letterboxd',
 			'common.notAvailable' => 'N/D',
 			'common.url' => 'URL',
 			'common.letterKeys' => 'ABC',
@@ -3041,6 +3539,29 @@ extension on TranslationsPt {
 			'update.viewRelease' => 'Ver Lançamento',
 			'update.latestVersion' => 'Você está na versão mais recente',
 			'update.checkFailed' => 'Falha ao verificar atualizações',
+			'supporter.title' => 'Pacote de temas e ícones',
+			'supporter.intro' => 'Uma compra única e opcional que adiciona extras visuais:',
+			'supporter.presetThemes' => 'Temas predefinidos',
+			'supporter.presetThemesDescription' => 'Brasa, Geleira, Floresta, Ameixa e Papel',
+			'supporter.customTheme' => 'Tema personalizado',
+			'supporter.customThemeDescription' => 'Escolha você mesmo cada cor',
+			'supporter.appIcons' => 'Ícones do app',
+			'supporter.appIconsDescription' => 'Escolha um ícone alternativo do Bask',
+			'supporter.buy' => ({required Object price}) => 'Comprar por ${price}',
+			'supporter.loadingPrice' => 'Carregando preço...',
+			'supporter.restore' => 'Restaurar compras',
+			'supporter.pending' => 'Sua compra está aguardando pagamento ou aprovação. Os extras serão desbloqueados assim que a loja concluí-la.',
+			'supporter.thankYouTitle' => 'Obrigado pela sua compra',
+			'supporter.thankYouBody' => 'O Pacote de temas e ícones está desbloqueado.',
+			'supporter.tileSubtitle' => 'Desbloqueie temas e ícones do app com uma compra única',
+			'supporter.tileSubtitleThemesOnly' => 'Desbloqueie temas com uma compra única',
+			'supporter.tileUnlocked' => 'Desbloqueado — obrigado pela sua compra',
+			'supporter.errors.storeUnavailable' => 'As compras não estão disponíveis. Verifique se você entrou na sua conta da loja e se as compras são permitidas neste dispositivo.',
+			'supporter.errors.productNotFound' => 'O Pacote de temas e ícones não está disponível na sua loja no momento.',
+			'supporter.errors.productQueryFailed' => 'Não foi possível carregar o preço. Verifique sua conexão e tente novamente.',
+			'supporter.errors.purchaseFailed' => 'A compra não foi concluída. Tente novamente.',
+			'supporter.errors.restoreFailed' => 'Não foi possível acessar a loja para restaurar sua compra. Tente novamente.',
+			'supporter.errors.nothingToRestore' => 'Nenhuma compra do Pacote de temas e ícones foi encontrada para esta conta da loja.',
 			'settings.title' => 'Configurações',
 			'settings.supportDeveloper' => 'Apoie o Bask',
 			'settings.supportDeveloperDescription' => 'Doe via Liberapay para financiar o desenvolvimento',
@@ -3064,6 +3585,11 @@ extension on TranslationsPt {
 			'settings.lightTheme' => 'Claro',
 			'settings.darkTheme' => 'Escuro',
 			'settings.oledTheme' => 'OLED',
+			'settings.emberTheme' => 'Brasa',
+			'settings.glacierTheme' => 'Geleira',
+			'settings.forestTheme' => 'Floresta',
+			'settings.plumTheme' => 'Ameixa',
+			'settings.paperTheme' => 'Papel',
 			'settings.libraryDensity' => 'Densidade da Biblioteca',
 			'settings.displayScale' => 'Escala de exibição',
 			'settings.compact' => 'Compacto',
@@ -3094,6 +3620,8 @@ extension on TranslationsPt {
 			'settings.alwaysKeepSidebarOpenDescription' => 'A barra lateral fica expandida e a área de conteúdo se ajusta',
 			'settings.showUnwatchedCount' => 'Mostrar Contagem de Não Assistidos',
 			'settings.showUnwatchedCountDescription' => 'Exibir contagem de episódios não assistidos em séries e temporadas',
+			'settings.showWatchedIndicators' => 'Mostrar Indicadores de Assistidos',
+			'settings.showWatchedIndicatorsDescription' => 'Exibir uma marca de verificação em filmes, séries e episódios assistidos',
 			'settings.showEpisodeNumberOnCards' => 'Mostrar Número do Episódio nos Cards',
 			'settings.showEpisodeNumberOnCardsDescription' => 'Mostrar temporada e episódio nos cartões de episódio',
 			'settings.tvFullCardLayout' => 'Cartões TV completos',
@@ -3121,6 +3649,11 @@ extension on TranslationsPt {
 			'settings.defaultQualityTitle' => 'Qualidade padrão',
 			'settings.cellularQualityTitle' => 'Qualidade padrão nos dados móveis',
 			'settings.cellularQualitySameAsDefault' => 'Igual à qualidade padrão',
+			'settings.directPlayCoveredQuality' => 'Reproduzir Vídeos Menores na Qualidade Original',
+			'settings.directPlayCoveredQualityDescription' => 'Reproduzir diretamente os vídeos que já estão dentro do limite de qualidade em vez de transcodificá-los',
+			'settings.videoCodecs' => 'Codecs de vídeo',
+			'settings.videoCodecsDescription' => 'Codecs desmarcados são transcodificados pelo servidor',
+			'settings.videoCodecsAlwaysAccepted' => 'Sempre aceito',
 			'settings.musicQualityTitle' => 'Qualidade da música',
 			'settings.subtitleStyling' => 'Estilo de Legendas',
 			'settings.subtitleStylingDescription' => 'Personalizar aparência das legendas',
@@ -3132,6 +3665,7 @@ extension on TranslationsPt {
 			'settings.minutesUnit' => ({required Object minutes}) => '${minutes} minutos',
 			'settings.rememberTrackSelections' => 'Lembrar seleção de faixas por série/filme',
 			'settings.rememberTrackSelectionsDescription' => 'Lembrar escolhas de áudio e legendas por título',
+			'settings.rememberTrackSelectionsBackendRule' => 'O Plex salva cada escolha no servidor por arquivo; o Jellyfin também ativa a opção Lembrar seleções da conta; o Emby não é compatível',
 			'settings.followServerTrackSelections' => 'Usar a seleção de faixas do servidor por episódio',
 			'settings.followServerTrackSelectionsDescription' => 'Ao mudar de episódio, aplicar o áudio e as legendas selecionados no servidor em vez de manter a escolha atual',
 			'settings.resumeMusicOnLaunch' => 'Lembrar a sessão de música',
@@ -3151,7 +3685,7 @@ extension on TranslationsPt {
 			'settings.videoPlayerNavigation' => 'Navegação do reprodutor de vídeo',
 			'settings.videoPlayerNavigationDescription' => 'Usar as teclas de seta para navegar pelos controles do reprodutor',
 			'settings.watchTogetherRelay' => 'Servidor de retransmissão do Assistir Juntos',
-			'settings.watchTogetherRelayDescription' => 'Definir um servidor de retransmissão personalizado. Todos devem usar o mesmo servidor.',
+			'settings.watchTogetherRelayDescription' => 'Servidores de retransmissão públicos do Open Watch Party, a menos que você defina o seu',
 			'settings.watchTogetherRelayHint' => 'https://minha-retransmissao.exemplo.com.br',
 			'settings.watchTogetherRelayInvalid' => 'Insira uma URL base de retransmissão HTTP ou HTTPS válida.',
 			'settings.crashReporting' => 'Relatório de Erros',
@@ -3177,6 +3711,7 @@ extension on TranslationsPt {
 			'settings.importSettingsInvalidFile' => 'Este arquivo não é uma exportação válida do Bask',
 			'settings.importSettingsNoUser' => 'Entre na conta antes de importar as configurações',
 			'settings.shortcutsReset' => 'Atalhos redefinidos para o padrão',
+			'settings.resetShortcutsConfirm' => 'Isso substituirá seus atalhos personalizados pelos padrões. Continuar?',
 			'settings.about' => 'Sobre',
 			'settings.aboutDescription' => 'Informações do app e licenças',
 			'settings.updates' => 'Atualizações',
@@ -3192,8 +3727,21 @@ extension on TranslationsPt {
 			'settings.autoPlayAndSkip' => 'Reprodução automática e pulos',
 			'settings.autoPlayNextEpisode' => 'Reproduzir próximo episódio automaticamente',
 			'settings.autoPlayNextEpisodeDescription' => 'Iniciar o próximo episódio automaticamente quando um terminar',
+			'settings.shuffleStartsFromBeginning' => 'Reprodução Aleatória Começa do Início',
+			'settings.shuffleStartsFromBeginningDescription' => 'Iniciar cada episódio do início na reprodução aleatória em vez de retomá-lo',
 			'settings.playNextCountdown' => 'Contagem regressiva do próximo episódio',
 			'settings.playNextCountdownImmediate' => 'Reproduzir imediatamente',
+			'settings.skipIntroMode' => 'Pular Abertura',
+			'settings.skipIntroModeOffDescription' => 'Reproduzir as aberturas normalmente sem botão de pulo',
+			'settings.skipIntroModeButtonDescription' => 'Mostrar um botão de pulo quando uma abertura começar',
+			'settings.skipIntroModeAutoDescription' => 'Pular as aberturas automaticamente após o atraso abaixo',
+			'settings.skipCreditsMode' => 'Pular Créditos',
+			'settings.skipCreditsModeOffDescription' => 'Reproduzir os créditos normalmente sem botão de pulo',
+			'settings.skipCreditsModeButtonDescription' => 'Mostrar um botão de pulo quando os créditos começarem',
+			'settings.skipCreditsModeAutoDescription' => 'Pular os créditos automaticamente e reproduzir o próximo episódio',
+			'settings.skipMarkerModeOff' => 'Desativado',
+			'settings.skipMarkerModeButton' => 'Mostrar botão',
+			'settings.skipMarkerModeAuto' => 'Automático',
 			'settings.forceSkipMarkerFallback' => 'Forçar marcadores alternativos',
 			'settings.forceSkipMarkerFallbackDescription' => 'Usar padrões de títulos de capítulos mesmo quando o Plex tiver marcadores',
 			'settings.autoSkipDelay' => 'Atraso para pular automaticamente',
@@ -3230,6 +3778,8 @@ extension on TranslationsPt {
 			'settings.manageLibrariesDescription' => 'Reordene e oculte bibliotecas',
 			'settings.companionRemoteServer' => 'Servidor de controle remoto',
 			'settings.companionRemoteServerDescription' => 'Permitir que dispositivos móveis na sua rede controlem este app',
+			'settings.companionRemoteServerStartFailed' => 'Não foi possível iniciar o servidor de controle remoto',
+			'settings.companionRemoteServerStopFailed' => 'Não foi possível parar o servidor de controle remoto',
 			'settings.autoPip' => 'Picture-in-picture automático',
 			'settings.autoPipDescription' => 'Entrar automaticamente no modo picture-in-picture ao sair do app durante a reprodução',
 			'settings.matchContentFrameRate' => 'Ajustar à taxa de quadros do conteúdo',
@@ -3242,12 +3792,20 @@ extension on TranslationsPt {
 			'settings.matchDynamicRangeDescription' => 'Ativar HDR para conteúdo HDR e depois voltar para SDR',
 			'settings.displaySwitchDelay' => 'Atraso na troca do modo de exibição',
 			'settings.tunneledPlayback' => 'Reprodução em túnel',
-			'settings.tunneledPlaybackDescription' => 'Usar o tunelamento de vídeo. Desative se o vídeo ficar preto ao reproduzir em HDR.',
+			'settings.tunneledPlaybackDescription' => 'Usar o tunelamento de vídeo. Desative se o vídeo ficar preto ao reproduzir em HDR ou o movimento travar.',
 			'settings.audioPassthrough' => 'Passagem direta de áudio',
 			'settings.audioPassthroughDescription' => 'Enviar o áudio Dolby/DTS ao receptor ou à TV sem recodificação, preservando o som surround. Desative se não houver som.',
-			'settings.audioPassthroughDescriptionAppleTv' => 'Usar o decodificador Dolby nativo da Apple para Dolby Digital Plus, incluindo Atmos. DTS e TrueHD continuam sendo reproduzidos como PCM multicanal. Desative se não houver som.',
-			'settings.audioDownmix' => 'Conversão para estéreo',
-			'settings.audioDownmixDescription' => 'Converter o áudio surround em dois canais para alto-falantes estéreo ou fones de ouvido',
+			'settings.audioPassthroughDescriptionApple' => 'Usar o decodificador Dolby nativo da Apple para Dolby Digital Plus, incluindo Atmos. DTS e TrueHD continuam sendo reproduzidos como PCM multicanal. Desative se não houver som.',
+			'settings.audioPassthroughDescriptionAppleSpatial' => 'Usar o decodificador Dolby nativo da Apple para Dolby Digital Plus, incluindo Atmos. No iOS, iPadOS e tvOS 26 ou posterior, TrueHD Atmos e DTS:X são reproduzidos como áudio espacial. As demais faixas DTS e TrueHD são reproduzidas como PCM multicanal. Desative se não houver som.',
+			'settings.audioPassthroughOverriddenByNormalization' => 'Desativada enquanto a normalização de intensidade sonora estiver ativa',
+			'settings.audioChannelLimit' => 'Canais de áudio',
+			'settings.audioChannelLimitDescription' => 'Mixar o áudio decodificado em menos canais para alto-falantes, fones de ouvido ou sistemas HDMI que não reproduzem todos os canais',
+			'settings.audioChannelLimitOriginal' => 'Original',
+			'settings.audioChannelLimitOriginalDescription' => 'Reproduzir todos os canais da faixa',
+			'settings.audioChannelLimitSurround51' => 'Até 5.1',
+			'settings.audioChannelLimitSurround51Description' => 'Mixar 7.1 em 5.1 para TVs e receptores que só aceitam PCM 5.1. A passagem direta não é afetada.',
+			'settings.audioChannelLimitStereo' => 'Estéreo',
+			'settings.audioChannelLimitStereoDescription' => 'Mixar em dois canais para alto-falantes estéreo ou fones de ouvido. Desativa a passagem direta.',
 			'settings.downmixCenterBoost' => 'Reforço do canal central',
 			'settings.downmixCenterBoostValue' => ({required Object db}) => '${db} dB',
 			'settings.downmixCenterBoostLabel' => 'Reforço (dB)',
@@ -3255,7 +3813,7 @@ extension on TranslationsPt {
 			'settings.audioDownmixNormalize' => 'Normalizar volume na conversão para estéreo',
 			'settings.audioDownmixNormalizeDescription' => 'Reduzir o volume da mixagem para evitar saturação. Desative para manter o volume original, que pode distorcer em cenas muito altas.',
 			'settings.dvConversionMode' => 'Conversão Dolby Vision',
-			'settings.dvConversionModeDescription' => 'Escolha como o ExoPlayer lida com arquivos Dolby Vision Profile 7.',
+			'settings.dvConversionModeDescription' => 'Escolha como os arquivos Dolby Vision Profile 7 são tratados.',
 			'settings.dvConversionAuto' => 'Automático',
 			'settings.dvConversionNative' => 'Nativo / desativado',
 			'settings.dvConversionDv81' => 'P7 → P8.1',
@@ -3264,8 +3822,24 @@ extension on TranslationsPt {
 			'settings.dvConversionNativeDescription' => 'Forçar DV7 nativo e impedir uma nova tentativa de conversão de DV',
 			'settings.dvConversionDv81Description' => 'Forçar a conversão RPU integrada para Dolby Vision perfil 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Remover as camadas RPU/EL do Dolby Vision e apresentar HEVC sem Dolby Vision',
+			'settings.disableDolbyVision' => 'Desativar Dolby Vision',
+			'settings.disableDolbyVisionDescription' => 'Reproduzir a camada HDR10 ou HLG do arquivo em vez de Dolby Vision, quando houver',
+			'settings.hdrSdrConversion' => 'Conversão de HDR para SDR',
+			'settings.hdrSdrConversionDescription' => 'Escolha o que converte vídeos HDR quando a tela não consegue exibir HDR.',
+			'settings.hdrSdrConversionAuto' => 'Automático',
+			'settings.hdrSdrConversionAutoDescription' => 'Dispositivo no Android 9 ou posterior, reprodutor em versões anteriores',
+			'settings.hdrSdrConversionDevice' => 'Dispositivo',
+			'settings.hdrSdrConversionDeviceDescription' => 'O hardware de vídeo do dispositivo faz a conversão. Mais rápido, mas as cores dependem do dispositivo',
+			'settings.hdrSdrConversionPlayer' => 'Reprodutor',
+			'settings.hdrSdrConversionPlayerDescription' => 'O reprodutor faz a conversão. Cores consistentes, mas o 4K pode travar em TV boxes mais simples',
 			'settings.deinterlace' => 'Desentrelaçamento',
 			'settings.deinterlaceDescription' => 'Remover artefatos de pente de vídeo entrelaçado (apenas no reprodutor mpv)',
+			'settings.deinterlaceOff' => 'Desativado',
+			'settings.deinterlaceOffDescription' => 'Exibir o vídeo entrelaçado como é decodificado',
+			'settings.deinterlaceVideo' => 'Vídeo',
+			'settings.deinterlaceVideoDescription' => 'Transformar cada campo em um quadro completo. Para vídeos gravados para TV, como esportes, noticiários e shows',
+			'settings.deinterlaceFilm' => 'Filme',
+			'settings.deinterlaceFilmDescription' => 'Restaurar os quadros originais de filmes e animações convertidos por telecine para 29,97 fps, comum em DVDs NTSC. Vídeos gravados para TV travam. A TV ao vivo usa Vídeo',
 			'settings.requireProfileSelectionOnOpen' => 'Pedir perfil ao abrir o app',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Mostrar a seleção de perfil sempre que o app for aberto',
 			'settings.forceTvMode' => 'Forçar modo TV',
@@ -3307,22 +3881,66 @@ extension on TranslationsPt {
 			'settings.gestureVolumeSwipeDescription' => 'Deslize para cima ou para baixo na borda direita para ajustar o volume',
 			'settings.gesturePinchToZoom' => 'Pinça para zoom',
 			'settings.gesturePinchToZoomDescription' => 'Pince o vídeo para ampliar ou reduzir',
+			'settings.rememberBrightnessLevel' => 'Lembrar Nível de Brilho',
+			'settings.rememberBrightnessLevelDescription' => 'Iniciar a reprodução com o brilho definido pelo último deslize',
 			'settings.controls' => 'Controles',
 			'settings.rememberPlayerChanges' => 'Lembrar alterações do reprodutor',
 			'settings.rememberPlayerChangesDescription' => 'Onde uma alteração feita durante a reprodução é salva e reaplicada',
 			'settings.scopePlaybackSpeed' => 'Velocidade de reprodução',
 			'settings.scopeShaderPreset' => 'Predefinição de shader',
 			'settings.scopeAspectRatio' => 'Proporção da tela',
+			'settings.scopeZoom' => 'Zoom',
 			'settings.scopeSyncOffsets' => 'Sincronização de áudio e legendas',
 			'settings.playerScopeOff' => 'Não salvar',
 			'settings.playerScopeGlobal' => 'Em todos os lugares',
 			'settings.playerScopeLibrary' => 'Por biblioteca',
 			'settings.playerScopeTitle' => 'Por série ou filme',
 			'settings.exportDialogTitle' => 'Exportar configurações do Bask',
+			'themeEditor.builtIn' => 'Integrados',
+			'themeEditor.presets' => 'Predefinidos',
+			'themeEditor.custom' => 'Personalizado',
+			'themeEditor.customEmpty' => 'Ainda não criado',
+			'themeEditor.editCustom' => 'Editar tema personalizado',
+			'themeEditor.editCustomDescription' => 'Escolha você mesmo cada cor',
+			'themeEditor.locked' => 'Desbloqueie com o Pacote de temas e ícones',
+			'themeEditor.savedLocked' => 'Salvo — desbloqueia com o Pacote de temas e ícones',
+			'themeEditor.title' => 'Tema personalizado',
+			'themeEditor.startFrom' => 'Começar a partir de',
+			'themeEditor.startFromDescription' => 'Copiar todas as cores de outro tema',
+			'themeEditor.colors' => 'Cores',
+			'themeEditor.preview' => 'Pré-visualização',
+			'themeEditor.slots.bg' => 'Fundo',
+			'themeEditor.slots.surface' => 'Superfície',
+			'themeEditor.slots.outline' => 'Contorno',
+			'themeEditor.slots.text' => 'Texto',
+			'themeEditor.slots.textMuted' => 'Texto secundário',
+			'themeEditor.slots.accent' => 'Destaque',
+			'themeEditor.opacity' => 'Opacidade',
+			_ => null,
+		} ?? switch (path) {
+			'themeEditor.hexHint' => '#RRGGBB ou #AARRGGBB',
+			'themeEditor.fromOtherThemes' => 'De outros temas',
+			'themeEditor.swatchLabel' => ({required Object color, required Object theme}) => '${color} (${theme})',
+			'themeEditor.contrast.textOnBg' => 'Texto sobre o fundo',
+			'themeEditor.contrast.textOnSurface' => 'Texto sobre a superfície',
+			'themeEditor.contrast.textMutedOnBg' => 'Texto secundário sobre o fundo',
+			'themeEditor.contrast.textMutedOnSurface' => 'Texto secundário sobre a superfície',
+			'themeEditor.contrast.accentOnBg' => 'Destaque sobre o fundo',
+			'themeEditor.contrast.accentOnSurface' => 'Destaque sobre a superfície',
+			'themeEditor.contrast.labelOnAccent' => 'Rótulo do botão sobre o destaque',
+			'themeEditor.lowContrast' => ({required Object pair, required Object ratio, required Object minimum}) => '${pair}: ${ratio}:1, abaixo dos ${minimum}:1 recomendados',
+			'themeEditor.discardTitle' => 'Descartar alterações?',
+			'themeEditor.discardMessage' => 'Suas alterações de cor não salvas serão perdidas.',
+			'themeEditor.discard' => 'Descartar',
+			'themeEditor.previewCardTitle' => ({required Object number}) => 'Episódio ${number}',
+			'themeEditor.previewCardSubtitle' => ({required Object minutes}) => '${minutes} min restantes',
+			'themeEditor.previewSwitch' => 'Reprodução automática',
+			'themeEditor.previewMutedText' => 'O texto secundário fica assim',
 			'search.hint' => 'Buscar filmes, séries, músicas...',
 			'search.tryDifferentTerm' => 'Tente um termo de busca diferente',
 			'search.searchYourMedia' => 'Buscar suas mídias',
 			'search.enterTitleActorOrKeyword' => 'Insira um título, ator ou palavra-chave',
+			'search.people' => 'Pessoas',
 			'hotkeys.setShortcutFor' => ({required Object actionName}) => 'Definir Atalho para ${actionName}',
 			'hotkeys.clearShortcut' => 'Limpar atalho',
 			'hotkeys.noShortcutSet' => 'Nenhum atalho definido',
@@ -3451,8 +4069,6 @@ extension on TranslationsPt {
 			'fileInfo.deletedAt' => 'Excluído',
 			'fileInfo.remoteSource' => 'Origem remota',
 			'fileInfo.infiniteStream' => 'Fluxo infinito',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.directPlay' => 'Reprodução direta',
 			'fileInfo.directStream' => 'Fluxo direto',
 			'fileInfo.transcoding' => 'Transcodificação',
@@ -3596,14 +4212,15 @@ extension on TranslationsPt {
 			'videoControls.rotationLockButton' => 'Travar rotação',
 			'videoControls.lockScreen' => 'Travar tela',
 			'videoControls.screenLockButton' => 'Travar tela',
-			'videoControls.longPressToUnlock' => 'Pressione e segure para destravar',
 			'videoControls.timelineSlider' => 'Linha do tempo do vídeo',
 			'videoControls.volumeSlider' => 'Nível de volume',
 			'videoControls.endsAt' => ({required Object time}) => 'Termina às ${time}',
 			'videoControls.pipActive' => 'Reproduzindo em Picture-in-Picture',
 			'videoControls.pipFailed' => 'Falha ao iniciar picture-in-picture',
 			'videoControls.screenshotSaved' => 'Captura de tela salva',
+			'videoControls.screenshotFailed' => 'Não foi possível fazer a captura de tela',
 			'videoControls.zoomPercent' => ({required Object percent}) => 'Zoom ${percent}%',
+			'videoControls.volumePercent' => ({required Object percent}) => 'Volume ${percent}%',
 			'videoControls.pipErrors.androidVersion' => 'Requer Android 8.0 ou superior',
 			'videoControls.pipErrors.iosVersion' => 'Requer iOS 15.0 ou superior',
 			'videoControls.pipErrors.permissionDisabled' => 'Picture-in-picture está desativado. Ative nas configurações do sistema.',
@@ -3623,6 +4240,7 @@ extension on TranslationsPt {
 			'videoControls.subtitleDownloaded' => 'Legenda baixada',
 			'videoControls.subtitleDownloadedNotApplied' => 'A legenda foi baixada, mas não foi possível selecioná-la',
 			'videoControls.subtitleDownloadFailed' => 'Falha ao baixar legenda',
+			'videoControls.subtitleDownloadTimedOut' => 'A legenda não apareceu a tempo. O download pode ter falhado',
 			'videoControls.searchLanguages' => 'Pesquisar idiomas...',
 			'videoControls.skipIntro' => 'Pular abertura',
 			'videoControls.skipCredits' => 'Pular créditos',
@@ -3655,6 +4273,9 @@ extension on TranslationsPt {
 			'messages.playbackDataInvalid' => 'O servidor retornou informações de reprodução inválidas.',
 			'messages.playbackCancelled' => 'A reprodução foi cancelada.',
 			'messages.playbackFailed' => 'Não foi possível iniciar a reprodução.',
+			'messages.playbackFailedDetail' => ({required Object error}) => 'Não foi possível iniciar a reprodução: ${error}',
+			'messages.audioOutputFailed' => 'A saída de áudio parou de responder. Verifique a conexão de áudio da TV ou do receptor; se outros aplicativos também estiverem sem som, reinicie o dispositivo.',
+			'messages.mediaUnavailable' => 'Este conteúdo não está mais disponível.',
 			'messages.errorLoadingFileInfo' => ({required Object error}) => 'Erro ao carregar as informações do arquivo: ${error}',
 			'messages.errorLoadingSeries' => 'Erro ao carregar série',
 			'messages.musicNotSupported' => 'A reprodução de música ainda não é compatível',
@@ -3689,6 +4310,8 @@ extension on TranslationsPt {
 			'messages.mediaUnreadableBody' => 'O servidor encontrou este item, mas não conseguiu ler o arquivo (HTTP 404). O arquivo provavelmente foi movido, excluído ou o armazenamento está offline. Peça ao responsável pelo servidor para verificar o arquivo e reexaminar a biblioteca.',
 			'messages.serverBusyTitle' => 'Transmissão indisponível',
 			'messages.serverBusyBody' => 'O servidor continuou se recusando a transmitir este arquivo (HTTP 503). Ele pode estar reiniciando ou ocupado, ou o armazenamento do arquivo pode estar offline. Tente novamente em instantes — se isso continuar acontecendo, peça ao proprietário do servidor para verificar o servidor e o armazenamento do arquivo.',
+			'messages.playbackNotAllowedTitle' => 'Reprodução não permitida',
+			'messages.playbackNotAllowedBody' => 'O servidor se recusou a transmitir este item (HTTP 403). Sua conta pode não ter permissão para reproduzi-lo, ou o servidor pode permitir a reprodução apenas na própria rede local.',
 			'messages.logsUploaded' => 'Logs enviados',
 			'messages.logsUploadFailed' => 'Falha ao enviar logs',
 			'messages.logId' => 'ID do log',
@@ -3698,6 +4321,7 @@ extension on TranslationsPt {
 			'messages.playbackDataNotPrepared' => 'A reprodução foi iniciada antes que os dados estivessem prontos',
 			'messages.streamSelectionUnavailable' => 'A seleção de fluxos não está disponível para esta fonte',
 			'messages.streamSelectionFailed' => 'Não foi possível aplicar os fluxos selecionados',
+			'messages.trackSelectionNotRemembered' => 'Esta escolha de faixa se aplica apenas à reprodução atual.',
 			'messages.serverUnavailableForProfile' => 'Nenhum servidor está disponível para o perfil ativo',
 			'subtitlingStyling.text' => 'Texto',
 			'subtitlingStyling.border' => 'Borda',
@@ -3715,6 +4339,8 @@ extension on TranslationsPt {
 			'subtitlingStyling.overrideStrip' => 'Remover estilo',
 			'subtitlingStyling.positionTop' => 'Superior',
 			'subtitlingStyling.positionBottom' => 'Inferior',
+			'subtitlingStyling.useMargins' => 'Usar margens',
+			'subtitlingStyling.useMarginsDescription' => 'Permitir legendas de texto no espaço fora do vídeo. Legendas estilizadas podem manter sua posição original.',
 			'subtitlingStyling.anchorToScreen' => 'Ancorar à tela',
 			'subtitlingStyling.anchorToScreenDescription' => 'Exibir as legendas de texto nas faixas pretas abaixo de vídeos em tela ampla',
 			'subtitlingStyling.bold' => 'Negrito',
@@ -3736,6 +4362,9 @@ extension on TranslationsPt {
 			'mpvConfig.presetDeleted' => 'Predefinição excluída',
 			'mpvConfig.confirmDeletePreset' => 'Tem certeza de que deseja excluir esta predefinição?',
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# comment',
+			'mpvConfig.lineHint' => 'option=value',
+			'mpvConfig.addLine' => 'Adicionar linha',
+			'mpvConfig.removeLine' => 'Remover linha',
 			'mpvConfig.embeddedVoHint' => 'vo, gpu-context e gpu-api são ignorados no Linux: o vídeo incorporado é sempre renderizado via vo=libmpv no plano de vídeo, e gpu-next (necessário para shaders de computação como ArtCNN) não pode ser executado incorporado.',
 			'dialog.confirmAction' => 'Confirmar Ação',
 			'profiles.addBaskProfile' => 'Adicionar perfil Bask',
@@ -3748,6 +4377,8 @@ extension on TranslationsPt {
 			'profiles.signOut' => 'Sair',
 			'profiles.signOutPlexTitle' => 'Sair do Plex?',
 			'profiles.signOutPlexMessage' => ({required Object displayName}) => 'Remover ${displayName} e todos os usuários do Plex Home? Você pode entrar novamente quando quiser.',
+			'profiles.signOutPlexDeleteDownloads' => 'Também excluir downloads',
+			'profiles.signOutPlexDeleteDownloadsDescription' => 'Caso contrário, eles permanecem neste dispositivo e voltam quando você entrar novamente nesta conta.',
 			'profiles.signedOutPlex' => 'Saiu do Plex.',
 			'profiles.signOutFailed' => 'Falha ao sair.',
 			'profiles.sectionTitle' => 'Perfis',
@@ -3784,7 +4415,7 @@ extension on TranslationsPt {
 			'profiles.borrowAddTo' => ({required Object displayName}) => 'Adicionar a ${displayName}',
 			'profiles.borrowExplain' => 'Use a conexão de outro perfil. Perfis protegidos por PIN exigem PIN.',
 			'profiles.borrowEmpty' => 'Nenhuma conexão disponível ainda.',
-			'profiles.borrowEmptySubtitle' => 'Conecte Plex ou Jellyfin a outro perfil primeiro.',
+			'profiles.borrowEmptySubtitle' => 'Conecte Plex, Jellyfin ou Emby a outro perfil primeiro.',
 			'profiles.borrowLoadFailed' => 'Não foi possível carregar as conexões disponíveis. Tente novamente.',
 			'profiles.borrowFromProfile' => ({required Object displayName}) => 'De ${displayName}',
 			'profiles.borrowConnectionBorrowed' => 'Conexão adicionada ao perfil.',
@@ -3799,14 +4430,18 @@ extension on TranslationsPt {
 			'profiles.pinProtectionOptional' => 'Proteção por PIN (opcional)',
 			'profiles.pinExplain' => 'PIN de 4 dígitos necessário para trocar perfis.',
 			'profiles.continueButton' => 'Continuar',
+			_ => null,
+		} ?? switch (path) {
 			'profiles.pinsDontMatch' => 'Os PINs não correspondem',
 			'profiles.tokenIdentityMismatch' => 'O token do perfil do Plex foi associado a um servidor inesperado',
 			'connections.sectionTitle' => 'Conexões',
 			'connections.addConnection' => 'Adicionar conexão',
-			'connections.addConnectionSubtitleNoProfile' => 'Entre com Plex ou conecte um servidor Jellyfin',
-			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Adicionar a ${displayName}: Plex, Jellyfin ou outra conexão de perfil',
+			'connections.addConnectionSubtitleNoProfile' => 'Entre com Plex ou conecte um servidor Jellyfin ou Emby',
+			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Adicionar a ${displayName}: Plex, Jellyfin, Emby ou outra conexão de perfil',
 			'connections.sessionExpiredOne' => ({required Object name}) => 'Sessão de ${name} expirada',
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Sessões expiradas em ${count} servidores',
+			'connections.accessDeniedOne' => ({required Object name}) => '${name} negou acesso a esta conta',
+			'connections.accessDeniedMany' => ({required Object count}) => '${count} servidores negaram acesso a esta conta',
 			'connections.signInAgain' => 'Entrar novamente',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Editar conexão do ${product}',
 			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Adicione ou remova URLs para ${serverName}. O Bask usará a URL acessível com menor latência.',
@@ -3892,6 +4527,11 @@ extension on TranslationsPt {
 			'discover.minutesLeft' => ({required Object minutes}) => '${minutes} min restantes',
 			'discover.moreLikeThis' => 'Títulos semelhantes',
 			'discover.titleCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n, one: '${n} título', other: '${n} títulos', ), 
+			'discover.person.born' => 'Nascimento',
+			'discover.person.died' => 'Falecimento',
+			'discover.person.birthplace' => 'Local de nascimento',
+			'discover.person.dateWithAge' => ({required Object date, required Object age}) => '${date} (${age} anos)',
+			'discover.person.dateWithAgeAtDeath' => ({required Object date, required Object age}) => '${date} (aos ${age} anos)',
 			'errors.searchFailed' => ({required Object error}) => 'Falha na busca: ${error}',
 			'errors.searchUnavailable' => 'A busca não conseguiu alcançar nenhum servidor de mídia.',
 			'errors.connectionTimeout' => ({required Object context}) => 'Tempo de conexão esgotado ao carregar ${context}',
@@ -3904,6 +4544,13 @@ extension on TranslationsPt {
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => 'Falha ao trocar para ${displayName}',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => 'Falha ao excluir ${displayName}',
 			'errors.failedToRate' => 'Não foi possível atualizar a classificação',
+			'errors.reasonTimedOut' => 'o tempo de conexão se esgotou',
+			'errors.reasonUnreachable' => 'não foi possível alcançar o servidor',
+			'errors.reasonRefused' => 'o servidor recusou a solicitação',
+			'errors.reasonNotFound' => 'o item não está mais no servidor',
+			'errors.reasonServerError' => 'o servidor relatou um erro',
+			'errors.reasonCancelled' => 'a solicitação foi cancelada',
+			'errors.reasonUnexpected' => 'ocorreu um erro inesperado',
 			'libraries.title' => 'Bibliotecas',
 			'libraries.fallbackTitle' => 'Biblioteca',
 			'libraries.scanLibraryFiles' => 'Escanear Arquivos da Biblioteca',
@@ -3965,9 +4612,8 @@ extension on TranslationsPt {
 			'libraries.filterCategories.tag' => 'Tag',
 			'libraries.filterCategories.unwatched' => 'Não assistidos',
 			'libraries.filterCategories.unplayed' => 'Não reproduzidos',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.filterCategories.favorites' => 'Favoritos',
+			'libraries.filterCategories.filePath' => 'Caminho do arquivo',
 			'libraries.sortLabels.title' => 'Título',
 			'libraries.sortLabels.dateAdded' => 'Data de adição',
 			'libraries.sortLabels.releaseDate' => 'Data de lançamento',
@@ -3988,10 +4634,39 @@ extension on TranslationsPt {
 			'libraries.sortLabels.dateShared' => 'Data de compartilhamento',
 			'libraries.sortLabels.latestEpisodeAirDate' => 'Última data de exibição do episódio',
 			'libraries.sortLabels.lastEpisodeDateAdded' => 'Data de adição do último episódio',
+			'libraries.sortLabels.dateDownloaded' => 'Data de download',
+			'libraries.sortLabels.size' => 'Tamanho',
+			'libraries.sortLabels.library' => 'Biblioteca',
+			'libraries.advancedFilters.include' => 'Incluir',
+			'libraries.advancedFilters.exclude' => 'Excluir',
+			'libraries.advancedFilters.any' => 'Qualquer',
+			'libraries.advancedFilters.yes' => 'Sim',
+			'libraries.advancedFilters.no' => 'Não',
+			'libraries.advancedFilters.not' => ({required Object value}) => 'Exceto ${value}',
+			'libraries.advancedFilters.valueCount' => ({required Object count}) => '${count} selecionados',
+			'libraries.advancedFilters.valueCountExcluded' => ({required Object count}) => '${count} excluídos',
+			'libraries.advancedFilters.searchValues' => 'Buscar valores',
+			'libraries.advancedFilters.noValues' => 'Nenhum valor',
+			'libraries.advancedFilters.matchContains' => 'Contém',
+			'libraries.advancedFilters.matchNotContains' => 'Não contém',
+			'libraries.advancedFilters.matchIs' => 'É',
+			'libraries.advancedFilters.matchIsNot' => 'Não é',
+			'libraries.advancedFilters.matchBeginsWith' => 'Começa com',
+			'libraries.advancedFilters.matchEndsWith' => 'Termina com',
+			'libraries.advancedFilters.textHint' => 'Digite para filtrar',
+			'libraries.advancedFilters.from' => 'De',
+			'libraries.advancedFilters.to' => 'Até',
+			'libraries.advancedFilters.range' => ({required Object from, required Object to}) => '${from} a ${to}',
+			'libraries.advancedFilters.atLeast' => ({required Object value}) => '${value} ou mais',
+			'libraries.advancedFilters.atMost' => ({required Object value}) => 'Até ${value}',
+			'libraries.advancedFilters.dateLastDays' => ({required Object count}) => 'Últimos ${count} dias',
+			'libraries.advancedFilters.dateLastYear' => 'Último ano',
+			'libraries.advancedFilters.dateOlderThanDays' => ({required Object count}) => 'Há mais de ${count} dias',
+			'libraries.advancedFilters.dateOlderThanYear' => 'Há mais de um ano',
 			'about.title' => 'Sobre',
 			'about.openSourceLicenses' => 'Licenças de código aberto',
 			'about.versionLabel' => ({required Object version}) => 'Versão ${version}',
-			'about.appDescription' => 'Um belo cliente de Plex e Jellyfin feito com Flutter',
+			'about.appDescription' => 'Um belo cliente de Plex, Jellyfin e Emby feito com Flutter',
 			'about.viewLicensesDescription' => 'Ver as licenças de bibliotecas de terceiros',
 			'serverSelection.noServersFoundForAccount' => ({required Object username, required Object email}) => 'Nenhum servidor encontrado para ${username} (${email})',
 			'serverSelection.failedToLoadServers' => ({required Object error}) => 'Falha ao carregar servidores: ${error}',
@@ -4074,6 +4749,7 @@ extension on TranslationsPt {
 			'explore.notInLibrary' => 'Não está na sua biblioteca',
 			'explore.inTheseLibraries' => 'Nestas bibliotecas',
 			'explore.checkingLibrary' => 'Verificando sua biblioteca...',
+			'explore.libraryCheckFailed' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n, one: 'Não foi possível verificar ${n} servidor', other: 'Não foi possível verificar ${n} servidores', ), 
 			'explore.emptyTitle' => 'Ainda não há nada aqui',
 			'explore.emptyMessage' => ({required Object source}) => 'As linhas de ${source} aparecerão aqui quando tiverem conteúdo.',
 			'explore.searchHint' => ({required Object source}) => 'Buscar em ${source}',
@@ -4139,6 +4815,7 @@ extension on TranslationsPt {
 			'explore.sourceMaterial.webComic' => 'Webcomic',
 			'explore.sourceMaterial.musicRelease' => 'Música',
 			'explore.sourceMaterial.otherMedia' => 'Outro',
+			'explore.creditRole.actor' => 'Ator',
 			'explore.creditRole.director' => 'Diretor',
 			'explore.creditRole.writer' => 'Roteirista',
 			'explore.creditRole.producer' => 'Produtor',
@@ -4174,6 +4851,8 @@ extension on TranslationsPt {
 			'explore.detail.watchOn' => 'Assistir em',
 			'explore.detail.watchTrailer' => 'Ver trailer',
 			'explore.detail.openOn' => ({required Object site}) => 'Abrir em ${site}',
+			'explore.detail.trailerUnavailable' => 'Não foi possível abrir o trailer neste dispositivo',
+			'explore.detail.linkUnavailable' => 'Não foi possível abrir o link neste dispositivo',
 			'explore.detail.crew' => 'Equipe',
 			'explore.detail.ratings' => 'Avaliações',
 			'explore.detail.schedule' => 'Programação',
@@ -4258,11 +4937,15 @@ extension on TranslationsPt {
 			'liveTv.editRuleAction' => 'Editar',
 			'liveTv.recordingRuleUpdated' => 'Regra de gravação atualizada',
 			'liveTv.guideReloadRequested' => 'Atualização do guia solicitada',
+			'liveTv.guideReloadFailed' => 'Não foi possível atualizar o guia',
 			'liveTv.rulesProcessRequested' => 'Reavaliação de regras solicitada',
+			'liveTv.rulesProcessFailed' => 'Não foi possível reavaliar as regras de gravação',
 			'liveTv.recordShow' => 'Gravar programa',
 			'liveTv.recordSettings.startEarly' => 'Começar antes (segundos)',
 			'liveTv.recordSettings.endLate' => 'Terminar depois (segundos)',
 			'liveTv.recordSettings.newOnly' => 'Apenas episódios novos',
+			_ => null,
+		} ?? switch (path) {
 			'liveTv.recordSettings.anyChannel' => 'Gravar em qualquer canal',
 			'liveTv.recordSettings.anyTime' => 'Gravar a qualquer hora',
 			'liveTv.recordSettings.skipInLibrary' => 'Ignorar episódios que já estão na biblioteca',
@@ -4273,6 +4956,8 @@ extension on TranslationsPt {
 			'liveTv.invalidPlaybackData' => ({required Object product}) => '${product} retornou dados inválidos de reprodução de TV ao Vivo',
 			'liveTv.failedToStartChannel' => 'Não foi possível iniciar o canal ao vivo',
 			'liveTv.failedToBuildStreamUrl' => 'Não foi possível gerar a URL da transmissão',
+			'liveTv.playbackStartFailed' => ({required Object reason}) => 'Não foi possível iniciar o canal: ${reason}',
+			'liveTv.channelSwitchFailed' => ({required Object reason}) => 'Não foi possível trocar de canal: ${reason}',
 			'collections.title' => 'Coleções',
 			'collections.collection' => 'Coleção',
 			'collections.empty' => 'A coleção está vazia',
@@ -4350,74 +5035,151 @@ extension on TranslationsPt {
 			'music.discography.compilations' => 'Compilações',
 			'watchTogether.title' => 'Assistir Juntos',
 			'watchTogether.description' => 'Assista a conteúdos sincronizados com amigos e familiares',
-			'watchTogether.createSession' => 'Criar sessão',
-			'watchTogether.creating' => 'Criando...',
-			'watchTogether.joinSession' => 'Entrar na sessão',
-			'watchTogether.joining' => 'Entrando...',
-			'watchTogether.controlMode' => 'Modo de controle',
-			'watchTogether.controlModeQuestion' => 'Quem pode controlar a reprodução?',
-			'watchTogether.hostOnly' => 'Apenas o anfitrião',
-			'watchTogether.anyone' => 'Qualquer pessoa',
-			'watchTogether.hostingSession' => 'Hospedando uma sessão',
-			'watchTogether.inSession' => 'Em uma sessão',
-			'watchTogether.sessionCode' => 'Código da sessão',
-			'watchTogether.openSessionControls' => 'Abrir os controles da sessão Assistir Juntos',
-			'watchTogether.copySessionCode' => 'Copiar código da sessão',
-			'watchTogether.hostControlsPlayback' => 'O anfitrião controla a reprodução',
-			'watchTogether.anyoneCanControl' => 'Qualquer pessoa pode controlar a reprodução',
-			'watchTogether.hostControls' => 'Controle do anfitrião',
-			'watchTogether.anyoneControls' => 'Controle por qualquer pessoa',
-			'watchTogether.participants' => 'Participantes',
-			'watchTogether.host' => 'Anfitrião',
-			'watchTogether.hostBadge' => 'ANFITRIÃO',
-			'watchTogether.youAreHost' => 'Você é o anfitrião',
-			'watchTogether.watchingWithOthers' => 'Assistindo com outras pessoas',
-			'watchTogether.endSession' => 'Encerrar sessão',
-			'watchTogether.leaveSession' => 'Sair da sessão',
-			'watchTogether.endSessionQuestion' => 'Encerrar sessão?',
-			'watchTogether.leaveSessionQuestion' => 'Sair da sessão?',
-			'watchTogether.endSessionConfirm' => 'Isso encerrará a sessão para todos os participantes.',
-			'watchTogether.leaveSessionConfirm' => 'Você será removido da sessão.',
-			'watchTogether.endSessionConfirmOverlay' => 'Isso encerrará a sessão do Assistir Juntos para todos os participantes.',
-			'watchTogether.leaveSessionConfirmOverlay' => 'Você será desconectado da sessão do Assistir Juntos.',
-			'watchTogether.end' => 'Encerrar',
-			'watchTogether.leave' => 'Sair',
-			'watchTogether.syncing' => 'Sincronizando...',
-			'watchTogether.joinWatchSession' => 'Entrar na sessão',
-			'watchTogether.enterCodeHint' => 'Insira o código de 5 caracteres',
-			'watchTogether.pasteFromClipboard' => 'Colar da área de transferência',
-			'watchTogether.pleaseEnterCode' => 'Insira um código de sessão',
-			'watchTogether.codeMustBe5Chars' => 'O código da sessão deve ter 5 caracteres',
-			'watchTogether.joinInstructions' => 'Insira o código de sessão do anfitrião para entrar.',
-			'watchTogether.failedToCreate' => 'Falha ao criar sessão',
-			'watchTogether.failedToJoin' => 'Falha ao entrar na sessão',
-			'watchTogether.sessionCodeCopied' => 'Código da sessão copiado para a área de transferência',
-			'watchTogether.relayUnreachable' => 'Servidor de retransmissão inacessível. O bloqueio pelo provedor de internet pode impedir o uso do Assistir Juntos.',
-			'watchTogether.reconnectingToHost' => 'Reconectando ao anfitrião...',
-			'watchTogether.currentPlayback' => 'Reprodução atual',
-			'watchTogether.joinCurrentPlayback' => 'Entrar na reprodução atual',
-			'watchTogether.joinCurrentPlaybackDescription' => 'Voltar ao conteúdo que o anfitrião está assistindo agora',
-			'watchTogether.failedToOpenCurrentPlayback' => 'Falha ao abrir a reprodução atual',
-			'watchTogether.participantJoined' => ({required Object name}) => '${name} entrou',
-			'watchTogether.participantLeft' => ({required Object name}) => '${name} saiu',
-			'watchTogether.participantPaused' => ({required Object name}) => '${name} pausou',
-			'watchTogether.participantResumed' => ({required Object name}) => '${name} retomou',
-			'watchTogether.participantSeeked' => ({required Object name}) => '${name} mudou a posição da reprodução',
-			'watchTogether.participantBuffering' => ({required Object name}) => '${name} está aguardando o carregamento',
-			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} está usando uma versão mais antiga do app — sincronização indisponível',
-			'watchTogether.resumingWithout' => ({required Object name}) => 'Retomando sem ${name}',
-			'watchTogether.waitingForParticipants' => 'Aguardando o carregamento dos outros participantes...',
-			'watchTogether.waitingForName' => ({required Object name}) => 'Aguardando ${name}...',
+			'watchTogether.createRoom' => 'Criar sala',
+			'watchTogether.creatingRoom' => 'Criando sala...',
+			'watchTogether.joinRoom' => 'Entrar na sala',
+			'watchTogether.joiningRoom' => 'Entrando na sala...',
+			'watchTogether.connecting' => 'Conectando...',
+			'watchTogether.relayPublic' => 'As salas usam os servidores de retransmissão públicos do Open Watch Party.',
+			'watchTogether.relayCustom' => ({required Object url}) => 'As salas usam seu servidor de retransmissão em ${url}.',
 			'watchTogether.recentRooms' => 'Salas recentes',
+			'watchTogether.roomActions' => 'Ações da sala',
 			'watchTogether.renameRoom' => 'Renomear sala',
 			'watchTogether.removeRoom' => 'Remover',
-			'watchTogether.guestSwitchUnavailable' => 'Não foi possível trocar — servidor indisponível para sincronização',
-			'watchTogether.guestSwitchFailed' => 'Não foi possível trocar — conteúdo não encontrado neste servidor',
-			'watchTogether.defaultDisplayName' => 'Usuário',
-			'watchTogether.errors.timedOut' => 'O servidor de retransmissão não respondeu a tempo',
-			'watchTogether.errors.connectionLost' => 'A conexão foi encerrada antes de a sessão ficar pronta',
-			'watchTogether.errors.invalidRelayResponse' => 'O servidor de retransmissão enviou uma resposta inesperada',
-			'watchTogether.errors.sessionEnded' => 'O anfitrião encerrou a sessão',
+			'watchTogether.enterRoomCode' => 'Insira o código de 6 caracteres do anfitrião.',
+			'watchTogether.roomCode' => 'Código da sala',
+			'watchTogether.paste' => 'Colar',
+			'watchTogether.noCodeInClipboard' => 'A área de transferência não contém um código de sala',
+			'watchTogether.copyCode' => 'Copiar código',
+			'watchTogether.codeCopied' => 'Código da sala copiado',
+			'watchTogether.shareInvite' => 'Compartilhar convite',
+			'watchTogether.inviteCopied' => 'Convite copiado. Cole-o em uma mensagem.',
+			'watchTogether.inviteMessage' => ({required Object code}) => 'Entre na minha sala do Assistir Juntos no Bask: abra "Assistir Juntos", escolha "Entrar na sala" e insira ${code}.',
+			'watchTogether.openSessionControls' => 'Abrir os controles da sessão Assistir Juntos',
+			'watchTogether.reconnecting' => 'Reconectando...',
+			'watchTogether.reconnectingDescription' => 'A conexão caiu. Você voltará à sala automaticamente.',
+			'watchTogether.connected' => 'Conectado',
+			'watchTogether.disconnected' => 'Desconectado',
+			'watchTogether.youAreHost' => 'Você é o anfitrião',
+			'watchTogether.hostedBy' => ({required Object name}) => 'Anfitrião: ${name}',
+			'watchTogether.hostControlsPlayback' => 'O anfitrião controla a reprodução',
+			'watchTogether.anyoneCanControl' => 'Qualquer pessoa pode controlar a reprodução',
+			'watchTogether.roomLocked' => 'Sala bloqueada',
+			'watchTogether.nowPlaying' => 'Reproduzindo agora',
+			'watchTogether.nothingPlaying' => 'Nada em reprodução',
+			'watchTogether.nothingPlayingHost' => 'Reproduza algo de qualquer biblioteca para compartilhar com a sala.',
+			'watchTogether.nothingPlayingGuest' => 'Quando o anfitrião reproduzir algo, o conteúdo será aberto aqui.',
+			'watchTogether.notShareable' => 'Este vídeo não corresponde a nenhum item do catálogo, então apenas pessoas com acesso ao mesmo servidor podem reproduzi-lo.',
+			'watchTogether.searching' => 'Procurando este vídeo nas suas bibliotecas...',
+			'watchTogether.yourCopy' => 'Sua cópia',
+			'watchTogether.sharingYourCopy' => 'Você está compartilhando sua cópia',
+			'watchTogether.playingOtherLength' => ({required Object difference}) => 'Reproduzindo sua cópia, ${difference}',
+			'watchTogether.mismatchTitle' => 'Sua cópia tem outra duração',
+			'watchTogether.mismatchDescription' => ({required Object difference}) => 'Sua cópia mais próxima é ${difference} que o vídeo da sala. Pode ser outro corte ou outra versão.',
+			'watchTogether.playAnyway' => 'Reproduzir mesmo assim',
+			'watchTogether.chooseAnotherCopy' => 'Escolher outra cópia',
+			'watchTogether.dontPlay' => 'Não reproduzir',
+			'watchTogether.unavailableTitle' => 'Você não tem este vídeo',
+			'watchTogether.unavailableDescription' => 'O Bask não o encontrou nas suas bibliotecas. Escolha uma cópia manualmente ou busque novamente.',
+			'watchTogether.chooseCopy' => 'Escolher uma cópia',
+			'watchTogether.searchAgain' => 'Buscar novamente',
+			'watchTogether.noCandidates' => 'Nenhuma cópia encontrada nas suas bibliotecas.',
+			'watchTogether.choiceFailed' => 'Não foi possível reproduzir esta cópia para a sala',
+			'watchTogether.lengthLonger' => ({required Object duration}) => '${duration} mais longa',
+			'watchTogether.lengthShorter' => ({required Object duration}) => '${duration} mais curta',
+			'watchTogether.lengthSame' => 'Mesma duração',
+			'watchTogether.lengthUnknown' => 'Duração desconhecida',
+			'watchTogether.joinCurrentPlayback' => 'Entrar na reprodução atual',
+			'watchTogether.joinCurrentPlaybackDescription' => 'Voltar ao conteúdo que o anfitrião está assistindo agora',
+			'watchTogether.stopMedia' => 'Parar o vídeo para todos',
+			'watchTogether.syncOffset' => 'Ajuste de sincronia',
+			'watchTogether.syncOffsetDescription' => 'Ajuste seu vídeo se ele estiver adiantado ou atrasado em relação à sala.',
+			'watchTogether.offsetHint' => ({required Object difference}) => 'Sua cópia é ${difference} que o vídeo da sala.',
+			'watchTogether.applyDifference' => ({required Object offset}) => 'Usar ${offset}',
+			'watchTogether.offsetMinusSecond' => '-1 s',
+			'watchTogether.offsetMinusTenth' => '-100 ms',
+			'watchTogether.offsetPlusTenth' => '+100 ms',
+			'watchTogether.offsetPlusSecond' => '+1 s',
+			'watchTogether.participants' => 'Participantes',
+			'watchTogether.participantCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(n, one: '${n} participante', other: '${n} participantes', ), 
+			'watchTogether.hostBadge' => 'ANFITRIÃO',
+			'watchTogether.nameYou' => ({required Object name}) => '${name} (você)',
+			'watchTogether.playerIdle' => 'Ocioso',
+			'watchTogether.playerLoading' => 'Carregando',
+			'watchTogether.playerReady' => 'Pronto',
+			'watchTogether.playerBuffering' => 'Em buffer',
+			'watchTogether.matchSearching' => 'Procurando',
+			'watchTogether.matchMatched' => 'Tem o vídeo',
+			'watchTogether.matchMismatched' => 'Duração diferente',
+			'watchTogether.matchUnavailable' => 'Não tem o vídeo',
+			'watchTogether.participantOffset' => ({required Object offset}) => 'Ajuste ${offset}',
+			'watchTogether.makeHost' => 'Tornar anfitrião',
+			'watchTogether.makeHostQuestion' => 'Transferir anfitrião?',
+			'watchTogether.makeHostConfirm' => ({required Object name}) => '${name} controlará a reprodução e conduzirá a sessão para todos.',
+			'watchTogether.transfer' => 'Transferir',
+			'watchTogether.removeParticipant' => 'Remover da sala',
+			'watchTogether.removeParticipantQuestion' => ({required Object name}) => 'Remover ${name}?',
+			'watchTogether.removeParticipantConfirm' => ({required Object name}) => '${name} sairá da sala. A pessoa poderá entrar novamente com o código, a menos que você bloqueie a sala.',
+			'watchTogether.remove' => 'Remover',
+			'watchTogether.roomSettings' => 'Configurações da sala',
+			'watchTogether.letEveryoneControl' => 'Permitir que todos controlem a reprodução',
+			'watchTogether.lockRoom' => 'Bloquear sala',
+			'watchTogether.lockRoomDescription' => 'Ninguém novo pode entrar',
+			'watchTogether.leaveRoom' => 'Sair da sala',
+			'watchTogether.leaveRoomQuestion' => 'Sair da sala?',
+			'watchTogether.leaveRoomConfirm' => 'Você pode entrar novamente com o código da sala.',
+			'watchTogether.leave' => 'Sair',
+			'watchTogether.endRoom' => 'Encerrar sala',
+			'watchTogether.endRoomQuestion' => 'Encerrar sala?',
+			'watchTogether.endRoomConfirm' => 'Isso encerra a sala para todos.',
+			'watchTogether.end' => 'Encerrar',
+			'watchTogether.playBlockedTitle' => 'A reprodução não começou',
+			'watchTogether.playBlockedDescription' => 'Pressione reproduzir para começar a assistir com a sala.',
+			'watchTogether.notices.pressedPlay' => ({required Object name}) => '${name} iniciou a reprodução',
+			'watchTogether.notices.playbackStarted' => 'Reprodução iniciada',
+			'watchTogether.notices.paused' => ({required Object name}) => '${name} pausou',
+			'watchTogether.notices.playbackPaused' => 'Reprodução pausada',
+			'watchTogether.notices.jumpedTo' => ({required Object name, required Object position}) => '${name} pulou para ${position}',
+			'watchTogether.notices.roomJumpedTo' => ({required Object position}) => 'Pulou para ${position}',
+			'watchTogether.notices.changedSpeed' => ({required Object name, required Object speed}) => '${name} definiu a velocidade para ${speed}',
+			'watchTogether.notices.speedChanged' => ({required Object speed}) => 'Velocidade definida para ${speed}',
+			'watchTogether.notices.startedMedia' => ({required Object name, required Object title}) => '${name} iniciou ${title}',
+			'watchTogether.notices.mediaStarted' => ({required Object title}) => 'Reproduzindo agora: ${title}',
+			'watchTogether.notices.stoppedMedia' => ({required Object name}) => '${name} parou o vídeo',
+			'watchTogether.notices.mediaStopped' => 'O vídeo parou',
+			'watchTogether.notices.waitingFor' => ({required Object name}) => 'Aguardando ${name}...',
+			'watchTogether.notices.waitingForSomeone' => 'Aguardando alguém se sincronizar...',
+			'watchTogether.notices.finished' => 'Concluído',
+			'watchTogether.notices.hostChangedTo' => ({required Object name}) => '${name} agora é o anfitrião',
+			'watchTogether.notices.youAreNowHost' => 'Agora você é o anfitrião',
+			'watchTogether.notices.joined' => ({required Object name}) => '${name} entrou',
+			'watchTogether.notices.left' => ({required Object name}) => '${name} saiu',
+			'watchTogether.notices.controlRefused' => 'Apenas o anfitrião pode controlar a reprodução',
+			'watchTogether.notices.searchFailed' => 'Não foi possível buscar o vídeo da sala em alguns servidores',
+			'watchTogether.notices.playBlocked' => 'Pressione reproduzir para começar',
+			'watchTogether.notices.shareFailed' => 'Não foi possível compartilhar este vídeo com a sala',
+			'watchTogether.notices.downloadNotShared' => 'Os downloads não são compartilhados com a sala enquanto o servidor de origem estiver offline',
+			'watchTogether.notices.openFailed' => 'Não foi possível abrir o vídeo da sala',
+			'watchTogether.ended.ended' => 'O anfitrião encerrou a sala',
+			'watchTogether.ended.kicked' => 'Você foi removido da sala',
+			'watchTogether.ended.expired' => 'A sala expirou',
+			'watchTogether.ended.replaced' => 'Você entrou nesta sala em outro dispositivo',
+			'watchTogether.ended.lost' => 'A conexão com a sala foi perdida',
+			'watchTogether.errors.invalidCode' => 'Isso não é um código de sala. Os códigos têm 6 letras e números, sem 0, 1, I, L ou O.',
+			'watchTogether.errors.roomNotFound' => 'Nenhuma sala tem esse código. Ela pode ter sido encerrada.',
+			'watchTogether.errors.roomFull' => 'Essa sala está cheia.',
+			'watchTogether.errors.roomLocked' => 'O anfitrião bloqueou essa sala.',
+			'watchTogether.errors.relayFull' => 'O Assistir Juntos está sobrecarregado no momento. Tente novamente mais tarde.',
+			'watchTogether.errors.unreachable' => 'Não foi possível acessar o servidor de retransmissão do Assistir Juntos. Verifique sua conexão.',
+			'watchTogether.errors.rateLimited' => 'Muitas tentativas. Aguarde um momento e tente novamente.',
+			'watchTogether.errors.clientBlocked' => 'Esta versão do Bask não pode usar o servidor de retransmissão. Atualize o app.',
+			'watchTogether.errors.forbidden' => 'Apenas o anfitrião pode fazer isso.',
+			'watchTogether.errors.notInRoom' => 'Você não está em uma sala.',
+			'watchTogether.errors.alreadyInRoom' => 'Você já está em uma sala.',
+			'watchTogether.errors.resumeFailed' => 'Não foi possível voltar à sala.',
+			'watchTogether.errors.unsupported' => 'O servidor de retransmissão não é compatível com isso.',
+			'watchTogether.errors.generic' => 'Algo deu errado. Tente novamente.',
+			'watchTogether.untitledEpisode' => ({required Object number}) => 'Episódio ${number}',
 			'downloads.title' => 'Downloads',
 			'downloads.manage' => 'Gerenciar',
 			'downloads.tvShows' => 'Séries de TV',
@@ -4432,10 +5194,14 @@ extension on TranslationsPt {
 			'downloads.downloadQueued' => 'Download na fila',
 			'downloads.downloadResumed' => 'Download retomado',
 			'downloads.serverErrorBitrate' => 'Erro do servidor: o arquivo pode exceder o limite remoto de taxa de bits',
-			'downloads.storageFull' => 'Os downloads foram interrompidos porque o armazenamento do dispositivo está cheio. Libere espaço e tente novamente.',
+			'downloads.storageFull' => 'Os downloads foram interrompidos para proteger o espaço disponível. Libere espaço ou escolha outro local de download e tente novamente.',
+			'downloads.storageUnavailable' => 'Os downloads foram interrompidos porque não foi possível verificar o armazenamento disponível. Verifique o local de download e tente novamente.',
 			'downloads.episodesQueued' => ({required Object count}) => '${count} episódios na fila de download',
 			'downloads.downloadDeleted' => 'Download excluído',
 			'downloads.deleteConfirm' => ({required Object title}) => 'Excluir "${title}" deste dispositivo?',
+			'downloads.deleteCollectionDownloads' => 'Excluir downloads',
+			'downloads.deleteCollectionDownloadsConfirm' => ({required Object title}) => 'Excluir todos os downloads de "${title}" deste dispositivo?',
+			'downloads.collectionDownloadsDeleted' => 'Downloads excluídos',
 			'downloads.cancelledDownloadTitle' => 'Download cancelado',
 			'downloads.cancelledDownloadMessage' => 'Este download foi cancelado. O que você deseja fazer?',
 			'downloads.allEpisodesAlreadyDownloaded' => 'Todos os episódios já foram baixados',
@@ -4453,6 +5219,8 @@ extension on TranslationsPt {
 			'downloads.noDownloadsTree' => 'Nenhum download',
 			'downloads.pauseAll' => 'Pausar todos',
 			'downloads.resumeAll' => 'Retomar todos',
+			'downloads.retryAll' => 'Tentar todos novamente',
+			'downloads.retryFailed' => 'Tentar novamente os downloads com falha',
 			'downloads.deleteAll' => 'Excluir todos',
 			'downloads.selectVersion' => 'Selecionar versão',
 			'downloads.allEpisodes' => 'Todos os episódios',
@@ -4479,8 +5247,6 @@ extension on TranslationsPt {
 			'downloads.syncRuleCleanupUnavailable' => 'Os downloads associados não puderam ser identificados com segurança. Reconecte o servidor e tente novamente, ou remova a regra sem excluir os downloads.',
 			'downloads.syncedNewEpisodes' => ({required Object count, required Object title}) => '${count} novos episódios sincronizados para ${title}',
 			'downloads.activeSyncRules' => 'Regras de sincronização',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.noSyncRules' => 'Nenhuma regra de sincronização',
 			'downloads.manageSyncRule' => 'Gerenciar sincronização',
 			'downloads.editEpisodeCount' => 'Número de episódios',
@@ -4491,6 +5257,7 @@ extension on TranslationsPt {
 			'downloads.syncRuleAvailable' => 'Disponível',
 			'downloads.syncRuleOffline' => 'Offline',
 			'downloads.syncRuleSignInRequired' => 'É necessário entrar',
+			'downloads.syncRuleAccessDenied' => 'Acesso negado',
 			'downloads.syncRuleNotAvailableForProfile' => 'Indisponível para o perfil atual',
 			'downloads.syncRuleUnknownServer' => 'Servidor desconhecido',
 			'downloads.syncRuleListCreated' => 'Regra de sincronização criada',
@@ -4520,13 +5287,23 @@ extension on TranslationsPt {
 			'downloads.backgroundWarning.statusUnknown' => 'Ainda não verificado',
 			'downloads.backgroundWarning.settingsUnavailable' => 'Não foi possível abrir as configurações do sistema neste dispositivo',
 			'downloads.backgroundWarning.linkUnavailable' => 'Não foi possível abrir dontkillmyapp.com neste dispositivo',
+			'downloads.options' => 'Opções de downloads',
+			'downloads.groupings.library' => 'Biblioteca',
+			'downloads.groupings.collections' => 'Coleções',
+			'downloads.unknownLibrary' => 'Biblioteca desconhecida',
 			'downloads.unknownShow' => 'Série desconhecida',
 			'downloads.unknownSeason' => 'Temporada desconhecida',
 			'downloads.unknownAlbum' => 'Álbum desconhecido',
 			'downloads.completedOfTotal' => ({required Object completed, required Object total}) => '${completed}/${total} concluídos',
 			'downloads.errorFileNotFound' => 'Arquivo não encontrado (404)',
+			'downloads.errorDownloadNotAllowed' => 'Download não permitido pelo servidor (403)',
 			'downloads.errorDownloadFailed' => 'Falha no download',
-			'downloads.errorPostProcessing' => ({required Object error}) => 'Falha no pós-processamento: ${error}',
+			'downloads.errorDownloadFailedWithReason' => ({required Object reason}) => 'Falha no download: ${reason}',
+			'downloads.errorHttpStatus' => ({required Object status}) => 'Falha no download (HTTP ${status})',
+			'downloads.errorPostProcessing' => ({required Object reason}) => 'Falha no pós-processamento: ${reason}',
+			'downloads.reasonFileNotSaved' => 'não foi possível salvar o arquivo neste dispositivo',
+			'downloads.reasonCannotResume' => 'não foi possível retomar o download parcial',
+			'downloads.reasonDeviceStorageFull' => 'este dispositivo está sem espaço de armazenamento',
 			'downloads.notificationDownloading' => 'Baixando...',
 			'downloads.notificationComplete' => 'Download concluído',
 			'downloads.notificationPaused' => 'Download pausado',
@@ -4583,7 +5360,7 @@ extension on TranslationsPt {
 			'companionRemote.remote.tabPlay' => 'Reproduzir',
 			'companionRemote.remote.tabMore' => 'Mais',
 			'companionRemote.remote.menu' => 'Menu',
-			'companionRemote.remote.tabNavigation' => 'Navegação',
+			'companionRemote.remote.tabNavigation' => 'Navegação por abas',
 			'companionRemote.remote.tabDiscover' => 'Descobrir',
 			'companionRemote.remote.tabLibraries' => 'Bibliotecas',
 			'companionRemote.remote.tabSearch' => 'Buscar',
@@ -4634,7 +5411,7 @@ extension on TranslationsPt {
 			'videoSettings.audioOutputSpatial' => 'Áudio espacial',
 			'videoSettings.audioOutputStereo' => 'Estéreo',
 			'videoSettings.audioNormalization' => 'Normalizar intensidade sonora',
-			'videoSettings.audioDownmix' => 'Conversão para estéreo',
+			'videoSettings.audioNormalizationDisablesPassthrough' => 'Decodifica o áudio para PCM; a passagem direta fica desativada enquanto esta opção estiver ativa',
 			'performanceOverlay.color' => 'Cor',
 			'performanceOverlay.performance' => 'Desempenho',
 			'performanceOverlay.buffer' => 'Buffer',
@@ -4647,6 +5424,13 @@ extension on TranslationsPt {
 			'performanceOverlay.rotation' => 'Rotação',
 			'performanceOverlay.dvSource' => 'Fonte DV',
 			'performanceOverlay.dvPath' => 'Caminho DV',
+			'performanceOverlay.dvRouteDecoder' => 'Decodificador Dolby Vision',
+			'performanceOverlay.dvRouteDecoderP81' => 'Decodificador Dolby Vision (P7→8.1)',
+			'performanceOverlay.dvRouteBaseLayer' => 'Camada base',
+			'performanceOverlay.dvRouteBaseLayerHdr10' => 'Camada base HDR10',
+			'performanceOverlay.dvRouteBaseLayerHlg' => 'Camada base HLG',
+			'performanceOverlay.dvRouteBaseLayerSdr' => 'Camada base SDR',
+			'performanceOverlay.dvRouteReshaped' => 'Remodelagem RPU (gpu-next)',
 			'performanceOverlay.p7Conversion' => 'Conv. P7',
 			'performanceOverlay.sampleRate' => 'Taxa de amostragem',
 			'performanceOverlay.pixelFormat' => 'Formato de pixel',
@@ -4674,6 +5458,8 @@ extension on TranslationsPt {
 			'performanceOverlay.fps' => 'FPS',
 			'performanceOverlay.decoderAndroidHw' => 'Android HW',
 			'performanceOverlay.decoderNvidiaHw' => 'NVIDIA HW',
+			_ => null,
+		} ?? switch (path) {
 			'performanceOverlay.decoderQualcommHw' => 'Qualcomm HW',
 			'performanceOverlay.decoderMediatekHw' => 'MediaTek HW',
 			'performanceOverlay.decoderExynosHw' => 'Exynos HW',
@@ -4773,6 +5559,7 @@ extension on TranslationsPt {
 			'metadataEdit.label' => 'Rótulo',
 			'metadataEdit.style' => 'Estilo',
 			'metadataEdit.mood' => 'Humor',
+			'metadataEdit.quickTag' => 'Tag rápida...',
 			'matchScreen.match' => 'Associar...',
 			'matchScreen.fixMatch' => 'Corrigir correspondência...',
 			'matchScreen.unmatch' => 'Desassociar',
@@ -4819,6 +5606,10 @@ extension on TranslationsPt {
 			'seerr.qualityProfile' => 'Perfil de qualidade',
 			'seerr.rootFolder' => 'Pasta raiz',
 			'seerr.languageProfile' => 'Perfil de idioma',
+			'seerr.tags' => 'Etiquetas',
+			'seerr.noTags' => 'Sem etiquetas',
+			'seerr.defaultOption' => ({required Object name}) => '${name} (padrão)',
+			'seerr.animeNote' => 'Esta série é um anime.',
 			'seerr.requestSubmitted' => 'Solicitação enviada',
 			'seerr.requestFailed' => ({required Object error}) => 'Falha na solicitação: ${error}',
 			'seerr.requestsLoadFailed' => 'Não foi possível carregar as opções de solicitação',
@@ -4830,6 +5621,7 @@ extension on TranslationsPt {
 			'seerr.statusBlocklisted' => 'Na lista de bloqueio',
 			'seerr.couldNotReach' => ({required Object url, required Object error}) => 'Não foi possível acessar ${url}: ${error}',
 			'seerr.noInstanceAtUrl' => ({required Object url, required Object status}) => 'Nenhuma instância do Seerr em ${url} (HTTP ${status})',
+			'seerr.behindAuthProxy' => 'Um proxy reverso com autenticação (SSO ou autenticação HTTP) respondeu no lugar do Seerr. O Bask não consegue entrar através dele: permita que o caminho /api/v1 do Seerr ignore o proxy para este aplicativo, ou use um endereço que alcance o Seerr diretamente.',
 			'seerr.invalidUrl' => 'Insira um endereço de servidor como https://seerr.example.com',
 			'seerr.quickConnectUnsupported' => 'Esta instância do Seerr não oferece suporte a Quick Connect. Ela precisa do Seerr 3.4 ou mais recente.',
 			'seerr.notInitialized' => 'Esta instância do Seerr não concluiu a configuração inicial',
@@ -4840,6 +5632,8 @@ extension on TranslationsPt {
 			'seerr.freshCookieRejected' => 'O Seerr rejeitou o novo cookie de sessão',
 			'seerr.noUserInformation' => 'O Seerr não retornou informações do usuário',
 			'seerr.sessionRejectedAfterReauth' => 'A sessão foi rejeitada após entrar novamente',
+			'seerr.permissionDenied' => 'O Seerr negou esta ação: sua conta não tem mais a permissão necessária',
+			'seerr.permissionRevoked' => 'Você não tem mais permissão para solicitar isso',
 			'services.title' => 'Serviços',
 			'services.hubSubtitle' => 'Sincronize o progresso de exibição e solicite novos títulos.',
 			'services.integrations' => 'Integrações',
@@ -4855,6 +5649,8 @@ extension on TranslationsPt {
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
+			'services.simklReconnect.title' => 'Reconectar o Simkl',
+			'services.simklReconnect.subtitle' => 'O Simkl está desativando o método de acesso usado por esta conexão. Ao reconectar, o simkl.com será aberto para aprovar o Bask — o Bask nunca vê sua senha. Seu histórico de exibição continua no Simkl.',
 			'services.deviceCode.title' => ({required Object service}) => 'Ativar o Bask no ${service}',
 			'services.deviceCode.instructions' => 'Leia o código QR ou acesse o endereço abaixo e insira este código:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Abrir ${service} para ativar',

@@ -3,6 +3,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <atomic>
 #include <cerrno>
 #include <chrono>
@@ -66,9 +67,12 @@ class MpvPlayerLifecycleTestPeer {
     player.observed_properties_.Register(name, "node", id);
   }
   static void HandleEvent(MpvPlayer& player, mpv_event* event) { player.HandleMpvEvent(event); }
+  static bool ProcessEvents(MpvPlayer& player) { return player.ProcessEvents(); }
   static void SendPlaybackRestart(MpvPlayer& player, int64_t source_id, const double* position_seconds) {
     player.SendPlaybackRestartEvent(true, source_id, position_seconds);
   }
+  static plezy::mpv_common::AudioRecoveryState& AudioRecovery(MpvPlayer& player) { return player.audio_recovery_; }
+  static void RunAudioRecovery(MpvPlayer& player) { player.MaybeRunAudioRecovery(); }
 
   static void HoldLease(
       const std::shared_ptr<MpvPlayer::CallbackContext>& context, std::mutex& mutex, std::condition_variable& condition,
@@ -433,6 +437,79 @@ void TestSourceQualifiedEventPayloads() {
   for (FlValue* event : events) fl_value_unref(event);
 }
 
+// Audio recovery giving up is the one END_FILE this runner produces itself:
+// the stop it issues ends the file with reason stop, which the handler reports
+// as the AO_INIT_FAILED error under Dart's audio-output-failed cause. That
+// END_FILE consumes the latch, so the next one is reported as it came.
+void TestAudioRecoveryGiveUpEndsFileAsAudioOutputFailure() {
+  MpvPlayer player;
+  std::vector<FlValue*> events;
+  player.SetEventCallback([&events](FlValue* event) {
+    // The give-up's own log line is not part of the contract under test.
+    if (fl_value_get_type(event) == FL_VALUE_TYPE_MAP) {
+      FlValue* name = fl_value_lookup_string(event, "name");
+      if (name != nullptr && std::string(fl_value_get_string(name)) == "log-message") return;
+    }
+    events.push_back(fl_value_ref(event));
+  });
+
+  // An outage whose whole reload budget was spent a minute ago, so the
+  // give-up is what the recovery tick owes now.
+  auto& recovery = MpvPlayerLifecycleTestPeer::AudioRecovery(player);
+  const auto start = plezy::mpv_common::AudioRecoveryState::Clock::now() - std::chrono::minutes(1);
+  recovery.SetFileLoaded(true, start);
+  recovery.SetCurrentAudioOutputNull(true, start);
+  const int schedule_ms[] = {500, 1000, 2000, 4000, 8000};
+  for (int due_ms : schedule_ms) {
+    const auto action = recovery.NextReload(start + std::chrono::milliseconds(due_ms));
+    Check(action.reason == plezy::mpv_common::AudioReloadReason::kNullFallback, "null-fallback schedule changed");
+    Check(recovery.CompleteReload(action.request_generation), "reload completion was refused");
+  }
+  MpvPlayerLifecycleTestPeer::RunAudioRecovery(player);
+
+  constexpr int64_t kSourceId = 6000000002LL;
+  mpv_event_end_file end{};
+  end.reason = MPV_END_FILE_REASON_STOP;
+  end.playlist_entry_id = kSourceId;
+  mpv_event end_event{};
+  end_event.event_id = MPV_EVENT_END_FILE;
+  end_event.data = &end;
+  MpvPlayerLifecycleTestPeer::HandleEvent(player, &end_event);
+  MpvPlayerLifecycleTestPeer::HandleEvent(player, &end_event);
+  Check(events.size() == 2, "give-up must add nothing but the two end-file events");
+
+  FlValue* failed = RequireEventData(events[0], "end-file");
+  Check(
+      fl_value_get_int(RequireMapField(failed, "sourceId", "end-file source ID is missing")) == kSourceId,
+      "the give-up end-file must keep the ended source ID");
+  Check(
+      fl_value_get_int(RequireMapField(failed, "reason", "end-file reason is missing")) == MPV_END_FILE_REASON_ERROR,
+      "the stop issued on give-up must be reported as an error");
+  Check(
+      fl_value_get_int(RequireMapField(failed, "error", "end-file error is missing")) == MPV_ERROR_AO_INIT_FAILED,
+      "the give-up must be reported as AO_INIT_FAILED");
+  Check(
+      fl_value_get_type(RequireMapField(failed, "message", "end-file message is missing")) == FL_VALUE_TYPE_STRING,
+      "the give-up end-file must carry an error message");
+  FlValue* cause = RequireMapField(failed, "cause", "the give-up end-file must carry a cause");
+  Check(
+      fl_value_get_type(cause) == FL_VALUE_TYPE_STRING &&
+          std::string(fl_value_get_string(cause)) == plezy::mpv_common::kAudioOutputFailedCause,
+      "the give-up cause must be the one Dart handles as audio-output-failed");
+
+  FlValue* plain = RequireEventData(events[1], "end-file");
+  Check(
+      fl_value_get_int(RequireMapField(plain, "reason", "plain end-file reason is missing")) ==
+          MPV_END_FILE_REASON_STOP,
+      "a later end-file must not inherit the consumed give-up");
+  Check(
+      fl_value_lookup_string(plain, "error") == nullptr && fl_value_lookup_string(plain, "cause") == nullptr,
+      "a plain stop must carry neither error nor cause");
+
+  player.SetEventCallback(nullptr);
+  for (FlValue* event : events) fl_value_unref(event);
+}
+
 // The restart handling below has no core, so the substituted reader stands in
 // for it: it records what was asked and hands the reply back to the test.
 struct CapturedPositionRead {
@@ -566,6 +643,213 @@ void TestStartFileFlushesPendingPlaybackRestartUnderPreviousSource() {
 
   player.SetEventCallback(nullptr);
   for (FlValue* event : events) fl_value_unref(event);
+}
+
+mpv_event MakeEvent(mpv_event_id id, void* data = nullptr) {
+  mpv_event event{};
+  event.event_id = id;
+  event.data = data;
+  return event;
+}
+
+// Stands in for mpv_wait_event(mpv, 0): hands out the script in order; a pass
+// ends at the MPV_EVENT_NONE or MPV_EVENT_SHUTDOWN that closes it.
+struct ScriptedEventWait {
+  std::vector<mpv_event> events;
+  size_t next = 0;
+
+  void Install(MpvPlayer& player) {
+    player.ConfigureEventWaitsForTesting([this]() {
+      Check(next < events.size(), "the pass read past the end of its script");
+      return &events[next++];
+    });
+  }
+};
+
+// What reached the event channel: property changes as "property", log lines
+// by their prefix, anything else by its event name.
+std::string DeliveredName(FlValue* message) {
+  if (fl_value_get_type(message) == FL_VALUE_TYPE_LIST) return "property";
+  const std::string name = fl_value_get_string(RequireMapField(message, "name", "event name is missing"));
+  if (name != "log-message") return name;
+  FlValue* data = RequireMapField(message, "data", "log line data is missing");
+  return "log:" + std::string(fl_value_get_string(RequireMapField(data, "prefix", "log line prefix is missing")));
+}
+
+std::vector<std::string> DeliveredNames(const std::vector<FlValue*>& events) {
+  std::vector<std::string> names;
+  for (FlValue* event : events) names.push_back(DeliveredName(event));
+  return names;
+}
+
+// A failed open as a consumer that lags the core dequeues it: mpv hands out
+// queued events and property changes before its log buffer, so the END_FILE
+// and what followed it come ahead of the lines logged before it (#2513). Dart
+// classifies the failure from the lines it has when the end-file arrives, so
+// the pass must put those lines on the channel first - while still handling
+// every event, command replies included, in mpv's order.
+void TestErrorEndFileFollowsTheLinesExplainingIt() {
+  MpvPlayer player;
+  MpvPlayerLifecycleTestPeer::RegisterObservedNode(player, "idle-active", 9);
+  std::vector<FlValue*> events;
+  player.SetEventCallback([&events](FlValue* event) { events.push_back(fl_value_ref(event)); });
+
+  size_t delivered_at_reply = std::numeric_limits<size_t>::max();
+  const uint64_t request_id = MpvPlayerLifecycleTestPeer::RegisterPendingCommand(
+      player, [&](int, const mpv_node*) { delivered_at_reply = events.size(); });
+
+  constexpr int64_t kFailedSourceId = 7;
+  mpv_event_end_file end{};
+  end.reason = MPV_END_FILE_REASON_ERROR;
+  end.error = MPV_ERROR_LOADING_FAILED;
+  end.playlist_entry_id = kFailedSourceId;
+  int idle = 1;
+  mpv_event_property idle_active{};
+  idle_active.name = "idle-active";
+  idle_active.format = MPV_FORMAT_FLAG;
+  idle_active.data = &idle;
+  mpv_event reply = MakeEvent(MPV_EVENT_COMMAND_REPLY);
+  reply.reply_userdata = request_id;
+  mpv_event_log_message http{"ffmpeg", "warn", "http: HTTP error 404 Not Found\n", MPV_LOG_LEVEL_WARN};
+  mpv_event_log_message failed{
+      "stream", "error", "Failed to open http://127.0.0.1/missing.mkv.\n", MPV_LOG_LEVEL_ERROR};
+
+  ScriptedEventWait wait;
+  wait.events = {
+      MakeEvent(MPV_EVENT_END_FILE, &end),
+      MakeEvent(MPV_EVENT_PROPERTY_CHANGE, &idle_active),
+      reply,
+      MakeEvent(MPV_EVENT_LOG_MESSAGE, &http),
+      MakeEvent(MPV_EVENT_LOG_MESSAGE, &failed),
+      MakeEvent(MPV_EVENT_NONE),
+  };
+  wait.Install(player);
+  Check(MpvPlayerLifecycleTestPeer::ProcessEvents(player), "a pass that drained must leave the core running");
+
+  Check(
+      DeliveredNames(events) == std::vector<std::string>{"log:ffmpeg", "log:stream", "end-file", "property"},
+      "a failed open's end-file must follow the lines explaining it, and what came after it keep mpv's order");
+  Check(delivered_at_reply == 0, "a command reply must complete as it is dequeued, not when held events go out");
+  FlValue* end_data = RequireEventData(events[2], "end-file");
+  Check(RequireSourceId(end_data, "held end-file source ID is missing") == kFailedSourceId, "held end-file changed");
+  Check(
+      fl_value_get_int(RequireMapField(end_data, "reason", "held end-file reason is missing")) ==
+          MPV_END_FILE_REASON_ERROR,
+      "held end-file reason changed");
+
+  // The hold ends with the pass: the next one goes out as mpv hands it over.
+  mpv_event_start_file start{};
+  start.playlist_entry_id = kFailedSourceId + 1;
+  idle = 0;
+  mpv_event_log_message playing{"cplayer", "info", "Playing: http://127.0.0.1/next.mkv\n", MPV_LOG_LEVEL_INFO};
+  wait.events = {
+      MakeEvent(MPV_EVENT_START_FILE, &start),
+      MakeEvent(MPV_EVENT_PROPERTY_CHANGE, &idle_active),
+      MakeEvent(MPV_EVENT_LOG_MESSAGE, &playing),
+      MakeEvent(MPV_EVENT_NONE),
+  };
+  wait.next = 0;
+  Check(MpvPlayerLifecycleTestPeer::ProcessEvents(player), "the next pass must leave the core running");
+  Check(
+      DeliveredNames(events) ==
+          std::vector<std::string>{
+              "log:ffmpeg", "log:stream", "end-file", "property", "start-file", "property", "log:cplayer"},
+      "a pass without an error end-file must deliver in mpv's order");
+
+  player.SetEventCallback(nullptr);
+  for (FlValue* event : events) fl_value_unref(event);
+}
+
+// A pass cut short by MPV_EVENT_SHUTDOWN still sends what the error end-file
+// held, in order, rather than stranding it behind a pass that never comes.
+void TestShutdownReleasesHeldEvents() {
+  MpvPlayer player;
+  MpvPlayerLifecycleTestPeer::RegisterObservedNode(player, "idle-active", 9);
+  std::vector<FlValue*> events;
+  player.SetEventCallback([&events](FlValue* event) { events.push_back(fl_value_ref(event)); });
+
+  mpv_event_end_file end{};
+  end.reason = MPV_END_FILE_REASON_ERROR;
+  end.error = MPV_ERROR_LOADING_FAILED;
+  end.playlist_entry_id = 7;
+  int idle = 1;
+  mpv_event_property idle_active{};
+  idle_active.name = "idle-active";
+  idle_active.format = MPV_FORMAT_FLAG;
+  idle_active.data = &idle;
+
+  ScriptedEventWait wait;
+  wait.events = {
+      MakeEvent(MPV_EVENT_END_FILE, &end),
+      MakeEvent(MPV_EVENT_PROPERTY_CHANGE, &idle_active),
+      MakeEvent(MPV_EVENT_SHUTDOWN),
+  };
+  wait.Install(player);
+  Check(!MpvPlayerLifecycleTestPeer::ProcessEvents(player), "shutdown must end the pass as the core going away");
+  Check(
+      DeliveredNames(events) == std::vector<std::string>{"end-file", "property"},
+      "a pass ended by shutdown must still deliver what the error end-file held, in order");
+
+  player.SetEventCallback(nullptr);
+  for (FlValue* event : events) fl_value_unref(event);
+}
+
+// A verbose log buffer that overflowed before the error END_FILE was dequeued
+// reads out as mpv's overflow notice and then its 10000 lines, the ones
+// explaining the failure newest. The hold waits through all of them, then is
+// released and the rest of the pass is delivered as it comes, rather than
+// every non-log event waiting for a MPV_EVENT_NONE that is far off.
+void TestErrorEndFileHoldEndsAfterAFullLogBuffer() {
+  MpvPlayer player;
+  MpvPlayerLifecycleTestPeer::RegisterObservedNode(player, "idle-active", 9);
+  std::vector<std::string> names;
+  player.SetEventCallback([&names](FlValue* event) { names.push_back(DeliveredName(event)); });
+
+  mpv_event_end_file end{};
+  end.reason = MPV_END_FILE_REASON_ERROR;
+  end.error = MPV_ERROR_LOADING_FAILED;
+  end.playlist_entry_id = 7;
+  int idle = 1;
+  mpv_event_property idle_active{};
+  idle_active.name = "idle-active";
+  idle_active.format = MPV_FORMAT_FLAG;
+  idle_active.data = &idle;
+  mpv_event_log_message overflow{
+      "overflow", "fatal", "log message buffer overflow: 12 messages skipped\n", MPV_LOG_LEVEL_FATAL};
+  mpv_event_log_message filler{"demux", "v", "verbose\n", MPV_LOG_LEVEL_V};
+  mpv_event_log_message http{"ffmpeg", "warn", "http: HTTP error 404 Not Found\n", MPV_LOG_LEVEL_WARN};
+  mpv_event_log_message failed{
+      "stream", "error", "Failed to open http://127.0.0.1/missing.mkv.\n", MPV_LOG_LEVEL_ERROR};
+  mpv_event_log_message playing{"cplayer", "info", "Playing: http://127.0.0.1/next.mkv\n", MPV_LOG_LEVEL_INFO};
+
+  // mpv's verbose buffer (player/client.c): the notice, then 10000 lines.
+  constexpr size_t kBufferLines = 10000;
+  ScriptedEventWait wait;
+  wait.events.push_back(MakeEvent(MPV_EVENT_END_FILE, &end));
+  wait.events.push_back(MakeEvent(MPV_EVENT_LOG_MESSAGE, &overflow));
+  for (size_t i = 0; i < kBufferLines - 2; ++i) wait.events.push_back(MakeEvent(MPV_EVENT_LOG_MESSAGE, &filler));
+  wait.events.push_back(MakeEvent(MPV_EVENT_LOG_MESSAGE, &http));
+  wait.events.push_back(MakeEvent(MPV_EVENT_LOG_MESSAGE, &failed));
+  wait.events.push_back(MakeEvent(MPV_EVENT_PROPERTY_CHANGE, &idle_active));
+  wait.events.push_back(MakeEvent(MPV_EVENT_LOG_MESSAGE, &playing));
+  wait.events.push_back(MakeEvent(MPV_EVENT_NONE));
+  wait.Install(player);
+  Check(MpvPlayerLifecycleTestPeer::ProcessEvents(player), "a pass that drained must leave the core running");
+
+  Check(names.size() == kBufferLines + 4, "every event of the pass must be delivered exactly once");
+  const auto position = [&names](const std::string& name) {
+    return static_cast<size_t>(std::find(names.begin(), names.end(), name) - names.begin());
+  };
+  const size_t end_file = position("end-file");
+  Check(
+      position("log:overflow") < end_file && position("log:ffmpeg") < end_file && position("log:stream") < end_file,
+      "a full log buffer and its overflow notice must all reach Dart ahead of the error end-file");
+  const size_t property = position("property");
+  Check(
+      end_file < property && property < position("log:cplayer"),
+      "past a full log buffer the hold must end and events go out as mpv hands them over");
+
+  player.SetEventCallback(nullptr);
 }
 
 void TestUnavailableCommandFails() {
@@ -942,7 +1226,11 @@ int main() {
     mpv::TestSourceQualifiedEventPayloads();
     mpv::TestPlaybackRestartWaitsForPositionReply();
     mpv::TestEndFileFlushesPendingPlaybackRestart();
+    mpv::TestAudioRecoveryGiveUpEndsFileAsAudioOutputFailure();
     mpv::TestStartFileFlushesPendingPlaybackRestartUnderPreviousSource();
+    mpv::TestErrorEndFileFollowsTheLinesExplainingIt();
+    mpv::TestShutdownReleasesHeldEvents();
+    mpv::TestErrorEndFileHoldEndsAfterAFullLogBuffer();
     mpv::TestFailedTeardownIsRetriedAndConsumedExactlyOnce();
   } catch (const std::exception& error) {
     g_main_context_pop_thread_default(context);

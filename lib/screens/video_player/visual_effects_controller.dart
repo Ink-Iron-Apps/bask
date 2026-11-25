@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -70,22 +69,23 @@ class VisualEffectsController {
     }
   }
 
-  /// Enable ambient lighting for the current video/player geometry.
-  /// Returns false when the aspect ratios cannot be determined yet.
-  Future<bool> _enableAmbientLighting(AmbientLightingService ambientLighting, ShaderProvider shaderProvider) async {
-    // Get video display aspect ratio
+  /// The picture's display aspect, or null before mpv has decoded a frame:
+  /// `dwidth`/`dheight` are unavailable until then.
+  Future<double?> _readVideoAspect() async {
     final dwidth = await _player()?.getProperty('dwidth');
     final dheight = await _player()?.getProperty('dheight');
-    if (dwidth == null || dheight == null) return false;
+    if (dwidth == null || dheight == null) return null;
     final w = double.tryParse(dwidth);
     final h = double.tryParse(dheight);
-    if (w == null || h == null || h == 0) return false;
-    final videoAspect = w / h;
+    if (w == null || h == null || h == 0) return null;
+    return w / h;
+  }
 
-    // Get player widget aspect ratio
-    final playerSize = _filterManager()?.playerSize;
-    if (playerSize == null || playerSize.height == 0) return false;
-    final outputAspect = playerSize.width / playerSize.height;
+  /// Enable ambient lighting for the current picture.
+  /// Returns false when the picture aspect cannot be determined yet.
+  Future<bool> _enableAmbientLighting(AmbientLightingService ambientLighting, ShaderProvider shaderProvider) async {
+    final videoAspect = await _readVideoAspect();
+    if (videoAspect == null) return false;
 
     // Clear shaders — ambient lighting and shaders are mutually exclusive
     if (shaderProvider.isShaderEnabled) {
@@ -96,7 +96,7 @@ class VisualEffectsController {
     // Force contain mode when enabling ambient lighting
     _filterManager()?.resetToContain();
 
-    await ambientLighting.enable(videoAspect, outputAspect);
+    await ambientLighting.enable(videoAspect);
     return true;
   }
 
@@ -116,6 +116,72 @@ class VisualEffectsController {
     if (_isMounted()) _requestRebuild();
   }
 
+  /// Whether the start flow armed the restore [onFirstFrame] runs.
+  bool _ambientRestoreArmed = false;
+
+  /// The pass in flight for the current first frame; concurrent first-frame
+  /// callers await the same one.
+  Future<void>? _firstFramePass;
+
+  /// Arm the persisted-setting restore for this playback attempt's first
+  /// frame.
+  ///
+  /// `dwidth`/`dheight` only exist once mpv has pushed a decoded frame to
+  /// the VO, which is after the start flow's hooks run: restoring there read
+  /// null and silently never applied the setting. The first-frame latch
+  /// consumes the arm exactly once — a later in-place reload must not
+  /// re-enable an effect the viewer switched off through a zoom or box-fit
+  /// change, which never persist.
+  void armAmbientRestore() => _ambientRestoreArmed = true;
+
+  /// A failed attempt's arm must not fire on its successor's first frame.
+  void disarmAmbientRestore() => _ambientRestoreArmed = false;
+
+  /// Everything that needs the picture mpv presents, run at each item's first
+  /// frame — the initial start and every in-place swap — and awaited by the
+  /// first-frame latch before that frame is revealed:
+  ///
+  /// - the armed ambient-lighting restore (start only);
+  /// - otherwise, with ambient lighting on, the picture aspect that places
+  ///   subtitles, which a swapped item may have changed;
+  /// - the NVScaler HDR skip, decided against this item's colour params
+  ///   instead of the previous file's or none at all.
+  ///
+  /// Concurrent callers share one pass; a pass started after one completed
+  /// re-reads the same properties and changes nothing.
+  Future<void> onFirstFrame() {
+    return _firstFramePass ??= _runFirstFramePass().whenComplete(() => _firstFramePass = null);
+  }
+
+  Future<void> _runFirstFramePass() async {
+    try {
+      if (_ambientRestoreArmed) {
+        _ambientRestoreArmed = false;
+        await restoreAmbientLighting();
+      } else {
+        await _refreshAmbientVideoAspect();
+      }
+      await _reapplyShaderForContent();
+    } catch (e, st) {
+      // Never hold the reveal over an effect.
+      appLogger.w('Visual effects: first-frame pass failed', error: e, stackTrace: st);
+    }
+  }
+
+  Future<void> _refreshAmbientVideoAspect() async {
+    final ambientLighting = _ambientLighting();
+    if (ambientLighting == null || !ambientLighting.isEnabled) return;
+    final videoAspect = await _readVideoAspect();
+    if (videoAspect == null) return;
+    await ambientLighting.updateVideoAspect(videoAspect);
+  }
+
+  Future<void> _reapplyShaderForContent() async {
+    final shaderService = _shaderService();
+    if (shaderService == null || !shaderService.isSupported) return;
+    if (await shaderService.reapplyForContent() && _isMounted()) _requestRebuild();
+  }
+
   /// Cycle through BoxFit modes: contain → cover → fill → contain (for button)
   void cycleBoxFitMode() {
     // Disable ambient lighting when switching boxfit modes
@@ -125,10 +191,14 @@ class VisualEffectsController {
     _requestRebuild();
   }
 
-  /// Also used by the pinch-zoom gesture, which mutates the filter
-  /// manager directly during the gesture and toasts once on gesture end.
-  void showZoomToast(double zoomScale) {
+  void _showZoomToast(double zoomScale) {
     _toast.show(Symbols.zoom_in_rounded, t.videoControls.zoomPercent(percent: (zoomScale * 100).round()));
+  }
+
+  /// Reads the item at call time so a change after an in-place episode swap
+  /// keys against the item actually on screen.
+  void _persistZoom(double zoomScale) {
+    unawaited(ScopedPlayerPrefs.write(ScopedPlayerPrefs.videoZoom, _metadata(), zoomScale));
   }
 
   double setZoom(double zoomScale, {bool showToast = true}) {
@@ -137,9 +207,19 @@ class VisualEffectsController {
 
     _ambientLighting()?.disable();
     final next = filterManager.setZoomScale(zoomScale);
-    if (showToast) showZoomToast(next);
+    _persistZoom(next);
+    if (showToast) _showZoomToast(next);
     if (_isMounted()) _requestRebuild();
     return next;
+  }
+
+  /// End of a pinch. The gesture mutates the filter manager directly on
+  /// every tick, so it toasts and persists once, here.
+  void commitPinchZoom() {
+    final zoomScale = _filterManager()?.zoomScale;
+    if (zoomScale == null) return;
+    _showZoomToast(zoomScale);
+    _persistZoom(zoomScale);
   }
 
   void zoomIn() {
@@ -156,16 +236,6 @@ class VisualEffectsController {
     setZoom(1.0);
   }
 
-  /// Update video-aspect-override when player size changes.
-  /// The shader adapts automatically via built-in target_size uniform.
-  void onResize(Size newSize) {
-    final ambientLighting = _ambientLighting();
-    if (ambientLighting == null || !ambientLighting.isEnabled) return;
-    if (newSize.height == 0) return;
-
-    ambientLighting.updateOutputAspect(newSize.width / newSize.height);
-  }
-
   /// Toggle ambient lighting effect on/off
   Future<void> toggleAmbientLighting() async {
     final ambientLighting = _ambientLighting();
@@ -174,7 +244,6 @@ class VisualEffectsController {
 
     if (ambientLighting.isEnabled) {
       await ambientLighting.disable();
-      unawaited(_filterManager()?.updateVideoFilter());
     } else {
       if (!await _enableAmbientLighting(ambientLighting, shaderProvider)) return;
     }

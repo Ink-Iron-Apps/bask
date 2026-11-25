@@ -55,7 +55,12 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class ExploreScreenState extends State<ExploreScreen>
-    with FullRefreshable, TabVisibilityAware, FocusableTab, DebouncedMediaSearch {
+    with
+        ManualRefreshable,
+        FullRefreshable,
+        TabVisibilityAware,
+        FocusableTab,
+        DebouncedMediaSearch<ExploreScreen, MediaItem> {
   late ExploreProvider _explore;
   late CatalogSourcesProvider _sources;
   CatalogSourceId? _activeSourceId;
@@ -108,6 +113,9 @@ class ExploreScreenState extends State<ExploreScreen>
     if (query.isEmpty) return;
     unawaited(runSearch(query));
   }
+
+  @override
+  void manualRefresh() => unawaited(_handleRefresh());
 
   /// Pull-to-refresh and the toolbar refresh action: re-run the query that is
   /// actually on screen, not the hidden rows behind it.
@@ -306,11 +314,7 @@ class ExploreScreenState extends State<ExploreScreen>
           key: _actionBarKey,
           onNavigateDown: searchFocusNode.requestFocus,
           actions: [
-            FocusableAction(
-              icon: Symbols.refresh_rounded,
-              tooltip: t.common.refresh,
-              onPressed: () => unawaited(_handleRefresh()),
-            ),
+            FocusableAction(icon: Symbols.refresh_rounded, tooltip: t.common.refresh, onPressed: manualRefresh),
           ],
         ),
       ],
@@ -383,7 +387,12 @@ class ExploreScreenState extends State<ExploreScreen>
     }
 
     return Scaffold(
-      body: RefreshIndicator(onRefresh: _handleRefresh, child: content),
+      // Horizontal-only SafeArea, as on Search: the field, shelves, and
+      // results clear a landscape notch or iPhone Duo's portrait sensor column.
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: SafeArea(top: false, bottom: false, child: content),
+      ),
     );
   }
 
@@ -422,7 +431,7 @@ class ExploreScreenState extends State<ExploreScreen>
       return FocusableMediaCard(
         key: Key(item.globalKey),
         item: item,
-        forceListMode: true,
+        viewModeOverride: ViewMode.list,
         disableScale: true,
         focusNode: index == 0 ? firstResultFocusNode : null,
         onNavigateLeft: _navigateToSidebar,
@@ -530,12 +539,13 @@ class ExploreScreenState extends State<ExploreScreen>
                 onFocusedItemChanged: _setSpotlightItem,
                 loadMoreItems: (hub) {
                   final rowHub = _rowForHub(hub);
-                  return rowHub == null ? Future.value(hub.items) : _explore.loadAllForHub(rowHub);
+                  return rowHub == null ? () => Future.value(hub.items) : () => _explore.loadAllForHub(rowHub);
                 },
                 onNavigateUp: _actionBarKey.currentState?.requestFocusOnFirst,
                 onNavigateToSidebar: _navigateToSidebar,
                 onBack: _navigateToSidebar,
                 tallPosterScale: TvBrowseRailLayout.compactTallPosterScale,
+                widePosterScale: TvBrowseRailLayout.compactEpisodeThumbnailScale,
               ),
             ),
           TvToolbarOverlay(child: _buildTvToolbar(sources)),

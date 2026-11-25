@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bask/i18n/strings.g.dart';
 import 'package:bask/mpv/mpv.dart';
 import 'package:bask/widgets/video_controls/widgets/performance_overlay/performance_stats.dart';
 import 'package:bask/widgets/video_controls/widgets/performance_overlay/performance_stats_service.dart';
@@ -272,40 +273,66 @@ void main() {
   });
 
   group('PerformanceStatsService dropped frames', () {
-    // The fork's vo=mediacodec declares prepare_frame, so mpv admits frames a
-    // preparation lead before their pts and `frame-drop-count` can never
-    // reach vo.c's `end_time < now` condition. A confident 0 there sent
-    // reporters of visible stutter looking in the wrong place.
-    test('the mediacodec VO cannot count drops, so the overlay says N/A', () async {
+    test('sums the VO and decoder counts from the native stats', () async {
       final stats = await _firstStats(
-        _NativeStatsPlayer({
-          'playerType': 'mpv',
-          'current-vo': 'mediacodec',
-          'frame-drop-count': '0',
-          'decoder-frame-drop-count': '0',
-        }),
-      );
-
-      expect(stats.droppedFramesFormatted, 'N/A');
-    });
-
-    test("a GL VO keeps reporting mpv's real count", () async {
-      final stats = await _firstStats(
-        _NativeStatsPlayer({
-          'playerType': 'mpv',
-          'current-vo': 'gpu',
-          'frame-drop-count': '7',
-          'decoder-frame-drop-count': '2',
-        }),
+        _NativeStatsPlayer({'playerType': 'mpv', 'frame-drop-count': '7', 'decoder-frame-drop-count': '2'}),
       );
 
       expect(stats.droppedFramesFormatted, '9');
+    });
+
+    test('a count the sweep could not read is not a drop', () async {
+      final stats = await _firstStats(_NativeStatsPlayer({'playerType': 'mpv', 'frame-drop-count': '4'}));
+
+      expect(stats.droppedFramesFormatted, '4');
     });
 
     test('the desktop property path is unaffected', () async {
       final stats = await _firstStats(_PropertyPlayer({'frame-drop-count': '3'}));
 
       expect(stats.droppedFramesFormatted, '3');
+    });
+  });
+
+  group('PerformanceStatsService Dolby Vision route (#2534)', () {
+    Future<PerformanceStats> mpvStats(Map<String, dynamic> stats) =>
+        _firstStats(_NativeStatsPlayer({'playerType': 'mpv', ...stats}));
+
+    test('a base layer is named by the transfer it decodes to, so a P8.1 fallback reads as HDR10', () async {
+      final cases = <String?, String>{
+        'pq': t.performanceOverlay.dvRouteBaseLayerHdr10,
+        'hlg': t.performanceOverlay.dvRouteBaseLayerHlg,
+        'bt.1886': t.performanceOverlay.dvRouteBaseLayerSdr,
+        'auto': t.performanceOverlay.dvRouteBaseLayer,
+        null: t.performanceOverlay.dvRouteBaseLayer,
+      };
+      for (final MapEntry(key: gamma, value: label) in cases.entries) {
+        final stats = await mpvStats({'dvSourceProfile': 8, 'dvRoute': 'base-layer', 'video-params/gamma': ?gamma});
+
+        expect(stats.dvSourceProfileFormatted, 'P8');
+        expect(stats.hasDvPlaybackPath, isTrue, reason: 'gamma=$gamma');
+        expect(stats.dvPlaybackPathFormatted, label, reason: 'gamma=$gamma');
+      }
+    });
+
+    test('the DV decoder is not named by the transfer', () async {
+      final stats = await mpvStats({'dvSourceProfile': 8, 'dvRoute': 'dv-decoder', 'video-params/gamma': 'pq'});
+
+      expect(stats.dvPlaybackPathFormatted, t.performanceOverlay.dvRouteDecoder);
+    });
+
+    test('a file without a DOVI record shows no DV rows', () async {
+      final stats = await mpvStats({'video-params/gamma': 'pq'});
+
+      expect(stats.dvSourceProfile, isNull);
+      expect(stats.hasDvPlaybackPath, isFalse);
+    });
+
+    test('an unknown route id hides the row rather than guessing', () async {
+      final stats = await mpvStats({'dvSourceProfile': 8, 'dvRoute': 'teleported'});
+
+      expect(stats.dvSourceProfile, 8);
+      expect(stats.hasDvPlaybackPath, isFalse);
     });
   });
 }

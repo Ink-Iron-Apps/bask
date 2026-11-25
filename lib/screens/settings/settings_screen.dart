@@ -60,7 +60,7 @@ import '../../widgets/settings_section.dart';
 import '../../widgets/system_bottom_inset.dart';
 import '../../profiles/active_profile_provider.dart';
 import '../../profiles/profile.dart';
-import '../../watch_together/services/watch_together_relay_endpoint.dart';
+import '../../watch_together/services/watch_party_relays.dart';
 import 'about_screen.dart';
 import 'add_connection_screen.dart';
 import 'account_preferences_screen.dart';
@@ -172,9 +172,13 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
   @override
   void focusActiveTabIfReady() {
     if (InputModeTracker.isKeyboardMode(context, listen: false)) {
-      _focusTracker.restoreFocus(fallbackKey: DonationService.isEnabled ? _kDonate : _kGeneral);
+      _focusTracker.restoreFocus(fallbackKey: _topTileKey);
     }
   }
+
+  /// Focus key of the first tile: the Liberapay link in donation builds, else
+  /// General.
+  static String get _topTileKey => DonationService.isEnabled ? _kDonate : _kGeneral;
 
   void _navigateToSidebar() {
     MainScreenFocusScope.focusSidebarOf(context);
@@ -212,61 +216,67 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
     return Scaffold(
       body: Focus(
         onKeyEvent: _handleKeyEvent,
-        child: CustomScrollView(
-          primary: false,
-          slivers: [
-            ExcludeFocus(child: CustomAppBar(title: Text(t.settings.title), pinned: true)),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: 8),
-                SettingsGroup(
-                  children: [
-                    if (DonationService.isEnabled) _buildDonateTile(),
-                    _buildGeneralTile(),
-                    _buildAppearanceTile(),
-                    _buildPlaybackTile(),
-                    if (hasLibraries) _buildManageLibrariesTile(sheetContext),
-                    _buildServicesTile(),
+        // Horizontal-only SafeArea: the groups clear a landscape notch or
+        // iPhone Duo's portrait sensor column.
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: CustomScrollView(
+            primary: false,
+            slivers: [
+              ExcludeFocus(child: CustomAppBar(title: Text(t.settings.title), pinned: true)),
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: 8),
+                  SettingsGroup(
+                    children: [
+                      if (DonationService.isEnabled) _buildDonateTile(),
+                      _buildGeneralTile(),
+                      _buildAppearanceTile(),
+                      _buildPlaybackTile(),
+                      if (hasLibraries) _buildManageLibrariesTile(sheetContext),
+                      _buildServicesTile(),
+                    ],
+                  ),
+
+                  _buildConnectionsSection(sheetContext),
+
+                  if (PlatformDetector.supportsDownloads()) _buildDownloadsSection(),
+
+                  if (_keyboardShortcutsSupported || PlatformDetector.shouldActAsRemoteHost(sheetContext))
+                    _buildControlsSection(sheetContext),
+
+                  _buildAdvancedSection(),
+
+                  // The in-app updater is how a sideloaded build gets updated at
+                  // all, so it does not hide behind upstream's ENABLE_UPDATE_CHECK
+                  // flag, which is set only by their own release pipeline.
+                  if (UpdateService.isUpdateCheckAvailable || AppUpdateService.isSupportedPlatform) ...[
+                    _buildUpdateSection(),
                   ],
-                ),
 
-                _buildConnectionsSection(sheetContext),
+                  // Hidden on Android TV / tvOS (no document picker); desktop in
+                  // force-TV mode keeps it — FilePickerService works there.
+                  if (!PlatformDetector.isTV() || PlatformDetector.isDesktopOS()) _buildBackupSection(),
 
-                if (PlatformDetector.supportsDownloads()) _buildDownloadsSection(),
-
-                if (_keyboardShortcutsSupported || PlatformDetector.shouldActAsRemoteHost(sheetContext))
-                  _buildControlsSection(sheetContext),
-
-                _buildAdvancedSection(),
-
-                // The in-app updater is how a sideloaded build gets updated at
-                // all, so it does not hide behind upstream's ENABLE_UPDATE_CHECK
-                // flag, which is set only by their own release pipeline.
-                if (UpdateService.isUpdateCheckAvailable || AppUpdateService.isSupportedPlatform) ...[
-                  _buildUpdateSection(),
-                ],
-
-                // Hidden on Android TV / tvOS (no document picker); desktop in
-                // force-TV mode keeps it — FilePickerService works there.
-                if (!PlatformDetector.isTV() || PlatformDetector.isDesktopOS()) _buildBackupSection(),
-
-                const SizedBox(height: 24),
-                SettingsGroup(
-                  children: [
-                    SettingNavigationTile(
-                      focusNode: _focusTracker.get(_kAbout),
-                      icon: Symbols.info_rounded,
-                      title: t.settings.about,
-                      subtitle: t.settings.aboutDescription,
-                      destinationBuilder: (context) => const AboutScreen(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-              ]),
-            ),
-            const SliverSystemBottomInset(),
-          ],
+                  const SizedBox(height: 24),
+                  SettingsGroup(
+                    children: [
+                      SettingNavigationTile(
+                        focusNode: _focusTracker.get(_kAbout),
+                        icon: Symbols.info_rounded,
+                        title: t.settings.about,
+                        subtitle: t.settings.aboutDescription,
+                        destinationBuilder: (context) => const AboutScreen(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ]),
+              ),
+              const SliverSystemBottomInset(),
+            ],
+          ),
         ),
       ),
     );
@@ -1135,11 +1145,18 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
     await context.read<DownloadProvider>().resetDownloadLocation();
     await _settingsService.resetAllSettings();
     if (!mounted) return;
-    await const SettingsMutationService().applyStoredEffects(
+    final failures = await const SettingsMutationService().applyStoredEffects(
       context,
       previousRootConfiguration: previousRootConfiguration,
     );
-    if (mounted) showSuccessSnackBar(context, t.settings.resetSettingsSuccess);
+    if (!mounted) return;
+    // Every pref is reset either way; only some runtime effect declined, so the
+    // reset itself is not a failure — name what did not take.
+    if (failures.isEmpty) {
+      showSuccessSnackBar(context, t.settings.resetSettingsSuccess);
+    } else {
+      showErrorSnackBar(context, failures.first.display);
+    }
   }
 
   /// Offers the credential tier, then asks for the passphrase that protects
@@ -1279,13 +1296,20 @@ class _SettingsScreenState extends State<SettingsScreen> with FocusableTab, Moun
           await hiddenLibrariesProvider.refresh();
           unawaited(librariesProvider.refresh());
           if (!mounted) return;
-          await const SettingsMutationService().applyStoredEffects(
+          final failures = await const SettingsMutationService().applyStoredEffects(
             context,
             previousRootConfiguration: previousRootConfiguration,
           );
 
           if (!mounted) return;
-          showSuccessSnackBar(context, _importMessageFor(result));
+          // An effect that declined is the more useful thing to say: the
+          // import itself landed either way, and the failure names the one
+          // setting that did not take.
+          if (failures.isEmpty) {
+            showSuccessSnackBar(context, _importMessageFor(result));
+          } else {
+            showErrorSnackBar(context, failures.first.display);
+          }
         } on NoUserSignedInException {
           if (mounted) showErrorSnackBar(context, t.settings.importSettingsNoUser);
         } on InvalidExportFileException {
@@ -1351,7 +1375,7 @@ class _RelayUrlDialogState extends State<_RelayUrlDialog> {
   void initState() {
     super.initState();
     _controller = TextEditingController(
-      text: widget.settingsService.read(settings.SettingsService.customRelayUrl) ?? '',
+      text: widget.settingsService.read(settings.SettingsService.watchPartyRelayUrl) ?? '',
     );
   }
 
@@ -1364,24 +1388,24 @@ class _RelayUrlDialogState extends State<_RelayUrlDialog> {
 
   Future<void> _reset() async {
     _controller.clear();
-    await widget.settingsService.write(settings.SettingsService.customRelayUrl, null);
+    await widget.settingsService.write(settings.SettingsService.watchPartyRelayUrl, null);
     if (mounted) Navigator.pop(context);
   }
 
   Future<void> _save() async {
     final value = _controller.text;
     if (value.trim().isEmpty) {
-      await widget.settingsService.write(settings.SettingsService.customRelayUrl, null);
+      await widget.settingsService.write(settings.SettingsService.watchPartyRelayUrl, null);
       if (mounted) Navigator.pop(context);
       return;
     }
 
-    final endpoint = WatchTogetherRelayEndpoint.tryParseCustom(value);
-    if (endpoint == null) {
+    final base = canonicalRelayBaseUrl(value);
+    if (base == null) {
       setState(() => _relayUrlInvalid = true);
       return;
     }
-    await widget.settingsService.write(settings.SettingsService.customRelayUrl, endpoint.canonicalBaseUrl);
+    await widget.settingsService.write(settings.SettingsService.watchPartyRelayUrl, base);
     if (mounted) Navigator.pop(context);
   }
 

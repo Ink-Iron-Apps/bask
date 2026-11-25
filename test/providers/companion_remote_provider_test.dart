@@ -16,6 +16,7 @@ import 'package:bask/services/companion_remote/lan_discovery_service.dart';
 import 'package:bask/services/companion_remote/remote_auth_context.dart';
 import 'package:bask/services/companion_remote/remote_auth_service.dart';
 
+import '../test_helpers/backend_client_fixtures.dart';
 import '../test_helpers/prefs.dart';
 import '../test_helpers/profile_stack.dart';
 
@@ -65,6 +66,147 @@ void main() {
     });
   });
 
+  group('CompanionRemoteProvider — live host identity refresh', () {
+    test('a refresh still rebuilding when the provider is disposed does not restart the host', () async {
+      final stack = await ProfileStack.create();
+      addTearDown(stack.dispose);
+      final first = _localProfile('profile-a');
+      final second = _localProfile('profile-b');
+      for (final (profile, connection) in [(first, _jellyfinConnection('a')), (second, _jellyfinConnection('b'))]) {
+        await stack.connections.upsert(connection);
+        await stack.profiles.upsert(profile);
+        await stack.profileConnections.upsert(
+          ProfileConnection(profileId: profile.id, connectionId: connection.id, userIdentifier: connection.userId),
+          makeDefault: true,
+        );
+      }
+      await stack.storage.setActiveProfileId(first.id);
+      await stack.active.initialize();
+
+      final disconnectGate = Completer<void>();
+      final host = _FakeCompanionRemotePeerService(disconnectGate: disconnectGate);
+      final peers = _FakePeerFactory([host, _FakeCompanionRemotePeerService()]);
+      final provider = CompanionRemoteProvider.forTesting(
+        peerServiceFactory: peers.call,
+        discoveryServiceFactory: _FakeLanDiscoveryService.new,
+      );
+      addTearDown(() {
+        if (!disconnectGate.isCompleted) disconnectGate.complete();
+        if (!provider.isDisposed) provider.dispose();
+      });
+      expect(
+        await provider.ensureCryptoReady(
+          null,
+          connections: stack.connections,
+          activeProfile: stack.active,
+          profileConnections: stack.profileConnections,
+        ),
+        isTrue,
+      );
+      await provider.startHostServer();
+      provider.bindProfileServices(
+        connections: stack.connections,
+        activeProfile: stack.active,
+        profileConnections: stack.profileConnections,
+        plexHome: stack.plexHome,
+      );
+      // Let the watchers' initial emissions refresh an unchanged identity.
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(provider.isHostServerRunning, isTrue);
+
+      // A profile switch changes the identity: the refresh tears the host
+      // down to rebuild, and the provider is disposed while it does.
+      expect(await stack.active.activate(second), isTrue);
+      await host.disconnectStarted.future;
+      provider.dispose();
+      disconnectGate.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(peers.created, 1);
+      expect(provider.isHostServerRunning, isFalse);
+    });
+  });
+
+  group('CompanionRemoteProvider — host player state', () {
+    test('a remote that pairs while the player is up is told it is active', () async {
+      final host = _FakeCompanionRemotePeerService();
+      final harness = await _RemoteHarness.create(
+        _FakePeerFactory([host]).call,
+        discoveryServiceFactory: _FakeLanDiscoveryService.new,
+      );
+      addTearDown(harness.close);
+      await harness.provider.startHostServer();
+      harness.provider.setHostPlayerActive(true);
+      host.sentCommands.clear();
+
+      host.emitDeviceConnected(RemoteDevice(id: 'phone', name: 'Phone', platform: 'ios', connectedAt: DateTime(2026)));
+
+      expect(host.sentCommands.single.type, RemoteCommandType.syncState);
+      expect(host.sentCommands.single.data, {'playerActive': true});
+
+      harness.provider.setHostPlayerActive(false);
+      host.sentCommands.clear();
+      host.emitDeviceConnected(RemoteDevice(id: 'phone', name: 'Phone', platform: 'ios', connectedAt: DateTime(2026)));
+      expect(host.sentCommands.single.data, {'playerActive': false});
+    });
+  });
+
+  // MainScreen skips the "ask for a profile on open" resume prompt only while
+  // this device drives another one (#2087). A TV hosting the server reads as in
+  // session from start to stop, phone paired or not, and must still prompt.
+  group('CompanionRemoteProvider — driving a remote session (#3076)', () {
+    test('a running host server with no paired remote is not driving', () async {
+      final host = _FakeCompanionRemotePeerService();
+      final harness = await _RemoteHarness.create(
+        _FakePeerFactory([host]).call,
+        discoveryServiceFactory: _FakeLanDiscoveryService.new,
+      );
+      addTearDown(harness.close);
+      await harness.provider.startHostServer();
+
+      expect(harness.provider.isHost, isTrue);
+      expect(harness.provider.isInSession, isTrue);
+      expect(harness.provider.isDrivingRemoteSession, isFalse);
+    });
+
+    test('a host whose remote dropped unintentionally is not driving', () async {
+      final host = _FakeCompanionRemotePeerService();
+      final harness = await _RemoteHarness.create(
+        _FakePeerFactory([host]).call,
+        discoveryServiceFactory: _FakeLanDiscoveryService.new,
+      );
+      addTearDown(harness.close);
+      await harness.provider.startHostServer();
+      host.emitDeviceConnected(RemoteDevice(id: 'phone', name: 'Phone', platform: 'ios', connectedAt: DateTime(2026)));
+      expect(harness.provider.isDrivingRemoteSession, isFalse);
+
+      host.emitDeviceDisconnected();
+
+      expect(harness.provider.status, RemoteSessionStatus.reconnecting);
+      expect(harness.provider.isInSession, isTrue);
+      expect(harness.provider.isDrivingRemoteSession, isFalse);
+    });
+
+    test('a remote that is connected or reconnecting is driving (#2035)', () async {
+      final remote = _FakeCompanionRemotePeerService();
+      final harness = await _RemoteHarness.create(_FakePeerFactory([remote]).call);
+      addTearDown(harness.close);
+      await harness.provider.connectToManualHost('192.0.2.40:48634');
+
+      expect(harness.provider.isRemote, isTrue);
+      expect(harness.provider.status, RemoteSessionStatus.connected);
+      expect(harness.provider.isDrivingRemoteSession, isTrue);
+
+      // On resume the held reconnect cycle typically still reads `reconnecting`.
+      remote.emitDeviceDisconnected();
+
+      expect(harness.provider.status, RemoteSessionStatus.reconnecting);
+      expect(harness.provider.isDrivingRemoteSession, isTrue);
+
+      await harness.provider.cancelReconnect();
+    });
+  });
+
   group('CompanionRemoteProvider — dispose hygiene', () {
     test('cancelReconnect on a fresh provider does not throw', () {
       final p = CompanionRemoteProvider();
@@ -72,12 +214,6 @@ void main() {
       // status remains disconnected.
       expect(p.cancelReconnect, returnsNormally);
       expect(p.status, RemoteSessionStatus.disconnected);
-      p.dispose();
-    });
-
-    test('stopDiscovery on a fresh provider is a no-op', () {
-      final p = CompanionRemoteProvider();
-      expect(p.stopDiscovery, returnsNormally);
       p.dispose();
     });
 
@@ -810,19 +946,17 @@ PlexAccountConnection _plexAccount(String id, String clientIdentifier) {
   );
 }
 
-JellyfinConnection _jellyfinConnection(String id) {
-  return JellyfinConnection(
-    id: id,
-    baseUrl: 'https://jellyfin.example.test',
-    serverName: 'Jellyfin',
-    serverMachineId: 'machine-$id',
-    userId: 'user-$id',
-    userName: 'User $id',
-    accessToken: 'token-$id',
-    deviceId: 'device-$id',
-    createdAt: DateTime(2026, 1, 1),
-  );
-}
+JellyfinConnection _jellyfinConnection(String id) => testJellyfinConnection(
+  id: id,
+  machineId: 'machine-$id',
+  userId: 'user-$id',
+  baseUrl: 'https://jellyfin.example.test',
+  serverName: 'Jellyfin',
+  userName: 'User $id',
+  accessToken: 'token-$id',
+  deviceId: 'device-$id',
+  createdAt: DateTime(2026, 1, 1),
+);
 
 Profile _localProfile(String id) {
   return Profile.local(id: id, displayName: id, createdAt: DateTime(2026, 1, 1));
@@ -976,6 +1110,10 @@ class _FakeCompanionRemotePeerService extends CompanionRemotePeerService {
   @override
   void sendPing() {
     pingsSent++;
+  }
+
+  void emitDeviceConnected(RemoteDevice device) {
+    if (!_streamsClosed) _connected.add(device);
   }
 
   void emitDeviceDisconnected() {

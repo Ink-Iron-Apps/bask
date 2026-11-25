@@ -52,6 +52,7 @@ class AgentPlaybackCommands {
                   'visible': servers.serverIds.contains(id),
                   'online': servers.isServerOnline(ServerId(id)),
                   'authenticationRequired': servers.authErrorServerIds.contains(id),
+                  'accessDenied': servers.accessDeniedServerIds.contains(id),
                   if (servers.serverIds.contains(id) && servers.getClientForServer(ServerId(id)) != null)
                     'backend': servers.getClientForServer(ServerId(id))!.backend.id,
                 },
@@ -83,6 +84,10 @@ class AgentPlaybackCommands {
     }
   }
 
+  /// `item` is the launched target until the owner reports one: a video
+  /// session that advanced to the next episode in place (or that a Next
+  /// press moved) names the item it is on now, so a reader can tell it from
+  /// the one `playback.start` accepted.
   Map<String, dynamic> _status(AgentCommandContext context) {
     final coordinator = PlaybackCoordinator.instance;
     final music = context.context.read<MusicPlaybackService>();
@@ -671,6 +676,9 @@ class AgentPlaybackCommands {
     if (servers.authErrorServerIds.contains(serverId)) {
       throw const AgentControlException('authenticationRequired', 'The server requires authentication.');
     }
+    if (servers.accessDeniedServerIds.contains(serverId)) {
+      throw const AgentControlException('permissionDenied', 'The server refuses this account.');
+    }
     final client = servers.getClientForServer(serverId);
     if (client == null) {
       throw const AgentControlException('serverUnavailable', 'No authenticated client is bound to this server.');
@@ -686,7 +694,7 @@ class AgentPlaybackCommands {
   ) =>
       servers.expectedServerIds.contains(serverId) &&
       servers.serverIds.contains(serverId) &&
-      !servers.authErrorServerIds.contains(serverId) &&
+      !servers.refusedServerIds.contains(serverId) &&
       identical(servers.getClientForServer(serverId), client) &&
       identical(client.authenticationSessionId, authentication);
 
@@ -726,9 +734,11 @@ class AgentPlaybackCommands {
 
   AgentControlException _safeError(Object error) {
     if (error is AgentControlException) return error;
-    if (error is MediaServerAuthException ||
-        (error is MediaServerHttpException && (error.statusCode == 401 || error.statusCode == 403))) {
+    if (error is MediaServerAuthException || (error is MediaServerHttpException && error.statusCode == 401)) {
       return const AgentControlException('authenticationRequired', 'The server requires authentication.');
+    }
+    if (error is MediaServerHttpException && error.statusCode == 403) {
+      return const AgentControlException('permissionDenied', 'The server refuses this account.');
     }
     if (error is MediaServerHttpException) {
       return const AgentControlException('serverUnavailable', 'The server request failed.');

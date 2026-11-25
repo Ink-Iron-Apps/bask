@@ -7,6 +7,7 @@ import 'package:bask/widgets/app_icon.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../focus/dpad_navigator.dart';
 import '../../focus/focusable_text_field.dart';
+import '../../focus/input_mode_tracker.dart';
 import '../../focus/key_event_utils.dart';
 import '../../i18n/strings.g.dart';
 import '../../mixins/controller_disposer_mixin.dart';
@@ -16,7 +17,7 @@ import '../../utils/app_logger.dart';
 import '../../utils/debouncer.dart';
 import '../../utils/platform_detector.dart';
 import '../../utils/snackbar_helper.dart';
-import '../../mixins/settings_effect_mixin.dart';
+import '../../mixins/listenable_bindings_mixin.dart';
 import '../../services/settings_service.dart';
 import '../../widgets/app_menu.dart';
 import '../../widgets/focused_scroll_scaffold.dart';
@@ -33,7 +34,7 @@ class MpvConfigScreen extends StatefulWidget {
   State<MpvConfigScreen> createState() => _MpvConfigScreenState();
 }
 
-class _MpvConfigScreenState extends State<MpvConfigScreen> with SettingsEffectMixin, ControllerDisposerMixin {
+class _MpvConfigScreenState extends State<MpvConfigScreen> with ListenableBindingsMixin, ControllerDisposerMixin {
   SettingsService get _settingsService => SettingsService.instance;
 
   late final TextEditingController _textController = createTextEditingController(
@@ -236,7 +237,12 @@ class _MpvConfigScreenState extends State<MpvConfigScreen> with SettingsEffectMi
             if (didPop || _isLeaving) return;
             if (BackKeyCoordinator.consumeIfHandled()) return;
             BackKeyUpSuppressor.suppressBackUntilKeyUp();
-            if (_textFieldFocusNode.hasFocus && _savePresetFocusNode.canRequestFocus) {
+            // D-pad back leaves the text field for Save first; a pointer back
+            // (the app-bar arrow) has no focus to move and saves on the way out.
+            // Live mode: a tap's pointer-down has not rebuilt the provider yet.
+            if (_textFieldFocusNode.hasFocus &&
+                _savePresetFocusNode.canRequestFocus &&
+                InputModeTracker.currentMode == InputMode.keyboard) {
               _savePresetFocusNode.requestFocus();
             } else {
               unawaited(_flushAndPop());

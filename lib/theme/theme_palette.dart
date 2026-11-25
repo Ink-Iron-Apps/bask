@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'mono_theme.dart';
+
 /// A colour identity applied on top of the light/dark/OLED mode.
 ///
 /// [neutral] is the monochrome look the app shipped with: it contributes no
@@ -9,7 +11,12 @@ import 'package:flutter/material.dart';
 /// role stays mapped to the text colour. Every other value tints the surfaces
 /// and gives the accent roles a hue, while leaving the mode in charge of
 /// brightness — "dark + plum" is still a dark theme.
-enum ThemePalette { neutral, navy, indigo, teal, plum, forest, amber, crimson, slate }
+/// [ember], [glacier] and [paper] come from upstream, where they are presets
+/// of a palette model that owns brightness too. Here they are tints like every
+/// other value, so the mode still decides light or dark: each one carries
+/// upstream's hand-tuned colours for the brightness it was drawn for, and the
+/// recipe below covers the other one.
+enum ThemePalette { neutral, navy, indigo, teal, plum, forest, amber, crimson, slate, ember, glacier, paper }
 
 /// The colours a palette contributes to one brightness of the theme.
 @immutable
@@ -95,6 +102,31 @@ extension ThemePaletteColors on ThemePalette {
     // Barely tinted on purpose: the option for wanting a hint of colour
     // rather than a colour.
     ThemePalette.slate => (hue: 213, saturation: 0.22),
+    // Upstream's three, read off their tuned surfaces: warm charcoal, cold
+    // blue-grey, warm paper. Lower saturation than the hues above because
+    // upstream keeps its backgrounds close to neutral.
+    ThemePalette.ember => (hue: 20, saturation: 0.22),
+    ThemePalette.glacier => (hue: 207, saturation: 0.30),
+    ThemePalette.paper => (hue: 43, saturation: 0.25),
+  };
+
+  /// The accent's hue when it differs from the surfaces'. Only [paper] does:
+  /// upstream pairs warm paper with a deep teal, which no single hue can give
+  /// both halves of.
+  double? get _accentHue => switch (this) {
+    ThemePalette.paper => 180,
+    _ => null,
+  };
+
+  /// Upstream's hand-tuned palette for this tint, and the brightness it was
+  /// drawn for. Used as-is when the mode asks for that brightness; the recipe
+  /// covers the other one, and OLED always takes the recipe so it keeps the
+  /// pure black it exists for.
+  ({MonoPalette palette, bool dark})? get _tuned => switch (this) {
+    ThemePalette.ember => (palette: MonoPalette.ember, dark: true),
+    ThemePalette.glacier => (palette: MonoPalette.glacier, dark: true),
+    ThemePalette.paper => (palette: MonoPalette.paper, dark: false),
+    _ => null,
   };
 
   /// Saturation and lightness of the accent on a dark theme. Lightness is
@@ -110,6 +142,9 @@ extension ThemePaletteColors on ThemePalette {
     ThemePalette.amber => (saturation: 0.92, lightness: 0.56),
     ThemePalette.crimson => (saturation: 0.82, lightness: 0.64),
     ThemePalette.slate => (saturation: 0.45, lightness: 0.66),
+    ThemePalette.ember => (saturation: 1.0, lightness: 0.67),
+    ThemePalette.glacier => (saturation: 1.0, lightness: 0.74),
+    ThemePalette.paper => (saturation: 0.55, lightness: 0.55),
   };
 
   /// This palette's contribution for one brightness, or null when it has
@@ -123,8 +158,10 @@ extension ThemePaletteColors on ThemePalette {
     final tone = _accentTone;
     if (tint == null || tone == null) return null;
 
+    final accentHue = _accentHue ?? tint.hue;
+
     if (dark || oled) {
-      final accent = _hsl(tint.hue, tone.saturation, tone.lightness);
+      final accent = _hsl(accentHue, tone.saturation, tone.lightness);
       return PaletteColors(
         bg: oled ? const Color(0xFF000000) : _hsl(tint.hue, tint.saturation, 0.075),
         surface: _hsl(tint.hue, tint.saturation * 0.95, oled ? 0.05 : 0.11),
@@ -136,12 +173,42 @@ extension ThemePaletteColors on ThemePalette {
     // Light mode takes the tint at a fraction of the dark strength: a light
     // theme's background is mostly white, where the saturation that reads as
     // "deep navy" at 0.075 lightness reads as a wash.
-    final accent = _lightAccent(tint.hue, math.min(tone.saturation * 0.95, 1.0));
+    final accent = _lightAccent(accentHue, math.min(tone.saturation * 0.95, 1.0));
     return PaletteColors(
       bg: _hsl(tint.hue, tint.saturation * 0.45, 0.965),
       surface: const Color(0xFFFFFFFF),
       accent: accent,
       onAccent: _onAccentFor(accent),
+    );
+  }
+}
+
+extension ThemePaletteMono on ThemePalette {
+  /// The six colours [monoTheme] paints with, for this palette in this mode.
+  ///
+  /// The mode owns brightness, so a palette never forces one: asking [paper]
+  /// for a dark theme gives its teal on a dark page rather than switching the
+  /// app to light.
+  MonoPalette monoFor({required bool dark, required bool oled}) {
+    final base = oled
+        ? MonoPalette.oled
+        : dark
+        ? MonoPalette.dark
+        : MonoPalette.light;
+
+    final tuned = _tuned;
+    if (tuned != null && !oled && tuned.dark == dark) return tuned.palette;
+
+    final colors = colorsFor(dark: dark, oled: oled);
+    if (colors == null) return base;
+    // Outline and text stay the mode's: a tint repaints the page, not the ink.
+    return MonoPalette(
+      bg: colors.bg,
+      surface: colors.surface,
+      outline: base.outline,
+      text: base.text,
+      textMuted: base.textMuted,
+      accent: colors.accent,
     );
   }
 }

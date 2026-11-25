@@ -85,4 +85,32 @@ class SurfaceFrameRateVoteTest {
     vote.onMediaFrameRate(-24f)
     assertEquals(2, calls.size)
   }
+
+  @Test
+  fun thePresentedRateFactorScalesTheVote() {
+    val surface = Surface(SurfaceTexture(0))
+    vote.onMediaFrameRate(29.97f)
+    vote.onStarted()
+    vote.onSurfaceChanged(surface)
+    assertEquals(listOf(surface to 29.97f), calls)
+
+    // One frame per field (bwdif send_field, or a MediaCodec that deinterlaces
+    // itself): a 29.97 vote would let a seamless display settle on a mode that
+    // drops every other frame.
+    vote.onPresentedRateFactor(2f)
+    assertEquals(surface to 29.97f * 2, calls.last())
+
+    // Inverse telecine presents the film frames: 29.97i votes 23.976.
+    vote.onPresentedRateFactor(PresentedFrameRate.IVTC_RATE_FACTOR)
+    assertEquals(surface to 29.97f * 0.8f, calls.last())
+
+    // The next file resets the chain before its rate is known, and a
+    // progressive file keeps the container rate.
+    vote.onMediaFrameRate(0f)
+    vote.onPresentedRateFactor(1f)
+    assertEquals(surface to 0f, calls.last())
+    vote.onMediaFrameRate(24f)
+    assertEquals(surface to 24f, calls.last())
+    assertEquals(5, calls.size)
+  }
 }
