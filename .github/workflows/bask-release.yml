@@ -45,6 +45,11 @@ env:
 jobs:
   build:
     runs-on: ${{ vars.SELF_HOSTED_RUNNER || 'ubuntu-latest' }}
+    outputs:
+      # What the Windows job needs to reproduce this build's tree and name its
+      # artifact the same way.
+      tag: ${{ inputs.tag || steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -268,88 +273,6 @@ jobs:
             --target-platform android-arm64,android-arm \
             --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
 
-      - name: Install the patched Windows engine
-        # Bask cannot composite on a stock engine. The video is a child HWND
-        # inside the Flutter view; what puts the UI above it is the patched
-        # engine presenting the UI on a topmost DirectComposition visual when
-        # FLUTTER_WINDOWS_DCOMP is set (windows/runner/main.cpp). On a stock
-        # engine that flag does nothing, the video window covers everything,
-        # and the player's controls are present and clickable but invisible —
-        # which is exactly what v2.33.0 and earlier shipped.
-        #
-        # The script asserts the SDK's engine.stamp matches the artifacts, so a
-        # Flutter bump that moves the revision fails here rather than producing
-        # another build with no visible controls.
-        id: windows_engine
-        if: ${{ runner.os == 'Windows' }}
-        continue-on-error: true
-        run: |
-          flutter precache --windows
-          powershell -NoProfile -ExecutionPolicy Bypass -File windows/tool/install-patched-engine.ps1
-          # Hash of the engine the build will link against, so the bundle can
-          # be checked for carrying this engine rather than a stock one.
-          sdk=$(dirname "$(dirname "$(command -v flutter)")")
-          dll="$sdk/bin/cache/artifacts/engine/windows-x64-release/flutter_windows.dll"
-          [ -f "$dll" ] || { echo "::error::No engine DLL at $dll"; exit 1; }
-          echo "engine_sha=$(sha256sum "$dll" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-          echo "installed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Build the portable Windows app
-        # Windows only, and only where the runner can actually build it: the
-        # self-hosted runner is Windows, GitHub's default here is Linux. A
-        # missing Windows build is not worth failing the Android release over,
-        # so this reports and continues.
-        if: ${{ runner.os == 'Windows' && steps.windows_engine.outputs.installed == 'true' }}
-        continue-on-error: true
-        shell: bash
-        run: |
-          flutter build windows --release \
-            --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
-
-      - name: Verify the Windows bundle
-        # The checks a file listing cannot make: that the engine in the bundle
-        # is the patched one this build installed, and that the app actually
-        # starts. Four releases shipped a player with invisible controls while
-        # analyze, 3,500 tests and a file check all passed, because nothing
-        # ever ran the thing.
-        #
-        # On failure the bundle is deleted rather than the job failed: the
-        # Android release is not worth losing, and the publish step attaches
-        # whatever zip exists, so removing it is what keeps a bad build
-        # unpublished.
-        if: ${{ runner.os == 'Windows' && steps.windows_engine.outputs.installed == 'true' }}
-        continue-on-error: true
-        shell: bash
-        run: |
-          bundle=build/windows/x64/runner/Release
-          if ! powershell -NoProfile -ExecutionPolicy Bypass -File windows/tool/verify-bundle.ps1 \
-            -BundleDir "$bundle" -ExpectedEngineSha "${{ steps.windows_engine.outputs.engine_sha }}"; then
-            echo "::warning::Windows bundle failed verification; it will not be published"
-            rm -rf "$bundle"
-            exit 1
-          fi
-
-      - name: Package the portable Windows app
-        if: ${{ runner.os == 'Windows' && steps.windows_engine.outputs.installed == 'true' }}
-        continue-on-error: true
-        shell: bash
-        env:
-          TAG: ${{ inputs.tag || steps.version.outputs.tag }}
-        run: |
-          bundle=build/windows/x64/runner/Release
-          [ -d "$bundle" ] || { echo "::warning::No Windows bundle to package"; exit 0; }
-          # The marker is what makes it portable: with it beside the exe the
-          # app keeps its database, preferences, caches and downloads in
-          # ./data instead of %APPDATA%, so the folder is the whole install.
-          printf '%s\n' \
-            'Delete this file to make this copy store its data in %APPDATA% instead.' \
-            'While it exists, everything Bask writes stays in the bask-data folder next to the executable.' \
-            > "$bundle/portable.txt"
-          rm -rf build/windows-portable && mkdir -p build/windows-portable
-          cp -r "$bundle" "build/windows-portable/Bask-${TAG}-windows-x64"
-          (cd build/windows-portable && 7z a -tzip "Bask-${TAG}-windows-x64-portable.zip" "Bask-${TAG}-windows-x64" >/dev/null)
-          ls -la build/windows-portable/*.zip
-
       - name: Remove signing material
         if: always()
         run: rm -f android/app/bask-release.jks android/key.properties
@@ -396,8 +319,7 @@ jobs:
           attempt=0
           # The Windows zip is optional: its build step is allowed to fail
           # without taking the Android release with it.
-          windows_zip=$(ls build/windows-portable/*.zip 2>/dev/null || true)
-          until gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber build/app/outputs/flutter-apk/Bask-*.apk $windows_zip; do
+          until gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber build/app/outputs/flutter-apk/Bask-*.apk; do
             attempt=$((attempt+1))
             if [ "$attempt" -gt 5 ]; then echo "::error::Could not attach APKs to $TAG"; exit 1; fi
             echo "Retrying asset upload (attempt $attempt)"
@@ -462,3 +384,123 @@ jobs:
 
           echo "::error::Could not record $VERSION on main"
           exit 1
+
+  windows:
+    # GitHub's own Windows runners build this; it needs no self-hosted machine.
+    # Separate from the Android job because a single job has a single OS, and
+    # the Android build is the one that must not wait on a Windows toolchain.
+    #
+    # Beside the Android job rather than before it: the APKs are the release,
+    # and a Windows toolchain failure must not hold them back or withdraw them.
+    needs: build
+    if: ${{ needs.build.outputs.tag != '' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # The commit the APKs were built from. The release tag points here
+          # too, but the version bump is written back to main afterwards, so
+          # the tag is not a reliable way to get this tree.
+          ref: ${{ github.sha }}
+
+      - name: Stamp the release version
+        # The same line the Android job's version step applies to its own
+        # checkout, so the Windows build reports the version being released
+        # rather than the one main still records.
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          sed -i "s/^version: .*/version: ${VERSION}+${{ github.run_number }}/" pubspec.yaml
+          grep '^version:' pubspec.yaml
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install the patched Windows engine
+        # Bask cannot composite on a stock engine. The video is a child HWND
+        # inside the Flutter view; what puts the UI above it is the patched
+        # engine presenting the UI on a topmost DirectComposition visual when
+        # FLUTTER_WINDOWS_DCOMP is set (windows/runner/main.cpp). On a stock
+        # engine that flag does nothing, the video window covers everything,
+        # and the player's controls are present and clickable but invisible —
+        # which is exactly what v2.33.0 and earlier shipped.
+        #
+        # The script asserts the SDK's engine.stamp matches the artifacts, so a
+        # Flutter bump that moves the revision fails here rather than producing
+        # another build with no visible controls.
+        id: windows_engine
+        run: |
+          flutter precache --windows
+          powershell -NoProfile -ExecutionPolicy Bypass -File windows/tool/install-patched-engine.ps1
+          # Hash of the engine the build will link against, so the bundle can
+          # be checked for carrying this engine rather than a stock one.
+          sdk=$(dirname "$(dirname "$(command -v flutter)")")
+          dll="$sdk/bin/cache/artifacts/engine/windows-x64-release/flutter_windows.dll"
+          [ -f "$dll" ] || { echo "::error::No engine DLL at $dll"; exit 1; }
+          echo "engine_sha=$(sha256sum "$dll" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "installed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build the portable Windows app
+        run: |
+          flutter build windows --release \
+            --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
+
+      - name: Verify the Windows bundle
+        # The checks a file listing cannot make: that the engine in the bundle
+        # is the patched one this build installed, and that the app actually
+        # starts. Four releases shipped a player with invisible controls while
+        # analyze, 3,500 tests and a file check all passed, because nothing
+        # ever ran the thing.
+        #
+        # On failure the bundle is deleted as well as the job failed: the
+        # upload step below attaches whatever zip exists, so removing it is
+        # what keeps a bad build unpublished. The APKs are already out by now
+        # and are not withdrawn.
+        run: |
+          bundle=build/windows/x64/runner/Release
+          if ! powershell -NoProfile -ExecutionPolicy Bypass -File windows/tool/verify-bundle.ps1 \
+            -BundleDir "$bundle" -ExpectedEngineSha "${{ steps.windows_engine.outputs.engine_sha }}"; then
+            echo "::warning::Windows bundle failed verification; it will not be published"
+            rm -rf "$bundle"
+            exit 1
+          fi
+
+      - name: Package the portable Windows app
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          bundle=build/windows/x64/runner/Release
+          [ -d "$bundle" ] || { echo "::warning::No Windows bundle to package"; exit 0; }
+          # The marker is what makes it portable: with it beside the exe the
+          # app keeps its database, preferences, caches and downloads in
+          # ./data instead of %APPDATA%, so the folder is the whole install.
+          printf '%s\n' \
+            'Delete this file to make this copy store its data in %APPDATA% instead.' \
+            'While it exists, everything Bask writes stays in the bask-data folder next to the executable.' \
+            > "$bundle/portable.txt"
+          rm -rf build/windows-portable && mkdir -p build/windows-portable
+          cp -r "$bundle" "build/windows-portable/Bask-${TAG}-windows-x64"
+          (cd build/windows-portable && 7z a -tzip "Bask-${TAG}-windows-x64-portable.zip" "Bask-${TAG}-windows-x64" >/dev/null)
+          ls -la build/windows-portable/*.zip
+
+      - name: Attach the portable Windows app to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          zip=$(ls build/windows-portable/*.zip 2>/dev/null || true)
+          [ -n "$zip" ] || { echo "::error::No Windows zip to attach to $TAG"; exit 1; }
+          attempt=0
+          until gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber $zip; do
+            attempt=$((attempt+1))
+            if [ "$attempt" -gt 5 ]; then echo "::error::Could not attach the Windows build to $TAG"; exit 1; fi
+            sleep $((attempt*10))
+          done
+          echo "attached $(basename "$zip") to $TAG"
