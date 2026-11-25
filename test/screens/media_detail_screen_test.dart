@@ -2017,8 +2017,9 @@ void main() {
             serverId: 'server_1',
             serverName: 'Server',
           ).copyWith(
-            // Unbranded sources render a star icon plus the bare value text, so
-            // each badge is findable by its formatted value.
+            // Each badge is findable by its formatted value: an unbranded
+            // source renders a star icon plus the bare value, while a branded
+            // one (mal) carries its logo and its own two-decimal formatting.
             ratings: const [
               MediaRatingSource(source: 'critic', value: 9.2),
               MediaRatingSource(source: 'simkl', value: 7.4),
@@ -2059,16 +2060,16 @@ void main() {
 
       // 1100 wide: everything fits (test font ~13px/char puts the full strip
       // near 740px against ~1068px of hero width).
-      expectChips(present: ['2017', 'PG-13', '1h 46min', '1080p', '9.2', '7.4', '6.4', rate], absent: []);
+      expectChips(present: ['2017', 'PG-13', '1h 46min', '1080p', '9.2', '7.4', '6.40', rate], absent: []);
 
       // The scores pill sheds badges from the end before anything else.
       await resizeTo(660);
-      expectChips(present: ['2017', 'PG-13', '1h 46min', '1080p', '9.2', rate], absent: ['7.4', '6.4']);
+      expectChips(present: ['2017', 'PG-13', '1h 46min', '1080p', '9.2', rate], absent: ['7.4', '6.40']);
 
       // Then the whole pill, the quality label, and the certification go —
       // never the runtime, year, or Rate.
       await resizeTo(420);
-      expectChips(present: ['2017', '1h 46min', rate], absent: ['9.2', '7.4', '6.4', '1080p', 'PG-13']);
+      expectChips(present: ['2017', '1h 46min', rate], absent: ['9.2', '7.4', '6.40', '1080p', 'PG-13']);
 
       // Down to the bone: the year and the interactive Rate chip survive.
       await resizeTo(320);
