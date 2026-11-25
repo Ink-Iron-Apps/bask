@@ -1430,9 +1430,12 @@ void main() {
     });
   });
 
-  testWidgets('TV detail episode activation bypasses the open-details preference', (tester) async {
+  Future<_RecordingNavigatorObserver> activateFirstTvDetailEpisode(
+    WidgetTester tester, {
+    required EpisodeAction episodeAction,
+  }) async {
     final settings = await SettingsService.getInstance();
-    await settings.write(SettingsService.episodeAction, EpisodeAction.details);
+    await settings.write(SettingsService.episodeAction, episodeAction);
     tester.view.physicalSize = const Size(1280, 720);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -1507,12 +1510,15 @@ void main() {
             ChangeNotifierProvider<DownloadProvider>.value(value: downloadProvider),
             ChangeNotifierProvider<OfflineWatchSyncService>.value(value: offlineWatch),
           ],
-          child: MaterialApp(
-            navigatorKey: navigatorKey,
-            navigatorObservers: [observer],
-            theme: monoTheme(dark: true),
-            home: withProfileNavigationScope(
-              child: SizedBox(width: 1280, height: 720, child: MediaDetailScreen(metadata: show)),
+          // The scope sits above the navigator: an episode opened from the
+          // rail pushes a profile route, and that route resolves the scope
+          // from its own context, not from the screen that pushed it.
+          child: withProfileNavigationScope(
+            child: MaterialApp(
+              navigatorKey: navigatorKey,
+              navigatorObservers: [observer],
+              theme: monoTheme(dark: true),
+              home: SizedBox(width: 1280, height: 720, child: MediaDetailScreen(metadata: show)),
             ),
           ),
         ),
@@ -1531,6 +1537,27 @@ void main() {
     await tester.pump();
     await tester.sendKeyUpEvent(LogicalKeyboardKey.enter);
     await tester.pump();
+
+    return observer;
+  }
+
+  testWidgets('a TV detail rail episode opens its own screen when the preference says details', (tester) async {
+    final observer = await activateFirstTvDetailEpisode(tester, episodeAction: EpisodeAction.details);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(observer.pushedRouteNames, isNot(contains(kVideoPlayerRouteName)));
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is MediaDetailScreen && widget.metadata.id == 'episode_1',
+        skipOffstage: false,
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a TV detail rail episode plays when the preference says play', (tester) async {
+    final observer = await activateFirstTvDetailEpisode(tester, episodeAction: EpisodeAction.play);
 
     expect(observer.pushedRouteNames, contains(kVideoPlayerRouteName));
   });
