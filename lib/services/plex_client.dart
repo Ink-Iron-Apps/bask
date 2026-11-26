@@ -3451,6 +3451,16 @@ class PlexClient
       if (generation != _profileUpdateGeneration) return false;
 
       final authenticationChanged = config.token != newToken || profileScopeId != newProfileScopeId;
+      // TEMPORARY DIAGNOSTIC (artwork 401s).
+      appLogger.w(
+        'ARTWORK-DIAG applyProfileUpdate',
+        error: {
+          'client': identityHashCode(this),
+          'wasEmpty': config.token?.isEmpty ?? true,
+          'nowEmpty': newToken.isEmpty,
+          'baseUrl': config.baseUrl,
+        },
+      );
       config = config.copyWith(token: newToken);
       profileScopeId = newProfileScopeId;
       _http.defaultHeaders = Map.of(config.headers);
@@ -4796,6 +4806,19 @@ class PlexClient
     }
     final token = config.token;
     if (token == null) return getThumbnailUrl(path);
+    // TEMPORARY DIAGNOSTIC (artwork 401s): every image URL is coming out with
+    // an empty token while API calls on this same client answer 200.
+    if (token.isEmpty) {
+      appLogger.w(
+        'ARTWORK-DIAG thumbnailUrl built with an empty token',
+        error: {
+          'baseUrl': config.baseUrl,
+          'profileScope': profileScopeId.toString(),
+          'client': identityHashCode(this),
+          'path': path,
+        },
+      );
+    }
     final encoded = Uri.encodeComponent(path.withPlexToken(token));
     final parts = <String>[
       ..._transcodeSizeParams(width: width, height: height, cover: cover),
