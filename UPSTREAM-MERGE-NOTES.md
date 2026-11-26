@@ -97,3 +97,37 @@ has them is left alone. Schema version is 27.
 
 `flutter analyze` is clean across `lib` and `test`, after `scripts/codegen.sh`.
 The suite runs in CI; this fork does not build locally.
+
+## What a real device found
+
+The suite cannot compile Kotlin and cannot open a database that predates the
+merge, so two whole classes of damage were invisible until an APK was built and
+installed. The "Bask test build" workflow exists for exactly this: it signs with
+the release keystore so the APK replaces an existing install rather than
+demanding an uninstall that would take the test database with it.
+
+**The Android build did not compile.** Four regressions, all of them the merge
+taking upstream's side of a region this fork had changed: a dropped
+`buildFeatures { buildConfig = true }` (upstream never reads BuildConfig,
+because its namespace and applicationId are the same string, and this fork's
+are not), an import of `com.edde746.plezy.shared.PlayerDebugLog` that the
+rename pass left alone because the neighbouring `com.edde746.mpv` imports are
+real, `BaskActivity` wired to an `AppIconChannel` whose class, manifest aliases,
+icon resources and Dart side all stayed upstream, and `WatchNextProvider` still
+matching `plezy://play` after the scheme became `bask`. Fixed in
+`fix(android): repair what the upstream merge broke in the native build`.
+
+**The migration is good.** On a Pixel with a real pre-merge database, 25, 26 and
+27 ran in order and the database was ready in 472ms. Resume positions survived
+(Continue Watching came back with the right episodes and the right progress),
+and so did the downloads: 79.44 GB, a 17-of-17 collection and a loose film, all
+listed correctly on a Downloads screen whose tables the merge had just created.
+
+**Artwork does not load.** Every image 401s, because
+`/photo/:/transcode?...&X-Plex-Token=` is built with an empty token while API
+calls on the same client and the same server answer 200. The app is otherwise
+whole -- library, metadata, ratings, the episode detail screen, downloads -- and
+posterless. Not yet root-caused: `PlexClient.thumbnailUrl` reads `config.token`,
+which for the bound Home-user profile should be the per-server token the binder
+just used successfully, so the client building those URLs is not the client
+making the calls. **This has to be found before the branch merges.**
