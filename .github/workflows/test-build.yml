@@ -1,0 +1,175 @@
+name: Bask test build
+
+# Builds installable, signed APKs from any branch without publishing a release.
+#
+# This exists for changes that tests cannot prove: a database migration needs a
+# device whose database predates it, and the native build needs a real
+# compile. Both want an APK that upgrades the existing install in place rather
+# than a fresh one, so the build signs with the same keystore the release uses
+# -- a different key fails to install over it, and uninstalling first would
+# destroy the very database the migration is supposed to be tested against.
+#
+# Nothing here bumps the version, writes a tag or touches a release. The APKs
+# are run artifacts and expire.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "versionName to stamp (default 2.99.0-test, which nothing can outrank)"
+        required: false
+        type: string
+
+# Every step is written in bash, same reason as the other workflows: a Windows
+# runner would otherwise get PowerShell and fail on the first pipeline.
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bask-test-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.47.1"
+  ANDROID_NDK_VERSION: "29.0.14206865"
+  ANDROID_CMAKE_VERSION: "4.1.2"
+
+jobs:
+  apk:
+    runs-on: ${{ vars.SELF_HOSTED_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Free runner disk space
+        # Only on GitHub's disposable machines. On a self-hosted runner this
+        # deletes the real NDK and prunes every Docker image on the box.
+        if: ${{ !vars.SELF_HOSTED_RUNNER }}
+        run: |
+          df -h /
+          sudo rm -rf \
+            /usr/share/dotnet \
+            /usr/share/swift \
+            /usr/local/lib/node_modules \
+            /usr/local/share/powershell \
+            /usr/local/.ghcup \
+            /opt/ghc \
+            /opt/hostedtoolcache/CodeQL \
+            "$ANDROID_HOME/ndk"
+          docker image prune --all --force || true
+          df -h /
+
+      - name: Setup Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: ${{ !vars.SELF_HOSTED_RUNNER }}
+
+      - name: Install pinned NDK and CMake
+        # sdkmanager is not on PATH on the runner image.
+        run: |
+          sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          if [ -z "$sdk" ]; then
+            echo "::error::Neither ANDROID_HOME nor ANDROID_SDK_ROOT is set"
+            exit 1
+          fi
+          if [ -d "$sdk/ndk/$ANDROID_NDK_VERSION" ] && [ -d "$sdk/cmake/$ANDROID_CMAKE_VERSION" ]; then
+            echo "NDK $ANDROID_NDK_VERSION and CMake $ANDROID_CMAKE_VERSION already installed"
+            exit 0
+          fi
+          sdkmanager="$sdk/cmdline-tools/latest/bin/sdkmanager"
+          [ -x "$sdkmanager" ] || sdkmanager=$(find "$sdk" -name 'sdkmanager*' -type f | head -n1)
+          echo "using $sdkmanager"
+          # A finite stream of license answers rather than `yes |`, which dies of
+          # SIGPIPE once sdkmanager stops reading and sinks the step under
+          # pipefail after the install has already succeeded.
+          printf 'y\n%.0s' $(seq 1 50) | "$sdkmanager" --install "ndk;${ANDROID_NDK_VERSION}" "cmake;${ANDROID_CMAKE_VERSION}" > /dev/null
+
+      - name: Cache Gradle
+        if: ${{ !vars.SELF_HOSTED_RUNNER }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Stamp the test version
+        env:
+          # High by default so the in-app updater finds nothing newer and cannot
+          # replace the build being tested. Going back to a real release
+          # afterwards is a downgrade, so it needs `adb install -r -d`.
+          VERSION: ${{ inputs.version || '2.99.0-test' }}
+        run: |
+          # The build number is left alone: split-per-abi derives the versionCode
+          # from it, and keeping it equal to the installed build is what lets the
+          # APK replace that install without a downgrade flag.
+          build=$(sed -n 's/^version: .*+\([0-9]*\)$/\1/p' pubspec.yaml)
+          if [ -z "$build" ]; then
+            echo "::error::pubspec.yaml has no +<build> suffix to preserve"
+            exit 1
+          fi
+          sed -i "s/^version: .*/version: ${VERSION}+${build}/" pubspec.yaml
+          grep '^version:' pubspec.yaml
+
+      - name: Configure signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set. An unsigned APK cannot replace the installed app."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/bask-release.jks
+          cat > android/key.properties << EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=bask-release.jks
+          EOF
+
+      - name: Build APKs
+        # Same two ABIs as the release: Google TV sets ship a 32-bit userspace,
+        # so armeabi-v7a is the one a Bravia installs.
+        run: |
+          flutter build apk --release --split-per-abi \
+            --target-platform android-arm64,android-arm \
+            --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/app/bask-release.jks android/key.properties
+
+      - name: Name the APKs
+        env:
+          VERSION: ${{ inputs.version || '2.99.0-test' }}
+        run: |
+          cd build/app/outputs/flutter-apk
+          for abi in arm64-v8a armeabi-v7a; do
+            if [ -f "app-$abi-release.apk" ]; then
+              mv "app-$abi-release.apk" "Bask-${VERSION}-${abi}.apk"
+            fi
+          done
+          ls -la Bask-*.apk
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bask-test-apks
+          path: build/app/outputs/flutter-apk/Bask-*.apk
+          if-no-files-found: error

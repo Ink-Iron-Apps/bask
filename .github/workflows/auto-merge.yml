@@ -6,6 +6,10 @@ name: Auto-merge dev
 # runs happen here first, so a broken commit fails on dev instead of
 # landing on main and failing the release afterwards.
 #
+# A merge that changes only workflow files or Markdown builds the same app, so
+# it lands on main without a release rather than spending a version number on
+# nothing.
+#
 # The merge is made with GITHUB_TOKEN, and GitHub deliberately does not fire
 # workflows for pushes made with that token — otherwise a workflow could
 # trigger itself forever. So the release is started explicitly with a
@@ -109,6 +113,35 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Decide whether this range can change the app
+        id: scope
+        # A range that touches nothing but workflow files and Markdown builds a
+        # byte-identical app, so releasing it spends a version number the
+        # updater then offers to everyone for no change. The decision is made on
+        # the files, not the commit subjects: a `ci:` commit that edits app code
+        # still ships, and a `fix:` commit that only edits a workflow does not.
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+          changed=$(git diff --name-only origin/main...HEAD)
+          if [ -z "$changed" ]; then
+            echo "nothing changed"
+            echo "ships=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # grep -v with -E so a path that is neither of these survives and makes
+          # the range shippable. An empty result means every path was excluded.
+          shippable=$(printf '%s\n' "$changed" | grep -vE '^\.github/|\.md$' || true)
+          if [ -z "$shippable" ]; then
+            echo "only workflow files and Markdown changed; no release needed"
+            printf '%s\n' "$changed"
+            echo "ships=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "app-visible changes present:"
+            printf '%s\n' "$shippable"
+            echo "ships=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Merge dev into main
         id: merge
         env:
@@ -172,10 +205,15 @@ jobs:
           exit 1
 
       - name: Start the release build
-        if: steps.merge.outputs.merged == 'true'
+        if: steps.merge.outputs.merged == 'true' && steps.scope.outputs.ships == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           gh workflow run "Bask release" --ref main
           echo "dispatched Bask release on main"
+
+      - name: Explain a merge that ships nothing
+        if: steps.merge.outputs.merged == 'true' && steps.scope.outputs.ships != 'true'
+        run: |
+          echo "merged, but no release: the range changes no shipped file"
