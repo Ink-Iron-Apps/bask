@@ -472,6 +472,26 @@ class _OptimizedMediaImageState extends State<OptimizedMediaImage> {
       imageType: widget.imageType,
     );
 
+    // TEMPORARY DIAGNOSTIC (artwork 401s). Every builder inside the client
+    // logs an empty token and none of them fires, while the URL on the wire
+    // carries none -- so the interesting question is what this widget is
+    // handed and whether it has a client at all.
+    if (imageUrl.contains('X-Plex-Token=&') || imageUrl.endsWith('X-Plex-Token=')) {
+      final path = widget.imagePath ?? '';
+      appLogger.w(
+        'ARTWORK-DIAG tokenless image URL',
+        error: {
+          'imageType': widget.imageType.name,
+          'clientNull': widget.client == null,
+          'clientType': widget.client.runtimeType.toString(),
+          'pathIsAbsolute': path.startsWith('http'),
+          'pathIsATranscode': path.contains('/photo/:/transcode'),
+          'pathCarriesAToken': path.contains('X-Plex-Token'),
+          'pathHead': path.length <= 64 ? path : path.substring(0, 64),
+        },
+      );
+    }
+
     if (imageUrl.isEmpty) {
       // An unresolvable URL (no client, offline, suppressed transcode) is a
       // load failure from the caller's point of view, so honour its own
