@@ -6108,6 +6108,48 @@ class Translations$addServer$en {
 	/// en: 'Add connection'
 	String get addConnectionTitle => 'Add connection';
 
+	/// en: 'Add Bask Media Server'
+	String get addDirectServerTitle => 'Add Bask Media Server';
+
+	/// en: 'Connect to Bask Media Server'
+	String get connectToDirectServerCard => 'Connect to Bask Media Server';
+
+	/// en: 'Enter the server's address and a token.'
+	String get connectToDirectServerCardSubtitle => 'Enter the server\'s address and a token.';
+
+	/// en: 'Connect a Bask server. Binds to ${name}.'
+	String connectToDirectServerCardSubtitleScoped({required Object name}) => 'Connect a Bask server. Binds to ${name}.';
+
+	/// en: 'Bask Media Server'
+	String get directServerFallbackName => 'Bask Media Server';
+
+	/// en: 'Server address'
+	String get serverUrl => 'Server address';
+
+	/// en: 'For example http://192.168.1.10:32400'
+	String get serverUrlHelper => 'For example http://192.168.1.10:32400';
+
+	/// en: 'Token'
+	String get serverToken => 'Token';
+
+	/// en: 'From Users in the server's admin pages.'
+	String get serverTokenHelper => 'From Users in the server\'s admin pages.';
+
+	/// en: 'Enter the server's address'
+	String get enterDirectServerUrl => 'Enter the server\'s address';
+
+	/// en: 'Enter a token'
+	String get enterServerToken => 'Enter a token';
+
+	/// en: 'That address answered, but not like a Bask or Plex server.'
+	String get notADirectServer => 'That address answered, but not like a Bask or Plex server.';
+
+	/// en: 'The server did not accept that token.'
+	String get tokenRejected => 'The server did not accept that token.';
+
+	/// en: 'Connect'
+	String get connect => 'Connect';
+
 	/// en: 'Add to ${name}'
 	String addConnectionTitleScoped({required Object name}) => 'Add to ${name}';
 
@@ -10102,6 +10144,20 @@ extension on Translations {
 			'addServer.failedToRegisterAccount' => ({required Object error}) => 'Failed to register account: ${error}',
 			'addServer.enterMediaBrowserUrlError' => ({required Object product}) => 'Enter your ${product} server URL',
 			'addServer.addConnectionTitle' => 'Add connection',
+			'addServer.addDirectServerTitle' => 'Add Bask Media Server',
+			'addServer.connectToDirectServerCard' => 'Connect to Bask Media Server',
+			'addServer.connectToDirectServerCardSubtitle' => 'Enter the server\'s address and a token.',
+			'addServer.connectToDirectServerCardSubtitleScoped' => ({required Object name}) => 'Connect a Bask server. Binds to ${name}.',
+			'addServer.directServerFallbackName' => 'Bask Media Server',
+			'addServer.serverUrl' => 'Server address',
+			'addServer.serverUrlHelper' => 'For example http://192.168.1.10:32400',
+			'addServer.serverToken' => 'Token',
+			'addServer.serverTokenHelper' => 'From Users in the server\'s admin pages.',
+			'addServer.enterDirectServerUrl' => 'Enter the server\'s address',
+			'addServer.enterServerToken' => 'Enter a token',
+			'addServer.notADirectServer' => 'That address answered, but not like a Bask or Plex server.',
+			'addServer.tokenRejected' => 'The server did not accept that token.',
+			'addServer.connect' => 'Connect',
 			'addServer.addConnectionTitleScoped' => ({required Object name}) => 'Add to ${name}',
 			'addServer.signInWithPlexCard' => 'Sign in with Plex',
 			'addServer.signInWithPlexCardSubtitle' => 'Authorize this device. Shared servers are added.',

@@ -11,6 +11,7 @@ import '../../profiles/profile.dart';
 import '../../widgets/backend_badge.dart';
 import '../../widgets/focused_scroll_scaffold.dart';
 import '../profile/borrow_connection_screen.dart';
+import 'add_direct_server_screen.dart';
 import 'add_jellyfin_screen.dart';
 import 'add_plex_account_screen.dart';
 
@@ -42,6 +43,18 @@ class AddConnectionScreen extends StatelessWidget {
         builder: (_) => AddPlexAccountScreen(targetProfile: targetProfile),
       ),
       _BackendOption(
+        // Bask's own server is not a Plex account, so it carries no Plex
+        // badge; it speaks that dialect, which is an implementation detail
+        // and not something to label a card with.
+        backend: null,
+        leading: const AppIcon(Symbols.dns_rounded, fill: 1, size: 28),
+        title: t.addServer.connectToDirectServerCard,
+        subtitle: scoped
+            ? t.addServer.connectToDirectServerCardSubtitleScoped(name: targetProfile!.displayName)
+            : t.addServer.connectToDirectServerCardSubtitle,
+        builder: (_) => AddDirectServerScreen(targetProfile: targetProfile),
+      ),
+      _BackendOption(
         backend: MediaBackend.jellyfin,
         title: t.addServer.connectToMediaBrowserCard(product: jellyfinDialect.productName),
         subtitle: scoped
@@ -66,6 +79,7 @@ class AddConnectionScreen extends StatelessWidget {
       if (scoped)
         _BackendOption(
           backend: null,
+          leading: const AppIcon(Symbols.share_rounded, fill: 1, size: 28),
           title: t.addServer.borrowFromAnotherProfile,
           subtitle: t.addServer.borrowFromAnotherProfileSubtitle,
           builder: (_) => BorrowConnectionScreen(targetProfile: targetProfile!),
@@ -87,9 +101,7 @@ class AddConnectionScreen extends StatelessWidget {
                 if (i > 0) SizedBox(height: tokensRef.groupGap),
                 _BackendCard(
                   borderRadius: groupItemRadii(context, i, options.length),
-                  leading: options[i].backend != null
-                      ? BackendBadge(backend: options[i].backend!, size: 28)
-                      : const AppIcon(Symbols.share_rounded, fill: 1, size: 28),
+                  leading: options[i].leading ?? BackendBadge(backend: options[i].backend!, size: 28),
                   title: options[i].title,
                   subtitle: options[i].subtitle,
                   onTap: () async {
@@ -109,13 +121,23 @@ class AddConnectionScreen extends StatelessWidget {
 }
 
 class _BackendOption {
-  /// Null for the borrow option (renders a share icon instead of a badge).
+  /// Null for an option that is not one backend's own card, which is then
+  /// required to bring its own [leading].
   final MediaBackend? backend;
+
+  /// Drawn instead of the backend badge. Required when [backend] is null.
+  final Widget? leading;
   final String title;
   final String subtitle;
   final WidgetBuilder builder;
 
-  const _BackendOption({required this.backend, required this.title, required this.subtitle, required this.builder});
+  const _BackendOption({
+    required this.backend,
+    required this.title,
+    required this.subtitle,
+    required this.builder,
+    this.leading,
+  }) : assert(backend != null || leading != null, 'An option with no backend needs its own leading widget');
 }
 
 class _BackendCard extends StatelessWidget {

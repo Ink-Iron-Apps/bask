@@ -590,6 +590,9 @@ class ActiveProfileBinder {
     required bool allowPinPrompt,
     required int generation,
   }) async {
+    if (conn.direct) {
+      return _bindDirectPlexConnection(profile: profile, conn: conn, pc: pc, generation: generation);
+    }
     final auth = await _ensureAuth();
     if (!_isCurrentBind(profile.id, generation)) return const _ProfileBindResult.empty();
     return _bindPlexWithTokenPolicy(
@@ -605,6 +608,35 @@ class ActiveProfileBinder {
       persistMintedToken: (token) => profileConnections.recordToken(profile.id, conn.id, token),
       markUsed: () => profileConnections.markUsed(profile.id, conn.id),
     );
+  }
+
+  /// Bind a server the user added by address and token, with no plex.tv.
+  ///
+  /// The ordinary path asks plex.tv which servers this token may reach and
+  /// what per-server token to use for each. Neither question applies here:
+  /// there is one server, at the address the user typed, and the token is the
+  /// one that server issued. Asking anyway would send that token to plex.tv,
+  /// which has no business holding it -- and the answer would be a refusal
+  /// that the fallback then papers over, so it would appear to work while
+  /// leaking the credential on every bind.
+  Future<_ProfileBindResult> _bindDirectPlexConnection({
+    required Profile profile,
+    required PlexAccountConnection conn,
+    required ProfileConnection pc,
+    required int generation,
+  }) async {
+    final token = pc.hasToken ? pc.userToken! : conn.accountToken;
+    if (token.isEmpty) {
+      // There is no `/switch` to mint a replacement: a direct row without a
+      // token has to be added again, which is the user's move, not ours.
+      appLogger.w('ActiveProfileBinder: ${profile.displayName} has no token for direct server ${conn.id}');
+      return const _ProfileBindResult.empty();
+    }
+    if (!_isCurrentBind(profile.id, generation)) return const _ProfileBindResult.empty();
+    final result = await _connectFromServers(conn, token, conn.servers, profile.displayName, profileId: profile.id);
+    if (!_isCurrentBind(profile.id, generation)) return const _ProfileBindResult.empty();
+    await profileConnections.markUsed(profile.id, conn.id);
+    return result;
   }
 
   Future<String?> _mintLocalPlexToken({

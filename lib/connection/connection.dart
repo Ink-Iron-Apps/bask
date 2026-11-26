@@ -68,6 +68,17 @@ class PlexAccountConnection extends Connection {
   /// flow and refreshed periodically.
   final List<PlexServer> servers;
 
+  /// True when there is no plex.tv account behind this row: one server the
+  /// user named, authenticated with a token that server issued itself.
+  ///
+  /// Bask Media Server speaks the Plex dialect without being Plex, so it rides
+  /// this type rather than a parallel one -- the whole client stack already
+  /// knows how to talk to it. What it changes is everything that would
+  /// otherwise reach for plex.tv: there is no account to look up, no Home
+  /// users to list, and no `/switch` that could mint a replacement token. A
+  /// caller that would call plex.tv checks this first.
+  final bool direct;
+
   PlexAccountConnection({
     required this.id,
     required this.accountToken,
@@ -75,6 +86,7 @@ class PlexAccountConnection extends Connection {
     required this.accountLabel,
     this.activeProfile,
     this.servers = const [],
+    this.direct = false,
     required this.createdAt,
     this.lastAuthenticatedAt,
   });
@@ -91,7 +103,12 @@ class PlexAccountConnection extends Connection {
   String get displayLabel => displayName;
 
   @override
-  String? get displaySubtitle => servers.length == 1 ? '1 Plex server' : '${servers.length} Plex servers';
+  String? get displaySubtitle {
+    // A direct row's one server is the whole of it, so its address is more use
+    // than counting to one.
+    if (direct) return servers.isEmpty ? null : servers.first.connections.firstOrNull?.uri;
+    return servers.length == 1 ? '1 Plex server' : '${servers.length} Plex servers';
+  }
 
   PlexAccountConnection copyWith({
     String? id,
@@ -101,6 +118,7 @@ class PlexAccountConnection extends Connection {
     PlexHomeUser? activeProfile,
     bool clearActiveProfile = false,
     List<PlexServer>? servers,
+    bool? direct,
     DateTime? createdAt,
     DateTime? lastAuthenticatedAt,
   }) {
@@ -111,6 +129,7 @@ class PlexAccountConnection extends Connection {
       accountLabel: accountLabel ?? this.accountLabel,
       activeProfile: clearActiveProfile ? null : (activeProfile ?? this.activeProfile),
       servers: servers ?? this.servers,
+      direct: direct ?? this.direct,
       createdAt: createdAt ?? this.createdAt,
       lastAuthenticatedAt: lastAuthenticatedAt ?? this.lastAuthenticatedAt,
     );
@@ -124,6 +143,7 @@ class PlexAccountConnection extends Connection {
       'accountLabel': accountLabel,
       'activeProfile': activeProfile?.toJson(),
       'servers': servers.map((s) => s.toJson()).toList(),
+      'direct': direct,
     };
   }
 
@@ -146,10 +166,25 @@ class PlexAccountConnection extends Connection {
       accountLabel: json['accountLabel'] as String? ?? 'Plex',
       activeProfile: activeProfile,
       servers: servers,
+      // Absent in every row written before direct connections existed, and
+      // those are all plex.tv accounts.
+      direct: json['direct'] == true,
       createdAt: createdAt,
       lastAuthenticatedAt: lastAuthenticatedAt,
     );
   }
+}
+
+extension PlexAccountConnections on Iterable<Connection> {
+  /// The Plex accounts with a plex.tv account behind them.
+  ///
+  /// Excludes [PlexAccountConnection.direct] rows, which carry a token their
+  /// own server issued. Anything that would ask plex.tv a question -- Home
+  /// users, `/resources`, account identity -- wants this rather than
+  /// `whereType`, because asking on a direct row's behalf sends that server's
+  /// token to plex.tv and gets a refusal in return.
+  Iterable<PlexAccountConnection> get plexAccounts =>
+      whereType<PlexAccountConnection>().where((connection) => !connection.direct);
 }
 
 /// A single-server connection to a MediaBrowser-family server — Jellyfin or its

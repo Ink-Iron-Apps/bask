@@ -7,6 +7,7 @@ import 'package:bask/media/media_backend.dart';
 import 'package:bask/media/media_browser_dialect.dart';
 import 'package:bask/profiles/profile.dart';
 import 'package:bask/screens/settings/add_connection_screen.dart';
+import 'package:bask/screens/settings/add_direct_server_screen.dart';
 import 'package:bask/screens/settings/add_jellyfin_screen.dart';
 import 'package:bask/screens/settings/add_plex_account_screen.dart';
 import 'package:bask/theme/mono_theme.dart';
@@ -23,11 +24,12 @@ void main() {
   Profile profile(String id) =>
       Profile.local(id: id, displayName: id, sortOrder: 0, createdAt: DateTime.fromMillisecondsSinceEpoch(0));
 
-  testWidgets('offers Plex, Jellyfin and Emby, each with its own badge', (tester) async {
+  testWidgets('offers Plex, Bask, Jellyfin and Emby', (tester) async {
     await tester.pumpWidget(app(const AddConnectionScreen()));
     await tester.pumpAndSettle();
 
     expect(find.text('Sign in with Plex'), findsOneWidget);
+    expect(find.text('Connect to Bask Media Server'), findsOneWidget);
     expect(find.text('Connect to Jellyfin'), findsOneWidget);
     expect(find.text('Connect to Emby'), findsOneWidget);
 
@@ -77,6 +79,39 @@ void main() {
     expect(find.byType(AddJellyfinScreen), findsNothing);
   });
 
+  testWidgets('the Bask card opens the address-and-token form, and carries no Plex badge', (tester) async {
+    await tester.pumpWidget(app(const AddConnectionScreen()));
+    await tester.pumpAndSettle();
+
+    // A Plex badge here would say the server belongs to a Plex account. It
+    // speaks that dialect, which is not the same claim.
+    final badges = tester.widgetList<BackendBadge>(find.byType(BackendBadge)).map((b) => b.backend).toList();
+    expect(badges.where((backend) => backend == MediaBackend.plex), hasLength(1));
+
+    await tester.tap(find.text('Connect to Bask Media Server'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byType(AddDirectServerScreen), findsOneWidget);
+    expect(find.text('Add Bask Media Server'), findsOneWidget);
+    expect(find.text('Server address'), findsOneWidget);
+    expect(find.text('Token'), findsOneWidget);
+  });
+
+  testWidgets('a scoped Bask card names the profile it will bind to', (tester) async {
+    final target = profile('Living Room');
+    await tester.pumpWidget(app(AddConnectionScreen(targetProfile: target)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Connect a Bask server. Binds to Living Room.'), findsOneWidget);
+
+    await tester.tap(find.text('Connect to Bask Media Server'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(tester.widget<AddDirectServerScreen>(find.byType(AddDirectServerScreen)).targetProfile?.id, target.id);
+  });
+
   testWidgets('a scoped Emby card names the profile it will bind to', (tester) async {
     final target = profile('Living Room');
     await tester.pumpWidget(app(AddConnectionScreen(targetProfile: target)));
@@ -90,7 +125,7 @@ void main() {
     expect(screen.targetProfile?.id, target.id);
   });
 
-  testWidgets('the D-pad steps through all three backend cards', (tester) async {
+  testWidgets('the D-pad steps through every backend card', (tester) async {
     await tester.pumpWidget(app(const AddConnectionScreen()));
     await tester.pumpAndSettle();
 
@@ -103,7 +138,7 @@ void main() {
       if (focused != null) visited.add(focused);
     }
 
-    expect(find.byType(FocusableWrapper), findsNWidgets(3));
-    expect(visited.length, greaterThanOrEqualTo(3), reason: 'D-pad did not reach every backend card');
+    expect(find.byType(FocusableWrapper), findsNWidgets(4));
+    expect(visited.length, greaterThanOrEqualTo(4), reason: 'D-pad did not reach every backend card');
   });
 }
