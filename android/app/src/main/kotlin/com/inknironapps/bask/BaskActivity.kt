@@ -54,10 +54,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
 /**
- * The Flutter activity. It has no launcher entry of its own: the launcher components are the
- * activity-aliases in AndroidManifest.xml that target it (`.MainActivity` for the default icon,
- * `.appicon.<id>` for the alternates), and [AppIconChannel] switches the icon by enabling one
- * of them.
+ * The Flutter activity.
+ *
+ * Upstream gives this a set of alternate launcher icons, switched by enabling one of several
+ * activity-aliases. Bask does not carry that: the aliases, the icon resources and the Dart side
+ * that would offer the choice are all absent here, and the alternates are Plezy's own artwork.
+ * The wiring arrived with an upstream merge and is removed rather than left referring to a class
+ * this fork has no reason to hold.
  */
 class BaskActivity : FlutterActivity() {
 
@@ -141,7 +144,6 @@ class BaskActivity : FlutterActivity() {
   private val externalPlayerChannel = ExternalPlayerChannel(this)
   private val apkInstallChannel = ApkInstallChannel(this)
   private val userCertificateChannel = UserCertificateChannel()
-  private val appIconChannel = AppIconChannel(this)
   private val exitDiagnosticsRequested = AtomicBoolean(false)
 
   private inline fun logTextInputDiag(message: () -> String) {
@@ -787,14 +789,12 @@ class BaskActivity : FlutterActivity() {
   override fun onStop() {
     activityStarted = false
     if (isAndroidTvDevice()) flutterSurfaceReconnectPending = true
-    appIconChannel.onStop()
     super.onStop()
   }
 
   override fun onStart() {
     super.onStart()
     activityStarted = true
-    appIconChannel.onStart()
     tryReconnectFlutterSurface()
   }
 
@@ -1060,7 +1060,6 @@ class BaskActivity : FlutterActivity() {
 
     externalPlayerChannel.attach(flutterEngine.dartExecutor.binaryMessenger)
     userCertificateChannel.attach(flutterEngine.dartExecutor.binaryMessenger)
-    appIconChannel.attach(flutterEngine.dartExecutor.binaryMessenger)
 
     // Splash screen theme: persist user's chosen theme for next launch (API 31+)
     MethodChannel(flutterEngine.dartExecutor.binaryMessenger, THEME_CHANNEL).setMethodCallHandler { call, result ->
@@ -1255,7 +1254,6 @@ class BaskActivity : FlutterActivity() {
 
   override fun onUserLeaveHint() {
     super.onUserLeaveHint()
-    appIconChannel.onUserLeaveHint()
     // Auto PiP for API 26-30 (API 31+ uses setAutoEnterEnabled)
     if (isPipSupportedDevice() &&
       Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&

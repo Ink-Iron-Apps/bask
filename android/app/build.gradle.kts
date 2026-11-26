@@ -297,6 +297,16 @@ android {
   // by FEATURE_AUTOMOTIVE and the manifest declares `uses-library android.car required=false`.
   useLibrary("android.car")
 
+  // Provider authorities and FileProvider lookups derive from the applicationId so this
+  // fork installs alongside upstream Bask instead of colliding with its authorities.
+  //
+  // Upstream needs none of this -- its namespace and its applicationId are the same string,
+  // so it never reads BuildConfig -- which is why the upstream merge dropped this block and
+  // the Kotlin that reads BuildConfig.APPLICATION_ID stopped compiling.
+  buildFeatures {
+    buildConfig = true
+  }
+
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -395,10 +405,10 @@ android {
   }
 
   // Instrumentation normally runs against `debug`; the R8 reachability gate opts into the
-  // minified variant with -Pplezy.testBuildType=minified. Only one build type can host
+  // minified variant with -Pbask.testBuildType=minified. Only one build type can host
   // androidTest, and the existing playback suites need media3 builder APIs the app itself
   // never calls — which R8 legitimately shrinks — so they stay on debug.
-  testBuildType = (findProperty("plezy.testBuildType") as String?) ?: "debug"
+  testBuildType = (findProperty("bask.testBuildType") as String?) ?: "debug"
 
   packaging {
     jniLibs {

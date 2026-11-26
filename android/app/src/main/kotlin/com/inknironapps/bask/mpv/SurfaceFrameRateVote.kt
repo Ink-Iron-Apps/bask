@@ -3,7 +3,7 @@ package com.inknironapps.bask.mpv
 import android.os.Build
 import android.util.Log
 import android.view.Surface
-import com.edde746.plezy.shared.PlayerDebugLog
+import com.inknironapps.bask.shared.PlayerDebugLog
 
 /**
  * The seamless frame-rate vote Media3's `VideoFrameReleaseHelper` places on

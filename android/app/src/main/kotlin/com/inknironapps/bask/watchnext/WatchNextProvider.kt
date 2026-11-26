@@ -457,7 +457,7 @@ class WatchNextProvider internal constructor(
 
   private fun contentIdFromIntent(value: String?): String? {
     val uri = value?.let { runCatching { Uri.parse(it) }.getOrNull() } ?: return null
-    if (uri.scheme != "plezy" || uri.authority != "play") return null
+    if (uri.scheme != "bask" || uri.authority != "play") return null
     return uri.getQueryParameter("content_id")?.takeIf(String::isNotBlank)
   }
 
