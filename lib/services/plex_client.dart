@@ -1816,6 +1816,25 @@ class PlexClient
 
   String getThumbnailUrl(String? thumbPath) {
     if (thumbPath == null || thumbPath.isEmpty) return '';
+    // TEMPORARY DIAGNOSTIC (artwork 401s). This is the passthrough the sized
+    // builder returns through, so an image URL with no usable token reaches
+    // the network from here rather than from thumbnailUrl's own diagnostic.
+    final token = config.token;
+    if (token == null || token.isEmpty || thumbPath.contains('X-Plex-Token')) {
+      appLogger.w(
+        'ARTWORK-DIAG getThumbnailUrl',
+        error: {
+          'tokenNull': token == null,
+          'tokenLength': token?.length ?? -1,
+          'pathCarriesAToken': thumbPath.contains('X-Plex-Token'),
+          'pathIsATranscode': thumbPath.contains('/photo/:/transcode'),
+          'pathIsAbsolute': thumbPath.startsWith('http'),
+          'pathHead': thumbPath.length <= 48 ? thumbPath : thumbPath.substring(0, 48),
+          'client': identityHashCode(this),
+          'profileScope': profileScopeId.toString(),
+        },
+      );
+    }
     return _http.buildUri(thumbPath).toString().withPlexToken(config.token);
   }
 
@@ -4831,6 +4850,22 @@ class PlexClient
   @override
   String externalImageUrl(String url, {int? width, int? height, bool cover = true}) {
     final token = config.token;
+    // TEMPORARY DIAGNOSTIC (artwork 401s): the other builder of a transcode
+    // URL, and the one that encodes whatever it is handed without looking
+    // inside it.
+    if (token == null || token.isEmpty || url.contains('X-Plex-Token')) {
+      appLogger.w(
+        'ARTWORK-DIAG externalImageUrl',
+        error: {
+          'tokenNull': token == null,
+          'tokenLength': token?.length ?? -1,
+          'urlCarriesAToken': url.contains('X-Plex-Token'),
+          'urlHead': url.length <= 48 ? url : url.substring(0, 48),
+          'client': identityHashCode(this),
+          'profileScope': profileScopeId.toString(),
+        },
+      );
+    }
     if (token == null || (width == null && height == null)) return url;
     final encoded = Uri.encodeComponent(url);
     final parts = <String>[
