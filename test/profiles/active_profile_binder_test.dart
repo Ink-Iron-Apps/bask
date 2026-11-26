@@ -739,6 +739,96 @@ void main() {
     expect(multiServerProvider.onlineServerIds, ['srv-1']);
   });
 
+  group('a direct server', () {
+    /// A binder whose plex.tv seam fails the test if it is used at all.
+    ///
+    /// That is the proof the other assertions cannot give: a direct server's
+    /// token belongs to that one server, so sending it to plex.tv would leak
+    /// the credential -- and the refusal that came back would be papered over
+    /// by the cached-metadata fallback, leaving a bind that looks like it
+    /// worked.
+    _CapturingMultiServerManager rebuildBinderWithNoPlexTv() {
+      binder.dispose();
+      multiServerProvider.dispose();
+      final capturing = _CapturingMultiServerManager();
+      manager = capturing;
+      multiServerProvider = testMultiServerProvider(manager);
+      binder = ActiveProfileBinder(
+        activeProfile: activeProfile,
+        connections: connections,
+        profileConnections: profileConnections,
+        serverManager: manager,
+        multiServerProvider: multiServerProvider,
+        pinPrompt: (_, {String? errorMessage}) async => null,
+        shouldDeferInitialBind: (_) async => false,
+        plexAuth: PlexAuthService.forTesting(
+          http: MediaServerHttpClient(
+            client: MockClient((request) async {
+              fail('the bind called plex.tv at ${request.url}');
+            }),
+          ),
+        ),
+      );
+      return capturing;
+    }
+
+    Future<PlexAccountConnection> directConnection(String id) async {
+      final direct = PlexAccountConnection(
+        id: id,
+        accountToken: 'bms-token',
+        clientIdentifier: 'client-id',
+        accountLabel: 'The house',
+        servers: [_server(accessToken: 'bms-token')],
+        direct: true,
+        createdAt: DateTime(2026, 1, 1),
+      );
+      await connections.upsert(direct);
+      return direct;
+    }
+
+    test('binds from its own token without asking plex.tv anything', () async {
+      final capturing = rebuildBinderWithNoPlexTv();
+      final direct = await directConnection('direct.bms-1');
+      final profile = await createActiveLocalProfile('local-direct');
+      await profileConnections.upsert(
+        ProfileConnection(
+          profileId: profile.id,
+          connectionId: direct.id,
+          userToken: 'bms-token',
+          userIdentifier: 'srv-1',
+        ),
+      );
+
+      await binder.rebindActive();
+
+      expect(activeProfile.lastBindingSucceeded, isTrue);
+      expect(capturing.refreshCalls, 1);
+      expect(capturing.lastConnection?.servers.single.clientIdentifier, 'srv-1');
+      expect(capturing.lastProfileId, profile.id);
+      // Marked used like every other bound connection, so recency ordering
+      // does not treat a direct server as never having been opened.
+      expect((await profileConnections.get(profile.id, direct.id))?.lastUsedAt, isNotNull);
+    });
+
+    test('falls back to the connection token when the join row has none', () async {
+      // There is no `/switch` that could mint a replacement, so a row with no
+      // cached token uses the one the connection carries rather than treating
+      // the absence as the lazy-fetch sentinel a Plex account uses -- which
+      // would mint against plex.tv and fail this test.
+      final capturing = rebuildBinderWithNoPlexTv();
+      final direct = await directConnection('direct.bms-2');
+      final profile = await createActiveLocalProfile('local-direct-no-token');
+      await profileConnections.upsert(
+        ProfileConnection(profileId: profile.id, connectionId: direct.id, userIdentifier: 'srv-1'),
+      );
+
+      await binder.rebindActive();
+
+      expect(activeProfile.lastBindingSucceeded, isTrue);
+      expect(capturing.refreshCalls, 1);
+    });
+  });
+
   group('shared Plex server fetch policy', () {
     Future<({Profile profile, PlexAccountConnection account})> prepareLocalPlex({
       required http.Client httpClient,

@@ -126,7 +126,7 @@ class PlexHomeService {
 
     final current = await _connections.list();
     if (!_isLifecycleCurrent(epoch)) return;
-    final plexIds = current.whereType<PlexAccountConnection>().map((c) => c.id).toSet();
+    final plexIds = current.plexAccounts.map((c) => c.id).toSet();
     var changed = false;
 
     for (final id in _byConnection.keys.toList()) {
@@ -137,7 +137,7 @@ class PlexHomeService {
       }
     }
 
-    for (final conn in current.whereType<PlexAccountConnection>()) {
+    for (final conn in current.plexAccounts) {
       if (!_isLifecycleCurrent(epoch)) return;
       final raw = _storage!.getPlexHomeUsersCacheJson(conn.id);
       final cached = _decodeCache(conn.id, raw);
@@ -165,7 +165,7 @@ class PlexHomeService {
 
     final initial = await _connections.list();
     if (!_isLifecycleCurrent(epoch)) return;
-    final plexConnections = initial.whereType<PlexAccountConnection>().toList();
+    final plexConnections = initial.plexAccounts.toList();
     _knownConnectionIds
       ..clear()
       ..addAll(plexConnections.map((connection) => connection.id));
@@ -197,7 +197,7 @@ class PlexHomeService {
     if (!_isLifecycleCurrent(epoch)) return;
     final storage = _storage;
     if (storage == null) return;
-    final plexConns = current.whereType<PlexAccountConnection>().toList();
+    final plexConns = current.plexAccounts.toList();
     final currentIds = plexConns.map((c) => c.id).toSet();
 
     // Snapshot what's tracked *now*, before any await. Recomputing after
@@ -252,7 +252,7 @@ class PlexHomeService {
     if (!_isLifecycleCurrent(epoch)) return;
     final list = await _connections.list();
     if (!_isLifecycleCurrent(epoch)) return;
-    for (final conn in list.whereType<PlexAccountConnection>()) {
+    for (final conn in list.plexAccounts) {
       unawaited(_scheduleBackgroundRefresh(conn));
     }
   }
@@ -465,7 +465,7 @@ class PlexHomeService {
   Future<PlexHome?> materializeFirstPlexHome() async {
     await hydrate();
     final all = await _connections.list();
-    final first = all.whereType<PlexAccountConnection>().firstOrNull;
+    final first = all.plexAccounts.firstOrNull;
     if (first == null) return null;
     return materializePlexHome(first.id);
   }

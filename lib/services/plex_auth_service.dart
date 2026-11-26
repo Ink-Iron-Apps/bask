@@ -370,6 +370,49 @@ class PlexServer {
     this.lastSeenAt,
   });
 
+  /// A server reached at one address the user typed, with no plex.tv behind it.
+  ///
+  /// For a server that speaks the Plex dialect without belonging to a Plex
+  /// account -- Bask Media Server, which issues its own tokens. There is no
+  /// discovery to do, so the single endpoint is the whole candidate list, and
+  /// it is built by the same parser [withCustomEndpoints] uses so what the
+  /// form accepts and what the client then tries cannot drift apart.
+  ///
+  /// Returns null when [endpoint] is not an address this can reach.
+  static PlexServer? direct({
+    required String name,
+    required String clientIdentifier,
+    required String accessToken,
+    required String endpoint,
+    String? product,
+    String? platform,
+  }) {
+    final parsed = _parseCustomEndpoint(endpoint);
+    if (parsed == null) return null;
+    return PlexServer(
+      name: name,
+      clientIdentifier: clientIdentifier,
+      accessToken: accessToken,
+      connections: [
+        PlexConnection(
+          protocol: parsed.scheme,
+          address: parsed.host,
+          port: parsed.port,
+          uri: parsed.uri,
+          local: _isLocalOrPrivateHost(parsed.host),
+          relay: false,
+          ipv6: InternetAddress.tryParse(parsed.host)?.type == InternetAddressType.IPv6,
+        ),
+      ],
+      // Its own server, with its own tokens: there is no "shared with me" for
+      // a server the user holds the address and the token for.
+      owned: true,
+      product: product,
+      platform: platform,
+      lastSeenAt: DateTime.now(),
+    );
+  }
+
   /// A copy of this server with user-supplied endpoints folded in.
   ///
   /// plex.tv only advertises endpoints it can reach from the public internet,

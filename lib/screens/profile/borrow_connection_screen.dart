@@ -250,6 +250,8 @@ class _BorrowConnectionScreenState extends State<BorrowConnectionScreen> {
     try {
       if (!await _verifySourcePin(cand)) return;
       switch (cand.connection) {
+        case PlexAccountConnection(direct: true):
+          await _borrowDirect(cand);
         case PlexAccountConnection():
           await _borrowPlex(cand);
         case JellyfinConnection():
@@ -295,7 +297,9 @@ class _BorrowConnectionScreenState extends State<BorrowConnectionScreen> {
       return true;
     }
     // Plex Home source: defer to _borrowPlex's PIN prompt for Plex borrows.
-    if (cand.connection is PlexAccountConnection) return true;
+    // A direct server has no Home user to switch into, so it takes the
+    // profile-PIN check above and nothing further.
+    if (cand.connection case PlexAccountConnection(direct: false)) return true;
     // Other backends (Jellyfin) — validate via /switch and discard the token.
     final parentId = cand.source.parentConnectionId;
     final homeUuid = cand.source.plexHomeUserUuid;
@@ -341,6 +345,28 @@ class _BorrowConnectionScreenState extends State<BorrowConnectionScreen> {
       }
       return;
     }
+    _finishBorrow();
+  }
+
+  /// Borrowing a direct server copies its token across.
+  ///
+  /// There is no Home user to switch into and no plex.tv to ask: the token is
+  /// the one that server issued, and minting against plex.tv with it would
+  /// send the credential somewhere it does not belong and fail anyway.
+  Future<void> _borrowDirect(_BorrowCandidate cand) async {
+    final account = cand.connection as PlexAccountConnection;
+    final pcRegistry = context.read<ProfileConnectionRegistry>();
+    await pcRegistry.upsert(
+      ProfileConnection(
+        profileId: widget.targetProfile.id,
+        connectionId: account.id,
+        userToken: cand.pc.hasToken ? cand.pc.userToken : account.accountToken,
+        userIdentifier: cand.pc.userIdentifier.isNotEmpty
+            ? cand.pc.userIdentifier
+            : (account.servers.firstOrNull?.clientIdentifier ?? ''),
+        tokenAcquiredAt: DateTime.now(),
+      ),
+    );
     _finishBorrow();
   }
 
@@ -422,7 +448,9 @@ class _BorrowTile extends StatelessWidget {
                       ],
                     ],
                   ),
-                  if (candidate.connection is PlexAccountConnection)
+                  // Only a plex.tv account borrows a Home user's identity
+                  // along with the connection; a direct server has one.
+                  if (candidate.connection case PlexAccountConnection(direct: false))
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(

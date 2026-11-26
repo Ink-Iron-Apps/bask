@@ -223,8 +223,10 @@ class ConnectionBootstrap {
   Future<PlexAccountConnection?> _firstPlexAccount(PlexAccountConnection? preferred) async {
     if (preferred != null) return preferred;
     final connections = await connectionRegistry.list();
-    for (final conn in connections) {
-      if (conn is PlexAccountConnection) return conn;
+    // A direct server has no plex.tv account behind it, so it cannot stand in
+    // for one here: the next step asks plex.tv for Home users.
+    for (final conn in connections.plexAccounts) {
+      return conn;
     }
     return null;
   }
