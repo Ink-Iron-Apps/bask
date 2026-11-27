@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../services/connectivity_probe.dart';
 import '../mixins/disposable_change_notifier_mixin.dart';
 import 'multi_server_provider.dart';
 import '../services/multi_server_manager.dart';
@@ -9,14 +10,18 @@ import '../utils/connectivity_link_type.dart';
 
 enum OfflineModeReason {
   online,
-  noNetworkConnection,
   waitingForServerStatus,
   noKnownVisibleServers,
-  onlyAuthErrorServers,
+
+  /// Every visible server answered and refused this account (a rejected token
+  /// or a refused account). They are reachable, so this is not offline mode;
+  /// the refusal banner explains the empty app instead.
+  onlyRefusedServers,
   noServerConnection,
 }
 
-/// Tracks offline mode status based on network connectivity and server reachability.
+/// Tracks offline mode status from media-server reachability, and owns the
+/// app's single OS connectivity subscription for consumers that need it.
 class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMixin implements OfflineModeSource {
   final MultiServerManager _serverManager;
   MultiServerProvider? _multiServerProvider;
@@ -28,8 +33,7 @@ class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMi
   bool _lastOfflineState = false;
   bool _isInitialized = false;
 
-  /// Latest raw connectivity results. This provider owns the app's single
-  /// `Connectivity()` subscription; consumers needing the connection *type*
+  /// Latest raw connectivity results. Consumers needing the connection *type*
   /// (e.g. the WiFi-reconnect sync trigger in main.dart) read it from here
   /// instead of subscribing themselves.
   List<ConnectivityResult> _lastConnectivityResults = const [];
@@ -59,17 +63,22 @@ class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMi
     _multiServerProvider?.addListener(_handleMultiServerProviderChanged);
   }
 
-  /// Whether the app is currently in offline mode
-  /// Offline = no network OR (we know servers are unreachable)
+  /// Whether the app is currently in offline mode: no visible server is
+  /// reachable.
+  ///
+  /// OS connectivity is deliberately not part of the verdict. `none` from
+  /// connectivity_plus means "no internet-capable adapter", not "no route to
+  /// the server": a server on loopback, or on a LAN whose WAN is down (Windows
+  /// reports `none` whenever NCSI finds no internet), is still reachable
+  /// (#2505). [MultiServerManager] re-probes servers on every connectivity
+  /// change, so unreachable servers still drop the app offline promptly.
   @override
-  bool get isOffline =>
-      offlineReason == OfflineModeReason.noNetworkConnection || offlineReason == OfflineModeReason.noServerConnection;
+  bool get isOffline => offlineReason == OfflineModeReason.noServerConnection;
 
   OfflineModeReason get offlineReason {
-    if (!_hasNetworkConnection) return OfflineModeReason.noNetworkConnection;
     if (!_hasReceivedServerStatus) return OfflineModeReason.waitingForServerStatus;
     if (!_hasKnownVisibleServers) return OfflineModeReason.noKnownVisibleServers;
-    if (_hasOnlyAuthErrorServers) return OfflineModeReason.onlyAuthErrorServers;
+    if (_hasOnlyRefusedServers) return OfflineModeReason.onlyRefusedServers;
     if (!hasServerConnection) return OfflineModeReason.noServerConnection;
     return OfflineModeReason.online;
   }
@@ -95,11 +104,11 @@ class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMi
   bool get _hasKnownVisibleServers =>
       (_multiServerProvider?.expectedServerIds.length ?? _serverManager.serverIds.length) > 0;
 
-  bool get _hasOnlyAuthErrorServers {
+  bool get _hasOnlyRefusedServers {
     final provider = _multiServerProvider;
     if (provider == null) return false;
     final serverCount = provider.expectedServerIds.length;
-    return serverCount > 0 && provider.authErrorServerIds.length == serverCount;
+    return serverCount > 0 && provider.refusedServerIds.length == serverCount;
   }
 
   /// Attach the profile-visible server provider. Offline state is evaluated
@@ -114,20 +123,10 @@ class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMi
     _notifyIfOfflineChanged();
   }
 
-  /// Updates network and server connection flags
   Future<void> _updateConnectionFlags() async {
-    try {
-      final connectivityResult = await Connectivity().checkConnectivity().timeout(
-        const Duration(seconds: 3),
-        onTimeout: () => [ConnectivityResult.other],
-      );
-      _lastConnectivityResults = connectivityResult;
-      _lastWifiOrEthernetState = hasWifiOrEthernet;
-      _hasNetworkConnection = !connectivityResult.contains(ConnectivityResult.none);
-    } catch (e) {
-      // connectivity_plus can throw PlatformException on Windows (NetworkManager::StartListen)
-      _hasNetworkConnection = true;
-    }
+    _lastConnectivityResults = await ConnectivityProbe.check();
+    _lastWifiOrEthernetState = hasWifiOrEthernet;
+    _hasNetworkConnection = !_lastConnectivityResults.contains(ConnectivityResult.none);
   }
 
   void _handleMultiServerProviderChanged() {
@@ -148,13 +147,10 @@ class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMi
     safeNotifyListeners();
   }
 
-  /// Apply a connectivity snapshot and notify when anything observable moved.
-  ///
-  /// All three observable answers count, not just [isOffline]: regaining
-  /// cellular while every media server stays unreachable leaves [isOffline] true
-  /// through `noServerConnection` and [hasWifiOrEthernet] false, yet
-  /// [hasNetworkConnection] has flipped — and consumers that only need the
-  /// internet (tracker history writes) can act on exactly that.
+  /// Apply a connectivity snapshot and notify when either connectivity answer
+  /// moved. It never moves [isOffline] — server reachability owns that — but
+  /// consumers that only need the internet (tracker history writes) or the
+  /// link type (the WiFi-reconnect sync) act on these flags directly.
   @visibleForTesting
   void applyConnectivityResults(List<ConnectivityResult> results) {
     final hadNetwork = _hasNetworkConnection;
@@ -162,13 +158,9 @@ class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMi
     _hasNetworkConnection = !results.contains(ConnectivityResult.none);
 
     final wifiNow = hasWifiOrEthernet;
-    final offline = isOffline;
-    final changed =
-        _hasNetworkConnection != hadNetwork || wifiNow != _lastWifiOrEthernetState || offline != _lastOfflineState;
-    if (!changed) return;
+    if (_hasNetworkConnection == hadNetwork && wifiNow == _lastWifiOrEthernetState) return;
 
     _lastWifiOrEthernetState = wifiNow;
-    _lastOfflineState = offline;
     safeNotifyListeners();
   }
 
@@ -179,22 +171,7 @@ class OfflineModeProvider extends ChangeNotifier with DisposableChangeNotifierMi
 
     await _updateConnectionFlags();
 
-    // Monitor connectivity changes — runZonedGuarded catches async errors from
-    // connectivity_plus (e.g. DBusServiceUnknownException on Linux without NetworkManager)
-    runZonedGuarded(
-      () {
-        _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
-          applyConnectivityResults,
-          onError: (e) {
-            _hasNetworkConnection = true;
-          },
-        );
-      },
-      (error, stack) {
-        // connectivity_plus throws DBusServiceUnknownException on Linux without NetworkManager
-        _hasNetworkConnection = true;
-      },
-    );
+    _connectivitySubscription = ConnectivityProbe.changes.listen(applyConnectivityResults);
 
     // Monitor server status from MultiServerManager
     _serverStatusSubscription = _serverManager.statusStream.listen((_) {

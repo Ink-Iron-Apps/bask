@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:bask/connection/connection.dart';
 import 'package:bask/media/account_preferences.dart';
+import 'package:bask/media/account_ref.dart';
+import 'package:bask/media/media_backend.dart';
 import 'package:bask/media/media_browser_dialect.dart';
 import 'package:bask/models/plex/plex_home_user.dart';
 import 'package:bask/profiles/profile.dart';
@@ -137,6 +139,79 @@ void main() {
       expect(notified, 1);
     });
 
+    test('a Jellyfin account with the remember flag off gets it turned on, once, with its other fields kept', () async {
+      // The flag gates whether the server keeps the stream indexes Bask
+      // reports at all. Jellyfin replaces the whole UserConfiguration on write,
+      // so the sibling flag and the fields Bask does not model must survive.
+      final fixture = await _Fixture.local();
+      addTearDown(fixture.dispose);
+      await fixture.controller.ensureActiveLoaded();
+      final borrowed = testJellyfinConnection();
+      await fixture.bindBorrowed(borrowed);
+      await pumpEventQueue();
+      final posts = <http.Request>[];
+      fixture.registerBorrowedClient(
+        borrowed,
+        configuration: {
+          'AudioLanguagePreference': 'deu',
+          'RememberAudioSelections': false,
+          'RememberSubtitleSelections': false,
+          'OrderedViews': ['movies', 'shows'],
+        },
+        onPost: posts.add,
+      );
+      final ref = AccountRef.mediaBrowser(backend: MediaBackend.jellyfin, connectionId: borrowed.id);
+
+      expect(
+        await fixture.controller.ensureRemembersTrackSelections(ref, AccountPreferenceKey.rememberAudioSelections),
+        isTrue,
+      );
+      expect(posts.map((post) => post.url.path), ['/Users/user-1/Configuration']);
+      expect(jsonDecode(posts.single.body), {
+        'AudioLanguagePreference': 'deu',
+        'RememberAudioSelections': true,
+        'RememberSubtitleSelections': false,
+        'OrderedViews': ['movies', 'shows'],
+      });
+
+      // The next pick of the same type is answered from the cache.
+      expect(
+        await fixture.controller.ensureRemembersTrackSelections(ref, AccountPreferenceKey.rememberAudioSelections),
+        isTrue,
+      );
+      expect(posts, hasLength(1));
+
+      // The sibling flag is its own switch.
+      expect(
+        await fixture.controller.ensureRemembersTrackSelections(ref, AccountPreferenceKey.rememberSubtitleSelections),
+        isTrue,
+      );
+      expect(posts, hasLength(2));
+      expect(jsonDecode(posts.last.body), containsPair('RememberSubtitleSelections', true));
+    });
+
+    test('an Emby account cannot be asked to remember picks and is not written', () async {
+      final fixture = await _Fixture.local();
+      addTearDown(fixture.dispose);
+      await fixture.controller.ensureActiveLoaded();
+      final borrowed = testJellyfinConnection(dialect: MediaBrowserDialect.emby);
+      await fixture.bindBorrowed(borrowed);
+      await pumpEventQueue();
+      var requests = 0;
+      fixture.registerBorrowedClient(
+        borrowed,
+        configuration: {'RememberAudioSelections': false},
+        onRequest: () => requests++,
+      );
+      final ref = AccountRef.mediaBrowser(backend: MediaBackend.emby, connectionId: borrowed.id);
+
+      expect(
+        await fixture.controller.ensureRemembersTrackSelections(ref, AccountPreferenceKey.rememberAudioSelections),
+        isFalse,
+      );
+      expect(requests, 0);
+    });
+
     for (final dialect in MediaBrowserDialect.values) {
       test('Home jpn survives a borrowed $dialect default, inverse changes and profile switches', () async {
         final fixture = await _Fixture.plexHome(switchedToken: 'home-token');
@@ -195,6 +270,22 @@ void main() {
         expect(fixture.controller.activePreferences?.defaultAudioLanguage, 'fra');
       });
     }
+
+    test('a non-default Jellyfin account still reads its Next Up rewatching switch', () async {
+      final fixture = await _Fixture.local();
+      addTearDown(fixture.dispose);
+      await fixture.controller.ensureActiveLoaded();
+      final other = testJellyfinConnection();
+      fixture.registerBorrowedClient(other, rewatchingInNextUp: true);
+      await fixture.bindBorrowed(other, isDefault: false);
+      await pumpEventQueue();
+      await fixture.controller.ensureActiveLoaded();
+      await pumpEventQueue();
+
+      // Playback defaults still come from the default Plex account.
+      expect(fixture.controller.activePreferences?.defaultAudioLanguage, 'fra');
+      expect(fixture.serverManager.getJellyfinClientByCompoundId(other.id)?.sendNextUpRewatching, isTrue);
+    });
 
     test('a borrowed default before Home token mint never supplies playback preferences', () async {
       final fixture = await _Fixture.plexHome();
@@ -303,7 +394,7 @@ class _Fixture {
   Future<void>? responseGate;
   Completer<void>? requestStarted;
 
-  Future<void> bindBorrowed(JellyfinConnection connection) async {
+  Future<void> bindBorrowed(JellyfinConnection connection, {bool isDefault = true}) async {
     await stack.connections.upsert(connection);
     await stack.profileConnections.upsert(
       ProfileConnection(
@@ -311,23 +402,47 @@ class _Fixture {
         connectionId: connection.id,
         userIdentifier: connection.userId,
         userToken: connection.accessToken,
-        isDefault: true,
+        isDefault: isDefault,
       ),
-      makeDefault: true,
+      makeDefault: isDefault,
     );
   }
 
-  void registerBorrowedClient(JellyfinConnection connection, {required String language}) {
+  /// Serve a MediaBrowser account whose `UserConfiguration` starts as
+  /// [configuration] (plus [language], when given). Configuration writes are
+  /// applied to the served state, because the client re-reads after posting.
+  void registerBorrowedClient(
+    JellyfinConnection connection, {
+    String? language,
+    Map<String, dynamic> configuration = const {},
+    bool rewatchingInNextUp = false,
+    void Function(http.Request request)? onPost,
+    void Function()? onRequest,
+  }) {
+    final served = <String, dynamic>{...configuration, 'AudioLanguagePreference': ?language};
     serverManager.debugRegisterJellyfinClientForTesting(
       testJellyfinClient(
         connection: connection,
-        handler: (request) async => jsonResponse(
-          request.url.path.contains('/DisplayPreferences/')
-              ? {'CustomPrefs': <String, dynamic>{}}
-              : {
-                  'Configuration': {'AudioLanguagePreference': language},
-                },
-        ),
+        handler: (request) async {
+          onRequest?.call();
+          final isDisplayPreferences = request.url.path.contains('/DisplayPreferences/');
+          if (request.method == 'POST') {
+            onPost?.call(request);
+            if (!isDisplayPreferences) {
+              served
+                ..clear()
+                ..addAll(jsonDecode(request.body) as Map<String, dynamic>);
+            }
+            return http.Response('', 204);
+          }
+          return jsonResponse(
+            isDisplayPreferences
+                ? {
+                    'CustomPrefs': <String, dynamic>{if (rewatchingInNextUp) 'enableRewatchingInNextUp': 'true'},
+                  }
+                : {'Configuration': served},
+          );
+        },
       ),
     );
   }

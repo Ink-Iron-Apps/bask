@@ -15,6 +15,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/shader_preset.dart';
+import '../../../media/ids.dart';
+import '../../../media/media_file_info.dart';
+import '../../../media/media_item.dart';
+import '../../../media/media_server_client.dart';
 import '../../../media/playback_rate.dart';
 import '../../../media/transcode_explanation.dart';
 import '../../../models/transcode_quality_preset.dart';
@@ -33,19 +37,25 @@ import '../../../services/video_filter_manager.dart';
 import '../../../focus/focusable_wrapper.dart';
 import '../../../utils/dialogs.dart';
 import '../../../utils/app_logger.dart';
+import '../../../utils/error_message_utils.dart';
 import '../../../utils/formatters.dart';
 import '../../../utils/device_identity.dart';
 import '../../../utils/platform_detector.dart';
+import '../../../utils/audio_channel_limit_labels.dart';
 import '../../../utils/quality_preset_labels.dart';
 import '../../../utils/storage_space.dart';
 import '../../../utils/latest_async_write.dart';
+import '../../../utils/provider_extensions.dart';
 import '../../../utils/snackbar_helper.dart';
 import '../../../theme/mono_tokens.dart';
+import '../../../widgets/bottom_sheet_page_scaffold.dart';
+import '../../../widgets/file_info_bottom_sheet.dart';
 import '../../../widgets/focusable_list_tile.dart';
 import '../../../widgets/settings_builder.dart';
 import '../../../widgets/overlay_sheet.dart';
 import '../../../services/video_equalizer.dart';
 import '../../../watch_together/providers/watch_together_provider.dart';
+import '../../../watch_together/widgets/watch_session_sheet.dart';
 import '../models/track_controls_state.dart';
 import '../widgets/sync_offset_control.dart';
 import '../widgets/sleep_timer_content.dart';
@@ -69,6 +79,7 @@ enum _SettingsView {
   pictureChannel,
   dialogueBoostGain,
   downmixCenterBoost,
+  audioChannelLimit,
 }
 
 class _SettingsMenuItem extends StatelessWidget {
@@ -115,7 +126,7 @@ class _SettingsMenuItem extends StatelessWidget {
 
 /// Ordering for the sheet's asynchronous pref writes, keyed on the pref key.
 ///
-/// Shared by the toggle rows and the tone-mapping picker rather than owned by
+/// Shared by the toggle rows and the tone-mapping and audio-channel pickers rather than owned by
 /// either. A pick closes the sheet, so anything scoped to a widget cannot rank
 /// a write against one started by a *later* sheet - which is exactly the race
 /// here, since reopening and picking again is one tap. Keys are distinct per
@@ -291,10 +302,11 @@ class _SettingsToggleItemState extends State<_SettingsToggleItem> {
 }
 
 /// Reflects the system's resolved audio rendering mode, as the Dolby
-/// application guide requires. Renders nothing until the system reports a
-/// conclusive value: Apple only resolves `renderingMode` for CarPlay and
-/// AirPlay routes, and showing "Stereo" for an inconclusive HDMI route would
-/// be worse than showing nothing.
+/// application guide requires, and on iPhone/iPad confirms Spatial Audio or
+/// Dolby Atmos reached the headphones. Renders nothing until the system
+/// reports a conclusive value: `renderingMode` is only populated for routes
+/// the system renders itself, and showing "Stereo" for an inconclusive HDMI
+/// route would be worse than showing nothing.
 class _AudioRenderingModeItem extends StatefulWidget {
   const _AudioRenderingModeItem({required this.player});
 
@@ -398,6 +410,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   // hidden. Only the plane sees that, so it says so.
   StreamSubscription<void>? _hdrOutputChanged;
   late HdrToneMapping _hdrToneMapping;
+  late AudioChannelLimit _audioChannelLimit;
 
   TrackControlsState get _state => widget.trackControlsState;
 
@@ -428,6 +441,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     _subtitleSpeed = ScopedPlayerPrefs.resolve(ScopedPlayerPrefs.subtitleSpeed, _state.metadata);
     _zoomScale = VideoFilterManager.normalizeZoomScale(_state.videoZoomScale);
     _hdrToneMapping = SettingsService.instance.read(SettingsService.hdrToneMapping);
+    _audioChannelLimit = SettingsService.instance.read(SettingsService.audioChannelLimit);
     _loadDebugDvConversionMode();
     if (_probesHdrSupport) {
       _hdrSupportLifecycle = AppLifecycleListener(onResume: _refreshLinuxHdrSupport, onShow: _refreshLinuxHdrSupport);
@@ -532,6 +546,66 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         if (mounted) showErrorSnackBar(context, t.videoSettings.hdrToneMappingFailed);
       }
     }());
+  }
+
+  /// ExoPlayer only has the stereo fold; see [AudioChannelLimit.onExoPlayer].
+  bool get _isExoPlayer => Platform.isAndroid && widget.player.playerType == 'exoplayer';
+
+  AudioChannelLimit get _displayedAudioChannelLimit =>
+      _isExoPlayer ? _audioChannelLimit.onExoPlayer : _audioChannelLimit;
+
+  // Same ordering and undo contract as the tone-mapping picker above: the
+  // player takes the limit first, and a refused store write puts both back.
+  void _setAudioChannelLimit(AudioChannelLimit limit) {
+    final targetPlayer = widget.player;
+    final key = SettingsService.audioChannelLimit.key;
+    final writeToken = _prefWrites.begin(key);
+    unawaited(() async {
+      try {
+        final committed = await _prefWrites.commitIfLatest(
+          key,
+          writeToken,
+          () => _applyThenPersist(
+            SettingsService.audioChannelLimit,
+            limit,
+            (value) => targetPlayer.setAudioChannelLimit(
+              value,
+              centerBoostDb: SettingsService.instance.read(SettingsService.downmixCenterBoost),
+              normalize: SettingsService.instance.read(SettingsService.audioDownmixNormalize),
+            ),
+          ),
+        );
+        if (!committed || !mounted || targetPlayer != widget.player) return;
+        setState(() {
+          _audioChannelLimit = limit;
+        });
+        OverlaySheetController.of(context).close();
+      } catch (error, stackTrace) {
+        appLogger.w('Failed to set the audio channel limit', error: error, stackTrace: stackTrace);
+      }
+    }());
+  }
+
+  // Remembered for later players (#2744); applyPreferredAudioDevice replays it
+  // at the next player start. The device takes the pick first, so a name mpv
+  // refuses is never stored. No undo when the store refuses instead: the
+  // previous name may belong to a device that is gone, and forcing it back would
+  // silence this session.
+  void _setAudioDevice(AudioDevice device) {
+    final targetPlayer = widget.player;
+    final key = SettingsService.audioOutputDevice.key;
+    final writeToken = _prefWrites.begin(key);
+    unawaited(() async {
+      try {
+        await _prefWrites.commitIfLatest(key, writeToken, () async {
+          await targetPlayer.setAudioDevice(device);
+          await SettingsService.instance.write(SettingsService.audioOutputDevice, device.name);
+        });
+      } catch (error, stackTrace) {
+        appLogger.w('Failed to set the audio output device', error: error, stackTrace: stackTrace);
+      }
+    }());
+    OverlaySheetController.of(context).close();
   }
 
   void _setDebugDvConversionMode(String mode) {
@@ -646,6 +720,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return t.videoSettings.dialogueBoostGain;
       case _SettingsView.downmixCenterBoost:
         return t.videoSettings.downmixCenterBoost;
+      case _SettingsView.audioChannelLimit:
+        return t.settings.audioChannelLimit;
     }
   }
 
@@ -680,6 +756,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return Symbols.tune_rounded;
       case _SettingsView.downmixCenterBoost:
         return Symbols.hearing_rounded;
+      case _SettingsView.audioChannelLimit:
+        return Symbols.speaker_group_rounded;
     }
   }
 
@@ -754,10 +832,27 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   }
 
   String _versionQualityValueText() {
+    final showVersions = _state.availableVersions.length > 1;
     final values = <String>[];
-    if (_state.availableVersions.length > 1) values.add(_selectedVersionLabel());
-    if (_state.serverSupportsTranscoding) values.add(qualityPresetLabel(_state.selectedQualityPreset));
+    if (showVersions) values.add(_selectedVersionLabel());
+    if (_state.serverSupportsTranscoding) {
+      values.add(
+        qualityPresetLabel(
+          _state.selectedQualityPreset,
+          sourceBitrateKbps: showVersions ? null : _selectedSourceBitrateKbps(),
+        ),
+      );
+    }
     return values.join(' / ');
+  }
+
+  int? _selectedSourceBitrateKbps() {
+    final index = _state.selectedMediaIndex;
+    if (index < 0 || index >= _state.availableVersions.length) {
+      return null;
+    }
+    final bitrate = _state.availableVersions[index].bitrate;
+    return bitrate != null && bitrate > 0 ? bitrate : null;
   }
 
   String _selectedVersionLabel() {
@@ -858,9 +953,10 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
   /// of 0 dB is the swresample default, so the switch above could be turned on
   /// from here and change nothing but the channel count.
   Widget _downmixDetailRows() => SettingsBuilder(
-    prefs: const [SettingsService.audioDownmix],
+    prefs: const [SettingsService.audioChannelLimit],
     builder: (context) {
-      if (!SettingsService.instance.read(SettingsService.audioDownmix)) return const SizedBox.shrink();
+      final limit = SettingsService.instance.read(SettingsService.audioChannelLimit);
+      if (limit == AudioChannelLimit.original) return const SizedBox.shrink();
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -878,8 +974,8 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             pref: SettingsService.audioDownmixNormalize,
             icon: Symbols.compress_rounded,
             title: t.videoSettings.audioDownmixNormalize,
-            onAfterWrite: (normalize) => widget.player.setAudioDownmix(
-              enabled: true,
+            onAfterWrite: (normalize) => widget.player.setAudioChannelLimit(
+              limit,
               centerBoostDb: SettingsService.instance.read(SettingsService.downmixCenterBoost),
               normalize: normalize,
             ),
@@ -933,6 +1029,15 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         return false;
       }),
     );
+  }
+
+  /// Client that can describe the playing item's files, or null when there is
+  /// nothing to describe: live TV, a kind with no files, or no client for the
+  /// server. Mirrors the library File Info entry's gate.
+  MediaServerClient? _fileInfoClient() {
+    final item = _state.metadata;
+    if (_state.isLive || item == null || !item.kind.hasFileInfo) return null;
+    return context.tryGetMediaClientForServer(serverIdOrNull(_state.serverId));
   }
 
   Widget _buildMenuView() {
@@ -1101,11 +1206,12 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
         // re-decides video tunneling. It lives in Settings > Video Playback next to
         // Tunneled Playback, which is applied the same way — at the next player start.
 
-        // Dolby playback badge. The Dolby application guide requires the app
-        // to reflect AVAudioSession.renderingMode; Apple only resolves that
-        // for CarPlay/AirPlay routes, so it is hidden rather than shown as
-        // "not Dolby" when the system reports notApplicable.
-        if (PlatformDetector.isAppleTV()) _AudioRenderingModeItem(player: widget.player),
+        // Dolby / Spatial Audio badge. The Dolby application guide requires
+        // the app to reflect AVAudioSession.renderingMode; the system only
+        // resolves it for routes it renders itself (AirPlay, CarPlay,
+        // headphones), so it is hidden rather than shown as "not Dolby" when
+        // it reports notApplicable. iOS covers iPhone, iPad, and Apple TV.
+        if (Platform.isIOS) _AudioRenderingModeItem(player: widget.player),
 
         _SettingsToggleItem(
           pref: SettingsService.audioNormalization,
@@ -1143,15 +1249,12 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           ),
         if (_usesFilterChain && !_dialogueBoostUnavailable) _dialogueBoostGainRow(),
 
-        _SettingsToggleItem(
-          pref: SettingsService.audioDownmix,
-          icon: Symbols.headphones_rounded,
-          title: t.videoSettings.audioDownmix,
-          onAfterWrite: (enabled) => widget.player.setAudioDownmix(
-            enabled: enabled,
-            centerBoostDb: SettingsService.instance.read(SettingsService.downmixCenterBoost),
-            normalize: SettingsService.instance.read(SettingsService.audioDownmixNormalize),
-          ),
+        _SettingsMenuItem(
+          icon: Symbols.speaker_group_rounded,
+          title: t.settings.audioChannelLimit,
+          valueText: audioChannelLimitLabel(_displayedAudioChannelLimit),
+          isHighlighted: _displayedAudioChannelLimit != AudioChannelLimit.original,
+          onTap: () => _navigateTo(_SettingsView.audioChannelLimit),
         ),
         _downmixDetailRows(),
 
@@ -1231,6 +1334,31 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             },
           ),
 
+        // File Info for the playing item (#2229), the same breakdown as the
+        // library's File Info entry. Read-only, so Watch Together guests get it.
+        if (_fileInfoClient() case final client?)
+          _SettingsMenuItem(
+            icon: Symbols.info_rounded,
+            title: t.mediaMenu.fileInfo,
+            valueText: '',
+            onTap: () => unawaited(
+              OverlaySheetController.of(context).push<void>(
+                builder: (_) => _FileInfoPage(client: client, item: _state.metadata!),
+              ),
+            ),
+          ),
+
+        // The Watch Together room, as the header's room pill opens it.
+        if (context.watch<WatchTogetherProvider?>() case final watchTogether? when watchTogether.isInSession)
+          _SettingsMenuItem(
+            icon: Symbols.group_rounded,
+            title: t.watchTogether.title,
+            valueText: t.watchTogether.participantCount(n: watchTogether.participantCount),
+            onTap: () => unawaited(
+              OverlaySheetController.of(context).push<void>(builder: (_) => const WatchSessionSheet(nested: true)),
+            ),
+          ),
+
         if (_showDebugDvConversionMode)
           _SettingsMenuItem(
             icon: Symbols.hdr_strong_rounded,
@@ -1252,7 +1380,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
           ),
 
         if (kDebugMode)
-          for (final status in const [500, 404, 503])
+          for (final status in const [403, 500, 404, 503])
             FocusableListTile(
               leading: AppIcon(Symbols.bug_report_rounded, fill: 1, color: tokens(context).textMuted),
               title: Text('Simulate HTTP $status from server'),
@@ -1532,6 +1660,26 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
                 ? AppIcon(Symbols.check_rounded, fill: 1, color: primary)
                 : null,
             onTap: () => unawaited(_setSubtitleRate(rate.value)),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAudioChannelLimitView() {
+    final primary = Theme.of(context).colorScheme.primary;
+    final selected = _displayedAudioChannelLimit;
+
+    return ListView(
+      children: [
+        for (final limit in AudioChannelLimit.available(exoPlayer: _isExoPlayer))
+          FocusableListTile(
+            title: Text(audioChannelLimitLabel(limit), style: TextStyle(color: selected == limit ? primary : null)),
+            subtitle: Text(
+              audioChannelLimitDescription(limit),
+              style: TextStyle(color: tokens(context).textMuted, fontSize: 12),
+            ),
+            trailing: selected == limit ? AppIcon(Symbols.check_rounded, fill: 1, color: primary) : null,
+            onTap: () => _setAudioChannelLimit(limit),
           ),
       ],
     );
@@ -1829,10 +1977,7 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
     return FocusableListTile(
       title: Text(label, style: TextStyle(color: isSelected ? primary : null)),
       trailing: isSelected ? AppIcon(Symbols.check_rounded, fill: 1, color: primary) : null,
-      onTap: () {
-        widget.player.setAudioDevice(device);
-        OverlaySheetController.of(context).close();
-      },
+      onTap: () => _setAudioDevice(device),
     );
   }
 
@@ -2056,14 +2201,89 @@ class _VideoSettingsSheetState extends State<VideoSettingsSheet> {
             return _buildDbPickerView(
               pref: SettingsService.downmixCenterBoost,
               values: const [0, 2, 4, 6, 8, 10, 12],
-              apply: (centerBoostDb) => widget.player.setAudioDownmix(
-                enabled: true,
+              apply: (centerBoostDb) => widget.player.setAudioChannelLimit(
+                SettingsService.instance.read(SettingsService.audioChannelLimit),
                 centerBoostDb: centerBoostDb,
                 normalize: SettingsService.instance.read(SettingsService.audioDownmixNormalize),
               ),
             );
+          case _SettingsView.audioChannelLimit:
+            return _buildAudioChannelLimitView();
         }
       }(),
+    );
+  }
+}
+
+/// The playing item's file info as a nested page of the settings sheet. Holds
+/// a fixed-height spinner while the server answers, then shows the library's
+/// [FileInfoBottomSheet] or why there is nothing to show.
+class _FileInfoPage extends StatefulWidget {
+  final MediaServerClient client;
+  final MediaItem item;
+
+  const _FileInfoPage({required this.client, required this.item});
+
+  @override
+  State<_FileInfoPage> createState() => _FileInfoPageState();
+}
+
+class _FileInfoPageState extends State<_FileInfoPage> {
+  MediaFileInfo? _fileInfo;
+  String? _failure;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    MediaFileInfo? fileInfo;
+    String? failure;
+    try {
+      fileInfo = await widget.client.getFileInfo(widget.item);
+      if (fileInfo == null) failure = t.messages.fileInfoNotAvailable;
+    } catch (error, stackTrace) {
+      appLogger.w('Failed to load file info in the player', error: error, stackTrace: stackTrace);
+      failure = t.messages.errorLoadingFileInfo(error: localizedErrorReason(error));
+    }
+    // Popped while loading: the page is gone, and the sheet's focus belongs to
+    // whatever is on top now.
+    if (!mounted) return;
+    setState(() {
+      _fileInfo = fileInfo;
+      _failure = failure;
+    });
+    // The loaded page replaces the spinner's focus tree.
+    OverlaySheetController.maybeOf(context)?.refocus();
+  }
+
+  void _back() => OverlaySheetController.of(context).pop();
+
+  @override
+  Widget build(BuildContext context) {
+    final fileInfo = _fileInfo;
+    if (fileInfo != null) {
+      return FileInfoBottomSheet(fileInfo: fileInfo, title: widget.item.displayTitle, onBack: _back);
+    }
+    final failure = _failure;
+    return BottomSheetPageScaffold(
+      title: t.fileInfo.title,
+      onBack: _back,
+      // Matches the loaded sheet's header so only the body changes.
+      showHeaderBorder: false,
+      child: SizedBox(
+        height: 160,
+        child: Center(
+          child: failure == null
+              ? const CircularProgressIndicator()
+              : Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(failure, textAlign: TextAlign.center),
+                ),
+        ),
+      ),
     );
   }
 }

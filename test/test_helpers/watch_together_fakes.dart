@@ -1,11 +1,8 @@
 import 'dart:async';
 
 import 'package:bask/mpv/mpv.dart';
-import 'package:bask/watch_together/models/sync_message.dart';
-import 'package:bask/watch_together/services/watch_together_peer_service.dart';
-import 'package:bask/watch_together/services/watch_together_relay_endpoint.dart';
 
-/// Rich fake [Player] for Watch Together sync tests.
+/// Rich fake [Player] for player and Watch Together tests.
 ///
 /// Commands mutate state and emit the corresponding property events on a
 /// microtask (mirroring the real command-ack-then-property-event ordering);
@@ -19,6 +16,7 @@ class FakeSyncPlayer implements Player {
     Duration duration = const Duration(minutes: 45),
     bool seekable = true,
     double rate = 1.0,
+    bool hasRenderedFrame = false,
   }) : _state = PlayerState(
          playing: playing,
          buffering: buffering,
@@ -26,6 +24,7 @@ class FakeSyncPlayer implements Player {
          duration: duration,
          seekable: seekable,
          rate: rate,
+         hasRenderedFrame: hasRenderedFrame,
        );
 
   PlayerState _state;
@@ -53,7 +52,9 @@ class FakeSyncPlayer implements Player {
   final _bufferingController = StreamController<bool>.broadcast();
   final _rateController = StreamController<double>.broadcast();
   final _playbackRestartController = StreamController<void>.broadcast();
+  final _fileStartedController = StreamController<void>.broadcast();
   final _durationController = StreamController<Duration>.broadcast();
+  final _errorController = StreamController<PlayerError>.broadcast();
 
   @override
   PlayerState get state => _state;
@@ -75,11 +76,12 @@ class FakeSyncPlayer implements Player {
     tracks: const Stream<Tracks>.empty(),
     track: const Stream<TrackSelection>.empty(),
     log: const Stream<PlayerLog>.empty(),
-    error: const Stream<PlayerError>.empty(),
+    error: _errorController.stream,
     audioDevice: const Stream<AudioDevice>.empty(),
     audioDevices: const Stream<List<AudioDevice>>.empty(),
     bufferRanges: const Stream<List<BufferRange>>.empty(),
     playbackRestart: _playbackRestartController.stream,
+    fileStarted: _fileStartedController.stream,
     backendSwitched: const Stream<void>.empty(),
   );
 
@@ -123,7 +125,7 @@ class FakeSyncPlayer implements Player {
     nextCommandFuture = null;
     if (pending != null) await pending;
     _state = _state.copyWith(position: position);
-    if (emitRestartOnSeek) _playbackRestartController.add(null);
+    if (emitRestartOnSeek) emitPlaybackRestart();
   }
 
   @override
@@ -172,16 +174,45 @@ class FakeSyncPlayer implements Player {
     _rateController.add(value);
   }
 
-  /// First frame rendered (after load).
-  void emitPlaybackRestart() => _playbackRestartController.add(null);
+  /// The screen asked the backend to open a replacement source and `open()`
+  /// resolved. Like the real player, the per-file facts reset here — before
+  /// the backend's `start-file` or anything else from the new file arrives.
+  void beginOpen() {
+    _state = _state.copyWith(completed: false, hasRenderedFrame: false);
+  }
+
+  /// The backend started a load (mpv `start-file`). Every real backend sends
+  /// this before the load's first frame, and the open outcome delimits an
+  /// attempt's signals by it; a fake `open` emits it before its restart.
+  /// Like the real player, the new file has rendered nothing yet.
+  void emitFileStarted() {
+    _state = _state.copyWith(hasRenderedFrame: false);
+    _fileStartedController.add(null);
+  }
+
+  /// First frame rendered (after load and after every seek). Like the real
+  /// player, the state records the fact before the event goes out.
+  void emitPlaybackRestart() {
+    _state = _state.copyWith(hasRenderedFrame: true);
+    _playbackRestartController.add(null);
+  }
 
   void emitDuration(Duration value) {
     _state = _state.copyWith(duration: value);
     _durationController.add(value);
   }
 
+  /// The player reports [error], as a failed open or a dead stream would.
+  void emitError(PlayerError error) => _errorController.add(error);
+
   void setPosition(Duration position) {
     _state = _state.copyWith(position: position);
+  }
+
+  /// Seed the physical "current file rendered a frame" fact without an event,
+  /// for a binding made after the frame.
+  void setHasRenderedFrame(bool value) {
+    _state = _state.copyWith(hasRenderedFrame: value);
   }
 
   /// Advance the playhead as if [elapsed] of playback happened.
@@ -209,103 +240,11 @@ class FakeSyncPlayer implements Player {
     await _bufferingController.close();
     await _rateController.close();
     await _playbackRestartController.close();
+    await _fileStartedController.close();
     await _durationController.close();
+    await _errorController.close();
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-/// In-memory relay linking [HubPeerService]s for duplex end-to-end tests.
-///
-/// Mirrors the real relay's contract: broadcasts fan out to every other
-/// peer, sendTo targets one, the sender id is stamped server-side
-/// ([SyncMessage.copyWith]), and registration/disconnection emit
-/// peerJoined/peerLeft events to the others.
-class FakeRelayHub {
-  final Map<String, HubPeerService> _peers = {};
-
-  HubPeerService register(String peerId) {
-    if (_peers.containsKey(peerId)) {
-      throw StateError('Peer ID is already registered: $peerId');
-    }
-    final service = HubPeerService._(peerId, this);
-    for (final existing in _peers.values) {
-      existing._peerConnected.add(peerId);
-      service._peerConnected.add(existing.peerId);
-    }
-    _peers[peerId] = service;
-    return service;
-  }
-
-  void disconnect(String peerId) {
-    if (_peers.remove(peerId) == null) return;
-    for (final other in _peers.values) {
-      other._peerDisconnected.add(peerId);
-    }
-  }
-
-  void _broadcast(String from, SyncMessage message) {
-    final stamped = message.peerId == from ? message : message.copyWith(peerId: from);
-    for (final entry in _peers.entries) {
-      if (entry.key == from) continue;
-      entry.value._messages.add(stamped);
-    }
-  }
-
-  void _sendTo(String from, String to, SyncMessage message) {
-    final stamped = message.peerId == from ? message : message.copyWith(peerId: from);
-    _peers[to]?._messages.add(stamped);
-  }
-
-  Future<void> dispose() async {
-    final peers = _peers.values.toList();
-    _peers.clear();
-    for (final peer in peers) {
-      await peer.closeHub();
-    }
-  }
-}
-
-class HubPeerService extends WatchTogetherPeerService {
-  HubPeerService._(this.peerId, this._hub) : super(endpoint: WatchTogetherRelayEndpoint.resolve('http://localhost'));
-
-  final String peerId;
-  final FakeRelayHub _hub;
-  final _messages = StreamController<SyncMessage>.broadcast();
-  final _peerConnected = StreamController<String>.broadcast();
-  final _peerDisconnected = StreamController<String>.broadcast();
-
-  /// Outgoing log (in addition to hub routing), for assertions.
-  final List<SyncMessage> outgoingLog = [];
-
-  @override
-  String? get myPeerId => peerId;
-
-  @override
-  Stream<SyncMessage> get onMessageReceived => _messages.stream;
-
-  @override
-  Stream<String> get onPeerConnected => _peerConnected.stream;
-
-  @override
-  Stream<String> get onPeerDisconnected => _peerDisconnected.stream;
-
-  @override
-  void broadcast(SyncMessage message) {
-    outgoingLog.add(message);
-    _hub._broadcast(peerId, message);
-  }
-
-  @override
-  void sendTo(String peerId, SyncMessage message) {
-    outgoingLog.add(message);
-    _hub._sendTo(this.peerId, peerId, message);
-  }
-
-  Future<void> closeHub() async {
-    await _messages.close();
-    await _peerConnected.close();
-    await _peerDisconnected.close();
-  }
 }

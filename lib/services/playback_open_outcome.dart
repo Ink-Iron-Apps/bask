@@ -35,16 +35,23 @@ enum _OpenSignalSource {
 ///
 /// Every future resolves `true` on its event and `false` — never throws —
 /// once the load failed, [abort] ran, or the player's streams closed. The
-/// optional deadline counts from the backend's load start and aborts a
-/// backend that neither loads, fails, nor dies.
+/// optional deadline bounds how long a started load may go without
+/// progress — its load start, `file-loaded`, and every
+/// [PlayerStreams.demuxerProgress] restart it — and aborts a backend that
+/// stops moving without loading, failing, or dying. A slow load that keeps
+/// moving (a resume seek decoding its way from a keyframe over a thin link)
+/// is not a stalled one.
 class PlaybackOpenOutcome {
-  PlaybackOpenOutcome._(Player player, this._source, this._deadline) {
+  PlaybackOpenOutcome._(Player player, this._source, this._deadline, this._onDeadline) {
     final streams = player.streams;
     _subscriptions.add(streams.fileStarted.listen((_) => _onFileStarted(), onDone: _onStreamsClosed));
     _subscriptions.add(streams.primaryMediaReady.listen((_) => _onPrimaryMediaReady(), onDone: _onStreamsClosed));
     _subscriptions.add(streams.fileLoaded.listen((_) => _onFileLoaded(), onDone: _onStreamsClosed));
     _subscriptions.add(streams.playbackRestart.listen((_) => _onPlaybackRestart(), onDone: _onStreamsClosed));
     _subscriptions.add(streams.fileLoadFailed.listen((_) => _onFileLoadFailed(), onDone: _onStreamsClosed));
+    // No onDone: a backend without demuxer progress publishes an empty
+    // stream, which is the absence of a signal, not a closed player.
+    _subscriptions.add(streams.demuxerProgress.listen((_) => _onDemuxerProgress()));
     if (_source == _OpenSignalSource.androidExoPlayer) {
       _subscriptions.add(streams.backendSwitched.listen((_) => _onBackendSwitched(), onDone: _onStreamsClosed));
     }
@@ -52,27 +59,36 @@ class PlaybackOpenOutcome {
     if (isSettled) _release();
   }
 
-  /// Arms for [player]'s next [Player.open]. [deadline] counts from the
-  /// backend's load start; null waits until the backend or the caller
-  /// settles the open.
-  static PlaybackOpenOutcome arm(Player player, {Duration? deadline}) {
+  /// Arms for [player]'s next [Player.open]. [deadline] is the longest the
+  /// started load may go without progress; null waits until the backend or
+  /// the caller settles the open. [onDeadline] runs after the deadline
+  /// aborted the open, so the owner can raise the failure the backend never
+  /// reported.
+  static PlaybackOpenOutcome arm(Player player, {Duration? deadline, void Function()? onDeadline}) {
     final source = switch (player) {
       PlayerAndroid(usingMpvFallback: false) => _OpenSignalSource.androidExoPlayer,
       _ => _OpenSignalSource.mpv,
     };
-    return PlaybackOpenOutcome._(player, source, deadline);
+    return PlaybackOpenOutcome._(player, source, deadline, onDeadline);
   }
 
-  static PlaybackOpenOutcome armForTesting(Player player, {bool startsOnAndroidExoPlayer = false, Duration? deadline}) {
+  static PlaybackOpenOutcome armForTesting(
+    Player player, {
+    bool startsOnAndroidExoPlayer = false,
+    Duration? deadline,
+    void Function()? onDeadline,
+  }) {
     return PlaybackOpenOutcome._(
       player,
       startsOnAndroidExoPlayer ? _OpenSignalSource.androidExoPlayer : _OpenSignalSource.mpv,
       deadline,
+      onDeadline,
     );
   }
 
   final _OpenSignalSource _source;
   final Duration? _deadline;
+  final void Function()? _onDeadline;
   final List<StreamSubscription<void>> _subscriptions = [];
   final Completer<bool> _primaryMediaReady = Completer<bool>();
   final Completer<bool> _fileLoaded = Completer<bool>();
@@ -148,6 +164,11 @@ class PlaybackOpenOutcome {
     if (!_loadStarted) return;
     _complete(_primaryMediaReady, true);
     _complete(_fileLoaded, true);
+    _restartDeadline();
+  }
+
+  void _onDemuxerProgress() {
+    if (_loadStarted && _mpvSignalsActive) _restartDeadline();
   }
 
   void _onPlaybackRestart() {
@@ -178,7 +199,10 @@ class PlaybackOpenOutcome {
     final deadline = _deadline;
     if (deadline == null) return;
     _deadlineTimer?.cancel();
-    _deadlineTimer = Timer(deadline, () => abort('no first frame within ${deadline.inSeconds}s of load start'));
+    _deadlineTimer = Timer(deadline, () {
+      abort('no load progress for ${deadline.inSeconds}s');
+      _onDeadline?.call();
+    });
   }
 
   void _settlePending(bool value) {

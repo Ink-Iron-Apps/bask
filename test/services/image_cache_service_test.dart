@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -119,6 +121,50 @@ void main() {
     expect(ok.statusCode, 200);
   });
 
+  test('a response whose headers never arrive releases its slot', () async {
+    final stalled = Completer<http.StreamedResponse>();
+    final client = createArtworkHttpClientForTest(
+      MockClient.streaming((request, _) async {
+        if (request.url.path == '/stalled') return stalled.future;
+        return http.StreamedResponse(Stream.value('poster-bytes'.codeUnits), 200);
+      }),
+      maxConcurrent: 1,
+      stallTimeout: const Duration(milliseconds: 20),
+    );
+
+    await expectLater(client.send(get('/stalled')).timeout(timeout), throwsA(isA<TimeoutException>()));
+
+    final ok = await client.send(get('/poster')).timeout(timeout);
+    expect(await ok.stream.bytesToString().timeout(timeout), 'poster-bytes');
+
+    // A late answer from a transport that ignored the abort is discarded.
+    final lateBodyCancelled = Completer<void>();
+    final lateBody = StreamController<List<int>>(onCancel: () => lateBodyCancelled.complete());
+    stalled.complete(http.StreamedResponse(lateBody.stream, 200));
+    await lateBodyCancelled.future.timeout(timeout);
+    await lateBody.close();
+  });
+
+  test('a body that stops mid-transfer releases its slot', () async {
+    final body = StreamController<List<int>>();
+    final client = createArtworkHttpClientForTest(
+      MockClient.streaming((request, _) async {
+        if (request.url.path == '/stalled') return http.StreamedResponse(body.stream, 200);
+        return http.StreamedResponse(Stream.value('poster-bytes'.codeUnits), 200);
+      }),
+      maxConcurrent: 1,
+      stallTimeout: const Duration(milliseconds: 20),
+    );
+
+    final stalled = await client.send(get('/stalled')).timeout(timeout);
+    body.add('partial'.codeUnits);
+    await expectLater(stalled.stream.drain<void>().timeout(timeout), throwsA(isA<TimeoutException>()));
+
+    final ok = await client.send(get('/poster')).timeout(timeout);
+    expect(await ok.stream.bytesToString().timeout(timeout), 'poster-bytes');
+    await body.close();
+  });
+
   test('cancelling a successful body releases its slot', () async {
     final client = createArtworkHttpClientForTest(mixedClient(), maxConcurrent: 1);
 
@@ -142,6 +188,61 @@ void main() {
     test('everything else keeps the large cap', () {
       // Evicting on a phone made scrolling re-download artwork it already had.
       expect(PlexImageCacheManager.artworkObjectLimitFor(isTv: false), 100000);
+    });
+  });
+
+  group('artwork credentials', () {
+    // A 1x1 PNG, so the cache has something it recognises to write.
+    final pngBytes = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==',
+    );
+
+    const token = 'tokenthatmustsurvive';
+    const credentialedUrl =
+        'http://server.invalid:32400/photo/:/transcode?width=300&height=450&minSize=1&upscale=0'
+        '&url=%2Flibrary%2Fmetadata%2F1%2Fthumb%2F2%3FX-Plex-Token%3D$token'
+        '&X-Plex-Token=$token';
+
+    test('the download carries the token the cache metadata must not keep', () async {
+      // The whole point of handing the cache a redacted URL is that something
+      // puts the credential back before the request leaves. When nothing did,
+      // PMS answered 401 to every poster in the app while the same token's API
+      // calls answered 200, and no URL builder had anything to report because
+      // the URL it built was correct.
+      final directory = await Directory.systemTemp.createTemp('bask-artwork-cache');
+      addTearDown(() async {
+        if (directory.existsSync()) await directory.delete(recursive: true);
+      });
+
+      final requested = <String>[];
+      final manager = PlexImageCacheManager.forTesting(
+        httpClientFactory: () => MockClient((request) async {
+          requested.add(request.url.toString());
+          return http.Response.bytes(pngBytes, 200, headers: {'content-type': 'image/png'});
+        }),
+        cacheDirectoryProvider: () async => directory,
+      );
+      addTearDown(manager.dispose);
+
+      // The cache's own bookkeeping is not what is under test; the bytes on
+      // the wire are.
+      try {
+        await manager.getFileStream(credentialedUrl).drain<void>().timeout(timeout);
+      } on Object {
+        // Ignored deliberately — see above.
+      }
+
+      expect(requested, isNotEmpty, reason: 'the manager never issued a request');
+      expect(requested.first, credentialedUrl);
+      expect(requested.first, contains('X-Plex-Token=$token'));
+      expect(requested.first, isNot(contains('X-Plex-Token=&')), reason: 'a blanked token is what the server refuses');
+    });
+
+    test('a credential is blanked everywhere it appears, query and encoded url alike', () {
+      final redacted = redactArtworkUrl(credentialedUrl);
+      expect(redacted, isNot(contains(token)));
+      expect(redacted, endsWith('X-Plex-Token='), reason: 'the plain query parameter');
+      expect(redacted, contains('X-Plex-Token%3D&'), reason: 'the one nested in the encoded url=');
     });
   });
 }

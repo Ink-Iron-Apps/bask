@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
+import '../exceptions/media_server_exceptions.dart';
 import '../i18n/strings.g.dart';
 import '../mpv/mpv.dart';
 
@@ -15,15 +14,30 @@ import '../services/track_selection_service.dart';
 import '../utils/app_logger.dart';
 import '../utils/track_label_builder.dart';
 
-/// Persists a track choice for the current part to the server.
-/// Backends that persist through another path (Jellyfin uses playback progress
-/// stream indexes) or lack server-side stream selection leave this null.
+/// Persists a track choice for the current part to the server and reports
+/// whether the server stored it. Plex only: backends whose picks ride the
+/// playback progress reports ([TrackSelectionMemoryEnabler]) or that keep no
+/// server-side stream selection leave this null.
+///
+/// A server refusal (non-2xx) throws [MediaServerHttpException] with its
+/// status code; transport failures keep their own [MediaServerHttpException]
+/// type so the caller can tell "refused" from "never answered".
 /// [trackType] is `'audio'` or `'subtitle'`.
 typedef TrackPreferencePersister =
-    Future<void> Function({required int partId, required String trackType, required int streamID});
+    Future<bool> Function({required int partId, required String trackType, required int streamID});
 
-/// Manages track (audio + subtitle) lifecycle: external subtitle loading,
-/// automatic track selection, server preference sync, and cycling.
+/// Makes the server honour the stream indexes the playback progress reports
+/// already carry for [trackType] (`'audio'` or `'subtitle'`), and reports
+/// whether it will. MediaBrowser only: Jellyfin turns a reported index into the
+/// next play's default only while the account's `RememberAudioSelections` /
+/// `RememberSubtitleSelections` flag is on, so this turns the flag on when the
+/// user opted in locally. False when the backend cannot remember picks at all
+/// ([MediaBrowserDialect.persistsTrackSelectionsViaAccountFlags]) or the
+/// account refused the change.
+typedef TrackSelectionMemoryEnabler = Future<bool> Function(String trackType);
+
+/// Manages track (audio + subtitle) lifecycle: automatic track selection,
+/// server preference sync, and cycling.
 ///
 /// Follows the same manager pattern as [VideoFilterManager]:
 /// disposed when the player screen tears down.
@@ -33,10 +47,14 @@ class TrackManager {
   /// Returns false once the owning widget is unmounted or disposed.
   final bool Function() isActive;
 
-  /// Optional hook for persisting a track choice to Plex immediately. `null`
-  /// for backends with a different persistence path (Jellyfin) or no
-  /// server-side track preferences.
+  /// Writes a track choice to Plex immediately. `null` for backends whose
+  /// picks ride the progress reports (MediaBrowser, see
+  /// [enableTrackSelectionMemory]) and for playback with no server.
   final TrackPreferencePersister? persistTrackPreference;
+
+  /// Makes a MediaBrowser server keep the picks its progress reports carry.
+  /// `null` for Plex and for playback with no server.
+  final TrackSelectionMemoryEnabler? enableTrackSelectionMemory;
 
   /// Resolves the user's profile settings (may be null during loading).
   final MediaServerUserProfile? Function() getProfileSettings;
@@ -75,17 +93,18 @@ class TrackManager {
 
   // ── Internal state ─────────────────────────────────────────────────
 
-  bool waitingForExternalSubsTrackSelection = false;
-  bool _externalSubtitleAddsInFlight = false;
   bool _isApplyingTrackSelection = false;
   Completer<void>? _selectionIdleCompleter;
   Future<void>? _activePlayerMutationDrain;
-  List<SubtitleTrack> _lastExternalSubtitles = const [];
   StreamSubscription<Tracks>? _trackLoadingSubscription;
-  Timer? _subtitleFallbackTimer;
   Timer? _trackSelectionFallbackTimer;
   bool _disposed = false;
   int _selectionGeneration = 0;
+
+  /// Whether this item's user has already been told a pick is session-only.
+  /// One notice per item: every later pick on the same source would fail the
+  /// same way, and a snackbar per pick would drown the track cycling OSD.
+  bool _reportedSelectionNotRemembered = false;
 
   bool get _managerIsActive => !_disposed && isActive();
 
@@ -103,14 +122,11 @@ class TrackManager {
     );
   }
 
-  /// Cached external subtitles for re-use after backend fallback.
-  @visibleForTesting
-  List<SubtitleTrack> get lastExternalSubtitles => _lastExternalSubtitles;
-
   TrackManager({
     required this.player,
     required this.isActive,
     this.persistTrackPreference,
+    this.enableTrackSelectionMemory,
     required this.getProfileSettings,
     required this.waitForProfileSettings,
     required this.metadata,
@@ -123,87 +139,6 @@ class TrackManager {
     this.showMessage,
     this.playbackRateOwnedExternally,
   });
-
-  // ── External subtitles ─────────────────────────────────────────────
-
-  /// Cache external subtitles for backend fallback recovery.
-  void cacheExternalSubtitles(List<SubtitleTrack> externalSubtitles) {
-    _lastExternalSubtitles = externalSubtitles;
-  }
-
-  /// Add external subtitle tracks to the player in metadata order.
-  ///
-  /// MPV assigns subtitle track IDs in completion order, so parallel sub-adds
-  /// make the track list nondeterministic. Keep this ordered for the fallback
-  /// paths that cannot attach sidecars through loadfile.
-  ///
-  /// [waitUntilReady] is the open's file-loaded signal; it resolves false when
-  /// the open failed or was aborted first. Returns whether the adds ran —
-  /// false when the open never became ready or the manager went inactive, so
-  /// the caller knows there is nothing to resume or select on.
-  Future<bool> addExternalSubtitles(List<SubtitleTrack> externalSubtitles, {Future<bool>? waitUntilReady}) async {
-    if (externalSubtitles.isEmpty) return true;
-
-    _externalSubtitleAddsInFlight = true;
-    try {
-      if (waitUntilReady != null) {
-        if (!await waitUntilReady) {
-          appLogger.d('Skipping external subtitle load: the open never became ready');
-          return false;
-        }
-        if (!isActive()) return false;
-      }
-      appLogger.d('Adding ${externalSubtitles.length} external subtitle(s) to player');
-
-      for (final subtitleTrack in externalSubtitles.where((s) => s.uri != null)) {
-        try {
-          await player.addSubtitleTrack(
-            uri: subtitleTrack.uri!,
-            title: subtitleTrack.title,
-            language: subtitleTrack.language,
-            select: subtitleTrack.isDefault,
-          );
-          appLogger.d('Added external subtitle: ${subtitleTrack.title ?? subtitleTrack.uri}');
-        } catch (e) {
-          appLogger.w('Failed to add external subtitle: ${subtitleTrack.title ?? subtitleTrack.uri}', error: e);
-        }
-      }
-      return true;
-    } finally {
-      _externalSubtitleAddsInFlight = false;
-    }
-  }
-
-  /// Resume playback after external subtitles have been loaded (or failed).
-  /// Sets up a 3-second fallback in case playbackRestart doesn't fire.
-  Future<void> resumeAfterSubtitleLoad() async {
-    if (!isActive()) return;
-
-    try {
-      await player.play();
-      final pos = player.state.position;
-      try {
-        await player.seek(pos.inMilliseconds > 0 ? pos : Duration.zero);
-      } catch (e) {
-        appLogger.w('Non-critical seek after subtitle load failed', error: e);
-      }
-    } catch (e) {
-      // play() failed — clear the flag immediately since playbackRestart won't fire
-      appLogger.w('Resume after subtitle load failed, applying track selection directly', error: e);
-      waitingForExternalSubsTrackSelection = false;
-      unawaited(applyTrackSelection());
-      return;
-    }
-
-    // Fallback if playbackRestart doesn't fire
-    _subtitleFallbackTimer?.cancel();
-    _subtitleFallbackTimer = Timer(const Duration(seconds: 3), () {
-      if (waitingForExternalSubsTrackSelection && isActive()) {
-        waitingForExternalSubsTrackSelection = false;
-        applyTrackSelection();
-      }
-    });
-  }
 
   /// Invalidates every pending automatic selection before the player is
   /// reused for another media generation and returns a bounded drain for the
@@ -426,18 +361,9 @@ class TrackManager {
     }
   }
 
-  /// Called when playbackRestart fires — checks the flag and applies selection.
-  void onPlaybackRestart() {
-    if (waitingForExternalSubsTrackSelection) {
-      if (_externalSubtitleAddsInFlight) return;
-      waitingForExternalSubsTrackSelection = false;
-      applyTrackSelection();
-    }
-  }
-
   // ── Backend fallback ───────────────────────────────────────────────
 
-  /// Handle ExoPlayer → MPV backend switch: re-add external subs and reapply selection.
+  /// Handle ExoPlayer → MPV backend switch: reapply selection.
   Future<void> onBackendSwitched() async {
     final pendingSelection = _selectionIdleCompleter?.future;
     final playerMutationDrain = invalidatePendingSelection();
@@ -446,16 +372,6 @@ class TrackManager {
     if (!_managerIsActive) return;
 
     appLogger.i('Player backend switched from ExoPlayer to MPV (native fallback)');
-    if (_lastExternalSubtitles.isNotEmpty && !player.attachesExternalSubtitlesAtOpen) {
-      try {
-        await addExternalSubtitles(_lastExternalSubtitles);
-      } catch (e) {
-        appLogger.w('Failed to re-add external subtitles after backend switch', error: e);
-      }
-    }
-
-    if (!_managerIsActive) return;
-
     applyTrackSelectionWhenReady();
   }
 
@@ -465,12 +381,19 @@ class TrackManager {
   /// track now playing so the caller can record it as the committed choice.
   /// Returns null when there was nothing to cycle.
   SubtitleTrack? cycleSubtitleTrack() {
-    final tracks = player.state.tracks.subtitle.where((t) => t.id != 'auto').toList();
-    if (tracks.isEmpty) return null;
+    final realTracks = player.state.tracks.subtitle
+        .where((t) => t.id != SubtitleTrack.auto.id && t.id != SubtitleTrack.off.id)
+        .toList();
+    if (realTracks.isEmpty) return null;
+    // The engine's track list names only real tracks, so Off is added as a
+    // stop of its own: without it the cycle wrapped from the last track back
+    // to the first and never turned subtitles off.
+    final tracks = [SubtitleTrack.off, ...realTracks];
 
     final current = player.state.track.subtitle;
+    // No selection, or one the list no longer holds, counts as Off.
     final currentIndex = tracks.indexWhere((t) => t.id == current?.id);
-    final nextIndex = (currentIndex + 1) % tracks.length;
+    final nextIndex = (currentIndex < 0 ? 1 : currentIndex + 1) % tracks.length;
     final next = tracks[nextIndex];
     player.selectSubtitleTrack(next);
     unawaited(onSubtitleTrackSelectedByUser(next));
@@ -484,7 +407,8 @@ class TrackManager {
                 language: next.language,
                 codec: next.codec,
                 forced: next.isForced,
-                index: nextIndex,
+                // Position among the real tracks, as the track sheet numbers them.
+                index: nextIndex - 1,
               ).joined,
             );
       showMessage?.call(label, duration: const Duration(seconds: 1));
@@ -510,6 +434,7 @@ class TrackManager {
           title: next.title,
           language: next.language,
           codec: next.codec,
+          codecProfile: next.codecProfile,
           channels: next.channelsCount,
           index: nextIndex,
         ).joined,
@@ -551,7 +476,7 @@ class TrackManager {
   /// Handle audio track changes — save stream selection and language preference.
   Future<void> onAudioTrackChanged(AudioTrack track) async {
     final info = mediaInfo;
-    final partId = await _guardTrackChange(info);
+    final partId = await _guardTrackChange(info, 'audio');
     if (partId == null || info == null) return;
 
     final matchedPlex = findPlexTrackForMpvAudio(track, info.audioTracks, allMpvTracks: player.state.tracks.audio);
@@ -568,7 +493,7 @@ class TrackManager {
   /// Handle subtitle track changes — save stream selection and language preference.
   Future<void> onSubtitleTrackChanged(SubtitleTrack track, {int? sourceStreamId}) async {
     final info = mediaInfo;
-    final partId = await _guardTrackChange(info);
+    final partId = await _guardTrackChange(info, 'subtitle');
     if (partId == null) return;
 
     int? streamID;
@@ -613,11 +538,17 @@ class TrackManager {
 
   // ── Private helpers ────────────────────────────────────────────────
 
-  /// Common guard checks for track change handlers.
-  Future<int?> _guardTrackChange(MediaSourceInfo? info) async {
+  /// Common guard for the track change handlers: the part id to write against,
+  /// or null when nothing is written per part — the user opted out, the
+  /// backend remembers picks through its account instead (settled here), or
+  /// the source cannot be addressed.
+  Future<int?> _guardTrackChange(MediaSourceInfo? info, String trackType) async {
     if (!await shouldPersistTrackSelections()) return null;
 
-    if (persistTrackPreference == null) return null;
+    if (persistTrackPreference == null) {
+      await _ensureServerRemembersSelections(trackType);
+      return null;
+    }
 
     if (info == null) {
       appLogger.w('No media info available, cannot save stream selection');
@@ -636,34 +567,71 @@ class TrackManager {
   ///
   /// A null [streamID] means no server stream could be identified for the
   /// chosen track. There is no local fallback store, so the choice is simply
-  /// lost — say so instead of reporting a save that never happened.
+  /// lost — say so instead of reporting a save that never happened. The same
+  /// goes for a server that answers without storing the choice.
   Future<void> _saveTrackPreferences({required int partId, required String trackType, int? streamID}) async {
     if (streamID == null) {
       appLogger.w('Not saving $trackType stream selection: no server stream matched the selected track');
       _reportSelectionNotRemembered();
       return;
     }
+    final persist = persistTrackPreference;
+    if (persist == null || !isActive()) return;
+    final bool stored;
     try {
-      if (!isActive()) return;
-      final persist = persistTrackPreference;
-      if (persist == null) {
-        return;
-      }
-      await persist(partId: partId, trackType: trackType, streamID: streamID);
-      appLogger.d('Successfully saved $trackType stream selection');
-    } catch (e) {
-      appLogger.e('Failed to save $trackType stream selection', error: e);
+      stored = await persist(partId: partId, trackType: trackType, streamID: streamID);
+    } catch (e, st) {
+      _handleServerSyncFailure('save the $trackType stream selection', e, st);
+      return;
     }
+    if (stored) {
+      appLogger.d('Successfully saved $trackType stream selection');
+      return;
+    }
+    appLogger.w('Server did not store the $trackType stream selection');
+    _reportSelectionNotRemembered();
   }
 
-  /// The pick took effect in the engine but cannot be recorded against the
-  /// server — either the source carries no part id to write against, or no
-  /// server stream matched the chosen track — and there is no local store to
-  /// fall back to. Tell the user the choice is session-only rather than
-  /// dropping it silently. The message names that outcome, not the cause,
-  /// because both call sites produce the same one.
+  /// MediaBrowser: the pick itself travels in the progress reports; what can
+  /// still go wrong is the server ignoring it, which the hook settles.
+  Future<void> _ensureServerRemembersSelections(String trackType) async {
+    final enable = enableTrackSelectionMemory;
+    if (enable == null || !isActive()) return;
+    final bool remembered;
+    try {
+      remembered = await enable(trackType);
+    } catch (e, st) {
+      _handleServerSyncFailure("turn on the account's $trackType selection memory", e, st);
+      return;
+    }
+    if (remembered) return;
+    appLogger.w('Server will not remember $trackType selections');
+    _reportSelectionNotRemembered();
+  }
+
+  /// A request that never reached a verdict (network, timeout, client-side
+  /// abort) says nothing about whether the server would store the pick, so it
+  /// stays in the log. Anything else — a refusal carrying a status code, or a
+  /// failure inside the client — means the pick is session-only.
+  void _handleServerSyncFailure(String action, Object error, StackTrace stackTrace) {
+    if (error is MediaServerHttpException && (error.isTransient || error.isCancellation)) {
+      appLogger.w('Could not $action: no server verdict', error: error, stackTrace: stackTrace);
+      return;
+    }
+    appLogger.w('Server refused to $action', error: error, stackTrace: stackTrace);
+    _reportSelectionNotRemembered();
+  }
+
+  /// The pick took effect in the engine but will not be recorded against the
+  /// server — the source carries no part id to write against, no server
+  /// stream matched the chosen track, or the server refused or cannot store
+  /// it — and there is no local store to fall back to. Tell the user the
+  /// choice is session-only rather than dropping it silently, once per item.
+  /// The message names that outcome, not the cause, because every call site
+  /// produces the same one.
   void _reportSelectionNotRemembered() {
-    if (!_managerIsActive) return;
+    if (_reportedSelectionNotRemembered || !_managerIsActive) return;
+    _reportedSelectionNotRemembered = true;
     showMessage?.call(t.messages.trackSelectionNotRemembered);
   }
 
@@ -672,8 +640,5 @@ class TrackManager {
     if (_disposed) return;
     _disposed = true;
     invalidatePendingSelection();
-    _externalSubtitleAddsInFlight = false;
-    _subtitleFallbackTimer?.cancel();
-    _subtitleFallbackTimer = null;
   }
 }

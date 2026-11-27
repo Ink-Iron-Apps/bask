@@ -55,8 +55,15 @@
         <!-- Driver-distraction state on Android Automotive OS. Optional: the platform library is
              absent on every other form factor, and CarRestrictionsMonitor falls back silently. -->
         <uses-library android:name="android.car" android:required="false" />
+        <!-- The activity itself has no launcher entry: the launcher component is the
+             .MainActivity alias below, kept because every existing home-screen shortcut and
+             TV favourite points at that name. Deep links stay here, on the activity itself.
+             turnScreenOn lets a bask:// link sent during the screensaver (e.g. by a home
+             automation) wake the device; set at runtime it comes too late, as the activity
+             is already launched behind the screensaver. -->
         <activity
-            android:name=".MainActivity"
+            android:name=".BaskActivity"
+            android:turnScreenOn="true"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -72,19 +79,35 @@
             <meta-data
                 android:name="flutter_deeplinking_enabled"
                 android:value="false" />
+            <!-- Every bask:// link, whatever its host. DeepLinkPlugin forwards the URL unchanged;
+                 the grammar lives in lib/services/deep_links/deep_link.dart. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="bask"/>
+            </intent-filter>
+        </activity>
+        <!-- The default icon. Keep this component name forever: it was the launcher activity before
+             app icons became switchable, so every existing home-screen shortcut, TV favourite and
+             recent task points at it. The meta-data repeats the activity's because FlutterActivity
+             reads it from the component that launched it. -->
+        <activity-alias
+            android:name=".MainActivity"
+            android:exported="true"
+            android:targetActivity=".BaskActivity">
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
-            <!-- Deep link handler for Watch Next items -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="plezy" android:host="play"/>
-            </intent-filter>
-        </activity>
+        </activity-alias>
         <!-- background_downloader promotes its download worker with
              FOREGROUND_SERVICE_TYPE_DATA_SYNC, but androidx.work declares this service with no
              foregroundServiceType at all. startForeground rejects any type that is not a subset
@@ -128,6 +151,13 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <!-- Setting this stops FlutterLoader from appending its half-of-RAM default after
+             BaskActivity's shell args, where it would override the low-RAM cap. BaskActivity
+             always passes the per-device value; this one applies only if another engine
+             initializes Flutter first. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.OldGenHeapSize"
+            android:value="256" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

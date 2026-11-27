@@ -819,6 +819,22 @@ void MpvPlayer::SetPropertyAsync(const std::string& name, const std::string& val
       });
 }
 
+void MpvPlayer::SetPropertyAsync(const std::string& name, double value, StatusCallback callback) {
+  if (disposed_ || !mpv_) {
+    if (callback) callback(MPV_ERROR_UNINITIALIZED);
+    return;
+  }
+  bask::mpv_common::SubmitSetPropertyAsync(
+      mpv_, pending_requests_, name, value, [this, name, value, cb = std::move(callback)](int error) mutable {
+        // Same native-side attribution as the string path: these writes come
+        // from the runner itself, so nothing else would name the property.
+        if (error < 0 && !disposed_) {
+          g_warning("MPV: setProperty '%s'=%g failed: %s", name.c_str(), value, mpv_error_string(error));
+        }
+        if (cb) cb(error);
+      });
+}
+
 bool MpvPlayer::ReadSourceHdrMetadata(SourceHdrMetadata* out) {
   if (out == nullptr) return false;
   std::lock_guard<std::mutex> lock(native_mutex_);
@@ -1034,19 +1050,39 @@ void MpvPlayer::RemoveTrackedSources() {
 }
 
 bool MpvPlayer::ProcessEvents() {
-  if (disposed_ || !mpv_) return false;
+#ifdef PLEZY_MPV_PLAYER_LIFECYCLE_TEST
+  // The substituted wait stands in for the core; see SetPropertyAsync.
+  const bool has_events = test_event_wait_ || mpv_;
+#else
+  const bool has_events = mpv_ != nullptr;
+#endif
+  if (disposed_ || !has_events) return false;
 
+  bool running = true;
   while (true) {
+#ifdef PLEZY_MPV_PLAYER_LIFECYCLE_TEST
+    mpv_event* event = test_event_wait_ ? test_event_wait_() : mpv_wait_event(mpv_, 0);
+#else
     mpv_event* event = mpv_wait_event(mpv_, 0);
+#endif
     if (event->event_id == MPV_EVENT_NONE) {
       break;
     }
     if (event->event_id == MPV_EVENT_SHUTDOWN) {
-      return false;
+      running = false;
+      break;
     }
+    // The pass already drains to MPV_EVENT_NONE, which is the drain the hold
+    // needs; see ErrorEndFileHold. A hold that reaches its limit is released
+    // there and the rest of the pass is delivered as it comes.
+    const bool began_hold = bask::mpv_common::IsErrorEndFile(event) && held_events_.Begin();
     HandleMpvEvent(event);
+    if (!began_hold && held_events_.CountDequeued()) ReleaseHeldEvents();
   }
-  return true;
+  // However the pass ended: nothing held may surface in a later pass, behind
+  // messages mpv produced after it.
+  ReleaseHeldEvents();
+  return running;
 }
 
 void MpvPlayer::LogRecovery(const std::string& text) {
@@ -1079,10 +1115,19 @@ void MpvPlayer::MaybeRunAudioRecovery() {
   if (action.reason == bask::mpv_common::AudioReloadReason::kNone) {
     return;
   }
+  if (action.reason == bask::mpv_common::AudioReloadReason::kGiveUp) {
+    // audio-fallback-to-null means the core will never end the file over a
+    // dead device itself, so the outcome is produced here: stop, and let the
+    // END_FILE handler report it as the AO_INIT_FAILED error Dart handles.
+    LogRecovery("audio output failed after " + std::to_string(action.attempt) + " reloads; ending playback");
+    audio_output_failed_ = true;
+    Command({"stop"});
+    return;
+  }
   const char* reason = action.reason == bask::mpv_common::AudioReloadReason::kResume ? "resume" : "null-fallback";
   TryAudioReload(reason, action.attempt, action.request_generation);
   if (action.exhausted) {
-    LogRecovery("audio recovery budget exhausted; waiting for device list change");
+    LogRecovery("audio recovery budget exhausted; ending playback if this reload fails");
   }
 }
 
@@ -1101,7 +1146,11 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
     case MPV_EVENT_LOG_MESSAGE: {
       auto* msg = static_cast<mpv_event_log_message*>(event->data);
       if (!msg) break;
-      g_message("MPV [%s] %s: %s", msg->level, msg->prefix, msg->text);
+      // No journald mirror here: the record is forwarded to Dart below, where
+      // LogRedactionManager scrubs tokens and server URLs before it reaches
+      // the app log. A g_message() copy would put mpv's unredacted
+      // "Playing: <url>" - token and all - into the system journal, and at the
+      // "info" level this runner requests that is every line mpv emits.
 
       FlValue* data = fl_value_new_map();
       fl_value_set_string_take(data, "prefix", fl_value_new_string(SanitizeUtf8(msg->prefix).c_str()));
@@ -1140,6 +1189,12 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
     }
     case MPV_EVENT_END_FILE: {
       audio_recovery_.SetFileLoaded(false);
+      // The stop that audio recovery issued on giving up ends the file with
+      // reason stop, which Dart would take for the user's own. It is reported
+      // as what it is - the AO_INIT_FAILED error the core would have raised
+      // without audio-fallback-to-null - under the cause tag Dart handles.
+      const bool audio_output_failed = audio_output_failed_;
+      audio_output_failed_ = false;
       // Whatever comes next is a different source until video-params says
       // otherwise, and describing it against this one's colour space is the
       // one failure worth a transient wrong answer to avoid. No re-apply is
@@ -1152,13 +1207,18 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
       FlushPendingRestartPositions();
       auto* end = static_cast<mpv_event_end_file*>(event->data);
       if (!end) break;
+      const int reason =
+          audio_output_failed ? static_cast<int>(MPV_END_FILE_REASON_ERROR) : static_cast<int>(end->reason);
+      const int error = audio_output_failed ? static_cast<int>(MPV_ERROR_AO_INIT_FAILED) : end->error;
       FlValue* data = fl_value_new_map();
       fl_value_set_string_take(data, "sourceId", fl_value_new_int(end->playlist_entry_id));
-      fl_value_set_string_take(data, "reason", fl_value_new_int(static_cast<int>(end->reason)));
-      if (end->reason == MPV_END_FILE_REASON_ERROR) {
-        fl_value_set_string_take(data, "error", fl_value_new_int(static_cast<int>(end->error)));
-        fl_value_set_string_take(
-            data, "message", fl_value_new_string(SanitizeUtf8(mpv_error_string(end->error)).c_str()));
+      fl_value_set_string_take(data, "reason", fl_value_new_int(reason));
+      if (reason == MPV_END_FILE_REASON_ERROR) {
+        fl_value_set_string_take(data, "error", fl_value_new_int(error));
+        fl_value_set_string_take(data, "message", fl_value_new_string(SanitizeUtf8(mpv_error_string(error)).c_str()));
+        if (audio_output_failed) {
+          fl_value_set_string_take(data, "cause", fl_value_new_string(bask::mpv_common::kAudioOutputFailedCause));
+        }
       }
       SendEvent("end-file", data);
       fl_value_unref(data);
@@ -1272,12 +1332,7 @@ void MpvPlayer::SendPropertyChange(const char* name, mpv_node* data) {
     fl_value_append_take(list, fl_value_new_null());
   }
 
-  EventCallback callback;
-  {
-    std::lock_guard<std::mutex> lock(callback_mutex_);
-    callback = event_callback_;
-  }
-  if (callback) callback(list);
+  DeliverEvent(list, false);
   fl_value_unref(list);
 }
 
@@ -1324,13 +1379,31 @@ void MpvPlayer::SendEvent(const std::string& name, FlValue* data) {
     fl_value_set_string_take(event_map, "data", fl_value_ref(data));
   }
 
+  DeliverEvent(event_map, name == "log-message");
+  fl_value_unref(event_map);
+}
+
+void MpvPlayer::DeliverEvent(FlValue* message, bool is_log_message) {
+  if (held_events_.ShouldHold(is_log_message)) {
+    held_events_.Hold(fl_value_ref(message));
+    return;
+  }
   EventCallback callback;
   {
     std::lock_guard<std::mutex> lock(callback_mutex_);
     callback = event_callback_;
   }
-  if (callback) callback(event_map);
-  fl_value_unref(event_map);
+  if (callback) callback(message);
+}
+
+void MpvPlayer::ReleaseHeldEvents() {
+  // Each goes out through DeliverEvent, which reads the callback afresh: one
+  // that Dispose has already cleared drops the rest instead of sending them
+  // after teardown.
+  for (FlValue* message : held_events_.Release()) {
+    DeliverEvent(message, false);
+    fl_value_unref(message);
+  }
 }
 
 void MpvPlayer::ApplyPropertySequence(
@@ -1456,6 +1529,8 @@ void MpvPlayer::ConfigurePropertyWritesForTesting(PropertyWriteForTesting writer
 void MpvPlayer::ConfigurePropertyReadsForTesting(PropertyReadForTesting reader) {
   test_property_read_ = std::move(reader);
 }
+
+void MpvPlayer::ConfigureEventWaitsForTesting(EventWaitForTesting wait) { test_event_wait_ = std::move(wait); }
 
 MpvPlayer::AppliedOutputColourSpace MpvPlayer::AppliedOutputColourSpaceForTesting() const {
   return {applied_target_trc_, applied_target_prim_, applied_tone_mapping_, applied_target_peak_};

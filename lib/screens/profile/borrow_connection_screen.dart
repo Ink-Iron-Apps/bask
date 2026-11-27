@@ -319,7 +319,7 @@ class _BorrowConnectionScreenState extends State<BorrowConnectionScreen> {
       logLabel: cand.source.displayName,
     );
     if (!result.succeeded) {
-      if (result.status == PlexHomeSwitchStatus.failed && mounted) {
+      if (result.status != PlexHomeSwitchStatus.cancelled && mounted) {
         showErrorSnackBar(context, t.profiles.failedToVerifyPin);
       }
       return false;
@@ -340,7 +340,7 @@ class _BorrowConnectionScreenState extends State<BorrowConnectionScreen> {
       logLabel: cand.source.displayName,
     );
     if (!result.succeeded) {
-      if (result.status == PlexHomeSwitchStatus.failed && mounted) {
+      if (result.status != PlexHomeSwitchStatus.cancelled && mounted) {
         showErrorSnackBar(context, t.profiles.borrowFailed);
       }
       return;

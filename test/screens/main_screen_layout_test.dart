@@ -86,9 +86,10 @@ void main() {
     expect(shouldPass(hasVisibleTabs: false), isFalse);
   });
 
-  test('desktop physical Escape is reserved for window fullscreen only at root Home', () {
+  test('desktop physical Escape is reserved for window fullscreen only at root Home outside TV mode', () {
     bool shouldHandle({
       bool isDesktop = true,
+      bool isTV = false,
       bool isPhysicalKeyboardEvent = true,
       LogicalKeyboardKey logicalKey = LogicalKeyboardKey.escape,
       bool isCurrentRoute = true,
@@ -96,6 +97,7 @@ void main() {
     }) {
       return shouldHandleDesktopRootEscape(
         isDesktop: isDesktop,
+        isTV: isTV,
         isPhysicalKeyboardEvent: isPhysicalKeyboardEvent,
         logicalKey: logicalKey,
         isCurrentRoute: isCurrentRoute,
@@ -106,8 +108,11 @@ void main() {
     expect(shouldHandle(), isTrue);
     expect(shouldHandle(isHomeTab: false), isFalse);
     expect(shouldHandle(isCurrentRoute: false), isFalse);
-    // A remote/gamepad-synthesized escape is not a physical keyboard Escape;
-    // it keeps the press-back-again exit path.
+    // Desktop embedders report remote (CEC/IR) Escape as a keyboard key; TV
+    // mode keeps it the remote's Back with the press-back-again exit (#2490).
+    expect(shouldHandle(isTV: true), isFalse);
+    // Gamepad and companion-remote Escape are synthesized as non-keyboard
+    // events; they keep the press-back-again exit path.
     expect(shouldHandle(isPhysicalKeyboardEvent: false), isFalse);
     expect(shouldHandle(isDesktop: false), isFalse);
     expect(shouldHandle(logicalKey: LogicalKeyboardKey.gameButtonB), isFalse);
@@ -147,32 +152,27 @@ void main() {
     );
   });
 
-  test('resume prompt is suppressed during playback (#2034) and companion sessions (#2087)', () {
+  test('resume prompt is suppressed while driving a companion remote (#2087)', () {
     bool should({
       bool resumedFromBackground = true,
       bool isOffline = false,
       bool alreadyShowingProfileSelection = false,
       bool isMobilePlatform = true,
-      bool hasActiveVideoPlayback = false,
-      bool hasActiveCompanionRemoteSession = false,
+      bool isDrivingCompanionRemote = false,
     }) {
       return shouldShowProfileSelectionOnResume(
         resumedFromBackground: resumedFromBackground,
         isOffline: isOffline,
         alreadyShowingProfileSelection: alreadyShowingProfileSelection,
         isMobilePlatform: isMobilePlatform,
-        hasActiveVideoPlayback: hasActiveVideoPlayback,
-        hasActiveCompanionRemoteSession: hasActiveCompanionRemoteSession,
+        isDrivingCompanionRemote: isDrivingCompanionRemote,
       );
     }
 
     expect(should(), isTrue);
-    // Waking the device mid-stream resumes the stream; the picker would
-    // fight the player's focus self-heal for the remote.
-    expect(should(hasActiveVideoPlayback: true), isFalse);
     // A phone driving another device backgrounds constantly; the picker +
     // PIN would bury the live remote session.
-    expect(should(hasActiveCompanionRemoteSession: true), isFalse);
+    expect(should(isDrivingCompanionRemote: true), isFalse);
     expect(should(resumedFromBackground: false), isFalse);
     expect(should(isOffline: true), isFalse);
     expect(should(alreadyShowingProfileSelection: true), isFalse);
@@ -210,6 +210,51 @@ void main() {
         expect(gate.consumePromptOn(state), isFalse);
         expect(gate.consumePromptOn(AppLifecycleState.resumed), isTrue, reason: '$state');
       }
+    });
+
+    // The full sequences Flutter delivers: it walks every state in between,
+    // so a return from `paused` passes back through `hidden`.
+    const goesToBackground = [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.paused];
+    const comesBack = [AppLifecycleState.hidden, AppLifecycleState.inactive, AppLifecycleState.resumed];
+
+    test('does not prompt after a backgrounding spent in Picture in Picture (#2195)', () {
+      final gate = ProfileSelectionResumeGate();
+      for (final state in goesToBackground) {
+        expect(gate.consumePromptOn(state, sessionContinuesInPip: true), isFalse);
+      }
+      // PiP hands the session back before Flutter's return frames arrive.
+      final prompts = [for (final state in comesBack) gate.consumePromptOn(state)];
+      expect(prompts, [false, false, false]);
+    });
+
+    test('prompts after a full round trip without Picture in Picture', () {
+      final gate = ProfileSelectionResumeGate();
+      for (final state in goesToBackground) {
+        gate.consumePromptOn(state);
+      }
+      // PiP starting only on the way back in cannot excuse the backgrounding.
+      final prompts = [for (final state in comesBack) gate.consumePromptOn(state, sessionContinuesInPip: true)];
+      expect(prompts, [false, false, true]);
+    });
+
+    test('prompts once after a tvOS Home round trip (#3076)', () {
+      // The tvOS engine sends no WillEnterForeground: Dart sees `paused` on
+      // Home and `resumed` on return, and the framework walks the states in
+      // between.
+      final gate = ProfileSelectionResumeGate();
+      final prompts = [
+        for (final state in [...goesToBackground, ...comesBack]) gate.consumePromptOn(state),
+      ];
+      expect(prompts, [false, false, false, false, false, true]);
+    });
+
+    test('one way-out frame without Picture in Picture is enough to prompt', () {
+      final gate = ProfileSelectionResumeGate();
+      gate.consumePromptOn(AppLifecycleState.inactive, sessionContinuesInPip: true);
+      gate.consumePromptOn(AppLifecycleState.hidden);
+      gate.consumePromptOn(AppLifecycleState.paused, sessionContinuesInPip: true);
+      final prompts = [for (final state in comesBack) gate.consumePromptOn(state)];
+      expect(prompts, [false, false, true]);
     });
 
     test('does not prompt without a prior backgrounding (cold open)', () {

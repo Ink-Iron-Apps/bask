@@ -48,8 +48,10 @@ published for them. Build those yourself with the instructions below.
 
 ### <img src="assets/readme_icons/browse.svg" height="20" alt="" align="center" /> Browse & Discover
 - Libraries, collections, and playlists — video and audio
+- Shuffle a whole movie or TV library
 - Discover hub — Continue Watching, Next Up, trending, and recommendations
-- Cross-server search across every connected Plex, Jellyfin, and Emby server
+- Continue Watching shows a title held in several libraries or on several servers once, and asks which copy to play
+- Cross-server search across every connected Plex, Jellyfin, and Emby server, including actors and directors
 - Filtering, sorting, and alphabetical jump navigation
 - Folder browsing and folder playback — home-video libraries open in folder view
 - Resolution, HDR/Dolby Vision, and audio-format badges on cards and detail pages
@@ -76,7 +78,7 @@ published for them. Build those yourself with the instructions below.
 - Chapter navigation with thumbnail scrub previews
 - Playback speed from 0.25x to 8x, audio sync offset, sleep timer (fixed durations or end of video)
 - Video zoom 50-200% with pinch, presets, and hotkeys
-- Audio passthrough[^pass], stereo downmix with center-channel boost, and loudness normalization
+- Audio passthrough[^pass], output channel limit (5.1 or stereo, with center-channel boost), and loudness normalization
 - File Info sheet — every version, file, and stream the server reports
 - Ambient lighting and GLSL shader presets[^mpv]
 - Picture-in-Picture[^pip]
@@ -105,19 +107,18 @@ published for them. Build those yourself with the instructions below.
 - Offline browsing with watch state sync-back on reconnect
 
 ### <img src="assets/readme_icons/watch-together.svg" height="20" alt="" align="center" /> Watch Together
-- Synchronized playback with friends
-- Real-time play / pause / seek sync
-- Host handoff when the relay and every connected peer support safe transfers
-- Automatic reconnect authenticates retained room membership; it never silently joins a reused room code.
-
-Self-hosted relays must support `authenticatedResume` for recovery. Deploy the updated relay before updating clients.
-Older relays still accept explicit create/join, but failed recovery requires joining or creating a room again.
+- Rooms on [Open Watch Party](https://openwatch.party) — share a six-character code; friends join from Bask or another Open Watch Party app
+- Everyone plays their own copy from their own server — Plex, Jellyfin, or Emby — matched by catalogue IDs, with a picker when several copies fit
+- Synchronized play / pause / seek, host or shared control, room lock, and host handoff
+- Public relays by default, or point Bask at your own self-hosted relay
 
 ### <img src="assets/readme_icons/integrations.svg" height="20" alt="" align="center" /> Integrations
 - Discord Rich Presence[^desktop]
 - Trakt, MyAnimeList, AniList, and Simkl — ratings, watched sync, and real-time scrobbling[^rt]
+- Scores from connected trackers on detail pages — Trakt, Simkl, MyAnimeList, and AniList, plus Rotten Tomatoes, Metacritic, Letterboxd, IMDb, and TMDB through MDBList
 - Bask Remote — control desktop and TV from mobile
 - Watch Next row and tvOS Top Shelf[^shelf]
+- [`bask://` links](#bask-links) to open a profile, play a title, or tune a channel from Home Assistant, launchers, or an NFC tag; any movie, show, or episode menu shows its link[^links]
 
 ### <img src="assets/readme_icons/customization.svg" height="20" alt="" align="center" /> Platform & Customization
 - Desktop, mobile, and TV — full D-pad, keyboard, and gamepad support
@@ -134,9 +135,9 @@ Older relays still accept explicit create/join, but failed recovery requires joi
 [^mb]: Jellyfin and Emby only.
 [^plex]: Plex only.
 [^connect]: Requires connecting the service under Settings > Services.
-[^hdr]: In-app HDR toggle on Windows, macOS, iOS, tvOS, and Linux — Linux needs a colour-managed Wayland compositor. Dolby Vision on Android and Apple TV.
+[^hdr]: In-app HDR toggle on Windows, macOS, iOS, tvOS, and Linux — Linux needs a colour-managed Wayland compositor. Dolby Vision on Android, macOS, and Apple TV.
 [^pass]: Desktop, Android TV, and Apple TV.
-[^mpv]: Requires the mpv player backend — unavailable on iOS and tvOS, and Android defaults to ExoPlayer.
+[^mpv]: Requires the mpv player backend — Android defaults to ExoPlayer. Not applied to Dolby Vision on Apple platforms.
 [^pip]: Android, iOS, and macOS — not on Android TV or Apple TV.
 [^rrm]: Windows, Android, and tvOS.
 [^android]: Progress sync on Android.
@@ -146,6 +147,29 @@ Older relays still accept explicit create/join, but failed recovery requires joi
 [^desktop]: Desktop only.
 [^rt]: Real-time scrobbling on Trakt and Simkl; MyAnimeList and AniList update on completion.
 [^shelf]: Android TV / Fire TV and tvOS.
+[^links]: Android, iOS, macOS, and tvOS.
+
+## bask:// links
+
+Links start Bask from outside the app. Any link may add `profile=<profile>`: a profile id, a Plex Home user UUID, or a display name (ignoring case; it must match one profile). Bask switches to that profile first, and a protected profile still asks for its PIN. A link replaces whatever is playing.
+
+| Link | Does |
+|---|---|
+| `bask://open` | Opens Bask |
+| `bask://play?server=<server>&id=<item>` | Plays one item on one server, any backend |
+| `bask://play?type=movie\|show&tmdb=<n>` | Plays a title from whichever server has it. Use `tmdb`, `tvdb`, `imdb=tt<n>`, or `plex=<hash>` (the Plex GUID without `plex://movie/`) |
+| `bask://live?channel=<channel>` | Tunes a Live TV channel by key, number, or call sign. Optional `server=<server>` and `start=beginning\|live` |
+
+For a show, `mode=next` (the default) plays the next episode to watch, and `mode=shuffle` plays the show shuffled. The menu of any movie, show, or episode has **Show link**, and each profile's menu in **Switch Profile** has **Show profile link**. Both show the link as text and a QR code.
+
+```sh
+# Android / Android TV, over adb (Home Assistant: remote.turn_on with activity: bask://...)
+adb shell am start -a android.intent.action.VIEW -d "bask://play?type=show\&tvdb=81189\&profile=Kids"
+# macOS
+open "bask://play?type=movie&tmdb=603"
+```
+
+On iOS, use the Open URLs action in Shortcuts.
 
 ## Building from Source
 
@@ -163,7 +187,8 @@ scripts/codegen.sh
 flutter run
 ```
 
-### Code Generation
+<details>
+<summary>Code generation</summary>
 
 After modifying model classes or other generated sources:
 
@@ -177,7 +202,41 @@ After modifying translations:
 dart run slang
 ```
 
-### Local Checks
+</details>
+
+<details>
+<summary>Packaging a Flatpak bundle</summary>
+
+Packages an **already fully resolved Linux release bundle** — pinned libmpv and bundled libraries included, not a Flathub source-build manifest. Run it on Linux, on the same architecture as the bundle, after following the bundle preparation steps in [the Linux release workflow](.github/workflows/build.yml): `flutter build linux` alone does not produce all the required bundled libraries.
+
+Install the packaging tools (Debian/Ubuntu shown) plus the native-architecture SDK and runtime:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y flatpak flatpak-builder imagemagick
+flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install --user flathub org.freedesktop.Platform//25.08 org.freedesktop.Sdk//25.08
+
+BUNDLE_DIR=build/linux/x64/release/bundle
+python3 linux/packaging/build-flatpak.py --bundle "$BUNDLE_DIR" --arch x64 --output "$PWD"
+```
+
+That writes `bask-linux-x64.flatpak`, installable with the Flatpak commands above; on arm64, use the prepared arm64 bundle directory and `--arch arm64`. Package from the checkout matching the bundle, since the version comes from `pubspec.yaml`.
+
+Cross-architecture packaging needs native Flatpak tools, a registered binfmt interpreter, and the target SDK/runtime installed with `flatpak install --user --arch=x86_64` (or `aarch64`) — never run Flatpak's namespace tools under emulation. Pass `--arch x64` or `--arch arm64` to the checker and the matching Flatpak architecture to `flatpak run --arch=...`.
+
+Check the installed package against the runtime (not just the SDK), then launch it on a Wayland desktop and exercise streaming, audio, downloads/offline playback, and file chooser portals:
+
+```bash
+python3 linux/packaging/check-flatpak.py
+```
+
+The check fails on a non-executable entry point or an unresolved bundled ELF dependency. A container without a GPU can use `flatpak run --env=GALLIUM_DRIVER=softpipe com.inknironapps.bask` for software-rendered verification; this is not a hardware-decoding or HDR test.
+
+</details>
+
+<details>
+<summary>Local checks</summary>
 
 ```bash
 scripts/ci_checks.sh
@@ -195,16 +254,18 @@ End-to-end tests (Android emulator plus a Dockerized Jellyfin fixture):
 python3 scripts/maestro/run_maestro.py basic
 ```
 
+</details>
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow, formatting, tests, and translation guidelines.
 
 ## License
 
-Bask is licensed under [GPL-3.0](LICENSE).
+Bask is licensed under [GPL-3.0](LICENSE). The license covers the code, not the Bask name or logo; forks distributed beyond personal use must follow [TRADEMARKS.md](TRADEMARKS.md).
 
 ## Acknowledgments
 
 - Built with [Flutter](https://flutter.dev)
 - Supports [Plex Media Server](https://www.plex.tv), [Jellyfin](https://jellyfin.org), and [Emby](https://emby.media)
-- Playback powered by [mpv](https://mpv.io) via our [mpv-build](https://github.com/edde746/mpv-build) pipeline (started as a fork of [MPVKit](https://github.com/mpvkit/MPVKit); the Android Kotlin/JNI glue descends from [libmpv-android](https://github.com/jarnedemeulemeester/libmpv-android)), Android [ExoPlayer](https://developer.android.com/media/media3/exoplayer), and [libass-android](https://github.com/peerless2012/libass-android)
+- Playback powered by [mpv](https://mpv.io) via our [mpv-build](https://github.com/edde746/mpv-build) pipeline (started as a fork of [MPVKit](https://github.com/mpvkit/MPVKit); on Android through its mpv-android library, whose Kotlin/JNI glue descends from [libmpv-android](https://github.com/jarnedemeulemeester/libmpv-android)), Android [ExoPlayer](https://developer.android.com/media/media3/exoplayer), and [libass-android](https://github.com/peerless2012/libass-android)

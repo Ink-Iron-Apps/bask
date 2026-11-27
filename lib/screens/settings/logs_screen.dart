@@ -8,10 +8,10 @@ import 'package:bask/utils/media_server_http_client.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import '../../focus/focusable_action_bar.dart';
 import '../../widgets/app_icon.dart';
 import '../../focus/key_event_utils.dart';
+import '../../navigation/page_refresh_shortcut.dart';
 import '../../i18n/strings.g.dart';
 import '../../mixins/mounted_set_state_mixin.dart';
 import '../../utils/dialogs.dart';
@@ -22,11 +22,11 @@ import '../../services/log_upload_service.dart';
 import '../../services/startup_diagnostics.dart';
 import '../../services/video_decode_capabilities.dart';
 import '../../utils/app_logger.dart';
+import '../../utils/app_version.dart';
 import '../../utils/formatters.dart';
 import '../../utils/platform_detector.dart';
 import '../../utils/snackbar_helper.dart';
 import '../../widgets/desktop_app_bar.dart';
-import '../../widgets/ios_status_bar_tap_scroll_to_top.dart';
 import '../../widgets/system_bottom_inset.dart';
 
 const previousStartupFailureKey = Key('logs-previous-startup-failure');
@@ -124,11 +124,13 @@ class _LogsScreenState extends State<LogsScreen> with MountedSetStateMixin {
   }
 
   Future<void> _loadDeviceInfo() async {
-    final packageInfo = await PackageInfo.fromPlatform();
+    final appVersion = await AppVersion.current();
     final deviceInfo = widget.deviceInfoPlugin ?? DeviceInfoPlugin();
     final buffer = StringBuffer();
     final commitSuffix = gitCommit.isNotEmpty ? ' ${gitCommit.substring(0, 7)}' : '';
-    buffer.writeln('${t.app.title} v${packageInfo.version} (${packageInfo.buildNumber})$commitSuffix');
+    buffer.writeln(
+      '${t.app.title} v${appVersion.versionOrUnknown} (${appVersion.buildNumber ?? AppVersion.unknown})$commitSuffix',
+    );
 
     if (Platform.isAndroid) {
       final info = await deviceInfo.androidInfo;
@@ -399,6 +401,8 @@ class _LogsScreenState extends State<LogsScreen> with MountedSetStateMixin {
       onKeyEvent: (node, event) {
         final backResult = handleBackKeyNavigation(context, event);
         if (backResult != KeyEventResult.ignored) return backResult;
+        final refreshResult = handlePageRefreshShortcut(event, _loadLogs);
+        if (refreshResult != KeyEventResult.ignored) return refreshResult;
         if (event is KeyDownEvent || event is KeyRepeatEvent) {
           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
             _scroll(80);
@@ -413,19 +417,22 @@ class _LogsScreenState extends State<LogsScreen> with MountedSetStateMixin {
       },
       child: PrimaryScrollController(
         controller: _scrollController,
-        child: IosStatusBarTapScrollToTop(
-          controller: _scrollController,
-          child: Scaffold(
-            body: Actions(
-              actions: <Type, Action<Intent>>{
-                ExtendSelectionByCharacterIntent: _CollapsingSelectionMoveAction<ExtendSelectionByCharacterIntent>(),
-                ExtendSelectionVerticallyToAdjacentLineIntent:
-                    _CollapsingSelectionMoveAction<ExtendSelectionVerticallyToAdjacentLineIntent>(),
-              },
-              child: SelectionArea(
-                focusNode: _selectionFocusNode,
-                child: SelectionContainer(
-                  delegate: _recordSelection,
+        child: Scaffold(
+          body: Actions(
+            actions: <Type, Action<Intent>>{
+              ExtendSelectionByCharacterIntent: _CollapsingSelectionMoveAction<ExtendSelectionByCharacterIntent>(),
+              ExtendSelectionVerticallyToAdjacentLineIntent:
+                  _CollapsingSelectionMoveAction<ExtendSelectionVerticallyToAdjacentLineIntent>(),
+            },
+            child: SelectionArea(
+              focusNode: _selectionFocusNode,
+              child: SelectionContainer(
+                delegate: _recordSelection,
+                // Horizontal-only SafeArea: log rows clear a landscape notch
+                // or iPhone Duo's portrait sensor column.
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
                   child: CustomScrollView(
                     primary: true,
                     slivers: [

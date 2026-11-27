@@ -42,7 +42,6 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
       _lastVideoLayoutSize = pendingSize;
       _lastVideoLayoutPlayer = currentPlayer;
       _videoFilterManager?.updatePlayerSize(pendingSize);
-      _visualEffects.onResize(pendingSize);
       unawaited(currentPlayer.updateFrame());
     });
   }
@@ -97,12 +96,13 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
     );
   }
 
-  /// Retry is the primary action and takes focus explicitly: a child
-  /// `autofocus` never fires here, because the screen-level [Focus] claims the
-  /// scope while the loading spinner is up and Flutter drops a later autofocus
-  /// request once the scope already has a focused child. See
-  /// [VideoPlayerScreenState._initializationErrorFocusNode].
-  Widget _buildInitializationError(String message) {
+  /// The screen's failure surface, shared by a core that failed to start and
+  /// a media open that failed after it did. Retry is the primary action and
+  /// takes focus explicitly: a child `autofocus` never fires here, because
+  /// the screen-level [Focus] claims the scope while the loading spinner is
+  /// up and Flutter drops a later autofocus request once the scope already
+  /// has a focused child. See [VideoPlayerScreenState._initializationErrorFocusNode].
+  Widget _buildPlaybackFailure(String message, {required VoidCallback onRetry}) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
@@ -126,8 +126,8 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
                   children: [
                     FocusableButton(
                       focusNode: _initializationErrorFocusNode,
-                      onPressed: _retryPlayerInitialization,
-                      child: FilledButton(onPressed: _retryPlayerInitialization, child: Text(t.common.retry)),
+                      onPressed: onRetry,
+                      child: FilledButton(onPressed: onRetry, child: Text(t.common.retry)),
                     ),
                     const SizedBox(width: 12),
                     FocusableButton(
@@ -234,8 +234,7 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
             return;
           }
 
-          final zoomScale = _videoFilterManager?.zoomScale ?? 1.0;
-          _visualEffects.showZoomToast(zoomScale);
+          _visualEffects.commitPinchZoom();
           _clearMobileZoomGesture();
           _setPlayerState(() {});
         },
@@ -254,14 +253,22 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
                     _scheduleVideoLayoutUpdate(newSize);
 
                     var authority = (canControlPlayback: true, canNavigateMediaItems: true);
+                    // A room at its media's end has no item left to end.
+                    var canEndItem = true;
                     try {
                       authority = context
-                          .select<WatchTogetherProvider, ({bool canControlPlayback, bool canNavigateMediaItems})>(
-                            (wt) => (
-                              canControlPlayback: !wt.isInSession || wt.canControl(),
-                              canNavigateMediaItems: !wt.isInSession || wt.isHost,
-                            ),
-                          );
+                          .select<WatchTogetherProvider, ({bool canControlPlayback, bool canNavigateMediaItems})>((wt) {
+                            final adapter = _wtAdapter;
+                            final following = adapter != null && wt.follows(adapter);
+                            return (
+                              canControlPlayback: !following || wt.canControl,
+                              canNavigateMediaItems: !following || wt.isHost,
+                            );
+                          });
+                      canEndItem = context.select<WatchTogetherProvider, bool>((wt) {
+                        final adapter = _wtAdapter;
+                        return adapter == null || !wt.follows(adapter) || !wt.isAtMediaEnd;
+                      });
                     } catch (_) {
                       // Watch Together is optional outside the main app shell.
                     }
@@ -272,26 +279,16 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
                       });
                     }
 
-                    VoidCallback? onNext;
-                    if (widget.isLive) {
-                      onNext = _hasNextChannel ? () => _switchLiveChannel(1) : null;
-                    } else {
-                      // _playNext no-ops while a navigation is in flight; matching that here
-                      // keeps the control from looking live while it does nothing.
-                      onNext = (_episode.next != null && !_episode.isLoadingNext && authority.canNavigateMediaItems)
-                          ? _playNext
-                          : null;
-                    }
-
-                    VoidCallback? onPrevious;
-                    if (widget.isLive) {
-                      onPrevious = _hasPreviousChannel ? () => _switchLiveChannel(-1) : null;
-                    } else {
-                      final canRestartOrPrevious = _currentMetadata.isEpisode || _episode.previous != null;
-                      onPrevious = (canRestartOrPrevious && authority.canNavigateMediaItems)
-                          ? _restartOrPlayPrevious
-                          : null;
-                    }
+                    // The screen answers next/previous once for every entry
+                    // point; the buttons add only the in-flight and room
+                    // authority gates so a control cannot look live while it
+                    // does nothing. Live TV is never room-bound, and its zap
+                    // debounces itself through the transition gate.
+                    final canNavigateItems = widget.isLive || authority.canNavigateMediaItems;
+                    final onNext = _hasNextItem && !_episode.isLoadingNext && canNavigateItems
+                        ? _navigateToNextItem
+                        : null;
+                    final onPrevious = _hasPreviousItem && canNavigateItems ? _navigateToPreviousItem : null;
 
                     final sourceAudioTracks = _currentMediaInfo?.audioTracks ?? const <MediaAudioTrack>[];
                     final sourceSubtitleSidecars = _sourceSubtitleSidecarsForControls();
@@ -344,8 +341,10 @@ extension _VideoPlayerBuildMethods on VideoPlayerScreenState {
                         onRateRequested: _setPlaybackRate,
                         onPlayPauseRequested: _handleControlsTransport,
                         onBack: _handleBackButton,
-                        onReachedEnd: ({skipAutoPlayCountdown = false}) =>
-                            _onVideoCompleted(true, skipAutoPlayCountdown: skipAutoPlayCountdown),
+                        onReachedEnd: canEndItem
+                            ? ({required skipAutoPlayCountdown}) =>
+                                  unawaited(_finishItem(skipAutoPlayCountdown: skipAutoPlayCountdown))
+                            : null,
                         canControl: authority.canControlPlayback,
                         canNavigateMediaItems: authority.canNavigateMediaItems,
                         hasFirstFrame: _firstFrame.uiReady,

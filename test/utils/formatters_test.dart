@@ -1,3 +1,4 @@
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bask/i18n/app_locale_utils.dart';
@@ -122,6 +123,27 @@ void main() {
 
       await LocaleSettings.setLocale(AppLocale.zhHant);
       expect(formatDurationTextual(duration.inMilliseconds), '1小時 2分鐘');
+    });
+  });
+
+  group('European Portuguese formatting', () {
+    test('uses European date and compact-number formats', () async {
+      await initializeDateFormatting();
+      await LocaleSettings.setLocale(AppLocale.ptPt);
+
+      expect(formatAbbreviatedDate('2026-11-12'), '12/11/2026');
+      expect(NumberFormat.compact(locale: LocaleSettings.currentLocale.intlLocaleName).format(1500000), '1,5\u00A0M');
+    });
+  });
+
+  group('formatRelativeDayLabel', () {
+    test('counts calendar days across a DST change', () {
+      // Spring-forward nights in the US (Mar 8) and the EU (Mar 29): in those
+      // zones the two local midnights are only 23 hours apart.
+      expect(formatRelativeDayLabel(DateTime(2026, 3, 9), now: DateTime(2026, 3, 8, 12)), t.liveTv.tomorrow);
+      expect(formatRelativeDayLabel(DateTime(2026, 3, 30), now: DateTime(2026, 3, 29, 12)), t.liveTv.tomorrow);
+      expect(formatRelativeDayLabel(DateTime(2026, 11, 2), now: DateTime(2026, 11, 1, 12)), t.liveTv.tomorrow);
+      expect(formatRelativeDayLabel(DateTime(2026, 3, 8, 23), now: DateTime(2026, 3, 8, 1)), t.liveTv.today);
     });
   });
 

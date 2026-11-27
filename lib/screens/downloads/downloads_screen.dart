@@ -37,9 +37,12 @@ import '../../widgets/focusable_media_card.dart';
 import '../../widgets/media_card_sliver_layout.dart';
 import '../../widgets/download_tree_view.dart';
 import '../main_screen.dart';
+import '../libraries/content_state_builder.dart';
+import '../libraries/library_browse_grouping.dart';
 import '../libraries/state_messages.dart';
 import '../../i18n/strings.g.dart';
 import 'downloaded_playlists_tab.dart';
+import 'downloads_options.dart';
 import 'sync_rules_screen.dart';
 
 class DownloadsScreen extends StatefulWidget {
@@ -56,6 +59,12 @@ class DownloadsScreenState extends State<DownloadsScreen>
   final _moviesTabChipFocusNode = FocusNode(debugLabel: 'tab_chip_movies');
   final _musicTabChipFocusNode = FocusNode(debugLabel: 'tab_chip_music');
   final _actionBarKey = GlobalKey<FocusableActionBarState>();
+
+  // Reaching into the content tabs for their options surface: the app bar's
+  // mobile options action and the D-pad handoff both act on whichever tab is
+  // in view.
+  final _tvShowsTabKey = GlobalKey<_DownloadsGridContentState>();
+  final _moviesTabKey = GlobalKey<_DownloadsGridContentState>();
 
   /// Playlists earns its tab only while one is downloaded, so the strip does
   /// not carry an empty section for a feature most libraries never use.
@@ -148,6 +157,25 @@ class DownloadsScreenState extends State<DownloadsScreen>
   /// Position of a fixed tab once the optional Playlists tab is accounted for.
   int _tabIndex(int baseIndex) => _showPlaylistsTab ? baseIndex + 1 : baseIndex;
 
+  /// Whether the tab in view has an options surface at all.
+  ///
+  /// Answered from the index rather than from a tab's state, because the app
+  /// bar builds before the tab below it: on the frame a tab first mounts its
+  /// state is still null, and an action hidden on that frame would not come
+  /// back until something else rebuilt the bar.
+  bool get _activeTabHasOptions {
+    final index = tabController.index;
+    return index == _tabIndex(1) || index == _tabIndex(2);
+  }
+
+  /// The options surface of the tab in view, once it has mounted.
+  DownloadsOptionsTab? _activeOptionsTab() {
+    final index = tabController.index;
+    if (index == _tabIndex(1)) return _tvShowsTabKey.currentState;
+    if (index == _tabIndex(2)) return _moviesTabKey.currentState;
+    return null;
+  }
+
   Widget _buildTabChip(String label, int index) {
     return buildTabChip(
       label,
@@ -193,18 +221,30 @@ class DownloadsScreenState extends State<DownloadsScreen>
             shadowColor: Colors.transparent,
             scrolledUnderElevation: 0,
             actions: [
-              FocusableActionBar(
-                key: _actionBarKey,
-                onNavigateLeft: () => getTabChipFocusNode(tabCount - 1).requestFocus(),
-                onNavigateDown: _focusCurrentTab,
-                actions: [
-                  FocusableAction(
-                    icon: Symbols.rule_settings_rounded,
-                    tooltip: t.downloads.activeSyncRules,
-                    onPressed: () =>
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SyncRulesScreen())),
-                  ),
-                ],
+              AnimatedBuilder(
+                animation: tabController,
+                builder: (context, _) => FocusableActionBar(
+                  key: _actionBarKey,
+                  onNavigateLeft: () => getTabChipFocusNode(tabCount - 1).requestFocus(),
+                  onNavigateDown: _focusCurrentTab,
+                  actions: [
+                    FocusableAction(
+                      icon: Symbols.rule_settings_rounded,
+                      tooltip: t.downloads.activeSyncRules,
+                      onPressed: () =>
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const SyncRulesScreen())),
+                    ),
+                    // Mobile reaches grouping, filters and sort through one
+                    // sheet; desktop and TV get the same options as chips
+                    // inside the tab, where there is room for them.
+                    if (PlatformDetector.isMobile(context) && _activeTabHasOptions)
+                      FocusableAction(
+                        icon: Symbols.tune_rounded,
+                        tooltip: t.downloads.options,
+                        onPressed: () => _activeOptionsTab()?.showOptionsSheet(),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -350,11 +390,13 @@ class DownloadsScreenState extends State<DownloadsScreen>
                           ),
                         ),
                       _DownloadsGridContent(
+                        key: _tvShowsTabKey,
                         type: DownloadType.tvShows,
                         suppressAutoFocus: suppressAutoFocus,
                         onBack: focusTabBar,
                       ),
                       _DownloadsGridContent(
+                        key: _moviesTabKey,
                         type: DownloadType.movies,
                         suppressAutoFocus: suppressAutoFocus,
                         onBack: focusTabBar,
@@ -390,7 +432,7 @@ Future<void> _playDownloadedPlaylist(
     metadata: provider.metadata,
     downloads: provider.downloads,
   );
-  final queue = OfflinePlaylistQueue.build(id: playlist.key, members: members, shuffle: shuffle);
+  final queue = OfflinePlaylistQueue.build(members: members, shuffle: shuffle);
   if (queue == null) {
     showAppSnackBar(context, t.downloads.playlistNothingDownloaded);
     return;
@@ -440,42 +482,108 @@ class _DownloadsGridContent extends StatefulWidget {
   final bool suppressAutoFocus;
   final VoidCallback? onBack;
 
-  const _DownloadsGridContent({required this.type, required this.suppressAutoFocus, this.onBack});
+  const _DownloadsGridContent({super.key, required this.type, required this.suppressAutoFocus, this.onBack});
 
   @override
   State<_DownloadsGridContent> createState() => _DownloadsGridContentState();
 }
 
 class _DownloadsGridContentState extends State<_DownloadsGridContent>
-    with UnsuppressFocusFirstMixin<_DownloadsGridContent> {
+    with UnsuppressFocusFirstMixin<_DownloadsGridContent>, DownloadsTabOptionsMixin<_DownloadsGridContent> {
   @override
   String get firstItemFocusDebugLabel => 'DownloadsGrid_firstItem';
 
   @override
   bool suppressAutoFocusOf(_DownloadsGridContent widget) => widget.suppressAutoFocus;
 
+  @override
+  String get optionsSectionId => widget.type == DownloadType.tvShows ? 'downloads:tv' : 'downloads:movies';
+
+  /// Shows can be browsed as shows, seasons or episodes; movies have one
+  /// level. Both split by library.
+  ///
+  /// Collections are deliberately absent: folding them needs the offline
+  /// collection screen and the membership sync that the upstream merge
+  /// dropped, and a folder that cannot be opened is worse than no folder. The
+  /// folding itself is ported and tested
+  /// ([DownloadProvider.groupDownloadsByCollection]); the option returns with
+  /// the screen.
+  @override
+  List<String> get groupingOptions => switch (widget.type) {
+    DownloadType.tvShows => const [
+      browseGroupingShows,
+      browseGroupingSeasons,
+      browseGroupingEpisodes,
+      browseGroupingLibrary,
+    ],
+    DownloadType.movies => const [browseGroupingMovies, browseGroupingLibrary],
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    initDownloadsOptions();
+  }
+
+  @override
+  void dispose() {
+    disposeDownloadsOptions();
+    super.dispose();
+  }
+
+  @override
+  void navigateToTabBar() => widget.onBack?.call();
+
+  @override
+  void navigateToSidebar() => MainScreenFocusScope.focusSidebarOf(context);
+
   /// Navigate focus to the sidebar
   void _navigateToSidebar() {
     MainScreenFocusScope.focusSidebarOf(context);
+  }
+
+  /// The tab's items for the active grouping, filtered and sorted. The
+  /// library grouping works on the tab's own level — shows or movies.
+  List<MediaItem> _items(DownloadProvider provider) {
+    final raw = switch (widget.type) {
+      DownloadType.tvShows => switch (selectedGrouping) {
+        browseGroupingSeasons => provider.downloadedSeasons,
+        browseGroupingEpisodes => provider.downloadedEpisodes,
+        _ => provider.downloadedShows,
+      },
+      DownloadType.movies => provider.downloadedMovies,
+    };
+    return applyDownloadsOptions(provider, raw);
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<DownloadProvider>(
       builder: (context, downloadProvider, _) {
-        final List<MediaItem> items = widget.type == DownloadType.tvShows
-            ? downloadProvider.downloadedShows
-            : downloadProvider.downloadedMovies;
+        final items = _items(downloadProvider);
 
         if (items.isEmpty) {
           return _buildEmptyState();
         }
 
+        final sections = selectedGrouping == browseGroupingLibrary
+            ? bucketDownloadsByLibrary(
+                items,
+                serverNameOf: (serverId) =>
+                    context.read<MultiServerProvider>().serverManager.serverDisplayName(ServerId(serverId)),
+              )
+            : null;
+
         // Extra top padding for focus decoration (scale + border extends beyond item bounds)
         const effectivePadding = EdgeInsets.only(left: 8, right: 8, top: 8);
 
         return SettingsBuilder(
-          prefs: const [SettingsService.viewMode, SettingsService.libraryDensity, SettingsService.tvFullCardLayout],
+          prefs: const [
+            SettingsService.viewMode,
+            SettingsService.libraryDensity,
+            SettingsService.tvFullCardLayout,
+            SettingsService.episodePosterMode,
+          ],
           builder: (context) {
             final settings = SettingsService.instance;
             final viewMode = settings.read(SettingsService.viewMode);
@@ -486,25 +594,36 @@ class _DownloadsGridContentState extends State<_DownloadsGridContent>
               // Allow focus decoration to render outside scroll bounds.
               clipBehavior: Clip.none,
               slivers: [
-                MediaCardSliverLayout(
-                  viewMode: viewMode,
-                  itemCount: items.length,
-                  density: density,
-                  padding: effectivePadding,
-                  fullBleedImage: fullCardLayout,
-                  itemBuilder: (context, position) {
-                    final item = items[position.index];
-                    return FocusableMediaCard(
-                      item: item,
-                      focusNode: position.index == 0 ? firstItemFocusNode : null,
-                      disableScale: position.disableScale,
-                      onBack: widget.onBack,
-                      isOffline: true, // Downloaded content works without server
-                      fullBleedImage: fullCardLayout && position.isGrid,
-                      onNavigateLeft: position.isFirstColumn ? _navigateToSidebar : null,
-                    );
-                  },
-                ),
+                optionsChipsBarSliver(),
+                if (sections != null)
+                  for (var i = 0; i < sections.length; i++) ...[
+                    SliverToBoxAdapter(child: DownloadsLibrarySectionHeader(section: sections[i])),
+                    _itemsSliver(
+                      sections[i].items,
+                      viewMode: viewMode,
+                      density: density,
+                      fullCardLayout: fullCardLayout,
+                      padding: effectivePadding,
+                      attachFirstItemFocus: i == 0,
+                      // Only the first section hands UP to the chips; later
+                      // ones leave it to default traversal so it reaches the
+                      // section above instead of jumping to the top.
+                      firstRowUp: i == 0 ? navigateToChips : null,
+                    ),
+                  ]
+                else
+                  _itemsSliver(
+                    items,
+                    viewMode: viewMode,
+                    density: density,
+                    fullCardLayout: fullCardLayout,
+                    padding: effectivePadding,
+                    useWideAspectRatio:
+                        selectedGrouping == browseGroupingEpisodes &&
+                        settings.read(SettingsService.episodePosterMode) == EpisodePosterMode.episodeThumbnail,
+                    attachFirstItemFocus: true,
+                    firstRowUp: navigateToChips,
+                  ),
               ],
             );
           },
@@ -513,7 +632,63 @@ class _DownloadsGridContentState extends State<_DownloadsGridContent>
     );
   }
 
+  /// One grid of [items]. [attachFirstItemFocus] hands the tab's first-item
+  /// node to card 0, and [firstRowUp] is the UP target of the first row.
+  Widget _itemsSliver(
+    List<MediaItem> items, {
+    required ViewMode viewMode,
+    required int density,
+    required bool fullCardLayout,
+    required EdgeInsets padding,
+    bool useWideAspectRatio = false,
+    bool attachFirstItemFocus = false,
+    VoidCallback? firstRowUp,
+  }) {
+    return MediaCardSliverLayout(
+      viewMode: viewMode,
+      itemCount: items.length,
+      density: density,
+      padding: padding,
+      fullBleedImage: fullCardLayout,
+      useWideAspectRatio: useWideAspectRatio,
+      itemBuilder: (context, position) {
+        final item = items[position.index];
+        return FocusableMediaCard(
+          item: item,
+          focusNode: attachFirstItemFocus && position.index == 0 ? firstItemFocusNode : null,
+          disableScale: position.disableScale,
+          onBack: widget.onBack,
+          isOffline: true, // Downloaded content works without server
+          fullBleedImage: fullCardLayout && position.isGrid,
+          onNavigateUp: position.isFirstRow ? firstRowUp : null,
+          onNavigateLeft: position.isFirstColumn ? _navigateToSidebar : null,
+        );
+      },
+    );
+  }
+
+  /// Nothing to show. A filter that hides everything is a different situation
+  /// from having no downloads, and says so with a way back.
   Widget _buildEmptyState() {
+    if (hasActiveFilters) {
+      return CustomScrollView(
+        clipBehavior: Clip.none,
+        slivers: [
+          optionsChipsBarSliver(),
+          SliverEmptyState(
+            message: t.libraries.noItemsMatchFilters,
+            icon: Symbols.filter_alt_off_rounded,
+            onAction: resetDownloadsFilters,
+            actionLabel: t.libraries.resetFilters,
+            actionIcon: Symbols.clear_all_rounded,
+            actionFocusNode: firstItemFocusNode,
+            onActionNavigateUp: navigateToChips,
+            onActionNavigateLeft: _navigateToSidebar,
+            onActionBack: widget.onBack,
+          ),
+        ],
+      );
+    }
     return EmptyStateWidget(
       message: t.downloads.noDownloads,
       subtitle: t.downloads.noDownloadsDescription,

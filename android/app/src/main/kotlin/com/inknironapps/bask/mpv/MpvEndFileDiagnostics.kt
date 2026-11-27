@@ -1,12 +1,16 @@
 package com.inknironapps.bask.mpv
 
-import com.inknironapps.bask.libmpv.EndFileReason
-import com.inknironapps.bask.libmpv.LogLevel
-import com.inknironapps.bask.libmpv.LogMessage
-import com.inknironapps.bask.libmpv.MpvError
-import com.inknironapps.bask.libmpv.MpvEvent
+import com.edde746.mpv.EndFileReason
+import com.edde746.mpv.LogLevel
+import com.edde746.mpv.MpvError
+import com.edde746.mpv.MpvEvent
 
-/** Adds the native diagnostic that libmpv-android exposes separately via logFlow. */
+/**
+ * Adds the native diagnostic to an end-file: the last error line mpv logged for
+ * the file. It relies on log lines and events arriving in one ordered stream,
+ * with a failure's lines ahead of its end-file (the mpv-android library's
+ * delivery order, MpvPlayer.Listener).
+ */
 internal class MpvEndFileDiagnostics {
   private var errorMessage: String? = null
 
@@ -23,7 +27,7 @@ internal class MpvEndFileDiagnostics {
     errorMessage = null
   }
 
-  fun onLogMessage(message: LogMessage) {
+  fun onLogMessage(message: MpvEvent.LogMessage) {
     if (message.level == LogLevel.Fatal || message.level == LogLevel.Error) {
       errorMessage = message.text.takeIf { it.isNotBlank() }
     }
@@ -35,7 +39,11 @@ internal class MpvEndFileDiagnostics {
     event.reason?.let { reason ->
       data["reason"] = reason.id
       if (reason == EndFileReason.Error) {
-        errorMessage?.let { data["message"] = it }
+        event.error?.let { data["error"] = it.code }
+        // The latched log line names the actual failure (an ffmpeg/demuxer
+        // message); mpv's own error string only classifies it, so it is the
+        // fallback for a failure nothing logged at error level.
+        (errorMessage ?: event.errorMessage)?.let { data["message"] = it }
         if (event.error == MpvError.AoInitFailed) data["cause"] = CAUSE_AUDIO_OUTPUT_FAILED
       }
     }

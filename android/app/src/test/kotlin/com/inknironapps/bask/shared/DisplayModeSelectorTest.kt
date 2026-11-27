@@ -136,10 +136,131 @@ class DisplayModeSelectorTest {
   }
 
   @Test
-  fun exactRateBeatsMultipleRate() {
-    val uhd30 = ModeInfo(9, 3840, 2160, 29.97f)
-    val selection = select(29.97f, modes = allModes + uhd30)
-    assertEquals(uhd30, selection?.mode)
+  fun halfRateContentTakesItsDoubledRateOverItsOwn() {
+    // 25 and 29.97/30 fps show 2:2 at 50/60 Hz; the panel's 25/30 Hz modes
+    // are a last resort (#3090). Precision still leads, so 29.97 fps takes
+    // 59.94 over 60 as 59.94 fps content does, and the lowest multiple wins
+    // over 100/120 Hz.
+    val uhd25 = ModeInfo(60, 3840, 2160, 25f)
+    val uhd2997 = ModeInfo(61, 3840, 2160, 29.97f)
+    val uhd30 = ModeInfo(62, 3840, 2160, 30f)
+    val uhd5994 = ModeInfo(63, 3840, 2160, 59.94f)
+    val uhd100 = ModeInfo(64, 3840, 2160, 100f)
+    val uhd120 = ModeInfo(65, 3840, 2160, 120f)
+    val panel = allModes + listOf(uhd25, uhd2997, uhd30, uhd5994, uhd100, uhd120)
+    assertEquals(uhd50, select(25f, modes = panel)?.mode)
+    assertEquals(uhd5994, select(29.97f, modes = panel)?.mode)
+    // Already at the doubled rate: nothing to renegotiate.
+    assertEquals(uhd60, select(30f, modes = panel)?.mode)
+  }
+
+  @Test
+  fun halfRateContentFallsBackToItsOwnRateWithoutADoubledMode() {
+    // 60 Hz never settles 25 fps into a short cadence; 25 Hz still beats it.
+    val uhd25 = ModeInfo(60, 3840, 2160, 25f)
+    assertEquals(uhd25, select(25f, modes = listOf(uhd60, uhd25, uhd24))?.mode)
+  }
+
+  @Test
+  fun offNominalHalfRateContentStillTakesItsDoubledRate() {
+    // The tolerance scales with the multiple as for any content: 25.06 fps
+    // is 2:2 at 50 Hz like 25 fps.
+    val uhd25 = ModeInfo(60, 3840, 2160, 25f)
+    assertEquals(uhd50, select(25.06f, modes = listOf(uhd60, uhd50, uhd25))?.mode)
+  }
+
+  @Test
+  fun theNearerExactRateBeatsTheActiveOneWithinTolerance() {
+    // 60.000004 is within RATE_TOLERANCE of 59.94, so both are "exact" for
+    // 59.94 fps content; being the active mode must not keep the one that
+    // drops a frame every ~17 s. Measured on Google TV, Shield and an Amlogic
+    // box after 6fcac5243 applied the multiples tie-break to the exact tier.
+    val uhd60000004 = ModeInfo(50, 3840, 2160, 60.000004f)
+    val uhd5994 = ModeInfo(51, 3840, 2160, 59.94f)
+    val panel = listOf(uhd60000004, uhd5994, uhd50, uhd24)
+    assertEquals(uhd5994, select(59.94f, current = uhd60000004, modes = panel)?.mode)
+    assertEquals(uhd60000004, select(60f, current = uhd5994, modes = panel)?.mode)
+    // Already on the nearer rate: nothing to trade.
+    assertEquals(uhd5994, select(59.94f, current = uhd5994, modes = panel)?.mode)
+  }
+
+  // --- Ranking among integer multiples ---
+
+  // A 120 Hz TV panel exposing a 48 Hz mode and no 23.976 one (#2255).
+  private val tv60 = ModeInfo(30, 1920, 1080, 60f)
+  private val tv48 = ModeInfo(31, 1920, 1080, 48f)
+  private val tv120 = ModeInfo(32, 1920, 1080, 120f)
+  private val tv24 = ModeInfo(33, 1920, 1080, 23.976f)
+  private val tv11988 = ModeInfo(34, 1920, 1080, 119.88f)
+
+  @Test
+  fun theHighestMultipleWinsWhenNoExactRateExists() {
+    // 48 is nearer to 2 x 23.976 than 120 is to 5x, but on a 120 Hz panel a
+    // 48 Hz mode is 2.5 refreshes per frame; 120 Hz is a whole 5:5.
+    val selection = select(23.976f, current = tv60, modes = listOf(tv60, tv48, tv120))
+    assertEquals(tv120, selection?.mode)
+  }
+
+  @Test
+  fun aCurrentCleanMultipleIsNotTradedForAnother() {
+    // Already at 120 Hz: 48 Hz's smaller error is not worth renegotiating
+    // the panel for the same cadence class.
+    val selection = select(23.976f, current = tv120, modes = listOf(tv60, tv48, tv120))
+    assertEquals(tv120, selection?.mode)
+    val stay = select(29.97f, current = tv60, modes = listOf(tv60, tv120))
+    assertEquals(tv60, stay?.mode)
+  }
+
+  @Test
+  fun halfRateContentRanksPrecisionThenTheActiveMode() {
+    // 4:4 at 120 Hz is as clean as 2:2 at 60: no renegotiation down.
+    assertEquals(tv120, select(30f, current = tv120, modes = listOf(tv60, tv120))?.mode)
+    // 60 Hz repeats a 29.97 fps frame every ~17 s; 119.88 Hz is an exact 4:4.
+    assertEquals(tv11988, select(29.97f, current = tv24, modes = listOf(tv24, tv60, tv11988))?.mode)
+  }
+
+  @Test
+  fun anExactRateStillBeatsTheHighestMultiple() {
+    val selection = select(23.976f, current = tv60, modes = listOf(tv60, tv48, tv120, tv24))
+    assertEquals(tv24, selection?.mode)
+  }
+
+  @Test
+  fun theSmallerErrorSeparatesTheSameMultiple() {
+    val selection = select(23.976f, current = tv60, modes = listOf(tv60, tv120, tv11988))
+    assertEquals(tv11988, selection?.mode)
+  }
+
+  @Test
+  fun resolutionMatchingRanksMultiplesTheSameWay() {
+    val selection = select(
+      23.976f,
+      current = tv60,
+      modes = listOf(tv60, tv48, tv120, uhd60, uhd50),
+      videoWidth = 1920,
+      videoHeight = 1080,
+      matchResolution = true
+    )
+    assertEquals(tv120, selection?.mode)
+    val stay = select(
+      23.976f,
+      current = tv120,
+      modes = listOf(tv60, tv48, tv120),
+      videoWidth = 1920,
+      videoHeight = 1080,
+      matchResolution = true
+    )
+    assertEquals(tv120, stay?.mode)
+  }
+
+  @Test
+  fun cadenceTierTwoRanksMultiplesTheSameWay() {
+    // No 1080p multiple at all; both 4K multiples contain the video and
+    // share the resolution distance, so the higher rate wins.
+    val uhd48 = ModeInfo(35, 3840, 2160, 48f)
+    val uhd120 = ModeInfo(36, 3840, 2160, 120f)
+    val selection = select(23.976f, current = tv60, modes = listOf(tv60, uhd48, uhd120), videoWidth = 1920, videoHeight = 1080)
+    assertEquals(uhd120, selection?.mode)
   }
 
   // --- Fractional cadence ---
@@ -223,6 +344,21 @@ class DisplayModeSelectorTest {
       matchResolution = true
     )
     assertEquals(hz60, selection?.mode)
+  }
+
+  @Test
+  fun aPanelWithoutA24pClassModeIsNotRenegotiatedTo50Or30() {
+    // A 4K stick whose panel exposes 60/50/30 Hz classes and nothing lower:
+    // 60 Hz already presents 23.976 as a 3:2; 50 never repeats and 30 is a
+    // longer 5:4, so no tier may trade the current mode for either.
+    val uhd5994 = ModeInfo(40, 3840, 2160, 59.94f)
+    val uhd30 = ModeInfo(41, 3840, 2160, 30f)
+    val uhd2997 = ModeInfo(42, 3840, 2160, 29.97f)
+    val fhd5994 = ModeInfo(43, 1920, 1080, 59.94f)
+    val stick = listOf(uhd60, uhd5994, uhd50, uhd30, uhd2997, fhd60, fhd5994, fhd50)
+    assertNull(select(23.976f, current = uhd60, modes = stick))
+    assertNull(select(23.976f, current = uhd60, modes = stick, videoWidth = 1920, videoHeight = 1080))
+    assertNull(select(23.976f, current = uhd60, modes = stick, videoWidth = 3840, videoHeight = 2160))
   }
 
   // --- matchRefreshRate ---

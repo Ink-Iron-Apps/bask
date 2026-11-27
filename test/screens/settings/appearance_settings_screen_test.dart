@@ -28,7 +28,7 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider<ThemeProvider>.value(
         value: theme,
-        child: MaterialApp(theme: monoTheme(dark: true), home: const AppearanceSettingsScreen()),
+        child: MaterialApp(theme: monoTheme(MonoPalette.dark), home: const AppearanceSettingsScreen()),
       ),
     );
     await tester.pumpAndSettle();

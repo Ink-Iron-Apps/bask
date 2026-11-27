@@ -10,8 +10,9 @@ enum AccountPreferenceKey {
   preferredAudioLanguage(AccountPreferenceValueKind.languageCode),
 
   /// Auto-pick an audio track from the language preference instead of keeping
-  /// the file's default. Jellyfin `PlayDefaultAudioTrack`, Plex
-  /// `autoSelectAudio`. Applied by the server.
+  /// the file's default. Plex `autoSelectAudio`; the inverse of MediaBrowser
+  /// `PlayDefaultAudioTrack` ("play default track regardless of language").
+  /// Applied by the server.
   autoSelectAudio(AccountPreferenceValueKind.boolean),
 
   /// Preferred subtitle language. Jellyfin `SubtitleLanguagePreference`,
@@ -183,7 +184,7 @@ enum ForcedSubtitlePreference {
 class AccountPreferences implements MediaServerUserProfile {
   const AccountPreferences({
     this.preferredAudioLanguage,
-    this.playDefaultAudioTrack,
+    this.selectAudioByLanguage,
     this.preferredSubtitleLanguage,
     this.subtitlePlaybackMode,
     this.rememberAudioSelections,
@@ -202,7 +203,7 @@ class AccountPreferences implements MediaServerUserProfile {
   static const empty = AccountPreferences();
 
   final String? preferredAudioLanguage;
-  final bool? playDefaultAudioTrack;
+  final bool? selectAudioByLanguage;
   final String? preferredSubtitleLanguage;
   final SubtitlePlaybackMode? subtitlePlaybackMode;
   final bool? rememberAudioSelections;
@@ -231,7 +232,7 @@ class AccountPreferences implements MediaServerUserProfile {
   /// Typed read of a single key, for generic UI rows.
   Object? operator [](AccountPreferenceKey key) => switch (key) {
     AccountPreferenceKey.preferredAudioLanguage => preferredAudioLanguageCode1,
-    AccountPreferenceKey.autoSelectAudio => playDefaultAudioTrack,
+    AccountPreferenceKey.autoSelectAudio => selectAudioByLanguage,
     AccountPreferenceKey.preferredSubtitleLanguage => preferredSubtitleLanguageCode1,
     AccountPreferenceKey.subtitleMode => subtitlePlaybackMode,
     AccountPreferenceKey.rememberAudioSelections => rememberAudioSelections,
@@ -251,10 +252,11 @@ class AccountPreferences implements MediaServerUserProfile {
   // Implemented so the account cache can feed TrackSelectionService directly
   // instead of maintaining a second fetch path for the same fields.
 
-  /// Defaults to true, matching both backends' own defaults
-  /// (`PlayDefaultAudioTrack` / `autoSelectAudio`) when unset.
+  /// Defaults to true, Plex's own `autoSelectAudio` default, when unset.
+  /// MediaBrowser servers always serialize `PlayDefaultAudioTrack`, so the
+  /// fallback never stands in for their (inverse) default.
   @override
-  bool get autoSelectAudio => playDefaultAudioTrack ?? true;
+  bool get autoSelectAudio => selectAudioByLanguage ?? true;
 
   @override
   String? get defaultAudioLanguage => preferredAudioLanguage;
@@ -331,27 +333,31 @@ class AccountPreferencesCapabilities {
   /// Jellyfin: `UserConfiguration`, plus [AccountPreferenceKey.rewatchingInNextUp]
   /// in the account's `DisplayPreferences` custom prefs.
   ///
-  /// [AccountPreferenceKey.rememberAudioSelections],
-  /// [AccountPreferenceKey.rememberSubtitleSelections] and
-  /// [AccountPreferenceKey.autoPlayNextEpisode] are read and round-tripped —
-  /// the whole-object write must never reset them — but are deliberately **not**
-  /// editable here. Bask already owns each of those decisions locally
-  /// (`SettingsService.rememberTrackSelections`, `followServerTrackSelections`,
-  /// `autoPlayNextEpisode`, the last of which is also a toggle in the player's
-  /// settings sheet), those local prefs are the only ones the playback path
-  /// reads, and they are the only answer available for Plex, which stores no
-  /// twin. Surfacing a second switch for the same behaviour would let the two
-  /// disagree with no rule for which wins. Making the account authoritative
-  /// instead means threading per-account state into `TrackManager`,
-  /// `PlaybackProgressTracker` and the in-player sheet, and splitting one local
-  /// toggle into Jellyfin's separate audio/subtitle flags — a playback-path
-  /// change that belongs in its own commit, not in this section.
+  /// [AccountPreferenceKey.rememberAudioSelections] and
+  /// [AccountPreferenceKey.rememberSubtitleSelections] are storable but have
+  /// no row in the Account preferences screen: the local
+  /// `SettingsService.rememberTrackSelections` toggle is the one opt-in, the
+  /// only answer available for Plex, and the one the playback path reads. The
+  /// server, though, records and applies the stream indexes Bask reports
+  /// only while these flags are on
+  /// ([MediaBrowserDialect.persistsTrackSelectionsViaAccountFlags]), so
+  /// `TrackManager` turns the flag for a picked track type on when the local
+  /// toggle needs it. One direction only — nothing here turns them off — which
+  /// is the rule for which side wins that a second switch would have lacked.
+  ///
+  /// [AccountPreferenceKey.autoPlayNextEpisode] is read and round-tripped —
+  /// the whole-object write must never reset it — but stays deliberately
+  /// **not** editable: Bask owns that decision locally (`autoPlayNextEpisode`,
+  /// also a toggle in the player's settings sheet) and the server plays no part
+  /// in it.
   static const jellyfin = AccountPreferencesCapabilities(
     supportedKeys: {
       AccountPreferenceKey.preferredAudioLanguage,
       AccountPreferenceKey.autoSelectAudio,
       AccountPreferenceKey.preferredSubtitleLanguage,
       AccountPreferenceKey.subtitleMode,
+      AccountPreferenceKey.rememberAudioSelections,
+      AccountPreferenceKey.rememberSubtitleSelections,
       AccountPreferenceKey.displayMissingEpisodes,
       AccountPreferenceKey.hidePlayedInLatest,
       AccountPreferenceKey.displayCollectionsView,
@@ -362,8 +368,10 @@ class AccountPreferencesCapabilities {
 
   /// Emby: the same `UserConfiguration` field set, minus rewatching —
   /// `/Shows/NextUp` has no `EnableRewatching` there
-  /// ([MediaBrowserDialect.supportsNextUpRewatching]), so storing the switch
-  /// would promise behaviour the server cannot deliver.
+  /// ([MediaBrowserDialect.supportsNextUpRewatching]) — and minus the remember
+  /// flags, whose effect on Emby playback defaults is unverified
+  /// ([MediaBrowserDialect.persistsTrackSelectionsViaAccountFlags]); storing
+  /// either would promise behaviour the server may not deliver.
   static const emby = AccountPreferencesCapabilities(
     supportedKeys: {
       AccountPreferenceKey.preferredAudioLanguage,

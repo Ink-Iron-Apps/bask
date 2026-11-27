@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:bask/utils/certificate_trust.dart';
 import 'package:xml/xml.dart';
 
 const _configPath = 'android/app/src/main/res/xml/network_security_config.xml';
@@ -13,9 +14,14 @@ const _expectedDomains = <String>{
   'simkl.com',
   'simkl.in',
   'jsdelivr.net',
-  'api.github.com',
+  'github.com',
+  'githubusercontent.com',
   'image.tmdb.org',
 };
+// Reached only through a redirect from a listed domain, so no source literal
+// names them: github.com's release asset downloads land on
+// release-assets.githubusercontent.com.
+const _redirectTargetDomains = <String>{'githubusercontent.com'};
 const _fixedEndpointSourcePaths = <String>[
   'lib/services/plex_auth_service.dart',
   'lib/services/plex_discover_client.dart',
@@ -25,12 +31,11 @@ const _fixedEndpointSourcePaths = <String>[
   'lib/services/trackers/anilist/anilist_constants.dart',
   'lib/services/trackers/simkl/simkl_constants.dart',
   'lib/services/trackers/oauth_proxy_client.dart',
-  'lib/services/trackers/anime_lists_mapping_store.dart',
-  'lib/services/trackers/fribb_mapping_store.dart',
+  'lib/services/trackers/anime_mappings_store.dart',
   'lib/services/catalog/seerr_catalog_source.dart',
   'lib/services/discord_rpc_service.dart',
   'lib/services/update_service.dart',
-  'lib/watch_together/services/watch_together_relay_endpoint.dart',
+  'lib/services/plezy_server.dart',
   'lib/main.dart',
 ];
 
@@ -76,6 +81,13 @@ void main() {
     expect(certificates.single.getAttribute('src'), 'system');
   });
 
+  // The config only governs the platform HTTP stack. dart:io does its own TLS
+  // and applies the same split through CertificateTrust, so the two lists must
+  // not drift: a domain missing there would verify against user authorities.
+  test('dart:io keeps the same fixed endpoints on system certificate authorities', () {
+    expect(CertificateTrust.fixedEndpointDomains, unorderedEquals(_expectedDomains));
+  });
+
   test('hard-coded HTTPS hosts remain covered by a system-only domain', () {
     final httpsLiteralPattern = RegExp("https://[^'\"\\s]+");
     final discoveredHosts = <String>{};
@@ -102,6 +114,7 @@ void main() {
     // the scan lost sight of the file that owns it, and a host change there would
     // silently fall through to base-config and its user certificate authorities.
     final unobservedDomains = _expectedDomains
+        .difference(_redirectTargetDomains)
         .where((domain) => !discoveredHosts.any((host) => host == domain || host.endsWith('.$domain')))
         .toList();
     expect(

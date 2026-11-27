@@ -13,7 +13,10 @@ import 'package:bask/i18n/strings.g.dart';
 import 'package:bask/media/media_source_info.dart';
 import 'package:bask/mpv/mpv.dart';
 import 'package:bask/providers/playback_state_provider.dart';
+import 'package:bask/models/hotkey_model.dart';
+import 'package:bask/services/keyboard_shortcuts_service.dart';
 import 'package:bask/services/settings_service.dart';
+import 'package:bask/services/shortcut_action.dart';
 import 'package:bask/services/video_volume_controller.dart';
 import 'package:bask/utils/platform_detector.dart';
 import 'package:bask/watch_together/providers/watch_together_provider.dart';
@@ -69,6 +72,10 @@ void main() {
     resetSharedPreferencesForTest();
     SettingsService.resetForTesting();
     settings = await SettingsService.getInstance();
+    // The shortcuts singleton binds to whichever SettingsService exists when it
+    // is first created; a fresh one per test makes binding writes reach it.
+    final shortcuts = await KeyboardShortcutsService.getInstance();
+    addTearDown(shortcuts.dispose);
 
     // Desktop with a pointer: the configuration the report came from.
     TvDetectionService.debugSetAppleTVOverride(false);
@@ -146,12 +153,33 @@ void main() {
     ),
   );
 
+  PlexVideoControls controls({
+    List<MediaMarker>? markers,
+    bool canControl = true,
+    bool playbackPromptOpen = false,
+    void Function({required bool skipAutoPlayCountdown})? onReachedEnd,
+  }) => PlexVideoControls(
+    player: player,
+    volumeController: volume,
+    metadata: testMediaItem(id: 'select-key'),
+    initialMarkers: markers,
+    toastController: toast,
+    chromeController: chrome,
+    hasFirstFrame: hasFirstFrame,
+    canNavigateMediaItems: false,
+    canControl: canControl,
+    playbackPromptOpen: playbackPromptOpen,
+    onPlayPauseRequested: (_) async => toggles++,
+    onReachedEnd: onReachedEnd,
+  );
+
   Future<void> pumpPlayer(
     WidgetTester tester, {
     List<MediaMarker>? markers,
     TargetPlatform platform = TargetPlatform.windows,
     bool canControl = true,
     bool playbackPromptOpen = false,
+    void Function({required bool skipAutoPlayCountdown})? onReachedEnd,
   }) async {
     await tester.pumpWidget(shell(const SizedBox.expand(), platform: platform));
     await tester.pump();
@@ -160,18 +188,11 @@ void main() {
     await tester.pumpWidget(
       shell(
         platform: platform,
-        PlexVideoControls(
-          player: player,
-          volumeController: volume,
-          metadata: testMediaItem(id: 'select-key'),
-          initialMarkers: markers,
-          toastController: toast,
-          chromeController: chrome,
-          hasFirstFrame: hasFirstFrame,
-          canNavigateMediaItems: false,
+        controls(
+          markers: markers,
           canControl: canControl,
           playbackPromptOpen: playbackPromptOpen,
-          onPlayPauseRequested: (_) async => toggles++,
+          onReachedEnd: onReachedEnd,
         ),
       ),
     );
@@ -199,6 +220,7 @@ void main() {
     TargetPlatform platform = TargetPlatform.windows,
     bool canControl = true,
     bool playbackPromptOpen = false,
+    void Function({required bool skipAutoPlayCountdown})? onReachedEnd,
   }) {
     testWidgets(description, (tester) async {
       await pumpPlayer(
@@ -207,6 +229,7 @@ void main() {
         platform: platform,
         canControl: canControl,
         playbackPromptOpen: playbackPromptOpen,
+        onReachedEnd: onReachedEnd,
       );
       await body(tester);
       chrome.cancelAutoHide();
@@ -568,6 +591,74 @@ void main() {
     });
   });
 
+  // Enter is the default skip binding and also the surface's Select key, whose
+  // own skip rule only holds while the chrome is down. Moving the mouse raises
+  // the chrome on desktop, so Select used to swallow the binding and toggle
+  // playback under a prompt the viewer could see (#2577).
+  group('the desktop skip binding', () {
+    final introMarker = MediaMarker(id: 1, type: 'intro', startTimeOffset: 10000, endTimeOffset: 45000);
+
+    Future<void> showPromptUnderChrome(WidgetTester tester) async {
+      player.emitPosition(const Duration(seconds: 15));
+      await tester.pumpAndSettle();
+      chrome.show();
+      await tester.pumpAndSettle();
+      expect(find.byType(SkipMarkerButton), findsOneWidget, reason: 'precondition: the prompt is up');
+      expect(focusLabel(), 'PlayerSurface', reason: 'precondition: nothing in the chrome owns focus');
+    }
+
+    playerTest('Enter skips a prompt with the chrome up', markers: [introMarker], (tester) async {
+      await showPromptUnderChrome(tester);
+
+      await press(tester, LogicalKeyboardKey.enter);
+
+      expect(player.state.position, const Duration(seconds: 45));
+      expect(toggles, 0, reason: 'the binding outranks the Select toggle');
+    });
+
+    playerTest('rebinding the skip gives Enter back to play/pause', markers: [introMarker], (tester) async {
+      await settings.write(SettingsService.keyboardHotkeys, {
+        ...settings.read(SettingsService.keyboardHotkeys),
+        ShortcutAction.skipMarker.id: const HotKey(key: PhysicalKeyboardKey.digit9),
+      });
+      await showPromptUnderChrome(tester);
+
+      await press(tester, LogicalKeyboardKey.enter);
+      expect(toggles, 1);
+      expect(player.state.position, const Duration(seconds: 15), reason: 'Enter is no longer the binding');
+
+      await press(tester, LogicalKeyboardKey.digit9);
+      expect(player.state.position, const Duration(seconds: 45));
+    });
+
+    // Focus drifts off the surface on route opening, window reactivation and
+    // the like; the global fallback used to consume the binding as a no-op.
+    playerTest('the binding skips while focus has drifted off the surface', markers: [introMarker], (tester) async {
+      player.emitPosition(const Duration(seconds: 15));
+      await tester.pumpAndSettle();
+      screenFocusNode.requestFocus();
+      await tester.pump();
+      expect(focusLabel(), 'VideoPlayerScreen', reason: 'precondition: focus has drifted');
+
+      await press(tester, LogicalKeyboardKey.enter);
+
+      expect(player.state.position, const Duration(seconds: 45));
+    });
+
+    playerTest('a drifted Enter does not skip a prompt that already went away', markers: [introMarker], (tester) async {
+      player.emitPosition(const Duration(seconds: 15));
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 8));
+      expect(find.byType(SkipMarkerButton), findsNothing, reason: 'precondition: the prompt auto-dismissed');
+      screenFocusNode.requestFocus();
+      await tester.pump();
+
+      await press(tester, LogicalKeyboardKey.enter);
+
+      expect(player.state.position, const Duration(seconds: 15), reason: 'an unseen marker must not be skipped');
+    });
+  });
+
   // Android TV is the platform the report came from, and it is materially
   // different: the marker autofocuses the button, so the key is dispatched
   // from the button's node upward rather than from the surface. The forced-TV
@@ -637,6 +728,136 @@ void main() {
       },
     );
   });
+
+  // Credits that run to the end of the file end the item instead of seeking.
+  // A Watch Together guest gets no Play Next prompt to take the remote, so
+  // the vanished button must hand it back to the surface (#1890, #3147).
+  group('credits that run to the end on a television', () {
+    final creditsMarker = MediaMarker(id: 1, type: 'credits', startTimeOffset: 2640000, endTimeOffset: 2700000);
+    final endings = <bool>[];
+
+    setUp(() async {
+      endings.clear();
+      TvDetectionService.debugSetAppleTVOverride(true);
+      PlatformDetector.debugSetIsDesktopOSOverride(false);
+      await setNavigationEnabled(true);
+    });
+
+    playerTest(
+      'Select ends the item without touching the player, and the next Select toggles playback',
+      markers: [creditsMarker],
+      onReachedEnd: ({required skipAutoPlayCountdown}) => endings.add(skipAutoPlayCountdown),
+      (tester) async {
+        InputModeTracker.reportNonPointerInput();
+        player.emitPosition(const Duration(minutes: 44, seconds: 30));
+        await tester.pumpAndSettle();
+        expect(focusLabel(), 'SkipMarkerButton', reason: 'precondition: TV autofocuses the sole affordance');
+
+        await press(tester, LogicalKeyboardKey.select);
+
+        expect(endings, [false], reason: 'the screen ends the item');
+        expect(player.pauses, 0, reason: 'the screen, not the controls, decides how the item ends');
+        expect(player.state.position, const Duration(minutes: 44, seconds: 30), reason: 'no seek to EOF');
+        expect(focusLabel(), 'PlayerSurface', reason: 'the vanished button must hand the remote back');
+
+        await press(tester, LogicalKeyboardKey.select);
+
+        expect(toggles, 1, reason: 'one press must toggle playback, not merely raise the chrome');
+      },
+    );
+
+    playerTest(
+      'with nothing left to end, the prompt goes away and does not come back',
+      markers: [creditsMarker],
+      onReachedEnd: ({required skipAutoPlayCountdown}) => endings.add(skipAutoPlayCountdown),
+      (tester) async {
+        player.emitPosition(const Duration(minutes: 44, seconds: 30));
+        await tester.pumpAndSettle();
+        expect(find.byType(SkipMarkerButton), findsOneWidget, reason: 'precondition: the prompt is up');
+
+        // A Watch Together room reached its end.
+        await tester.pumpWidget(shell(controls(markers: [creditsMarker])));
+        await tester.pumpAndSettle();
+        expect(find.byType(SkipMarkerButton), findsNothing);
+
+        player.emitPosition(const Duration(minutes: 44, seconds: 59));
+        await tester.pumpAndSettle();
+        expect(find.byType(SkipMarkerButton), findsNothing);
+        expect(endings, isEmpty);
+      },
+    );
+  });
+
+  // An in-place open (a TV wake-up restore, a quality switch) closes the
+  // first-frame gate, and the guard unmounts the transport row under a focused
+  // Play/Pause. Focus fell to the chrome's own scope, which no key stage
+  // answers, so a paused viewer's remote went dead under visible chrome
+  // (#3022).
+  group('an open that unmounts the focused control', () {
+    setUp(() async {
+      TvDetectionService.debugSetAppleTVOverride(null);
+      await TvDetectionService.getInstance(forceTv: true);
+      TvDetectionService.setForceTVSync(true);
+      PlatformDetector.debugSetIsDesktopOSOverride(false);
+      await setNavigationEnabled(true);
+    });
+
+    Future<void> focusPlayPause(WidgetTester tester) async {
+      await press(tester, LogicalKeyboardKey.arrowUp);
+      expect(focusLabel(), 'PlayPause', reason: 'precondition: the remote is on Play/Pause');
+    }
+
+    playerTest('the remote waits on the surface and returns to Play/Pause with the frame', (tester) async {
+      await focusPlayPause(tester);
+
+      hasFirstFrame.value = false;
+      await tester.pumpAndSettle();
+      expect(focusLabel(), 'PlayerSurface', reason: 'the emptied chrome scope must not keep the remote');
+
+      hasFirstFrame.value = true;
+      await tester.pumpAndSettle();
+      expect(focusLabel(), 'PlayPause', reason: 'the frame brings back the control the open took away');
+
+      await press(tester, LogicalKeyboardKey.arrowRight);
+      expect(focusLabel(), isNot(anyOf('PlayPause', 'PlayerSurface')), reason: 'arrows traverse the row again');
+    });
+
+    playerTest('OK toggles playback while the open is still loading', (tester) async {
+      await focusPlayPause(tester);
+      hasFirstFrame.value = false;
+      await tester.pumpAndSettle();
+
+      await press(tester, LogicalKeyboardKey.select);
+
+      expect(toggles, 1, reason: 'OK must not be swallowed while the row is gone');
+    });
+
+    playerTest('a remote resting on the surface stays there', (tester) async {
+      InputModeTracker.reportNonPointerInput();
+      chrome.show();
+      await tester.pumpAndSettle();
+      expect(focusLabel(), 'PlayerSurface', reason: 'precondition: nothing in the chrome owns focus');
+
+      hasFirstFrame.value = false;
+      await tester.pumpAndSettle();
+      hasFirstFrame.value = true;
+      await tester.pumpAndSettle();
+
+      expect(focusLabel(), 'PlayerSurface', reason: 'the open hands back what it took; it does not grab');
+    });
+
+    // The chrome scope node outlives each hide. A rebuild while hiding must not
+    // leave it refusing focus to its controls once the chrome is back.
+    playerTest('the chrome takes the remote again after hiding and showing', (tester) async {
+      await focusPlayPause(tester);
+
+      chrome.hide();
+      await tester.pumpAndSettle();
+      expect(focusLabel(), 'PlayerSurface', reason: 'precondition: the hidden chrome handed the remote back');
+
+      await focusPlayPause(tester);
+    });
+  });
 }
 
 /// Minimal [Player] reporting steady playback; transport is routed to the
@@ -644,6 +865,7 @@ void main() {
 class _TogglePlayer implements Player {
   Duration _position = const Duration(minutes: 5);
   final StreamController<Duration> _positionController = StreamController<Duration>.broadcast();
+  var pauses = 0;
 
   /// Moves the playhead and announces it on the position stream, the way a
   /// real player drives marker detection.
@@ -665,6 +887,9 @@ class _TogglePlayer implements Player {
   /// detection (and its focus handling) rides on that event.
   @override
   Future<void> seek(Duration position) async => emitPosition(position);
+
+  @override
+  Future<void> pause() async => pauses++;
 
   @override
   PlayerStreams get streams => PlayerStreams(

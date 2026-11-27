@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../focus/input_mode_tracker.dart';
 import '../focus/key_event_utils.dart';
 import 'desktop_app_bar.dart';
-import 'ios_status_bar_tap_scroll_to_top.dart';
 import 'system_bottom_inset.dart';
 
 /// A scaffold widget that wraps Focus + Scaffold + CustomScrollView
@@ -46,6 +45,10 @@ class FocusedScrollScaffold extends StatefulWidget {
   /// [handleBackKeyNavigation] (which pops the current route).
   final VoidCallback? onBackPressed;
 
+  /// Fixed bar below the scroll view, e.g. a screen's Save/Cancel row. It
+  /// stays in this scaffold's focus scope, after the content in traversal.
+  final Widget? bottomBar;
+
   const FocusedScrollScaffold({
     super.key,
     required this.title,
@@ -55,6 +58,7 @@ class FocusedScrollScaffold extends StatefulWidget {
     this.pinned = true,
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
+    this.bottomBar,
   });
 
   @override
@@ -102,9 +106,16 @@ class _FocusedScrollScaffoldState extends State<FocusedScrollScaffold> {
       },
       child: FocusScope(
         node: _scopeNode,
-        child: IosStatusBarTapScrollToTop(
-          child: Scaffold(
-            body: CustomScrollView(
+        child: Scaffold(
+          bottomNavigationBar: widget.bottomBar,
+          // Horizontal-only SafeArea at the region owner: rows clear a
+          // landscape notch or iPhone Duo's portrait sensor column. The app
+          // bar shares the scaffold color and never tints, so insetting it
+          // too is invisible.
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: CustomScrollView(
               slivers: [
                 if (!widget.focusableAppBarActions || !_appBarFocusEnabled)
                   ExcludeFocus(

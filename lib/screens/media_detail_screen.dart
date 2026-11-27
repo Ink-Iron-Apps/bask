@@ -31,10 +31,12 @@ import '../media/media_hub.dart';
 import '../utils/provider_extensions.dart';
 import '../utils/plex_season_display.dart';
 import '../media/media_item.dart';
+import '../media/primary_trailer.dart';
 import '../media/episode_collection.dart';
 import '../media/media_item_types.dart';
 import '../media/media_kind.dart';
 import '../media/media_source_info.dart';
+import '../media/media_rating.dart';
 import '../media/media_role.dart';
 import '../media/paged_media_list_state.dart';
 import '../widgets/media_card.dart';
@@ -66,16 +68,17 @@ import '../providers/multi_server_provider.dart';
 import '../providers/offline_watch_provider.dart';
 import '../providers/watch_state_store.dart';
 import '../services/catalog/catalog_source.dart';
+import '../services/catalog/community_ratings.dart';
 import '../services/catalog/library_watchlist_candidates.dart';
 import '../utils/app_logger.dart';
 import '../utils/formatters.dart';
+import '../utils/global_key_utils.dart';
 import '../utils/scroll_utils.dart';
 import '../utils/dialogs.dart';
 import '../utils/snackbar_helper.dart';
 import '../utils/media_navigation_helper.dart';
 import '../utils/video_player_navigation.dart';
 import '../widgets/app_bar_back_button.dart';
-import '../widgets/desktop_app_bar.dart';
 import '../utils/desktop_window_padding.dart';
 import '../widgets/horizontal_scroll_with_arrows.dart';
 import '../widgets/media_context_menu.dart';
@@ -88,22 +91,21 @@ import '../mixins/watch_state_aware.dart';
 import '../mixins/deletion_aware.dart';
 import '../mixins/mounted_set_state_mixin.dart';
 import '../mixins/server_bound_media_mixin.dart';
+import '../mixins/listenable_bindings_mixin.dart';
 import '../utils/watch_state_notifier.dart';
 import '../utils/deletion_notifier.dart';
 import '../utils/library_content_notifier.dart';
-import '../utils/global_key_utils.dart';
 import '../utils/tone_mapped_logo_image.dart';
 import '../widgets/episode_card.dart';
 import '../widgets/fitting_title_text.dart';
-import 'actor_media_screen.dart';
 import '../widgets/hub_section.dart';
-import '../widgets/ios_status_bar_tap_scroll_to_top.dart';
 import '../widgets/loading_indicator_box.dart';
 import '../widgets/rasterized_gradient.dart';
 import '../widgets/tv_browse_rail.dart';
 import '../widgets/tv_spotlight_background.dart';
 import '../providers/account_preferences_controller.dart';
 import '../services/playback_track_preview.dart';
+import '../utils/error_message_utils.dart';
 
 part 'media_detail/action_buttons.dart';
 part 'media_detail/playback_tracks_status.dart';
@@ -120,12 +122,19 @@ const double _maxHeroArtViewportFraction = 0.86;
 const double _heroChromeHeight = 58;
 
 /// Full-size logo/title slot in the non-TV hero, the gap under it, the action
-/// row height and the hero's bottom inset. Shared by the hero's height floor
-/// and its content budget so the two cannot disagree.
+/// row height, the hero's bottom inset and its side insets. Shared by the
+/// hero's height floor and its content budget so the two cannot disagree.
 const double _heroLogoHeight = 120;
 const double _heroLogoGap = 12;
 const double _heroActionHeight = 48;
 const double _heroBottomInset = 16;
+const double _heroSideInset = 16;
+
+/// Whether a non-TV hero whose content is [contentWidth] wide uses the phone
+/// layout: everything on the centre line, and the scores on a chip row of
+/// their own, since the one-run metadata strip has no room left for them
+/// beside the year, certification, runtime and quality labels (#2569).
+bool _isCompactHero(double contentWidth) => contentWidth < ScreenBreakpoints.mobile;
 
 const double _tvDetailTallPosterScale = 0.72;
 const double _tvDetailEpisodeThumbnailScale = 0.72;
@@ -152,11 +161,27 @@ class _SeasonEpisodePager {
 
   bool hasState(String seasonId) => _states.containsKey(seasonId);
 
+  /// Bumped by [resetSeason], so a page load (first or continuation) started
+  /// before a reset can tell that its result no longer belongs to the season.
+  final Map<String, int> _epochs = {};
+
+  int epochOf(String seasonId) => _epochs[seasonId] ?? 0;
+
   bool beginFirstPageLoad(String seasonId) => _firstPageLoadsInFlight.add(seasonId);
-  void endFirstPageLoad(String seasonId) => _firstPageLoadsInFlight.remove(seasonId);
+
+  /// Ends a first-page load started at [epoch]. A load that [resetSeason]
+  /// superseded leaves the in-flight mark to the load that replaced it.
+  void endFirstPageLoad(String seasonId, {required int epoch}) {
+    if (epoch == epochOf(seasonId)) _firstPageLoadsInFlight.remove(seasonId);
+  }
 
   bool beginMoreLoad(String seasonId) => _moreLoadsInFlight.add(seasonId);
-  void endMoreLoad(String seasonId) => _moreLoadsInFlight.remove(seasonId);
+
+  /// Ends a continuation load started at [epoch]; like [endFirstPageLoad], a
+  /// superseded load leaves the in-flight mark to its replacement.
+  void endMoreLoad(String seasonId, {required int epoch}) {
+    if (epoch == epochOf(seasonId)) _moreLoadsInFlight.remove(seasonId);
+  }
 
   void markFirstPageLoading(String seasonId) {
     _states[seasonId] = stateFor(seasonId).startInitialLoad();
@@ -193,6 +218,7 @@ class _SeasonEpisodePager {
     _states.remove(seasonId);
     _firstPageLoadsInFlight.remove(seasonId);
     _moreLoadsInFlight.remove(seasonId);
+    _epochs[seasonId] = epochOf(seasonId) + 1;
   }
 
   /// Drops cached episode pages for seasons outside [keepSeasonIds].
@@ -321,7 +347,13 @@ PageRoute<bool> mediaDetailRoute({
 }
 
 class _MediaDetailScreenState extends State<MediaDetailScreen>
-    with WatchStateAware, DeletionAware, MountedSetStateMixin, ServerBoundMediaMixin, RouteAware {
+    with
+        WatchStateAware,
+        DeletionAware,
+        MountedSetStateMixin,
+        ServerBoundMediaMixin,
+        RouteAware,
+        ListenableBindingsMixin {
   /// Public input alias — used as the live source of truth until the detail
   /// fetch returns. Holds backend-neutral [MediaItem] data.
   MediaItem get _metadata => _fullMetadata ?? widget.metadata;
@@ -356,6 +388,14 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   bool _suppressBackAfterPop = false;
   bool _tvDetailRevealed = false;
   bool _tvDetailRevealScheduled = false;
+  // Whether the route's push fade has finished. Until it has, and until the
+  // reveal gate opens, the hidden foreground and rail are not built: every
+  // data arrival during the fade would otherwise build and lay out invisible
+  // rows mid-animation, which drops most of the fade's frames on low-end TV
+  // boxes. After the fade, hidden content builds early again, so a slow load
+  // still warms the rows' artwork before the reveal.
+  bool _tvDetailRouteSettled = false;
+  Animation<double>? _tvDetailRouteAnimation;
   bool _hasLoadedSeasons = false;
   bool _hasLoadedEpisodes = false;
   double? _tvDetailPendingRailHeight;
@@ -374,8 +414,20 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   int _playbackProbeGeneration = 0;
   final ValueNotifier<int> _playbackStatusRevision = ValueNotifier(0);
   String? _playbackStatusTarget;
-  Listenable? _playbackVersionPreferences;
   Timer? _playbackProbeTimer;
+
+  // Scores from the full record a probe fetched, by global key. Plex children
+  // listings carry only the scalar TMDB pair; the item's own fetch adds the
+  // `Rating[]` array (IMDb), so the TV hero shows that for the focused episode
+  // at no extra request (#2539). Outlives probe refreshes: a score does not
+  // move with watch state, and clearing it would blank the badge until the
+  // re-probe lands.
+  final Map<String, List<MediaRatingSource>> _probedRatings = {};
+  final ValueNotifier<int> _focusedEpisodeRatingsRevision = ValueNotifier(0);
+  late final Listenable _tvDetailForegroundListenable = Listenable.merge([
+    _tvDetailFocusedEpisode,
+    _focusedEpisodeRatingsRevision,
+  ]);
 
   // Watchlist action (external catalog sources: Trakt, MAL). External ids
   // resolve once via the owning server, then per capable source; membership
@@ -385,6 +437,11 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   List<CatalogSource> _watchlistListenedSources = const [];
   final GlobalKey _watchlistButtonKey = GlobalKey();
   bool _watchlistMutationInFlight = false;
+
+  // The connected trackers' scores for this title, merged as each answers
+  // (see [_initCommunityRatings]); empty until then.
+  List<MediaRatingSource> _communityRatings = const [];
+  StreamSubscription<List<MediaRatingSource>>? _communityRatingsSubscription;
 
   // Inline season tabs
   int _selectedSeasonIndex = 0;
@@ -566,7 +623,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   }
 
   void _patchItemEverywhere(String sourceGlobalKey, MediaItem item) {
-    final base = _fullMetadata ?? widget.metadata;
+    final base = _metadata;
     if (base.globalKey == sourceGlobalKey) {
       _fullMetadata = _normalizeRefreshedItem(item, base);
     }
@@ -672,15 +729,15 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     // If we have a season that matches the rating key exactly, then remove it from our list
     final seasonIndex = _seasons.indexWhere((s) => s.id == event.itemId);
     if (seasonIndex != -1) {
-      setState(() {
-        _seasons.removeAt(seasonIndex);
-      });
+      late final bool selectionMoved;
+      setState(() => selectionMoved = _removeSeasonAt(seasonIndex));
 
       // If the show has no more seasons, navigate back up to the library
       if (_seasons.isEmpty && mounted) {
         _markDetailDeleted();
         return;
       }
+      if (selectionMoved) unawaited(_fetchSeasonEpisodes(_selectedSeasonIndex));
       _refreshWatchState();
       return;
     }
@@ -695,15 +752,15 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         final newLeafCount = (season.leafCount ?? 1) - 1;
         if (newLeafCount <= 0) {
           // Season is now empty, remove it
-          setState(() {
-            _seasons.removeAt(idx);
-          });
+          late final bool selectionMoved;
+          setState(() => selectionMoved = _removeSeasonAt(idx));
 
           // Otherwise we have no more seasons, so navigate up
           if (_seasons.isEmpty && mounted) {
             _markDetailDeleted();
             return;
           }
+          if (selectionMoved) unawaited(_fetchSeasonEpisodes(_selectedSeasonIndex));
         } else {
           setState(() {
             // Otherwise just update the counts
@@ -714,6 +771,31 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         return;
       }
     }
+  }
+
+  /// Removes the season at [index] while keeping the selection on the same
+  /// season: indexes after it shift down, and when the selected season itself
+  /// is removed the selection moves to its neighbour, whose rows replace the
+  /// removed season's. Returns whether the selection moved to another season,
+  /// whose episodes the caller then loads. Call inside setState.
+  bool _removeSeasonAt(int index) {
+    final removed = _seasons.removeAt(index);
+    _seasonEpisodePager.resetSeason(removed.id);
+    // A flattened list has no season selection to keep.
+    if (_isFlattenEpisodeList) return false;
+    if (_seasons.isEmpty) {
+      _selectedSeasonIndex = 0;
+      _episodes = const <MediaItem>[];
+      return false;
+    }
+    if (index < _selectedSeasonIndex) {
+      _selectedSeasonIndex--;
+      return false;
+    }
+    if (index > _selectedSeasonIndex) return false;
+    _selectedSeasonIndex = index.clamp(0, _seasons.length - 1);
+    _syncSelectedSeasonEpisodes(_selectedSeasonIndex, _seasons[_selectedSeasonIndex].id);
+    return true;
   }
 
   void _markDetailDeleted() {
@@ -813,7 +895,26 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     _loadFullMetadata();
     unawaited(_listenForPlaybackVersionChanges());
     _initWatchlistState();
+    _initCommunityRatings();
   }
+
+  /// Ask the connected trackers for this title's scores. They resolve the
+  /// title through the watchlist's cached ids, so this costs no extra
+  /// media-server request. No-ops offline and for non-movie/show kinds.
+  void _initCommunityRatings() {
+    if (widget.isOffline) return;
+    final catalogSources = Provider.of<CatalogSourcesProvider?>(context, listen: false);
+    if (catalogSources == null) return;
+    _communityRatingsSubscription = catalogSources
+        .communityRatingsForLibraryItem(_metadata, client: _getMediaClientForMetadata(context))
+        .listen((ratings) {
+          if (_canUseDetail) setState(() => _communityRatings = ratings);
+        });
+  }
+
+  /// [metadata]'s scores with the connected trackers' merged in.
+  List<MediaRatingSource> _titleRatings(MediaItem metadata) =>
+      withCommunityRatings(mediaRatingsFor(metadata), _communityRatings);
 
   /// Hook up the watchlist action's data: every watchlist-capable catalog
   /// source this item resolves in, with its per-source ids. No-ops offline
@@ -864,12 +965,44 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     super.didChangeDependencies();
     final routeObserver = ProfileNavigationScope.of(context).routeObserver;
     final route = ModalRoute.of(context);
+    _trackTvDetailRouteSettled(route);
     if (route is! PageRoute<dynamic>) return;
     if (route == _route && routeObserver == _routeObserver) return;
     _routeObserver?.unsubscribe(this);
     _route = route;
     _routeObserver = routeObserver;
     routeObserver.subscribe(this, route);
+  }
+
+  void _trackTvDetailRouteSettled(ModalRoute<dynamic>? route) {
+    if (_tvDetailRouteSettled) return;
+    final animation = PlatformDetector.isTV() ? route?.animation : null;
+    if (identical(animation, _tvDetailRouteAnimation)) return;
+    _tvDetailRouteAnimation?.removeStatusListener(_onTvDetailRouteStatus);
+    _tvDetailRouteAnimation = null;
+    if (animation == null || animation.isCompleted) {
+      _tvDetailRouteSettled = true;
+      return;
+    }
+    _tvDetailRouteAnimation = animation..addStatusListener(_onTvDetailRouteStatus);
+  }
+
+  void _onTvDetailRouteStatus(AnimationStatus status) {
+    if (!status.isCompleted) return;
+    _tvDetailRouteAnimation?.removeStatusListener(_onTvDetailRouteStatus);
+    _tvDetailRouteAnimation = null;
+    if (!mounted) return;
+    // Already revealed: the content is built, so there is nothing to rebuild.
+    if (_tvDetailRevealed) {
+      _tvDetailRouteSettled = true;
+      return;
+    }
+    // The status flips inside the fade's last tick. Building the withheld
+    // content in that frame would hold the fade's final frame back by the
+    // whole build, so it builds in the next frame, when nothing moves.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_tvDetailRouteSettled) setState(() => _tvDetailRouteSettled = true);
+    });
   }
 
   @override
@@ -900,6 +1033,17 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       _suppressBackAfterPop = false;
       return;
     }
+    _popMediaDetail();
+  }
+
+  /// Leaves via the detail's own route, and only while it is the top one. A
+  /// blind `Navigator.pop` takes whatever is topmost: a back that reaches this
+  /// screen after its route began closing pops the profile shell beneath — the
+  /// next one finds the navigator empty and throws (#2937, #2370) — and one that
+  /// reaches it under a dialog closes the dialog.
+  void _popMediaDetail() {
+    final route = _route ?? ModalRoute.of(context);
+    if (route == null || !route.isCurrent) return;
     Navigator.pop(context, _watchStateChanged);
   }
 
@@ -985,15 +1129,17 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   @override
   void dispose() {
     _libraryContentSubscription?.cancel();
+    unawaited(_communityRatingsSubscription?.cancel());
     for (final source in _watchlistListenedSources) {
       source.watchlistChanges.removeListener(_onWatchlistSourceChanged);
     }
     _routeObserver?.unsubscribe(this);
+    _tvDetailRouteAnimation?.removeStatusListener(_onTvDetailRouteStatus);
     _scrollController.dispose();
     _scrollOffset.dispose();
     _tvDetailFocusedEpisode.dispose();
+    _focusedEpisodeRatingsRevision.dispose();
     _playbackProbeTimer?.cancel();
-    _playbackVersionPreferences?.removeListener(_onPlaybackVersionChanged);
     _playbackStatusRevision.dispose();
     _extrasScrollController.dispose();
     _extrasFocusNode.removeListener(_handleExtrasFocusChange);
@@ -1120,10 +1266,20 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   /// tappable user-rating chip is the strip's only interactive element and is
   /// never dropped.
   ///
+  /// [ratings] fill the scores pill; the compact hero passes none and builds
+  /// its own scores row with [scoresOnly], which keeps just the pill and fits
+  /// it to the run the same way.
+  ///
   /// Only the mobile/desktop hero calls this (TV renders
   /// [_buildTvDetailMetadataLine] instead), so the non-TV metrics from
   /// [_buildMetadataChip] apply throughout.
-  List<Widget> _buildFittedHeroChips(BuildContext context, MediaItem metadata, double maxWidth) {
+  List<Widget> _buildFittedHeroChips(
+    BuildContext context,
+    MediaItem metadata,
+    double maxWidth, {
+    required List<MediaRatingSource> ratings,
+    bool scoresOnly = false,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     final textScaler = MediaQuery.textScalerOf(context);
     final textDirection = Directionality.of(context);
@@ -1151,7 +1307,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
     // One slot per chip; a slot's units are its droppable atoms — one per
     // rating badge for the scores pill, the whole chip for everything else.
-    final ratings = mediaRatingsFor(metadata);
     final slots = <({int dropPriority, List<double> unitWidths, Widget Function(int kept) build})>[];
 
     void addTextChip(String text, int dropPriority) {
@@ -1162,25 +1317,27 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       ));
     }
 
-    // An episode's own screen: the title is the episode, so the show name and
-    // the season/episode number identify it from the chip strip. Both are
-    // priority 0 — the strip may shed a rating before it sheds what the
-    // viewer is looking at.
-    if (metadata.isEpisode) {
-      if (metadata.grandparentTitle != null) addTextChip(metadata.grandparentTitle!, 0);
-      final episodeLabel = formatSeasonEpisodeLabel(metadata.parentIndex, metadata.index);
-      if (episodeLabel != null) addTextChip(episodeLabel, 0);
-    }
-    if (metadata.isEpisode && metadata.originallyAvailableAt != null) {
-      addTextChip(formatAbbreviatedDate(metadata.originallyAvailableAt!), 1);
-    } else if (metadata.year != null) {
-      addTextChip('${metadata.year}', 0);
-    }
-    if (metadata case PlexMediaItem(:final editionTitle?)) addTextChip(editionTitle, 3);
-    if (metadata.contentRating != null) addTextChip(formatContentRating(metadata.contentRating!), 2);
-    if (metadata.durationMs != null) addTextChip(formatDurationTextual(metadata.durationMs!), 1);
-    for (final label in buildMediaQualityLabels(metadata)) {
-      addTextChip(label, 4);
+    if (!scoresOnly) {
+      // An episode's own screen: the title is the episode, so the show name and
+      // the season/episode number identify it from the chip strip. Both are
+      // priority 0 — the strip may shed a rating before it sheds what the
+      // viewer is looking at.
+      if (metadata.isEpisode) {
+        if (metadata.grandparentTitle != null) addTextChip(metadata.grandparentTitle!, 0);
+        final episodeLabel = formatSeasonEpisodeLabel(metadata.parentIndex, metadata.index);
+        if (episodeLabel != null) addTextChip(episodeLabel, 0);
+      }
+      if (metadata.isEpisode && metadata.originallyAvailableAt != null) {
+        addTextChip(formatAbbreviatedDate(metadata.originallyAvailableAt!), 1);
+      } else if (metadata.year != null) {
+        addTextChip('${metadata.year}', 0);
+      }
+      if (metadata case PlexMediaItem(:final editionTitle?)) addTextChip(editionTitle, 3);
+      if (metadata.contentRating != null) addTextChip(formatContentRating(metadata.contentRating!), 2);
+      if (metadata.durationMs != null) addTextChip(formatDurationTextual(metadata.durationMs!), 1);
+      for (final label in buildMediaQualityLabels(metadata)) {
+        addTextChip(label, 4);
+      }
     }
     if (ratings.isNotEmpty) {
       // Every attributed score shares one pill rather than taking a chip
@@ -1227,7 +1384,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     // against the budget so dropping other chips actually makes room for it.
     Widget? userRatingChip;
     var userRatingChipWidth = 0.0;
-    if (!widget.isOffline) {
+    if (!scoresOnly && !widget.isOffline) {
       userRatingChip = _buildUserRatingChip(metadata);
       userRatingChipWidth =
           chipPadding +
@@ -1365,12 +1522,12 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         serverClient: _getMediaClientForMetadata(this.context),
         onServerRatingChanged: (rating) {
           setStateIfMounted(() {
-            _fullMetadata = (_fullMetadata ?? widget.metadata).copyWith(userRating: rating);
+            _fullMetadata = _metadata.copyWith(userRating: rating);
           });
         },
         onServerFavoriteChanged: (favorite) {
           setStateIfMounted(() {
-            _fullMetadata = (_fullMetadata ?? widget.metadata).copyWith(isFavorite: favorite);
+            _fullMetadata = _metadata.copyWith(isFavorite: favorite);
           });
         },
       ),
@@ -1394,6 +1551,8 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     required Iterable<String?> artworkPaths,
     required BoxFit fit,
     required ImageType imageType,
+    double? width,
+    double? height,
     Alignment alignment = Alignment.center,
     Color? logoToneTarget,
     bool logoToneRemapMixed = true,
@@ -1413,6 +1572,8 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         imagePath: null,
         localFilePath: localPath,
         cacheMissingLocalFile: true,
+        width: width,
+        height: height,
         fit: fit,
         alignment: alignment,
         imageType: imageType,
@@ -1440,18 +1601,16 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final personId = actor.id;
     if (personId == null || _metadata.serverId == null) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ActorMediaScreen(
-          actorName: actor.tag,
-          personId: personId,
-          actorThumb: actor.thumbPath,
-          characterName: actor.role,
-          serverId: _metadata.serverId!,
-          serverName: _metadata.serverName,
-          backend: _metadata.backend,
-        ),
+    unawaited(
+      navigateToPersonMedia(
+        context,
+        personId: personId,
+        name: actor.tag,
+        thumbPath: actor.thumbPath,
+        characterName: actor.role,
+        serverId: _metadata.serverId!,
+        serverName: _metadata.serverName,
+        backend: _metadata.backend,
       ),
     );
   }
@@ -1697,7 +1856,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       // a Plex client and a section id. The library section id came from
       // Plex as an int but lands in [MediaItem.libraryId] as the string
       // form (or null on Jellyfin items).
-      final sectionId = (_fullMetadata ?? _metadata).libraryId;
+      final sectionId = _metadata.libraryId;
       final seasonsFuture = client.fetchChildren(_metadata.id);
       // Prefs are a per-library nicety (Plex "flatten seasons"); a failure here
       // must never take down the seasons list, so degrade to defaults.
@@ -1784,9 +1943,8 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     });
 
     final downloadProvider = context.read<DownloadProvider>();
-    final episodes = downloadProvider.getDownloadedEpisodesForShow(_metadata.id);
-
-    // Group episodes by season
+    final episodes = downloadProvider.getDownloadedEpisodesForShow(_metadata.globalKey);
+    // Group episodes by season for the per-season pager cache.
     final Map<int, List<MediaItem>> seasonMap = {};
     for (final episode in episodes) {
       final seasonNum = episode.parentIndex ?? 0;
@@ -1853,17 +2011,28 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     }
   }
 
-  /// Downloaded episodes of [showId] belonging to the season with [seasonIndex], sorted by episode number.
-  List<MediaItem> _downloadedEpisodesForSeason(DownloadProvider downloadProvider, String showId, int? seasonIndex) {
-    return downloadProvider.getDownloadedEpisodesForShow(showId).where((ep) => ep.parentIndex == seasonIndex).toList()
+  /// Downloaded episodes of the show at [showGlobalKey] belonging to the
+  /// season with [seasonIndex], sorted by episode number.
+  List<MediaItem> _downloadedEpisodesForSeason(
+    DownloadProvider downloadProvider,
+    String showGlobalKey,
+    int? seasonIndex,
+  ) {
+    return downloadProvider
+        .getDownloadedEpisodesForShow(showGlobalKey)
+        .where((ep) => ep.parentIndex == seasonIndex)
+        .toList()
       ..sort((a, b) => (a.index ?? 0).compareTo(b.index ?? 0));
   }
 
-  /// Load episodes from downloaded content for a season
   void _loadEpisodesFromDownloads() {
     if (!_canUseDetail) return;
     final downloadProvider = context.read<DownloadProvider>();
-    final seasonEpisodes = _downloadedEpisodesForSeason(downloadProvider, _metadata.parentId ?? '', _metadata.index);
+    final seasonEpisodes = _downloadedEpisodesForSeason(
+      downloadProvider,
+      _metadata.seriesGlobalKey ?? '',
+      _metadata.index,
+    );
 
     setState(() {
       _allEpisodes = _allEpisodes.completeInitialLoad(seasonEpisodes, seasonEpisodes.length);
@@ -1898,36 +2067,36 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final cached = _seasonEpisodePager.stateFor(seasonId);
     if (_seasonEpisodePager.hasState(seasonId) && !cached.isInitialLoading && !cached.initialLoadFailed) {
       _seasonEpisodePager.completeFirstPage(seasonId, cached.items, cached.totalCount);
-      setStateIfMounted(() {
-        if (_isSelectedSeason(seasonIndex, seasonId)) {
-          _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
-        }
-      });
+      setStateIfMounted(() => _syncSelectedSeasonEpisodes(seasonIndex, seasonId));
       unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
       return;
     }
 
-    if (!_seasonEpisodePager.beginFirstPageLoad(seasonId)) {
-      setStateIfMounted(() {
-        if (_isSelectedSeason(seasonIndex, seasonId)) {
-          _seasonEpisodePager.markFirstPageLoading(seasonId);
-        }
-      });
-      return;
-    }
-
-    final generation = ++_episodesLoadGeneration;
+    // Whether this call owns the fetch or another caller already does, the
+    // selected season shows its loading state.
+    final ownsLoad = _seasonEpisodePager.beginFirstPageLoad(seasonId);
     setStateIfMounted(() {
       if (_isSelectedSeason(seasonIndex, seasonId)) {
         _seasonEpisodePager.markFirstPageLoading(seasonId);
       }
     });
+    if (!ownsLoad) return;
+
+    // Loads for different seasons never compete: each result lands in its own
+    // season's cache. Only a detail-wide reset (the generation) or a refresh of
+    // this season (the epoch) retires it. Retiring it on every season switch
+    // instead left a season that was left and revisited mid-load spinning, as
+    // the revisit found this load in flight and waited on it.
+    final generation = _episodesLoadGeneration;
+    final epoch = _seasonEpisodePager.epochOf(seasonId);
+    bool isCurrent() =>
+        mounted && generation == _episodesLoadGeneration && epoch == _seasonEpisodePager.epochOf(seasonId);
 
     try {
       if (widget.isOffline) {
         // Offline: load from downloads (already the complete set).
         final downloadProvider = context.read<DownloadProvider>();
-        final seasonEpisodes = _downloadedEpisodesForSeason(downloadProvider, _metadata.id, season.index);
+        final seasonEpisodes = _downloadedEpisodesForSeason(downloadProvider, _metadata.globalKey, season.index);
         _completeSeasonEpisodesLoad(
           seasonIndex: seasonIndex,
           seasonId: seasonId,
@@ -1949,14 +2118,8 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           );
           return;
         }
-        final page = await fetchSeasonEpisodePage(
-          mediaClient,
-          show: _metadata,
-          season: season,
-          start: 0,
-          size: _episodesPageSize,
-        );
-        if (!mounted || generation != _episodesLoadGeneration) return;
+        final page = await _fetchSeasonPage(mediaClient, season, start: 0);
+        if (!isCurrent()) return;
         _completeSeasonEpisodesLoad(
           seasonIndex: seasonIndex,
           seasonId: seasonId,
@@ -1967,13 +2130,13 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       }
     } catch (e, st) {
       appLogger.w('Season episodes load failed', error: e, stackTrace: st);
-      if (mounted && generation == _episodesLoadGeneration && _isSelectedSeason(seasonIndex, seasonId)) {
+      if (isCurrent() && _isSelectedSeason(seasonIndex, seasonId)) {
         setStateIfMounted(() {
           _seasonEpisodePager.failFirstPage(seasonId);
         });
       }
     } finally {
-      _seasonEpisodePager.endFirstPageLoad(seasonId);
+      _seasonEpisodePager.endFirstPageLoad(seasonId, epoch: epoch);
     }
   }
 
@@ -1995,19 +2158,15 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final seasonId = season.id;
     if (_seasonEpisodePager.hasState(seasonId)) return;
     if (!_seasonEpisodePager.beginFirstPageLoad(seasonId)) return;
+    final epoch = _seasonEpisodePager.epochOf(seasonId);
 
     try {
       final mediaClient = _getMediaClientForMetadata(context);
       if (mediaClient == null) return;
-      final page = await fetchSeasonEpisodePage(
-        mediaClient,
-        show: _metadata,
-        season: season,
-        start: 0,
-        size: _episodesPageSize,
-      );
+      final page = await _fetchSeasonPage(mediaClient, season, start: 0);
       if (!_canUseDetail ||
           _showEpisodesDirectly ||
+          epoch != _seasonEpisodePager.epochOf(seasonId) ||
           seasonIndex >= _seasons.length ||
           _seasons[seasonIndex].id != seasonId) {
         return;
@@ -2016,20 +2175,18 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         final current = _seasonEpisodePager.stateFor(seasonId);
         if (_seasonEpisodePager.hasState(seasonId) && !(current.isInitialLoading && !current.hasItems)) return;
         _seasonEpisodePager.completeFirstPage(seasonId, page.items, page.totalCount);
-        if (_isSelectedSeason(seasonIndex, seasonId)) {
-          _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
-        }
+        _syncSelectedSeasonEpisodes(seasonIndex, seasonId);
       });
       if (_isSelectedSeason(seasonIndex, seasonId)) unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
     } catch (e, st) {
       appLogger.d('TV adjacent season episode prefetch failed', error: e, stackTrace: st);
-      if (_canUseDetail && _isSelectedSeason(seasonIndex, seasonId)) {
+      if (_canUseDetail && epoch == _seasonEpisodePager.epochOf(seasonId) && _isSelectedSeason(seasonIndex, seasonId)) {
         setStateIfMounted(() {
           _seasonEpisodePager.failFirstPage(seasonId);
         });
       }
     } finally {
-      _seasonEpisodePager.endFirstPageLoad(seasonId);
+      _seasonEpisodePager.endFirstPageLoad(seasonId, epoch: epoch);
     }
   }
 
@@ -2045,7 +2202,13 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final loaded = state.items.length;
     if (!state.hasMore) return;
     if (!_seasonEpisodePager.beginMoreLoad(seasonId)) return;
+    // A refresh of this season (the epoch) retires the page as surely as a
+    // detail-wide reset (the generation): appending it to the refreshed first
+    // page would duplicate or skip rows.
     final generation = _episodesLoadGeneration;
+    final epoch = _seasonEpisodePager.epochOf(seasonId);
+    bool isCurrent() =>
+        mounted && generation == _episodesLoadGeneration && epoch == _seasonEpisodePager.epochOf(seasonId);
 
     setStateIfMounted(() {
       if (_isSelectedSeason(seasonIndex, seasonId)) {
@@ -2057,20 +2220,14 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       final mediaClient = _getMediaClientForMetadata(context);
       if (mediaClient == null) {
         setStateIfMounted(() {
-          if (_isSelectedSeason(seasonIndex, seasonId)) {
+          if (isCurrent() && _isSelectedSeason(seasonIndex, seasonId)) {
             _seasonEpisodePager.completeMoreLoad(seasonId, expectedOffset: loaded, episodes: const [], total: loaded);
           }
         });
         return;
       }
-      final page = await fetchSeasonEpisodePage(
-        mediaClient,
-        show: _metadata,
-        season: season,
-        start: loaded,
-        size: _episodesPageSize,
-      );
-      if (!mounted || generation != _episodesLoadGeneration) return;
+      final page = await _fetchSeasonPage(mediaClient, season, start: loaded);
+      if (!isCurrent()) return;
       setStateIfMounted(() {
         _seasonEpisodePager.completeMoreLoad(
           seasonId,
@@ -2078,21 +2235,20 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           episodes: page.items,
           total: page.totalCount,
         );
-        if (_isSelectedSeason(seasonIndex, seasonId)) _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
+        _syncSelectedSeasonEpisodes(seasonIndex, seasonId);
       });
     } catch (e, st) {
       appLogger.w('Season episodes page load failed', error: e, stackTrace: st);
-      if (mounted && generation == _episodesLoadGeneration && _isSelectedSeason(seasonIndex, seasonId)) {
+      if (isCurrent() && _isSelectedSeason(seasonIndex, seasonId)) {
         setStateIfMounted(() {
           _seasonEpisodePager.failMoreLoad(seasonId);
         });
       }
     } finally {
-      _seasonEpisodePager.endMoreLoad(seasonId);
+      _seasonEpisodePager.endMoreLoad(seasonId, epoch: epoch);
     }
   }
 
-  /// Whether the selected season has more episodes to page in.
   bool get _selectedSeasonHasMore {
     if (_selectedSeasonIndex < 0 || _selectedSeasonIndex >= _seasons.length) return false;
     return _selectedSeasonEpisodeState.hasMore;
@@ -2105,6 +2261,19 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         _seasons[seasonIndex].id == seasonId;
   }
 
+  /// One page of [season]'s episodes, sized for the detail lists.
+  Future<LibraryPage<MediaItem>> _fetchSeasonPage(MediaServerClient client, MediaItem season, {required int start}) {
+    return fetchSeasonEpisodePage(client, show: _metadata, season: season, start: start, size: _episodesPageSize);
+  }
+
+  /// Mirror the pager's items for [seasonId] into the visible episode list when
+  /// it is still the selected season. Call inside setState.
+  void _syncSelectedSeasonEpisodes(int seasonIndex, String seasonId) {
+    if (_isSelectedSeason(seasonIndex, seasonId)) {
+      _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
+    }
+  }
+
   void _completeSeasonEpisodesLoad({
     required int seasonIndex,
     required String seasonId,
@@ -2115,107 +2284,93 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     if (generation != _episodesLoadGeneration) return;
     setStateIfMounted(() {
       _seasonEpisodePager.completeFirstPage(seasonId, episodes, total);
-      if (_isSelectedSeason(seasonIndex, seasonId)) {
-        _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
-      }
+      _syncSelectedSeasonEpisodes(seasonIndex, seasonId);
     });
     if (_isSelectedSeason(seasonIndex, seasonId)) unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
   }
 
-  /// Load extras (trailers, featurettes, behind-the-scenes, etc.).
-  Future<void> _loadExtras() async {
+  /// Shared skeleton of the supplemental detail sections (extras, related
+  /// hubs): only movies and shows carry them, offline has no server, and every
+  /// exit — skipped, failed or applied — flips the section's loaded flag via
+  /// [markLoaded] so the TV reveal can proceed.
+  Future<void> _loadSupplementalSection<T>({
+    required MediaServerClient? Function() resolveClient,
+    required Future<T> Function(MediaServerClient client) fetch,
+    required void Function(T result) apply,
+    required void Function() markLoaded,
+  }) async {
     if (!_canUseDetail) return;
-    void markLoaded() {
+    void markLoadedIfLive() {
       if (!_canUseDetail) return;
-      setStateIfMounted(() {
-        _hasLoadedExtras = true;
-      });
+      setStateIfMounted(markLoaded);
     }
 
-    // Only load extras for movies and shows
     if (!_metadata.isMovie && !_metadata.isShow) {
-      markLoaded();
+      markLoadedIfLive();
       return;
     }
 
-    // Skip in offline mode (no server available)
     if (widget.isOffline) {
-      markLoaded();
+      markLoadedIfLive();
       return;
     }
 
     try {
-      final client = getServerBoundMediaClient(context);
+      final client = resolveClient();
       if (client == null) {
-        markLoaded();
+        markLoadedIfLive();
         return;
       }
 
-      final extras = await client.fetchExtras(_metadata.id);
+      final result = await fetch(client);
       if (!_canUseDetail) return;
 
-      // Preserve serverId for each extra (needed for multi-server setups).
-      final extrasWithServerId = extras
-          .map(
-            (extra) => extra.copyWith(
-              serverId: _metadata.serverId ?? extra.serverId,
-              serverName: _metadata.serverName ?? extra.serverName,
-            ),
-          )
-          .toList();
-
       setStateIfMounted(() {
-        _extras = extrasWithServerId;
-        _hasLoadedExtras = true;
+        apply(result);
+        markLoaded();
       });
     } catch (e) {
-      // Silently fail - extras section won't appear if fetch fails
-      markLoaded();
+      // Silently fail - the section won't appear if the fetch fails
+      markLoadedIfLive();
     }
+  }
+
+  /// Load extras (trailers, featurettes, behind-the-scenes, etc.).
+  Future<void> _loadExtras() {
+    return _loadSupplementalSection<List<MediaItem>>(
+      resolveClient: () => getServerBoundMediaClient(context),
+      fetch: (client) => client.fetchExtras(_metadata.id),
+      apply: (extras) {
+        // Preserve serverId for each extra (needed for multi-server setups).
+        _extras = extras
+            .map(
+              (extra) => extra.copyWith(
+                serverId: _metadata.serverId ?? extra.serverId,
+                serverName: _metadata.serverName ?? extra.serverName,
+              ),
+            )
+            .toList();
+      },
+      markLoaded: () => _hasLoadedExtras = true,
+    );
   }
 
   /// Load related hubs (collections, similar, "more from" director/actor).
   /// Backend-neutral — both Plex and Jellyfin implement
   /// [MediaServerClient.fetchRelatedHubs].
-  Future<void> _loadRelatedHubs() async {
-    if (!_canUseDetail) return;
-    void markLoaded() {
-      if (!_canUseDetail) return;
-      setStateIfMounted(() {
-        _hasLoadedRelatedHubs = true;
-      });
-    }
-
-    if (!_metadata.isMovie && !_metadata.isShow) {
-      markLoaded();
-      return;
-    }
-
-    if (widget.isOffline) {
-      markLoaded();
-      return;
-    }
-
-    final serverId = _metadata.serverId;
-    final client = serverId == null ? null : context.tryGetMediaClientForServer(ServerId(serverId));
-    if (client == null) {
-      markLoaded();
-      return;
-    }
-
-    try {
-      final relatedHubs = await client.fetchRelatedHubs(_metadata.id);
-      if (!_canUseDetail) return;
-
-      setStateIfMounted(() {
+  Future<void> _loadRelatedHubs() {
+    return _loadSupplementalSection<List<MediaHub>>(
+      resolveClient: () {
+        final serverId = _metadata.serverId;
+        return serverId == null ? null : context.tryGetMediaClientForServer(ServerId(serverId));
+      },
+      fetch: (client) => client.fetchRelatedHubs(_metadata.id),
+      apply: (relatedHubs) {
         _relatedHubs = relatedHubs;
         _relatedHubKeys = List.generate(relatedHubs.length, (_) => GlobalKey<HubSectionState>());
-        _hasLoadedRelatedHubs = true;
-      });
-    } catch (e) {
-      // Silently fail - related sections won't appear if fetch fails
-      markLoaded();
-    }
+      },
+      markLoaded: () => _hasLoadedRelatedHubs = true,
+    );
   }
 
   /// Focus the first visible section above cast: season tabs → overview → play button.
@@ -2239,7 +2394,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
   /// Focus the first visible section above extras: cast → season tabs → overview → play button.
   void _focusSectionAboveExtras() {
-    final metadata = _fullMetadata ?? _metadata;
+    final metadata = _metadata;
     if (metadata.roles != null && metadata.roles!.isNotEmpty) {
       _castStripKey.currentState?.requestFocus();
       _scrollSectionIntoView(_castSectionKey);
@@ -2249,7 +2404,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   }
 
   bool get _hasInfoRows {
-    final metadata = _fullMetadata ?? _metadata;
+    final metadata = _metadata;
     return metadata.studio != null || metadata.directors?.isNotEmpty == true || metadata.contentRating != null;
   }
 
@@ -2368,7 +2523,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
   /// Focus the overview, or the first available content section when there is no overview.
   void _focusBelowActionRow() {
-    final metadata = _fullMetadata ?? _metadata;
+    final metadata = _metadata;
 
     if (PlatformDetector.isTV()) {
       _tvDetailRailKey.currentState?.requestFocus();
@@ -2386,7 +2541,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
   /// Focus the first available content section after the overview.
   void _focusBelowOverview() {
-    final metadata = _fullMetadata ?? _metadata;
+    final metadata = _metadata;
 
     // DOWN order: seasons → episodes → cast → extras → related hubs → info rows.
     if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty) {
@@ -2469,7 +2624,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                   width: geometry.itemWidth,
                   posterPathOverride: season.thumbPath,
                   isOffline: widget.isOffline,
-                  forceGridMode: true,
+                  viewModeOverride: ViewMode.grid,
                   onRefresh: (source) {
                     _watchStateChanged = true;
                     unawaited(_refreshItemInPlace(source));
@@ -2606,7 +2761,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     }
   }
 
-  /// Handle vertical navigation between related hub sections
   bool _handleRelatedHubNavigation(int hubIndex, bool isUp) {
     return navigateVerticalHubRows(
       hubCount: _relatedHubKeys.length,
@@ -2841,30 +2995,26 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   Future<void> _fetchAllEpisodes() async {
     if (!_canUseDetail) return;
     final generation = ++_episodesLoadGeneration;
-    if (_seasons.isEmpty) {
+    void markEmpty() {
       setStateIfMounted(() {
         _allEpisodes = const PagedMediaListState<MediaItem>();
         _episodes = const <MediaItem>[];
         _hasLoadedEpisodes = true;
       });
+    }
+
+    if (_seasons.isEmpty) {
+      markEmpty();
       return;
     }
     final serverId = _metadata.serverId;
     if (serverId == null) {
-      setStateIfMounted(() {
-        _allEpisodes = const PagedMediaListState<MediaItem>();
-        _episodes = const <MediaItem>[];
-        _hasLoadedEpisodes = true;
-      });
+      markEmpty();
       return;
     }
     final client = context.tryGetMediaClientForServer(ServerId(serverId));
     if (client == null) {
-      setStateIfMounted(() {
-        _allEpisodes = const PagedMediaListState<MediaItem>();
-        _episodes = const <MediaItem>[];
-        _hasLoadedEpisodes = true;
-      });
+      markEmpty();
       return;
     }
     setStateIfMounted(() {
@@ -2904,7 +3054,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   }
 
   String? _seriesIdForSeason(MediaItem season) {
-    if (_metadata.isShow) return (_fullMetadata ?? _metadata).id;
+    if (_metadata.isShow) return _metadata.id;
     return season.grandparentId ?? season.parentId ?? _metadata.grandparentId ?? _metadata.parentId;
   }
 
@@ -2942,7 +3092,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     required ServerId serverId,
   }) {
     if (_metadata.isShow) {
-      return normalizeSeasonEpisodes(episodes, show: _fullMetadata ?? _metadata, season: season);
+      return normalizeSeasonEpisodes(episodes, show: _metadata, season: season);
     }
 
     return _enrichPlayableEpisodes(episodes, serverId)
@@ -3069,7 +3219,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   Future<void> _loadOfflineOnDeckEpisode() async {
     if (!_canUseDetail) return;
     final offlineWatchProvider = context.read<OfflineWatchProvider>();
-    final nextEpisode = await offlineWatchProvider.getNextUnwatchedEpisode(_metadata.id);
+    final nextEpisode = await offlineWatchProvider.getNextUnwatchedEpisode(_metadata.globalKey);
     if (!_canUseDetail) return;
 
     setStateIfMounted(() {
@@ -3134,12 +3284,11 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
       final firstSeason = defaultPlaybackSeason(_seasons)!;
 
-      // Get the first episode of the first season.
       MediaItem? firstEpisode;
       if (widget.isOffline) {
         // In offline mode, get episodes from downloads (filtered to this season).
         final downloadProvider = context.read<DownloadProvider>();
-        final episodes = _downloadedEpisodesForSeason(downloadProvider, _metadata.id, firstSeason.index);
+        final episodes = _downloadedEpisodesForSeason(downloadProvider, _metadata.globalKey, firstSeason.index);
         firstEpisode = episodes.isEmpty ? null : episodes.first;
       } else {
         final client = getServerBoundMediaClient(context);
@@ -3184,7 +3333,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       }
     } catch (e) {
       if (mounted && _canUseDetail) {
-        showErrorSnackBar(context, t.messages.errorLoading(error: e.toString()));
+        showErrorSnackBar(context, t.messages.errorLoading(error: localizedErrorReason(e)));
       }
     } finally {
       await loadingDialog.dismiss();
@@ -3221,7 +3370,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     }
     // Session-fresh hero: server snapshot resolved against the watch-state
     // store (onWatchStateChanged rebuilds on relevant events).
-    final metadata = _fresh(_fullMetadata ?? _metadata);
+    final metadata = _fresh(_metadata);
     final isShow = metadata.isShow;
     final isMobile = PlatformDetector.isMobile(context);
     final isTv = PlatformDetector.isTV();
@@ -3234,7 +3383,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       // lights; route the leading through the shared desktop padding logic.
       final backButton = AppBarBackButton(
         style: BackButtonStyle.plain,
-        onPressed: () => Navigator.pop(context, _watchStateChanged),
+        onPressed: _popMediaDetail,
         focusNode: _backButtonFocusNode,
       );
       final loading = ListenableBuilder(
@@ -3243,11 +3392,12 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           onKeyEvent: _handleMediaDetailBackKey,
           child: Scaffold(
             appBar: AppBar(
-              leading: DesktopAppBarSections.buildLeadingSection(leading: backButton, context: context),
-              leadingWidth: DesktopAppBarSections.calculateLeadingWidthForSection(
-                leading: backButton,
+              leading: DesktopAppBarHelper.buildAdjustedLeading(
+                backButton,
+                includeGestureDetector: true,
                 context: context,
               ),
+              leadingWidth: DesktopAppBarHelper.calculateLeadingWidth(backButton, context: context),
             ),
             body: const Center(child: CircularProgressIndicator()),
           ),
@@ -3268,18 +3418,24 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
     // Determine header height based on screen size. The hero is 60% of the
     // viewport but never shorter than a full hero needs — status bar and
-    // back-button strip, the full-size logo, both chip rows and the action
-    // row. Portrait phones and tablets clear that floor easily; a phone in
-    // landscape does not, and without it the budget shrinks the logo away.
+    // back-button strip, the full-size logo, both chip rows (three where the
+    // compact hero gives the scores their own) and the action row. Portrait
+    // phones and tablets clear that floor easily; a phone in landscape does
+    // not, and without it the budget shrinks the logo away.
     final size = MediaQuery.sizeOf(context);
+    final viewPadding = MediaQuery.paddingOf(context);
+    final heroChipRows =
+        _isCompactHero(size.width - viewPadding.horizontal - _heroSideInset * 2) && _titleRatings(metadata).isNotEmpty
+        ? 3
+        : 2;
     final heroFloor = isTv
         ? 0.0
-        : MediaQuery.paddingOf(context).top +
+        : viewPadding.top +
               _heroChromeHeight +
               _heroLogoHeight +
               _heroLogoGap +
-              _HeroChips.height * 2 +
-              _HeroChips.spacing +
+              _HeroChips.height * heroChipRows +
+              _HeroChips.spacing * (heroChipRows - 1) +
               _HeroChips.actionGap +
               _heroActionHeight +
               _heroBottomInset;
@@ -3294,235 +3450,225 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final blockSystemBack = InputModeTracker.shouldBlockSystemBack(context);
     final content = PrimaryScrollController(
       controller: _scrollController,
-      child: IosStatusBarTapScrollToTop(
-        controller: _scrollController,
-        child: OverlaySheetHost(
-          // blockSystemBack keeps the route from double-popping on Android
-          // keyboard/TV (the key handler owns dpad back); elsewhere canPop:true
-          // keeps the iOS swipe-back. The host also closes an open sheet on back.
-          canPop: !blockSystemBack,
-          onSystemBack: _handleMediaDetailSystemBack,
-          child: Focus(
-            onKeyEvent: _handleMediaDetailBackKey,
-            child: Scaffold(
-              body: Stack(
-                children: [
-                  // Background art sits behind the scroll view so it can be
-                  // taller than the hero sliver without displacing content.
-                  _buildHeroBackdropLayer(context, metadata, size, headerHeight),
+      child: OverlaySheetHost(
+        // blockSystemBack keeps the route from double-popping on Android
+        // keyboard/TV (the key handler owns dpad back); elsewhere canPop:true
+        // keeps the iOS swipe-back. The host also closes an open sheet on back.
+        canPop: !blockSystemBack,
+        onSystemBack: _handleMediaDetailSystemBack,
+        child: Focus(
+          onKeyEvent: _handleMediaDetailBackKey,
+          child: Scaffold(
+            body: Stack(
+              children: [
+                // Background art sits behind the scroll view so it can be
+                // taller than the hero sliver without displacing content.
+                _buildHeroBackdropLayer(context, metadata, size, headerHeight),
 
-                  CustomScrollView(
-                    primary: true,
-                    slivers: [
-                      // Hero header content over the background art
-                      SliverToBoxAdapter(
-                        child: SizedBox(height: headerHeight, child: _buildHeroHeader(context, metadata)),
-                      ),
+                CustomScrollView(
+                  primary: true,
+                  slivers: [
+                    // Hero header content over the background art
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: headerHeight, child: _buildHeroHeader(context, metadata)),
+                    ),
 
-                      // Main content. The side insets add the horizontal safe
-                      // area on top of the 16px margin so landscape phones keep
-                      // the text clear of the cutout, like the hero above.
-                      SliverSafeArea(
-                        top: false,
-                        bottom: false,
-                        sliver: SliverToBoxAdapter(
-                          child: Padding(
-                            // Reduced top inset keeps the Overview/first section
-                            // tight under the hero's action row (the hero already
-                            // contributes its own bottom inset above this).
-                            padding: .fromLTRB(
-                              isTv ? TvLayoutConstants.horizontalInset : 16,
-                              isTv ? 8 : 4,
-                              isTv ? TvLayoutConstants.horizontalInset : 16,
-                              isTv ? 8 : 16,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              children: [
-                                // Summary
-                                if (!isTv && metadata.summary != null && metadata.summary!.isNotEmpty) ...[
-                                  Text(key: _overviewSectionKey, t.discover.overview, style: sectionTitleStyle),
-                                  const SizedBox(height: 12),
-                                  CollapsibleText(
-                                    text: metadata.summary!,
-                                    maxLines: isMobile ? 6 : 4,
-                                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
-                                    focusNode: _overviewFocusNode,
-                                    skipTraversal: false,
-                                    onNavigateUp: () {
-                                      _scrollController.animateTo(
-                                        0,
-                                        duration: const Duration(milliseconds: 200),
-                                        curve: Curves.easeOut,
-                                      );
-                                      _playButtonFocusNode.requestFocus();
-                                    },
-                                    onNavigateDown: _focusBelowOverview,
-                                    onNavigateLeft: () {},
-                                    onNavigateRight: () {},
-                                  ),
-                                  const SizedBox(height: 12),
-                                ],
+                    // Main content. The side insets add the horizontal safe
+                    // area on top of the 16px margin so landscape phones keep
+                    // the text clear of the cutout, like the hero above.
+                    SliverSafeArea(
+                      top: false,
+                      bottom: false,
+                      sliver: SliverToBoxAdapter(
+                        child: Padding(
+                          // Reduced top inset keeps the Overview/first section
+                          // tight under the hero's action row (the hero already
+                          // contributes its own bottom inset above this).
+                          padding: .fromLTRB(
+                            isTv ? TvLayoutConstants.horizontalInset : 16,
+                            isTv ? 8 : 4,
+                            isTv ? TvLayoutConstants.horizontalInset : 16,
+                            isTv ? 8 : 16,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: .start,
+                            children: [
+                              // Summary
+                              if (!isTv && metadata.summary != null && metadata.summary!.isNotEmpty) ...[
+                                Text(key: _overviewSectionKey, t.discover.overview, style: sectionTitleStyle),
+                                const SizedBox(height: 12),
+                                CollapsibleText(
+                                  text: metadata.summary!,
+                                  maxLines: isMobile ? 6 : 4,
+                                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
+                                  focusNode: _overviewFocusNode,
+                                  skipTraversal: false,
+                                  onNavigateUp: () {
+                                    _scrollController.animateTo(
+                                      0,
+                                      duration: const Duration(milliseconds: 200),
+                                      curve: Curves.easeOut,
+                                    );
+                                    _playButtonFocusNode.requestFocus();
+                                  },
+                                  onNavigateDown: _focusBelowOverview,
+                                  onNavigateLeft: () {},
+                                  onNavigateRight: () {},
+                                ),
+                                const SizedBox(height: 12),
+                              ],
 
-                                // Seasons / Episodes (for TV shows and seasons)
-                                if (isShow && !_showEpisodesDirectly) ...[
-                                  // Season tabs + inline episodes
-                                  if (_isLoadingSeasons)
-                                    _sectionLoading
-                                  else if (_seasonsLoadFailed)
-                                    _sectionError(t.messages.seasonsLoadFailed, () => unawaited(_loadSeasons()))
-                                  else if (_seasons.isEmpty)
-                                    _sectionEmpty(context, t.messages.noSeasonsFound)
-                                  else ...[
-                                    Text(
-                                      key: _seasonsSectionKey,
-                                      t.libraries.groupings.seasons,
-                                      style: sectionTitleStyle,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    // Episodes are a level down now: a season
-                                    // opens its own screen rather than filling
-                                    // the rest of this one.
-                                    _buildSeasonGrid(),
-                                  ],
-                                  SizedBox(height: isTv ? 24 : 12),
-                                ] else if ((isShow && _showEpisodesDirectly) || metadata.isSeason) ...[
-                                  // Server says flatten — existing behavior unchanged
+                              // Seasons / Episodes (for TV shows and seasons)
+                              if (isShow && !_showEpisodesDirectly) ...[
+                                // Season tabs + inline episodes
+                                if (_isLoadingSeasons)
+                                  _sectionLoading
+                                else if (_seasonsLoadFailed)
+                                  _sectionError(t.messages.seasonsLoadFailed, () => unawaited(_loadSeasons()))
+                                else if (_seasons.isEmpty)
+                                  _sectionEmpty(context, t.messages.noSeasonsFound)
+                                else ...[
                                   Text(
                                     key: _seasonsSectionKey,
-                                    t.libraries.groupings.episodes,
+                                    t.libraries.groupings.seasons,
                                     style: sectionTitleStyle,
                                   ),
                                   const SizedBox(height: 12),
-                                  if (_isLoadingSeasons || _isLoadingEpisodes)
-                                    _sectionLoading
-                                  else if (_allEpisodesPageError && _episodes.isEmpty)
-                                    _sectionError(t.messages.episodesLoadFailed, () => unawaited(_fetchAllEpisodes()))
-                                  else if (_episodes.isNotEmpty)
-                                    _buildEpisodesList()
-                                  else
-                                    _sectionEmpty(context, t.messages.noEpisodesFoundGeneral),
-                                  SizedBox(height: isTv ? 24 : 12),
+                                  // Episodes are a level down now: a season
+                                  // opens its own screen rather than filling
+                                  // the rest of this one.
+                                  _buildSeasonGrid(),
                                 ],
-
-                                // Cast
-                                if (metadata.roles != null && metadata.roles!.isNotEmpty) ...[
-                                  Text(key: _castSectionKey, t.discover.cast, style: sectionTitleStyle),
-                                  const SizedBox(height: 12),
-                                  _buildCastSection(metadata),
-                                  SizedBox(height: isTv ? 24 : 12),
-                                ],
-
-                                // Trailers & Extras Section
-                                if (!widget.isOffline && _extras != null && _extras!.isNotEmpty) ...[
-                                  Text(key: _extrasSectionKey, t.discover.extras, style: sectionTitleStyle),
-                                  const SizedBox(height: 12),
-                                  _buildExtrasSection(),
-                                  SizedBox(height: isTv ? 24 : 12),
-                                ],
-
-                                // Related Hubs (Collections, Similar, More From...)
-                                for (int i = 0; i < _relatedHubs.length; i++) ...[
-                                  HubSection(
-                                    key: _relatedHubKeys[i],
-                                    hub: _relatedHubs[i],
-                                    focusMemory: _hubFocusMemory,
-                                    icon: _getRelatedHubIcon(_relatedHubs[i]),
-                                    inset: true,
-                                    onVerticalNavigation: (isUp) => _handleRelatedHubNavigation(i, isUp),
-                                  ),
-                                  // 8 on mobile: an inset HubSection already carries ~2px of internal
-                                  // bottom padding and the next section ~2px on top, so 8 lands on the
-                                  // same ~12px rhythm as the sections above.
-                                  SizedBox(height: isTv ? 28 : 8),
-                                ],
-
-                                // Additional info — wrapped in Focus so DPAD DOWN from the
-                                // last focusable section lands here and scrolls it into view.
-                                if (_hasInfoRows)
-                                  Focus(
-                                    focusNode: _infoRowsFocusNode,
-                                    onKeyEvent: _handleInfoRowsKeyEvent,
-                                    child: Column(
-                                      key: _infoRowsSectionKey,
-                                      crossAxisAlignment: .start,
-                                      children: [
-                                        if (metadata.studio != null) ...[
-                                          _buildInfoRow(t.discover.studio, metadata.studio!),
-                                          const SizedBox(height: 12),
-                                        ],
-                                        if (metadata.directors?.isNotEmpty == true) ...[
-                                          _buildInfoRow(
-                                            metadata.directors!.length > 1 ? t.discover.directors : t.discover.director,
-                                            metadata.directors!.join(', '),
-                                          ),
-                                          const SizedBox(height: 12),
-                                        ],
-                                        if (metadata.contentRating != null) ...[
-                                          _buildInfoRow(
-                                            t.discover.rating,
-                                            formatContentRating(metadata.contentRating!),
-                                          ),
-                                          const SizedBox(height: 12),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
+                                SizedBox(height: isTv ? 24 : 12),
+                              ] else if ((isShow && _showEpisodesDirectly) || metadata.isSeason) ...[
+                                // Server says flatten — existing behavior unchanged
+                                Text(key: _seasonsSectionKey, t.libraries.groupings.episodes, style: sectionTitleStyle),
+                                const SizedBox(height: 12),
+                                if (_isLoadingSeasons || _isLoadingEpisodes)
+                                  _sectionLoading
+                                else if (_allEpisodesPageError && _episodes.isEmpty)
+                                  _sectionError(t.messages.episodesLoadFailed, () => unawaited(_fetchAllEpisodes()))
+                                else if (_episodes.isNotEmpty)
+                                  _buildEpisodesList()
+                                else
+                                  _sectionEmpty(context, t.messages.noEpisodesFoundGeneral),
+                                SizedBox(height: isTv ? 24 : 12),
                               ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      SliverPadding(padding: .only(bottom: MediaQuery.paddingOf(context).bottom)),
-                    ],
-                  ),
-                  // Sticky top bar with fading background
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: ValueListenableBuilder<double>(
-                      valueListenable: _scrollOffset,
-                      builder: (context, offset, child) => IgnorePointer(
-                        ignoring: offset < 50,
-                        child: AnimatedOpacity(
-                          opacity: (offset / 100).clamp(0.0, 1.0),
-                          duration: const Duration(milliseconds: 150),
-                          child: child!,
-                        ),
-                      ),
-                      child: SizedBox(
-                        height: MediaQuery.paddingOf(context).top + 58,
-                        child: RasterizedGradient(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              theme.scaffoldBackgroundColor.withValues(alpha: 0.8),
-                              theme.scaffoldBackgroundColor.withValues(alpha: 0.5),
-                              theme.scaffoldBackgroundColor.withValues(alpha: 0),
+
+                              // Cast
+                              if (metadata.roles != null && metadata.roles!.isNotEmpty) ...[
+                                Text(key: _castSectionKey, t.discover.cast, style: sectionTitleStyle),
+                                const SizedBox(height: 12),
+                                _buildCastSection(metadata),
+                                SizedBox(height: isTv ? 24 : 12),
+                              ],
+
+                              // Trailers & Extras Section
+                              if (!widget.isOffline && _extras != null && _extras!.isNotEmpty) ...[
+                                Text(key: _extrasSectionKey, t.discover.extras, style: sectionTitleStyle),
+                                const SizedBox(height: 12),
+                                _buildExtrasSection(),
+                                SizedBox(height: isTv ? 24 : 12),
+                              ],
+
+                              // Related Hubs (Collections, Similar, More From...)
+                              for (int i = 0; i < _relatedHubs.length; i++) ...[
+                                HubSection(
+                                  key: _relatedHubKeys[i],
+                                  hub: _relatedHubs[i],
+                                  focusMemory: _hubFocusMemory,
+                                  icon: _getRelatedHubIcon(_relatedHubs[i]),
+                                  inset: true,
+                                  onVerticalNavigation: (isUp) => _handleRelatedHubNavigation(i, isUp),
+                                ),
+                                // 8 on mobile: an inset HubSection already carries ~2px of internal
+                                // bottom padding and the next section ~2px on top, so 8 lands on the
+                                // same ~12px rhythm as the sections above.
+                                SizedBox(height: isTv ? 28 : 8),
+                              ],
+
+                              // Additional info — wrapped in Focus so DPAD DOWN from the
+                              // last focusable section lands here and scrolls it into view.
+                              if (_hasInfoRows)
+                                Focus(
+                                  focusNode: _infoRowsFocusNode,
+                                  onKeyEvent: _handleInfoRowsKeyEvent,
+                                  child: Column(
+                                    key: _infoRowsSectionKey,
+                                    crossAxisAlignment: .start,
+                                    children: [
+                                      if (metadata.studio != null) ...[
+                                        _buildInfoRow(t.discover.studio, metadata.studio!),
+                                        const SizedBox(height: 12),
+                                      ],
+                                      if (metadata.directors?.isNotEmpty == true) ...[
+                                        _buildInfoRow(
+                                          metadata.directors!.length > 1 ? t.discover.directors : t.discover.director,
+                                          metadata.directors!.join(', '),
+                                        ),
+                                        const SizedBox(height: 12),
+                                      ],
+                                      if (metadata.contentRating != null) ...[
+                                        _buildInfoRow(t.discover.rating, formatContentRating(metadata.contentRating!)),
+                                        const SizedBox(height: 12),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                             ],
-                            stops: const [0.0, 0.3, 1.0],
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  // Back button (always visible)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: DesktopAppBarHelper.buildAdjustedLeading(
-                      AppBarBackButton(
-                        style: BackButtonStyle.circular,
-                        onPressed: () => Navigator.pop(context, _watchStateChanged),
-                        focusNode: _backButtonFocusNode,
+                    SliverPadding(padding: .only(bottom: MediaQuery.paddingOf(context).bottom)),
+                  ],
+                ),
+                // Sticky top bar with fading background
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: _scrollOffset,
+                    builder: (context, offset, child) => IgnorePointer(
+                      ignoring: offset < 50,
+                      child: AnimatedOpacity(
+                        opacity: (offset / 100).clamp(0.0, 1.0),
+                        duration: const Duration(milliseconds: 150),
+                        child: child!,
                       ),
-                      context: context,
-                    )!,
+                    ),
+                    child: SizedBox(
+                      height: MediaQuery.paddingOf(context).top + 58,
+                      child: RasterizedGradient(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            theme.scaffoldBackgroundColor.withValues(alpha: 0.8),
+                            theme.scaffoldBackgroundColor.withValues(alpha: 0.5),
+                            theme.scaffoldBackgroundColor.withValues(alpha: 0),
+                          ],
+                          stops: const [0.0, 0.3, 1.0],
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+                // Back button (always visible)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: DesktopAppBarHelper.buildAdjustedLeading(
+                    AppBarBackButton(
+                      style: BackButtonStyle.circular,
+                      onPressed: _popMediaDetail,
+                      focusNode: _backButtonFocusNode,
+                    ),
+                    context: context,
+                  )!,
+                ),
+              ],
             ),
           ),
         ),
@@ -3556,6 +3702,9 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final railTopPadding = 12 * detailScale;
     final foregroundBottom = (railHeight - railTopPadding) + (_tvDetailActionRailGap * detailScale);
     final spotlightLeft = (24 * detailScale).clamp(18.0, 40.0).toDouble();
+    // See _tvDetailRouteSettled. The children stay in place (only their
+    // content is withheld) so the Stack keeps its elements across the swap.
+    final buildHiddenContent = _tvDetailRevealed || _tvDetailRouteSettled;
 
     final revealContent = Stack(
       fit: StackFit.expand,
@@ -3565,11 +3714,13 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           right: size.width * 0.40,
           top: spotlightTop,
           bottom: foregroundBottom,
-          child: ValueListenableBuilder<MediaItem?>(
-            valueListenable: _tvDetailFocusedEpisode,
-            builder: (context, _, _) =>
-                _buildTvDetailForeground(context, metadata, hideSpoilers: hideSpoilers, scale: detailScale),
-          ),
+          child: buildHiddenContent
+              ? ListenableBuilder(
+                  listenable: _tvDetailForegroundListenable,
+                  builder: (context, _) =>
+                      _buildTvDetailForeground(context, metadata, hideSpoilers: hideSpoilers, scale: detailScale),
+                )
+              : const SizedBox.shrink(),
         ),
         // The action row's track status sits at the screen's right edge,
         // bottom-aligned with the row and outside the hero's 60% text column,
@@ -3600,13 +3751,13 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           child: DesktopAppBarHelper.buildAdjustedLeading(
             AppBarBackButton(
               style: BackButtonStyle.circular,
-              onPressed: () => Navigator.pop(context, _watchStateChanged),
+              onPressed: _popMediaDetail,
               focusNode: _backButtonFocusNode,
             ),
             context: context,
           )!,
         ),
-        if (detailHubs.isNotEmpty)
+        if (buildHiddenContent && detailHubs.isNotEmpty)
           Positioned(
             left: 0,
             right: 0,
@@ -3770,6 +3921,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                                 metadata,
                                 width: logoWidth,
                                 height: logoHeight,
+                                availableWidth: constraints.maxWidth,
                                 titleBuilder: (context, title) => _buildDetailTitle(
                                   context,
                                   title,
@@ -3871,7 +4023,10 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   /// fields, the quality labels and every rating badge the fitted line may
   /// have shed, the genres, plus the untruncated description (#2042).
   void _openTvDetailsSheet(BuildContext context, MediaItem metadata, {required bool hideSpoilers}) {
-    final item = _tvDetailFocusedEpisode.value ?? metadata;
+    final focusedEpisode = _tvDetailFocusedEpisode.value;
+    final item = focusedEpisode == null
+        ? metadata.copyWith(ratings: _titleRatings(metadata))
+        : _withProbedRatings(focusedEpisode);
     final description = _tvDetailDescription(metadata, hideSpoilers: hideSpoilers);
     final genres = metadata.genres ?? const <String>[];
     unawaited(
@@ -3888,7 +4043,8 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   /// labels stay off the hero line: they describe the file, not the title,
   /// and remain on the rail cards and in the details sheet (#2217).
   List<MetadataLinePart> _tvDetailMetadataParts(MediaItem metadata) {
-    final lineMetadata = _tvDetailFocusedEpisode.value ?? metadata;
+    final focusedEpisode = _tvDetailFocusedEpisode.value;
+    final lineMetadata = focusedEpisode ?? metadata;
     final parts = <MetadataLinePart>[];
 
     // Gated on the subject, not on [lineMetadata]: a show's hero already has
@@ -3910,10 +4066,22 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     if (lineMetadata.durationMs != null) {
       parts.add(MetadataLineText(formatDurationTextual(lineMetadata.durationMs!), dropPriority: 1));
     }
-    final ratings = mediaRatingsFor(lineMetadata, fallbackItem: metadata);
+    final episodeRatings = focusedEpisode == null
+        ? const <MediaRatingSource>[]
+        : mediaRatingsFor(_withProbedRatings(focusedEpisode));
+    // An episode without scores of its own shows the title's.
+    final ratings = episodeRatings.isNotEmpty ? episodeRatings : _titleRatings(metadata);
     if (ratings.isNotEmpty) parts.add(MetadataLineRatings(ratings, dropPriority: 4));
 
     return parts;
+  }
+
+  /// [episode] carrying the scores of its full record once a probe fetched
+  /// it. Only the scores are taken: the rail's snapshot stays the source of
+  /// every other field.
+  MediaItem _withProbedRatings(MediaItem episode) {
+    final ratings = _probedRatings[episode.globalKey];
+    return ratings == null ? episode : episode.copyWith(ratings: ratings);
   }
 
   String _tvDetailInformationSemanticLabel(
@@ -3957,14 +4125,19 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     return brightness == Brightness.dark ? Colors.black.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.55);
   }
 
+  /// The logo is contained within [width] × [height]; the title fallback gets
+  /// [ClearLogoImage.fallbackWidthFor] of the [availableWidth] hero column at
+  /// the same [height] (#1796).
   Widget _buildDetailLogoOrTitle(
     BuildContext context,
     MediaItem metadata, {
     required double width,
     required double height,
+    required double availableWidth,
     required Widget Function(BuildContext context, String title) titleBuilder,
     Alignment alignment = Alignment.centerLeft,
   }) {
+    final fallbackWidth = ClearLogoImage.fallbackWidthFor(logoWidth: width, available: availableWidth);
     // On an episode's own screen the headline is the episode. `displayTitle`
     // resolves to the show name for an episode, and the show's clear logo
     // would crowd the episode out of its own hero entirely, so both are
@@ -3981,38 +4154,41 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     );
 
     if (isEpisodeSubject || metadata.clearLogoPath == null) {
-      return SizedBox(width: width, height: height, child: titleFallback(context));
+      return SizedBox(width: fallbackWidth, height: height, child: titleFallback(context));
     }
 
-    return SizedBox(
+    final localArtwork = _buildOfflineArtworkIfAvailable(
+      context,
+      artworkPaths: [metadata.clearLogoPath],
       width: width,
       height: height,
-      child: Builder(
-        builder: (context) {
-          final localArtwork = _buildOfflineArtworkIfAvailable(
-            context,
-            artworkPaths: [metadata.clearLogoPath],
-            fit: BoxFit.contain,
-            alignment: alignment,
-            imageType: ImageType.heroLogo,
-            logoToneTarget: logoToneTarget,
-            logoToneRemapMixed: false,
-            placeholder: (context, url) => titleFallback(context),
-            errorWidget: (context, url, error) => titleFallback(context),
-          );
-          if (localArtwork != null) return localArtwork;
+      fit: BoxFit.contain,
+      alignment: alignment,
+      imageType: ImageType.heroLogo,
+      logoToneTarget: logoToneTarget,
+      logoToneRemapMixed: false,
+      // Both replace the image under Align's loose constraints below, so they
+      // take the whole title slot rather than the logo's.
+      placeholder: (context, url) => SizedBox.expand(child: titleFallback(context)),
+      errorWidget: (context, url, error) => SizedBox.expand(child: titleFallback(context)),
+    );
+    if (localArtwork != null) {
+      return SizedBox(
+        width: fallbackWidth,
+        height: height,
+        child: Align(alignment: alignment, child: localArtwork),
+      );
+    }
 
-          return ClearLogoImage(
-            client: _getArtworkMediaClient(context),
-            logoPath: metadata.clearLogoPath,
-            width: width,
-            height: height,
-            logoToneTarget: logoToneTarget,
-            alignment: alignment,
-            fallbackBuilder: titleFallback,
-          );
-        },
-      ),
+    return ClearLogoImage(
+      client: _getArtworkMediaClient(context),
+      logoPath: metadata.clearLogoPath,
+      width: width,
+      height: height,
+      fallbackWidth: fallbackWidth,
+      logoToneTarget: logoToneTarget,
+      alignment: alignment,
+      fallbackBuilder: titleFallback,
     );
   }
 
@@ -4216,14 +4392,23 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     return _onDeckEpisode?.id;
   }
 
-  List<MediaItem> _tvDetailActorItems(MediaItem metadata) {
-    final roles = metadata.roles;
-    if (roles == null || roles.isEmpty) return const [];
+  // Cached per metadata object: the TV rail memoizes cards by item identity,
+  // so rebuilding identical cast items on every Detail build would rebuild
+  // every cast card with them.
+  (MediaItem, List<MediaItem>)? _tvDetailActorItemsCache;
 
-    return [
-      for (var i = 0; i < roles.length; i++)
-        if (roles[i].tag.trim().isNotEmpty) _tvDetailActorItem(metadata, roles[i], i),
-    ];
+  List<MediaItem> _tvDetailActorItems(MediaItem metadata) {
+    final cached = _tvDetailActorItemsCache;
+    if (cached != null && identical(cached.$1, metadata)) return cached.$2;
+    final roles = metadata.roles;
+    final items = roles == null || roles.isEmpty
+        ? const <MediaItem>[]
+        : [
+            for (var i = 0; i < roles.length; i++)
+              if (roles[i].tag.trim().isNotEmpty) _tvDetailActorItem(metadata, roles[i], i),
+          ];
+    _tvDetailActorItemsCache = (metadata, items);
+    return items;
   }
 
   MediaItem _tvDetailActorItem(MediaItem metadata, MediaRole actor, int index) {
@@ -4469,7 +4654,12 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       top: false,
       bottom: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + _heroChromeHeight, 16, _heroBottomInset),
+        padding: EdgeInsets.fromLTRB(
+          _heroSideInset,
+          MediaQuery.paddingOf(context).top + _heroChromeHeight,
+          _heroSideInset,
+          _heroBottomInset,
+        ),
         child: _buildHeroHeaderContent(context, metadata),
       ),
     );
@@ -4484,29 +4674,52 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         const desiredLogoHeight = _heroLogoHeight;
         const desiredLogoWidth = 400.0;
         const actionHeight = _heroActionHeight;
-        // Fitted to a single run: chips shed by usefulness instead of
-        // wrapping onto a second run the height clip below would hide.
-        final chips = _buildFittedHeroChips(context, metadata, constraints.maxWidth);
-        // Genres render on their own line below the metadata chips.
-        final genreChips = [for (final genre in metadata.genres ?? const <String>[]) _buildMetadataChip(genre)];
+        const chipHeight = _HeroChips.height;
+        const rowGap = _HeroChips.spacing;
+        // Phone widths stack the logo, chips and actions on the centre line —
+        // the collection page's compact header. Wider heroes keep the
+        // bottom-left column: a 400px logo centred in a tablet-wide hero
+        // floats, and the wide collection header is left-aligned too.
+        final centered = _isCompactHero(constraints.maxWidth);
+        final blockAlignment = centered ? Alignment.bottomCenter : Alignment.bottomLeft;
+        final wrapAlignment = centered ? WrapAlignment.center : WrapAlignment.start;
 
         final showActions = availableHeight >= actionHeight;
         final remainingAfterActions = availableHeight - (showActions ? actionHeight : 0);
-        final showChips = chips.isNotEmpty && remainingAfterActions >= 88;
-        const chipHeight = _HeroChips.height;
-        final chipBlockHeight = showChips ? chipHeight : 0.0;
-        final chipActionGap = showChips && showActions
+        final chipsFit = remainingAfterActions >= 88;
+        final gapAboveActions = showActions
             ? (availableHeight < 180 ? _HeroChips.shortActionGap : _HeroChips.actionGap)
             : 0.0;
-        // Reserve a dedicated genre row, but only when the logo still keeps room
-        // afterwards so the title isn't crowded out on short heroes.
-        const genreRowHeight = _HeroChips.height;
-        const genreGap = _HeroChips.spacing;
-        final showGenres =
-            showChips &&
-            genreChips.isNotEmpty &&
-            remainingAfterActions - chipBlockHeight - chipActionGap - (genreRowHeight + genreGap) >= 52;
-        final genreBlockHeight = showGenres ? genreRowHeight + genreGap : 0.0;
+        // A chip row past the first is shown only while the logo keeps 52px,
+        // so the title isn't crowded out on short heroes.
+        bool roomForRow(double rowsAbove) =>
+            remainingAfterActions - rowsAbove - gapAboveActions - (chipHeight + rowGap) >= 52;
+
+        // The compact hero moves the scores onto a row of their own (#2569);
+        // a hero too short for it keeps them in the strip's pill instead.
+        final ratings = _titleRatings(metadata);
+        final scoresRow = centered && ratings.isNotEmpty && chipsFit && roomForRow(chipHeight);
+        // Fitted to a single run each: chips shed by usefulness instead of
+        // wrapping onto a second run the height clip below would hide.
+        final strip = _buildFittedHeroChips(
+          context,
+          metadata,
+          constraints.maxWidth,
+          ratings: scoresRow ? const [] : ratings,
+        );
+        final chipRows = [
+          if (strip.isNotEmpty) strip,
+          if (scoresRow)
+            _buildFittedHeroChips(context, metadata, constraints.maxWidth, ratings: ratings, scoresOnly: true),
+        ];
+        // Genres render on their own line below the metadata chips.
+        final genreChips = [for (final genre in metadata.genres ?? const <String>[]) _buildMetadataChip(genre)];
+
+        final showChips = chipsFit && chipRows.isNotEmpty;
+        final chipBlockHeight = showChips ? chipRows.length * (chipHeight + rowGap) - rowGap : 0.0;
+        final chipActionGap = showChips ? gapAboveActions : 0.0;
+        final showGenres = showChips && genreChips.isNotEmpty && roomForRow(chipBlockHeight);
+        final genreBlockHeight = showGenres ? chipHeight + rowGap : 0.0;
         final remainingForLogo = remainingAfterActions - chipBlockHeight - chipActionGap - genreBlockHeight;
         final logoGap = remainingForLogo >= 52 && (showChips || showActions)
             ? (availableHeight < 180 ? 8.0 : _heroLogoGap)
@@ -4522,13 +4735,17 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
             genreBlockHeight +
             chipActionGap +
             (showActions ? actionHeight : 0.0);
-        // Phone widths stack the logo, chips and actions on the centre line —
-        // the collection page's compact header. Wider heroes keep the
-        // bottom-left column: a 400px logo centred in a tablet-wide hero
-        // floats, and the wide collection header is left-aligned too.
-        final centered = constraints.maxWidth < ScreenBreakpoints.mobile;
-        final blockAlignment = centered ? Alignment.bottomCenter : Alignment.bottomLeft;
-        final wrapAlignment = centered ? WrapAlignment.center : WrapAlignment.start;
+
+        Widget chipRow(List<Widget> chips) => ClipRect(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: chipHeight),
+            child: Align(
+              alignment: blockAlignment,
+              heightFactor: 1,
+              child: Wrap(spacing: rowGap, runSpacing: rowGap, alignment: wrapAlignment, children: chips),
+            ),
+          ),
+        );
 
         return ClipRect(
           child: SizedBox(
@@ -4549,6 +4766,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                           metadata,
                           width: logoWidth,
                           height: logoHeight,
+                          availableWidth: constraints.maxWidth,
                           alignment: centered ? Alignment.center : Alignment.centerLeft,
                           titleBuilder: (context, title) => _buildDetailTitle(
                             context,
@@ -4562,39 +4780,11 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                         if (effectiveLogoGap > 0) SizedBox(height: effectiveLogoGap),
                       ],
                       if (showChips)
-                        ClipRect(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: chipHeight),
-                            child: Align(
-                              alignment: blockAlignment,
-                              heightFactor: 1,
-                              child: Wrap(
-                                spacing: _HeroChips.spacing,
-                                runSpacing: _HeroChips.spacing,
-                                alignment: wrapAlignment,
-                                children: chips,
-                              ),
-                            ),
-                          ),
-                        ),
-                      if (showGenres) ...[
-                        const SizedBox(height: genreGap),
-                        ClipRect(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: genreRowHeight),
-                            child: Align(
-                              alignment: blockAlignment,
-                              heightFactor: 1,
-                              child: Wrap(
-                                spacing: _HeroChips.spacing,
-                                runSpacing: _HeroChips.spacing,
-                                alignment: wrapAlignment,
-                                children: genreChips,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                        for (final (index, chips) in chipRows.indexed) ...[
+                          if (index > 0) const SizedBox(height: rowGap),
+                          chipRow(chips),
+                        ],
+                      if (showGenres) ...[const SizedBox(height: rowGap), chipRow(genreChips)],
                       if (chipActionGap > 0) SizedBox(height: chipActionGap),
                       if (showActions) SizedBox(height: actionHeight, child: _buildActionButtons(metadata)),
                     ],
@@ -4608,38 +4798,10 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     );
   }
 
-  /// Get the primary trailer from the extras list.
+  /// Get the primary trailer from the extras list; null hides the button.
   MediaItem? _getPrimaryTrailer() {
-    if (_extras == null || _extras!.isEmpty) return null;
-
-    // If there's a trailerKey (Plex `primaryExtraKey`), try to find that specific trailer
-    final metadata = _fullMetadata ?? _metadata;
-    if (metadata case PlexMediaItem(:final trailerKey?)) {
-      // Extract rating key from trailerKey (e.g., "/library/metadata/52601" -> "52601")
-      final primaryKey = trailerKey.split('/').last;
-      try {
-        return _extras!.firstWhere((extra) => extra.id == primaryKey);
-      } catch (_) {
-        // Primary key not found, fall through to find any trailer
-      }
-    }
-
-    try {
-      return _extras!.firstWhere(_isTrailerExtra);
-    } catch (_) {
-      // No trailer found, return null (button won't appear)
-      return null;
-    }
-  }
-
-  bool _isTrailerExtra(MediaItem extra) {
-    if (extra case PlexMediaItem(:final subtype?)) {
-      return subtype.toLowerCase() == 'trailer';
-    }
-    final raw = extra.raw;
-    final extraType = raw?['ExtraType'] as String?;
-    final type = raw?['Type'] as String?;
-    return extraType?.toLowerCase() == 'trailer' || type?.toLowerCase() == 'trailer';
+    final extras = _extras;
+    return extras == null ? null : primaryTrailer(_metadata, extras);
   }
 
   /// Build the cast section with locked focus pattern for D-pad navigation
@@ -4714,7 +4876,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                         item: extra,
                         width: cardWidth,
                         height: posterHeight,
-                        forceGridMode: true,
+                        viewModeOverride: ViewMode.grid,
                       ),
                     ),
                   );
