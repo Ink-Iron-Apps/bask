@@ -123,11 +123,26 @@ matching `plezy://play` after the scheme became `bask`. Fixed in
 and so did the downloads: 79.44 GB, a 17-of-17 collection and a loose film, all
 listed correctly on a Downloads screen whose tables the merge had just created.
 
-**Artwork does not load.** Every image 401s, because
-`/photo/:/transcode?...&X-Plex-Token=` is built with an empty token while API
-calls on the same client and the same server answer 200. The app is otherwise
-whole -- library, metadata, ratings, the episode detail screen, downloads -- and
-posterless. Not yet root-caused: `PlexClient.thumbnailUrl` reads `config.token`,
-which for the bound Home-user profile should be the per-server token the binder
-just used successfully, so the client building those URLs is not the client
-making the calls. **This has to be found before the branch merges.**
+**Artwork did not load, and the URL builders were never the problem.** Every
+image 401d on `/photo/:/transcode?...&X-Plex-Token=` with an empty token --
+empty in the query and again inside the encoded `url=` -- while API calls on
+the same client and server answered 200.
+
+The cause was in the artwork cache, not in any URL builder.
+`PlexImageCacheManager.getFileStream` deliberately hands the cache a redacted
+copy of the URL, so the token does not end up in plaintext cache metadata that
+outlives sign-out, and `_ArtworkCredentialInterceptor` restores the real URL
+before the download leaves. Two constructors existed, and only the
+`forTesting` one registered that interceptor; the app's own did not. So the app
+downloaded the redacted URL, which is precisely a request with a blank token in
+both places, and the server refused it. Nothing caught it: the tests drove the
+constructor that had the interceptor, and the builders, which were correct,
+had nothing to report -- their diagnostics never fired once.
+
+Fixed in `fix(images): restore the token the artwork cache strips before
+downloading`: one constructor, which always registers the interceptor and which
+the tests drive, plus a test that fails without it. The bug arrived with
+upstream's own `fix(images): keep server tokens out of the artwork cache
+metadata`, so it is not in any released version of this fork.
+
+With that cleared, nothing known blocks the merge.
