@@ -836,7 +836,6 @@ class MediaContextMenuState extends State<MediaContextMenu> {
     }
   }
 
-
   Future<void> _dispatchItemSelection(
     BuildContext context,
     String? selected,

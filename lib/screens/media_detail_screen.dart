@@ -2266,7 +2266,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     return fetchSeasonEpisodePage(client, show: _metadata, season: season, start: start, size: _episodesPageSize);
   }
 
-
   /// Mirror the pager's items for [seasonId] into the visible episode list when
   /// it is still the selected season. Call inside setState.
   void _syncSelectedSeasonEpisodes(int seasonIndex, String seasonId) {
@@ -3519,46 +3518,42 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                                 const SizedBox(height: 12),
                               ],
 
-                                // Seasons / Episodes (for TV shows and seasons)
-                                if (isShow && !_showEpisodesDirectly) ...[
-                                  // Season tabs + inline episodes
-                                  if (_isLoadingSeasons)
-                                    _sectionLoading
-                                  else if (_seasonsLoadFailed)
-                                    _sectionError(t.messages.seasonsLoadFailed, () => unawaited(_loadSeasons()))
-                                  else if (_seasons.isEmpty)
-                                    _sectionEmpty(context, t.messages.noSeasonsFound)
-                                  else ...[
-                                    Text(
-                                      key: _seasonsSectionKey,
-                                      t.libraries.groupings.seasons,
-                                      style: sectionTitleStyle,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    // Episodes are a level down now: a season
-                                    // opens its own screen rather than filling
-                                    // the rest of this one.
-                                    _buildSeasonGrid(),
-                                  ],
-                                  SizedBox(height: isTv ? 24 : 12),
-                                ] else if ((isShow && _showEpisodesDirectly) || metadata.isSeason) ...[
-                                  // Server says flatten — existing behavior unchanged
+                              // Seasons / Episodes (for TV shows and seasons)
+                              if (isShow && !_showEpisodesDirectly) ...[
+                                // Season tabs + inline episodes
+                                if (_isLoadingSeasons)
+                                  _sectionLoading
+                                else if (_seasonsLoadFailed)
+                                  _sectionError(t.messages.seasonsLoadFailed, () => unawaited(_loadSeasons()))
+                                else if (_seasons.isEmpty)
+                                  _sectionEmpty(context, t.messages.noSeasonsFound)
+                                else ...[
                                   Text(
                                     key: _seasonsSectionKey,
-                                    t.libraries.groupings.episodes,
+                                    t.libraries.groupings.seasons,
                                     style: sectionTitleStyle,
                                   ),
                                   const SizedBox(height: 12),
-                                  if (_isLoadingSeasons || _isLoadingEpisodes)
-                                    _sectionLoading
-                                  else if (_allEpisodesPageError && _episodes.isEmpty)
-                                    _sectionError(t.messages.episodesLoadFailed, () => unawaited(_fetchAllEpisodes()))
-                                  else if (_episodes.isNotEmpty)
-                                    _buildEpisodesList()
-                                  else
-                                    _sectionEmpty(context, t.messages.noEpisodesFoundGeneral),
-                                  SizedBox(height: isTv ? 24 : 12),
+                                  // Episodes are a level down now: a season
+                                  // opens its own screen rather than filling
+                                  // the rest of this one.
+                                  _buildSeasonGrid(),
                                 ],
+                                SizedBox(height: isTv ? 24 : 12),
+                              ] else if ((isShow && _showEpisodesDirectly) || metadata.isSeason) ...[
+                                // Server says flatten — existing behavior unchanged
+                                Text(key: _seasonsSectionKey, t.libraries.groupings.episodes, style: sectionTitleStyle),
+                                const SizedBox(height: 12),
+                                if (_isLoadingSeasons || _isLoadingEpisodes)
+                                  _sectionLoading
+                                else if (_allEpisodesPageError && _episodes.isEmpty)
+                                  _sectionError(t.messages.episodesLoadFailed, () => unawaited(_fetchAllEpisodes()))
+                                else if (_episodes.isNotEmpty)
+                                  _buildEpisodesList()
+                                else
+                                  _sectionEmpty(context, t.messages.noEpisodesFoundGeneral),
+                                SizedBox(height: isTv ? 24 : 12),
+                              ],
 
                               // Cast
                               if (metadata.roles != null && metadata.roles!.isNotEmpty) ...[

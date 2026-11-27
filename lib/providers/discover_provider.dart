@@ -297,7 +297,6 @@ class DiscoverProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     if (detected.isNotEmpty) safeNotifyListeners();
   }
 
-
   /// Every copy merged into the Continue Watching row [item] — the same title
   /// in another library or on another server — best-first, with [item]
   /// standing in for its own entry. Empty when the row stands alone.

@@ -235,11 +235,7 @@ void main() {
       expect(requested, isNotEmpty, reason: 'the manager never issued a request');
       expect(requested.first, credentialedUrl);
       expect(requested.first, contains('X-Plex-Token=$token'));
-      expect(
-        requested.first,
-        isNot(contains('X-Plex-Token=&')),
-        reason: 'a blanked token is what the server refuses',
-      );
+      expect(requested.first, isNot(contains('X-Plex-Token=&')), reason: 'a blanked token is what the server refuses');
     });
 
     test('a credential is blanked everywhere it appears, query and encoded url alike', () {

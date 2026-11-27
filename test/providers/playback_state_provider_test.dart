@@ -400,10 +400,7 @@ void main() {
 
       final first = testMediaItem(id: 'movie-1', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
       final last = testMediaItem(id: 'movie-2', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
-      p.setPlaybackFromLocalQueue(
-        LocalPlayQueue(items: [first, last], currentIndex: 0),
-        contextKey: 'playlist-1',
-      );
+      p.setPlaybackFromLocalQueue(LocalPlayQueue(items: [first, last], currentIndex: 0), contextKey: 'playlist-1');
 
       // Off: the end is the end.
       expect((await p.getNextEpisode(last.id)).item, isNull);
@@ -423,10 +420,7 @@ void main() {
       final p = PlaybackStateProvider();
       addTearDown(p.dispose);
       final only = testMediaItem(id: 'movie-1', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
-      p.setPlaybackFromLocalQueue(
-        LocalPlayQueue(items: [only], currentIndex: 0),
-        contextKey: 'one',
-      );
+      p.setPlaybackFromLocalQueue(LocalPlayQueue(items: [only], currentIndex: 0), contextKey: 'one');
       p.setRepeatMode(VideoRepeatMode.all);
 
       // Repeat-all means "play the queue again", and a queue of one that
@@ -447,10 +441,7 @@ void main() {
       final first = testMediaItem(id: 'movie-1', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
       final second = testMediaItem(id: 'movie-2', backend: MediaBackend.jellyfin, kind: MediaKind.movie);
 
-      p.setPlaybackFromLocalQueue(
-        LocalPlayQueue(items: [first, second], currentIndex: 0),
-        contextKey: 'playlist-1',
-      );
+      p.setPlaybackFromLocalQueue(LocalPlayQueue(items: [first, second], currentIndex: 0), contextKey: 'playlist-1');
 
       final next = await p.getNextEpisode(first.id);
       expect(next.status, QueueNavigationStatus.found);

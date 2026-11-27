@@ -1574,7 +1574,9 @@ void main() {
           await player.setAudioPassthrough(true);
 
           expect(player.audioPassthroughActive, isFalse);
-          expect(audioWrites, [('af', 'format=srate=192000:format=double,loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp')]);
+          expect(audioWrites, [
+            ('af', 'format=srate=192000:format=double,loudnorm=I=-14:TP=-3:LRA=4,format=srate=48000:format=floatp'),
+          ]);
         } finally {
           await player.dispose();
         }
