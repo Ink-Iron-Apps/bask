@@ -232,11 +232,6 @@ ThemeData monoTheme(MonoPalette palette) {
   return theme;
 }
 
-/// [monoTheme] without the cache, for a palette that changes every frame: the
-/// custom theme editor's live preview would otherwise keep every intermediate
-/// palette's theme alive.
-ThemeData monoThemeUncached(MonoPalette palette) => _buildMonoTheme(palette, platform: defaultTargetPlatform);
-
 ThemeData _buildMonoTheme(MonoPalette c, {required TargetPlatform platform}) {
   final brightness = c.brightness;
   final onAccent = c.onAccent;

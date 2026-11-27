@@ -32,7 +32,10 @@ import '../services/sync_rule_executor.dart';
 import '../services/watched_download_policy.dart';
 import '../utils/app_logger.dart';
 import '../utils/deletion_notifier.dart';
+import '../database/download_collection_operations.dart';
+import '../media/downloads_collection_grouping.dart';
 import '../media/episode_collection.dart';
+import '../media/media_item_sort.dart';
 import '../utils/global_key_utils.dart';
 import '../utils/content_utils.dart';
 import '../utils/notification_permission.dart';
@@ -202,6 +205,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     _syncRuleDownloadKeys.clear();
     _titleBackfillAttempted.clear();
     _metadata.clear();
+    _downloadCollections.clear();
     _activeProfileId = profileId;
     _metadataStore.setActiveProfileId(profileId);
     safeNotifyListeners();
@@ -383,6 +387,39 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   Future<void> _loadProfileScopedState() async {
     await _loadDownloadOwners();
     await _loadSyncRules();
+    await _loadDownloadCollections();
+  }
+
+  /// Rebuild [_downloadCollections] from the active profile's stored
+  /// membership. A collection whose own metadata is not cached stays out: the
+  /// folder it would make has no title or artwork to draw. Folding against an
+  /// empty set leaves a tab's list exactly as it was, which is what a profile
+  /// with no pinned collections gets.
+  Future<void> _loadDownloadCollections() async {
+    // Wrapped like the loaders beside it: a profile switch leaves this read in
+    // flight, and the database can be gone by the time it lands. Folding
+    // against an empty set is the same list the tab already shows, so a failed
+    // read costs nothing a retry does not fix.
+    try {
+      final profileId = _activeProfileId;
+      final generation = _profileGeneration;
+      final stored = profileId == null || profileId.isEmpty
+          ? const <StoredDownloadCollection>[]
+          : await _database.getDownloadCollections(profileId);
+      if (_activeProfileId != profileId || generation != _profileGeneration) return;
+      _downloadCollections.clear();
+      for (final (:serverId, :collectionId, :memberIds) in stored) {
+        final globalKey = buildGlobalKey(ServerId(serverId), collectionId);
+        final collection = _resolvedMetadata(globalKey);
+        if (collection == null) continue;
+        _downloadCollections[globalKey] = (
+          collection: collection.serverId == null ? collection.copyWith(serverId: serverId) : collection,
+          memberIds: memberIds,
+        );
+      }
+    } catch (e) {
+      appLogger.w('Failed to load downloaded collections', error: e);
+    }
   }
 
   /// Test-only seam to populate internal state maps without driving the full
@@ -397,6 +434,7 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
     Set<String>? queueing,
     Map<String, DeletionProgress>? deletionProgress,
     Set<String>? ownedDownloadKeys,
+    List<DownloadedCollection>? collections,
   }) {
     if (downloads != null) _downloads.addAll(downloads);
     if (metadata != null) _metadata.addAll(metadata);
@@ -408,6 +446,13 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
       }
     }
     if (deletionProgress != null) _deletionProgress.addAll(deletionProgress);
+    if (collections != null) {
+      for (final entry in collections) {
+        final serverId = entry.collection.serverId;
+        if (serverId == null) continue;
+        _downloadCollections[buildGlobalKey(ServerId(serverId), entry.collection.id)] = entry;
+      }
+    }
     if (ownedDownloadKeys != null) {
       _ownedDownloadKeys.addAll(ownedDownloadKeys);
     } else if (downloads != null) {
@@ -751,6 +796,178 @@ class DownloadProvider extends ChangeNotifier with DisposableChangeNotifierMixin
   }
 
   /// Get completed movie downloads
+  /// Completed, owned downloads matching [isLeaf], with watch state applied.
+  List<MediaItem> _completedDownloadedLeaves(bool Function(MediaItem meta) isLeaf) => [
+    for (final entry in _metadata.entries)
+      if (_ownsDownloadKey(entry.key) &&
+          _downloads[entry.key]?.status == DownloadStatus.completed &&
+          isLeaf(entry.value))
+        _metadataStore.applyWatchState(entry.value),
+  ];
+
+  /// Every downloaded episode, across every show: what the TV Shows tab lists
+  /// when its grouping is episodes rather than shows.
+  List<MediaItem> get downloadedEpisodes => _completedDownloadedLeaves((meta) => meta.isEpisode);
+
+  /// Every downloaded track, across every album.
+  List<MediaItem> get downloadedTracks => _completedDownloadedLeaves((meta) => meta.kind == MediaKind.track);
+
+  /// The seasons holding downloaded episodes.
+  ///
+  /// Seasons are grouped by the episodes' parent id where they carry one and
+  /// by season number otherwise, with the server and show in the key either
+  /// way so same-numbered seasons of different shows never merge.
+  List<MediaItem> get downloadedSeasons {
+    final bySeason = <String, List<MediaItem>>{};
+    for (final episode in downloadedEpisodes) {
+      final seasonId = episode.parentId;
+      final key = seasonId != null && seasonId.isNotEmpty
+          ? '${episode.serverId}:${episode.grandparentId}:$seasonId'
+          : '${episode.serverId}:${episode.grandparentId}#${episode.parentIndex ?? 0}';
+      bySeason.putIfAbsent(key, () => []).add(episode);
+    }
+    return [for (final episodes in bySeason.values) _downloadedSeasonItem(episodes)]
+      ..sort((a, b) => (a.index ?? 0).compareTo(b.index ?? 0));
+  }
+
+  /// The season [episodes] sit under: the stored season row when one is
+  /// cached, otherwise synthesized from what the episodes themselves carry.
+  /// Either way it counts the episodes actually on disk, not the server's,
+  /// which is the count a downloads card should show.
+  MediaItem _downloadedSeasonItem(List<MediaItem> episodes) {
+    final first = episodes.first;
+    final seasonIndex = first.parentIndex ?? 0;
+    final seasonId = first.parentId ?? '';
+    final serverId = first.serverId;
+    final stored = serverId == null || seasonId.isEmpty
+        ? null
+        : _resolvedMetadata(buildGlobalKey(ServerId(serverId), seasonId));
+    final base = stored != null && stored.isSeason
+        ? stored.copyWith(serverId: serverId, serverName: first.serverName ?? stored.serverName)
+        : MediaItem(
+            id: seasonId.isNotEmpty ? seasonId : '${first.grandparentId}#s$seasonIndex',
+            backend: first.backend,
+            kind: MediaKind.season,
+            title: (first.parentTitle?.isNotEmpty ?? false)
+                ? first.parentTitle
+                : t.common.seasonNumber(number: seasonIndex),
+            index: seasonIndex,
+            thumbPath: first.parentThumbPath,
+            parentId: first.grandparentId,
+            parentTitle: first.grandparentTitle,
+            serverId: serverId,
+            serverName: first.serverName,
+          );
+    return base.copyWith(
+      leafCount: episodes.length,
+      viewedLeafCount: episodes.where((episode) => episode.isWatched).length,
+    );
+  }
+
+  /// Collections holding downloaded titles, keyed by the collection's global
+  /// key. Loaded per profile by [_loadDownloadCollections].
+  final Map<String, DownloadedCollection> _downloadCollections = {};
+
+  /// Per-item sort bookkeeping for [items]: when each was downloaded and how
+  /// many bytes it holds, keyed by global key.
+  ///
+  /// Leaves answer from their own row. Containers — shows, seasons, albums —
+  /// aggregate over their completed downloaded leaves, newest timestamp and
+  /// summed bytes, so sorting by size or download date works on a tab that
+  /// shows containers rather than episodes. Computed once per call: hoist the
+  /// result rather than calling it from inside a comparator.
+  Map<String, MediaItemSortExtras> downloadSortExtras(List<MediaItem> items) {
+    final extras = <String, MediaItemSortExtras>{};
+    final containerKeys = {
+      for (final item in items)
+        if (item.isShow || item.isSeason || item.kind == MediaKind.album) item.globalKey,
+    };
+
+    void accumulate(String key, DownloadProgress progress) {
+      final existing = extras[key];
+      final downloadedAt = progress.downloadedAt;
+      extras[key] = (
+        downloadedAt: downloadedAt != null && downloadedAt > (existing?.downloadedAt ?? 0)
+            ? downloadedAt
+            : existing?.downloadedAt,
+        totalBytes: (existing?.totalBytes ?? 0) + progress.totalBytes,
+      );
+    }
+
+    for (final entry in _metadata.entries) {
+      final globalKey = entry.key;
+      if (!_ownsDownloadKey(globalKey)) continue;
+      final progress = _downloads[globalKey];
+      if (progress?.status != DownloadStatus.completed) continue;
+      final meta = entry.value;
+      final serverId = meta.serverId;
+      if (serverId == null) continue;
+
+      accumulate(globalKey, progress!);
+      if (containerKeys.isEmpty) continue;
+
+      // Fan a leaf's bookkeeping out to every container it could sit under, so
+      // a show or album carries the sum of what is actually on disk.
+      if (meta.isEpisode) {
+        final showId = meta.grandparentId;
+        if (showId != null) {
+          final showKey = buildGlobalKey(ServerId(serverId), showId);
+          if (containerKeys.contains(showKey)) accumulate(showKey, progress);
+        }
+        final seasonId = meta.parentId;
+        if (seasonId != null && seasonId.isNotEmpty) {
+          final seasonKey = buildGlobalKey(ServerId(serverId), seasonId);
+          if (containerKeys.contains(seasonKey)) accumulate(seasonKey, progress);
+        }
+      } else if (meta.kind == MediaKind.track) {
+        final albumId = meta.parentId;
+        if (albumId != null) {
+          final albumKey = buildGlobalKey(ServerId(serverId), albumId);
+          if (containerKeys.contains(albumKey)) accumulate(albumKey, progress);
+        }
+      }
+    }
+    return extras;
+  }
+
+  /// The distinct libraries across owned, completed downloads, for grouping
+  /// and filtering a downloads tab.
+  ///
+  /// A download recorded before library attribution existed, or taken while
+  /// offline, has no library id; those fall back to the server's name so they
+  /// still form one selectable bucket rather than disappearing from a filter.
+  List<({String serverId, String? libraryId, String title})> get downloadedLibraries {
+    final seen = <String, ({String serverId, String? libraryId, String title})>{};
+    for (final entry in _metadata.entries) {
+      if (!_ownsDownloadKey(entry.key)) continue;
+      if (_downloads[entry.key]?.status != DownloadStatus.completed) continue;
+      final meta = entry.value;
+      final serverId = meta.serverId;
+      if (serverId == null) continue;
+      seen.putIfAbsent(
+        '$serverId:${meta.libraryId}',
+        () => (
+          serverId: serverId,
+          libraryId: meta.libraryId,
+          title: meta.libraryTitle ?? meta.serverName ?? t.common.unknown,
+        ),
+      );
+    }
+    return seen.values.toList()..sort((a, b) {
+      final byTitle = a.title.compareTo(b.title);
+      if (byTitle != 0) return byTitle;
+      final byServer = a.serverId.compareTo(b.serverId);
+      if (byServer != 0) return byServer;
+      return (a.libraryId ?? '').compareTo(b.libraryId ?? '');
+    });
+  }
+
+  /// [items] — a downloads tab's movies or shows, already filtered and sorted
+  /// — with every collection holding two or more of them folded into one
+  /// folder. See [groupByDownloadedCollection].
+  List<MediaItem> groupDownloadsByCollection(List<MediaItem> items) =>
+      groupByDownloadedCollection(items, _downloadCollections.values);
+
   List<MediaItem> get downloadedMovies {
     return _metadata.entries
         .where((entry) {

@@ -146,3 +146,37 @@ upstream's own `fix(images): keep server tokens out of the artwork cache
 metadata`, so it is not in any released version of this fork.
 
 With that cleared, nothing known blocks the merge.
+
+## Upstream screens the merge dropped
+
+The merge kept upstream's models, helpers, database columns and tests while
+resolving several screens to this fork's side, which left those helpers
+orphaned and the features gone. `check-unused-files` and `check-unused-code`
+are what found them, and they only ran once the branch reached a gated branch:
+`merge-upstream` has no gate of its own.
+
+**Downloads grouping, sort and filter** — restored. `downloads_options.dart`
+(the whole options surface) had been dropped, orphaning `downloads_filter.dart`,
+`downloads_sort_options.dart` and `downloads_collection_grouping.dart`, while
+the `downloaded_media.libraryId` column, the `download_collections` table,
+`media_item_sort.dart`'s download keys and every i18n string survived. The
+options UI is back and wired into both grid tabs: sort, filters and grouping by
+shows, seasons, episodes or library, with the chips bar on desktop and TV and
+the sheet on mobile.
+
+Collections grouping is deliberately not offered yet. Folding is ported and
+tested in `DownloadProvider.groupDownloadsByCollection`, but opening a folder
+needs three more pieces the merge dropped: the offline mode of
+`collection_detail_screen.dart` (91 lines, and this fork has its own changes in
+that file to keep), `lib/utils/downloads_folder_actions.dart`, and
+`syncDownloadCollections` to fill `download_collections` when a server
+connects. Without the last one no folder would ever appear, so a partial port
+would only look finished.
+
+**The theme screens** — not restored. `custom_theme_editor_screen.dart` and
+`theme_settings_screen.dart` are both gone from `lib/screens/settings/`, while
+`settings_service.dart` still carries the custom-theme keys. The orphan this
+left behind, `monoThemeUncached`, has been removed because nothing in this tree
+can call it; the function is one line and comes back with the editor. Whether
+the Supporter theme editor should return is a product decision, not a merge
+repair.
