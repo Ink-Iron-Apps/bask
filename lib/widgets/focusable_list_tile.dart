@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../focus/dpad_navigator.dart';
+import '../focus/dpad_select_long_press_controller.dart';
 import '../focus/focusable_tile_mixin.dart';
 import '../utils/platform_detector.dart';
 import 'clickable_cursor.dart';
@@ -63,13 +66,68 @@ class FocusableListTile extends StatefulWidget {
 }
 
 class _FocusableListTileState extends State<FocusableListTile> with FocusableTileStateMixin<FocusableListTile> {
+  final _selectLongPress = DpadSelectLongPressController();
+
   @override
   FocusNode? get widgetFocusNode => widget.focusNode;
+
+  @override
+  void dispose() {
+    _selectLongPress.dispose();
+    super.dispose();
+  }
+
+  /// Material's [ListTile.onLongPress] is touch-only, so a remote/keyboard
+  /// could never reach it. When a long-press action exists, hold SELECT (or
+  /// press the context-menu key) triggers it and a short SELECT still taps.
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (widget.onLongPress == null || !widget.enabled || !effectiveFocusNode.hasPrimaryFocus) {
+      return KeyEventResult.ignored;
+    }
+
+    if (SelectKeyUpSuppressor.consumeIfSuppressed(event)) {
+      if (event is KeyUpEvent && event.logicalKey.isSelectKey) _selectLongPress.reset();
+      return KeyEventResult.handled;
+    }
+
+    if (event.logicalKey.isSelectKey) {
+      return _selectLongPress.handleKeyEvent(
+        event,
+        isOwnerActive: () => mounted,
+        onShortPress: () => widget.onTap?.call(),
+        // Read at fire time: the tile may have rebuilt (new selection state)
+        // during the hold.
+        onLongPress: () => widget.onLongPress?.call(),
+      );
+    }
+
+    if (event.isActionable && event.logicalKey.isContextMenuKey) {
+      _selectLongPress.reset();
+      widget.onLongPress?.call();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
 
   @override
   Widget build(BuildContext context) {
     final automotive = PlatformDetector.isAutomotive();
 
+    // Always mounted, even without onLongPress: adding/removing this wrapper
+    // would remount the ListTile and drop its ink focus highlight.
+    // _handleKeyEvent ignores events while onLongPress is null.
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onFocusChange: (hasFocus) {
+        if (!hasFocus) _selectLongPress.reset();
+      },
+      onKeyEvent: _handleKeyEvent,
+      child: _buildTile(automotive),
+    );
+  }
+
+  Widget _buildTile(bool automotive) {
     return MouseRegion(
       cursor: widget.enabled && (widget.onTap != null || widget.onLongPress != null)
           ? SystemMouseCursors.click
@@ -90,81 +148,6 @@ class _FocusableListTileState extends State<FocusableListTile> with FocusableTil
         autofocus: widget.autofocus,
         horizontalTitleGap: widget.horizontalTitleGap,
         minLeadingWidth: widget.minLeadingWidth,
-      ),
-    );
-  }
-}
-
-/// A RadioListTile that accepts a FocusNode for keyboard/controller navigation.
-///
-/// Uses Flutter's native RadioListTile focus support - no custom styling wrapper.
-/// Requires a [RadioGroup] ancestor to manage selection state.
-class FocusableRadioListTile<T> extends StatefulWidget {
-  /// The primary content of the list tile.
-  final Widget? title;
-
-  /// Additional content displayed below the title.
-  final Widget? subtitle;
-
-  /// A widget to display on the opposite side from the radio.
-  final Widget? secondary;
-
-  /// The value represented by this radio button.
-  final T value;
-
-  /// Whether this radio button is part of a vertically dense list.
-  final bool dense;
-
-  /// Optional FocusNode for keyboard/controller navigation.
-  final FocusNode? focusNode;
-
-  /// Whether this tile should autofocus when first built.
-  final bool autofocus;
-
-  /// Whether the radio tile is interactive.
-  final bool? enabled;
-
-  /// Visual density for the list tile.
-  final VisualDensity? visualDensity;
-
-  const FocusableRadioListTile({
-    super.key,
-    this.title,
-    this.subtitle,
-    this.secondary,
-    required this.value,
-    this.dense = true,
-    this.focusNode,
-    this.autofocus = false,
-    this.enabled,
-    this.visualDensity = const VisualDensity(vertical: -3),
-  });
-
-  @override
-  State<FocusableRadioListTile<T>> createState() => _FocusableRadioListTileState<T>();
-}
-
-class _FocusableRadioListTileState<T> extends State<FocusableRadioListTile<T>>
-    with FocusableTileStateMixin<FocusableRadioListTile<T>> {
-  @override
-  FocusNode? get widgetFocusNode => widget.focusNode;
-
-  @override
-  Widget build(BuildContext context) {
-    final automotive = PlatformDetector.isAutomotive();
-    return ClickableCursor(
-      enabled: widget.enabled ?? true,
-      child: RadioListTile<T>(
-        title: widget.title,
-        subtitle: widget.subtitle,
-        secondary: widget.secondary,
-        value: widget.value,
-        // groupValue and onChanged provided by RadioGroup ancestor
-        dense: automotive ? false : widget.dense,
-        visualDensity: automotive ? VisualDensity.standard : widget.visualDensity,
-        focusNode: effectiveFocusNode,
-        autofocus: widget.autofocus,
-        enabled: widget.enabled,
       ),
     );
   }

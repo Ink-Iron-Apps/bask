@@ -68,11 +68,11 @@ void main() {
     List<MediaItem> members() => ['a', 'b', 'c'].map(movie).toList();
 
     test('nothing playable yields no queue at all', () {
-      expect(OfflinePlaylistQueue.build(id: 'q', members: const []), isNull);
+      expect(OfflinePlaylistQueue.build(members: const []), isNull);
     });
 
     test('plays from the top in list order', () {
-      final queue = OfflinePlaylistQueue.build(id: 'q', members: members())!;
+      final queue = OfflinePlaylistQueue.build(members: members())!;
 
       expect(queue.items.map((i) => i.id), ['a', 'b', 'c']);
       expect(queue.currentIndex, 0);
@@ -80,20 +80,20 @@ void main() {
     });
 
     test('starts on the chosen item with the rest queued behind it', () {
-      final queue = OfflinePlaylistQueue.build(id: 'q', members: members(), startKey: 'plex1:b')!;
+      final queue = OfflinePlaylistQueue.build(members: members(), startKey: 'plex1:b')!;
 
       expect(queue.currentIndex, 1);
       expect(queue.items.map((i) => i.id), ['a', 'b', 'c']);
     });
 
     test('an unknown start key falls back to the top', () {
-      final queue = OfflinePlaylistQueue.build(id: 'q', members: members(), startKey: 'plex1:ghost')!;
+      final queue = OfflinePlaylistQueue.build(members: members(), startKey: 'plex1:ghost')!;
 
       expect(queue.currentIndex, 0);
     });
 
     test('shuffling keeps every item and marks the queue shuffled', () {
-      final queue = OfflinePlaylistQueue.build(id: 'q', members: members(), shuffle: true, random: Random(1))!;
+      final queue = OfflinePlaylistQueue.build(members: members(), shuffle: true, random: Random(1))!;
 
       expect(queue.items.map((i) => i.id).toSet(), {'a', 'b', 'c'});
       expect(queue.shuffled, isTrue);
@@ -105,7 +105,6 @@ void main() {
       // else, which is not what tapping an entry means.
       for (var seed = 0; seed < 20; seed++) {
         final queue = OfflinePlaylistQueue.build(
-          id: 'q',
           members: members(),
           shuffle: true,
           startKey: 'plex1:c',
@@ -119,7 +118,7 @@ void main() {
     });
 
     test('a single member is a queue of one, not an empty result', () {
-      final queue = OfflinePlaylistQueue.build(id: 'q', members: [movie('a')])!;
+      final queue = OfflinePlaylistQueue.build(members: [movie('a')])!;
 
       expect(queue.items, hasLength(1));
     });

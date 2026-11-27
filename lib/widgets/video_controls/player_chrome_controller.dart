@@ -5,7 +5,7 @@ import 'package:flutter/material.dart'
     show BuildContext, ListenableBuilder, MouseRegion, StatelessWidget, SystemMouseCursors, Widget;
 
 /// Reasons that keep the video-player chrome visible and suppress auto-hide.
-enum PlayerChromeHold { pip, contentStrip, promptInteraction, scrub }
+enum PlayerChromeHold { pip, contentStrip, promptInteraction, scrub, pointerPress }
 
 /// Owns video-player chrome visibility and auto-hide policy for one player route.
 class PlayerChromeController extends ChangeNotifier implements ValueListenable<bool> {
@@ -21,11 +21,14 @@ class PlayerChromeController extends ChangeNotifier implements ValueListenable<b
   bool _playing = false;
   bool _hasFirstFrame = true;
   Duration _hideDelay = const Duration(seconds: 3);
+  bool _directionalNavigation = false;
   Timer? _hideTimer;
   bool _pendingPlayPauseFocus = false;
   final Set<PlayerChromeHold> _holds = <PlayerChromeHold>{};
   final Stopwatch _pointerActivityStopwatch = Stopwatch()..start();
   int _lastPointerActivityMs = -1000;
+  final Set<int> _pressedPointers = <int>{};
+  bool _pointerLeftWhilePressed = false;
 
   @override
   bool get value => _controlsVisible;
@@ -38,7 +41,11 @@ class PlayerChromeController extends ChangeNotifier implements ValueListenable<b
   bool isHeld(PlayerChromeHold hold) => _holds.contains(hold);
   bool get pendingPlayPauseFocus => _pendingPlayPauseFocus;
 
-  void configure({Duration? hideDelay, bool? hasFirstFrame}) {
+  /// [directionalNavigation] marks a D-pad / keyboard-driven viewer: the
+  /// paused chrome then stays up until dismissed, because the remote has no
+  /// "tap to bring it back" and a viewer who paused to read the OSD would
+  /// otherwise lose it mid-read.
+  void configure({Duration? hideDelay, bool? hasFirstFrame, bool directionalNavigation = false}) {
     var restartTimer = false;
     if (hideDelay != null && hideDelay != _hideDelay) {
       _hideDelay = hideDelay;
@@ -46,6 +53,10 @@ class PlayerChromeController extends ChangeNotifier implements ValueListenable<b
     }
     if (hasFirstFrame != null && hasFirstFrame != _hasFirstFrame) {
       _hasFirstFrame = hasFirstFrame;
+      restartTimer = true;
+    }
+    if (directionalNavigation != _directionalNavigation) {
+      _directionalNavigation = directionalNavigation;
       restartTimer = true;
     }
     if (restartTimer) _startAutoHideForCurrentPlaybackState();
@@ -167,7 +178,7 @@ class PlayerChromeController extends ChangeNotifier implements ValueListenable<b
 
   void startPausedAutoHide() {
     _hideTimer?.cancel();
-    if (!_controlsVisible || !_hasFirstFrame || _holds.isNotEmpty) return;
+    if (!_controlsVisible || !_hasFirstFrame || _holds.isNotEmpty || _directionalNavigation) return;
     _hideTimer = Timer(_hideDelay, hide);
   }
 
@@ -185,9 +196,36 @@ class PlayerChromeController extends ChangeNotifier implements ValueListenable<b
 
   void restartAutoHideForCurrentPlaybackState() => _startAutoHideForCurrentPlaybackState();
 
+  /// Hides the chrome when the pointer leaves the player. A press that drags
+  /// out keeps the chrome until it lifts, so a slider or scrub in progress is
+  /// not unmounted under the pointer.
   void hideForPointerExit() {
     if (_holds.contains(PlayerChromeHold.pip)) return;
+    if (_holds.contains(PlayerChromeHold.pointerPress)) {
+      _pointerLeftWhilePressed = true;
+      return;
+    }
     hide(ignoreHolds: true);
+  }
+
+  /// The pointer came back over the player, so a press that left and returned
+  /// no longer hides the chrome when it lifts.
+  void recordPointerEnter() {
+    _pointerLeftWhilePressed = false;
+  }
+
+  /// A pointer went down on interactive chrome. The chrome is held until every
+  /// pressed pointer lifts.
+  void recordPointerDown(int pointer) {
+    if (!_pressedPointers.add(pointer) || _pressedPointers.length > 1) return;
+    hold(PlayerChromeHold.pointerPress);
+  }
+
+  void recordPointerUp(int pointer) {
+    if (!_pressedPointers.remove(pointer) || _pressedPointers.isNotEmpty) return;
+    final pointerLeft = _pointerLeftWhilePressed;
+    release(PlayerChromeHold.pointerPress);
+    if (pointerLeft) hideForPointerExit();
   }
 
   void cancelAutoHide() {
@@ -207,6 +245,10 @@ class PlayerChromeController extends ChangeNotifier implements ValueListenable<b
 
   void release(PlayerChromeHold hold, {bool notify = true, bool restartAutoHide = true}) {
     if (!_holds.remove(hold)) return;
+    if (hold == PlayerChromeHold.pointerPress) {
+      _pressedPointers.clear();
+      _pointerLeftWhilePressed = false;
+    }
     if (notify) notifyListeners();
     if (restartAutoHide && _holds.isEmpty) _startAutoHideForCurrentPlaybackState();
   }
@@ -239,6 +281,7 @@ class PlayerChromeInteractionRegion extends StatelessWidget {
         return MouseRegion(
           cursor: controller.controlsVisible ? SystemMouseCursors.basic : SystemMouseCursors.none,
           onHover: (_) => controller.recordPointerActivity(),
+          onEnter: hideOnExit ? (_) => controller.recordPointerEnter() : null,
           onExit: (_) {
             if (!hideOnExit) return;
             controller.cancelAutoHide();

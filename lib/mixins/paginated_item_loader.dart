@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -44,6 +45,11 @@ mixin PaginatedItemLoader<T, W extends StatefulWidget> on State<W> {
   /// Re-invoked by the retry timer. Most recent range-load args.
   VoidCallback? _scheduledRetry;
 
+  /// Size of the page whose response set [totalSize] to a [fallbackPageTotal]
+  /// sentinel (a full page, total claimed one past it), or null when the total
+  /// looks authoritative. Such a total is no bound on the next request.
+  int? _openEndedPageSize;
+
   /// Fetch a page of items. Subclass implements this — typically delegating
   /// to a paginated client method that returns a [LibraryPage].
   Future<LibraryPage<T>> fetchPage(int start, int size, AbortController? abort);
@@ -69,9 +75,18 @@ mixin PaginatedItemLoader<T, W extends StatefulWidget> on State<W> {
     _lastEagerPrefetch = null;
     _scheduledRetry = null;
     _paginationError = null;
+    _openEndedPageSize = null;
     loadedItems.clear();
     _loadingRanges.clear();
     totalSize = 0;
+  }
+
+  /// Record whether [page], fetched from [start] with [requestedSize], carries
+  /// a [fallbackPageTotal] sentinel rather than the server's own count.
+  void _trackOpenEndedTotal(int start, int requestedSize, LibraryPage<T> page) {
+    final count = page.items.length;
+    final sentinel = requestedSize > 0 && count >= requestedSize && page.totalCount == start + count + 1;
+    _openEndedPageSize = sentinel ? requestedSize : null;
   }
 
   /// Fetch the first page. Await from outside `setState`. Mutates
@@ -100,6 +115,7 @@ mixin PaginatedItemLoader<T, W extends StatefulWidget> on State<W> {
       loadedItems[i] = result.items[i];
     }
     totalSize = result.totalCount;
+    _trackOpenEndedTotal(0, pageSize, result);
     onPageLoaded(0, result.items);
     return (page: result, applied: true);
   }
@@ -163,7 +179,10 @@ mixin PaginatedItemLoader<T, W extends StatefulWidget> on State<W> {
     for (var i = firstIndex - 1; i >= lookBehindStart; i--) {
       if (!loadedItems.containsKey(i) && !_loadingRanges.contains(i)) {
         _lastEagerPrefetch = now;
-        _fetchRange(i, pageSize);
+        // Scanning upward finds the gap's last index: fetch the page that ends
+        // there, not one starting there (that would refetch the viewport).
+        final start = (i - pageSize + 1).clamp(0, i);
+        _fetchRange(start, i - start + 1);
         return;
       }
     }
@@ -281,6 +300,7 @@ mixin PaginatedItemLoader<T, W extends StatefulWidget> on State<W> {
       totalSize = page.totalCount;
       loadedItems.removeWhere((index, _) => index >= totalSize);
     });
+    _trackOpenEndedTotal(start, size, page);
     onPageLoaded(start, page.items);
     return (anchorOldIndex: anchorOldIndex, anchorNewIndex: anchorNewIndex);
   }
@@ -302,12 +322,19 @@ mixin PaginatedItemLoader<T, W extends StatefulWidget> on State<W> {
     if (totalSize == 0 || index >= totalSize || index < 0) return;
     if (loadedItems.containsKey(index) || _loadingRanges.contains(index)) return;
     final pageStart = (index ~/ pageSize) * pageSize;
+    // Start past the page's loaded prefix: a page that came back short of
+    // [index] would come back short again, and the skeleton that asked would
+    // ask again on every rebuild.
+    var start = pageStart;
+    while (start < index && loadedItems.containsKey(start)) {
+      start++;
+    }
     // Wire up the backoff retry: if this fetch fails, the retry timer in
     // _fetchRange needs something to call. Without this, a failed fetch on a
     // skeleton-only screen leaves the skeleton stuck until something else
     // triggers a rebuild.
     _scheduledRetry = () => ensureIndexLoaded(index, pageSize: pageSize);
-    _fetchRange(pageStart, pageSize);
+    _fetchRange(start, pageStart + pageSize - start);
   }
 
   /// Aborts in-flight requests and cancels timers. Call from `dispose()`.
@@ -333,18 +360,33 @@ mixin PaginatedItemLoader<T, W extends StatefulWidget> on State<W> {
     _paginationError = null;
     onPaginationStateChanged();
 
+    // A sentinel total ends one past the last full page, so clamping to it
+    // would ask for a one-item tail page (and page one item at a time from
+    // there). Past the known items, request a page as big as the one that
+    // came back full; the server returns only what exists.
+    final openEndedPageSize = _openEndedPageSize;
+    final requestSize = openEndedPageSize != null && start + clampedSize >= totalSize
+        ? math.max(size, openEndedPageSize)
+        : clampedSize;
+
     final generation = _requestId;
 
     try {
-      final result = await fetchPage(start, clampedSize, _cancelToken);
+      final result = await fetchPage(start, requestSize, _cancelToken);
       if (generation != _requestId || !mounted) return false;
 
+      // An empty page means nothing exists from [start] on, whatever count
+      // came with it. Trusting a count that runs ahead of what the server
+      // serves (a library mid-scan) would request this range forever.
+      final total = result.items.isEmpty ? math.min(start, result.totalCount) : result.totalCount;
       setState(() {
         for (var i = 0; i < result.items.length; i++) {
           loadedItems[start + i] = result.items[i];
         }
-        if (result.totalCount != totalSize) totalSize = result.totalCount;
+        if (total != totalSize) totalSize = total;
+        if (result.items.isEmpty) loadedItems.removeWhere((index, _) => index >= totalSize);
       });
+      _trackOpenEndedTotal(start, requestSize, result);
 
       _retryCount = 0;
       onPageLoaded(start, result.items);

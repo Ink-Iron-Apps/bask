@@ -178,7 +178,7 @@ extension _PlexVideoControlsTrackMethods on _PlexVideoControlsState {
       audioSyncOffset: _audioSyncOffset,
       subtitleSyncOffset: _subtitleSyncOffset,
       isRotationLocked: _isRotationLocked,
-      isFullscreen: _isFullscreen,
+      isFullscreen: FullscreenStateManager().isFullscreen,
       isAlwaysOnTop: _isAlwaysOnTop,
       // Desktop has no native picture-in-picture; there the same button hands
       // the picture to a corner window inside the app, so it is offered on

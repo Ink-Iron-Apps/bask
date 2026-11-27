@@ -111,6 +111,9 @@ struct _MpvPlugin {
   // must cost one transaction, not the whole queue. Zero-initialised like every
   // other scalar here; release_video_resources cancels a live source.
   guint hdr_mpv_leg_timeout_source_ = 0;
+  // Pending retry of a failed plane render (see schedule_render_retry); zero
+  // when none is scheduled. release_video_resources cancels a live source.
+  guint render_retry_source_ = 0;
   // Exactly one HDR transaction runs at a time, end to end.
   //
   // A transaction spans staging and validating the image description, switching
@@ -132,6 +135,10 @@ struct _MpvPlugin {
   // against the display's current peak so a move between two HDR outputs is not
   // mistaken for no change at all.
   uint32_t applied_target_peak = 0;
+  // The refresh rate mpv was last told through display-fps-override, in the
+  // millihertz GDK reports, so a move between two outputs of the same rate
+  // writes nothing. 0 until the first write.
+  int applied_display_fps_mhz = 0;
   // Set when a transaction ended in kUnknown: mpv stopped answering partway
   // through being put back, so what the plane emits cannot be named and the
   // surface carries no description. Recorded rather than inferred from the
@@ -224,6 +231,11 @@ static void release_video_resources(MpvPlugin* self) {
     g_source_remove(self->hdr_mpv_leg_timeout_source_);
     self->hdr_mpv_leg_timeout_source_ = 0;
   }
+  // Same for a pending render retry, which also holds a raw `self`.
+  if (self->render_retry_source_ != 0) {
+    g_source_remove(self->render_retry_source_);
+    self->render_retry_source_ = 0;
+  }
   // Queued transactions will never run, and each may be holding a reference to a
   // Dart method call that has to be answered or it is leaked along with its
   // response.
@@ -304,6 +316,7 @@ static void release_video_resources(MpvPlugin* self) {
   self->hdr_tone_mapping = mpv::HdrToneMapping::kCompositor;
   self->hdr_tone_mapping_desired = mpv::HdrToneMapping::kCompositor;
   self->applied_target_peak = 0;
+  self->applied_display_fps_mhz = 0;
   // The quarantine belongs to the mpv instance that stopped answering, not to
   // the app. A new plane and a new player have said nothing yet, so nothing
   // about them is unnameable, and leaving this set would hide the next session
@@ -339,6 +352,29 @@ static bool post_render_job(MpvPlugin* self, std::function<bool()> job, std::fun
   if (self->render_executor) return self->render_executor->Post(std::move(job), std::move(completion));
   completion(job());
   return true;
+}
+
+static void render_video_plane(MpvPlugin* self, gboolean force);
+
+// Delay before re-running a render whose job failed.
+constexpr guint kRenderRetryDelayMs = 100;
+
+// A failed render (a lost EGL surface, a driver error) is retried after a delay
+// instead of straight from its completion: a persistent failure would otherwise
+// spin the render thread, and under PLEZY_PLANE_RENDER_MAIN_THREAD, where the
+// completion runs inside post_render_job, recurse until the stack overflows.
+// plane_needs_render stays set, so the retry still owes the frame.
+static void schedule_render_retry(MpvPlugin* self) {
+  if (self->render_retry_source_ != 0) return;
+  self->render_retry_source_ = g_timeout_add(
+      kRenderRetryDelayMs,
+      +[](gpointer data) -> gboolean {
+        MpvPlugin* self = static_cast<MpvPlugin*>(data);
+        self->render_retry_source_ = 0;
+        render_video_plane(self, FALSE);
+        return G_SOURCE_REMOVE;
+      },
+      self);
 }
 
 // Renders and presents one frame on the native video plane. Skipped while the
@@ -419,8 +455,8 @@ static void render_video_plane(MpvPlugin* self, gboolean force) {
         self->render_in_flight = FALSE;
         if (self->video_surface == nullptr) return;
         // A swap failure leaves plane_needs_render set, so the retry - and the
-        // frame callback CompletePresent just cleared - are both owed to the
-        // next event that moves the plane, exactly as before the split.
+        // frame callback CompletePresent just cleared - are owed to the next
+        // event that moves the plane, or to the delayed retry scheduled below.
         if (self->video_surface->CompletePresent(swapped)) self->plane_needs_render = FALSE;
         // Work that had to wait out the flight, in dependency order: geometry
         // first (wl_egl_window_resize must not race a swap), then the HDR
@@ -435,7 +471,11 @@ static void render_video_plane(MpvPlugin* self, gboolean force) {
           self->hdr_start_deferred = FALSE;
           run_next_hdr_transaction(self);
         }
-        render_video_plane(self, FALSE);
+        if (swapped) {
+          render_video_plane(self, FALSE);
+        } else {
+          schedule_render_retry(self);
+        }
       });
   if (!posted) {
     // Shutdown has begun; the job will never run. Undo the prepare so the
@@ -918,6 +958,21 @@ static void handle_preferred_changed(MpvPlugin* self) {
   request_hdr_reapply(self);
 }
 
+// Tells mpv the refresh rate of the output the plane is on. vo=libmpv has no
+// window of its own, so its VOCTRL_GET_DISPLAY_FPS goes unanswered: display-fps
+// reads 0 - the performance overlay's "Display FPS: N/A" - and display-sync has
+// no vsync interval to work from. display-fps-override is the embedder's
+// channel for exactly this. Written only when the rate differs from what mpv
+// already holds; GDK reports it in millihertz.
+static void apply_display_fps(MpvPlugin* self, GdkMonitor* monitor) {
+  if (monitor == nullptr || !self->player) return;
+  const int refresh_mhz = gdk_monitor_get_refresh_rate(monitor);
+  if (refresh_mhz <= 0 || refresh_mhz == self->applied_display_fps_mhz) return;
+  self->applied_display_fps_mhz = refresh_mhz;
+  g_message("MPV video plane: display refresh rate %d mHz", refresh_mhz);
+  self->player->SetPropertyAsync("display-fps-override", refresh_mhz / 1000.0, nullptr);
+}
+
 // Brings up the native Wayland video plane, the only way this runner renders
 // video. Returns false with |error| set to the specific reason: there is no
 // second path to fall through to, so the reason is what the user is told.
@@ -962,6 +1017,12 @@ static gboolean start_video_plane(MpvPlugin* self, FlView* view, std::string* er
   self->video_surface->SetFrameCallback([self]() { render_video_plane(self, FALSE); });
   self->video_surface->SetForcedRenderCallback([self]() { render_video_plane(self, TRUE); });
   self->video_surface->SetPreferredChangedCallback([self]() { handle_preferred_changed(self); });
+  // The plane reports its output once its first frame is up; until then the
+  // toplevel's monitor is the answer, and thereafter every move re-applies.
+  self->video_surface->SetMonitorEnteredCallback([self](GdkMonitor* monitor) { apply_display_fps(self, monitor); });
+  if (GdkWindow* window = toplevel != nullptr ? gtk_widget_get_window(toplevel) : nullptr) {
+    apply_display_fps(self, gdk_display_get_monitor_at_window(gtk_widget_get_display(widget), window));
+  }
   self->player->SetRedrawCallback([self]() { render_video_plane(self, FALSE); });
   // playback-restart is not ordered against the video reconfigure that gives the
   // source its colour space, so the re-apply observe_event_for_hdr asks for can
@@ -1065,6 +1126,13 @@ void mpv_audio_plugin_register_with_registrar(FlPluginRegistrar* registrar) {
   g_mpv_audio_plugin = mpv_plugin_new(registrar, "com.plezy/mpv_audio_player", TRUE);
 }
 
+// fl_method_success_response_new() takes its own reference to the result, so
+// a value created just for the reply must be released here.
+static FlMethodResponse* bool_success_response(gboolean value) {
+  g_autoptr(FlValue) result = fl_value_new_bool(value);
+  return FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+}
+
 /// Method call handler.
 static void mpv_plugin_handle_method_call(FlMethodChannel* channel, FlMethodCall* method_call, gpointer user_data) {
   (void)channel;
@@ -1088,13 +1156,13 @@ static void mpv_plugin_handle_method_call(FlMethodChannel* channel, FlMethodCall
         }
       }
       if (self->initialized) {
-        response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(TRUE)));
+        response = bool_success_response(TRUE);
       } else {
         response =
             FL_METHOD_RESPONSE(fl_method_error_response_new("INIT_FAILED", "Failed to initialize MPV player", nullptr));
       }
     } else if (self->video_surface && self->video_surface->valid()) {
-      response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(TRUE)));
+      response = bool_success_response(TRUE);
     } else {
       if (!self->player || self->player->IsDisposed()) {
         self->player = std::make_unique<mpv::MpvPlayer>();
@@ -1109,7 +1177,7 @@ static void mpv_plugin_handle_method_call(FlMethodChannel* channel, FlMethodCall
         ++self->generation;
         self->player->SetEventCallback([self](FlValue* event) { send_event(self, event); });
         self->initialized = TRUE;
-        response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(TRUE)));
+        response = bool_success_response(TRUE);
       } else {
         // There is no second render path. Refuse with the reason rather than
         // presenting into something the user cannot see.
@@ -1369,7 +1437,8 @@ static void mpv_plugin_handle_method_call(FlMethodChannel* channel, FlMethodCall
               if (error < 0 || value.empty()) {
                 async_response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
               } else {
-                async_response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(value.c_str())));
+                g_autoptr(FlValue) reply = fl_value_new_string(value.c_str());
+                async_response = FL_METHOD_RESPONSE(fl_method_success_response_new(reply));
               }
               fl_method_call_respond(method_call, async_response, nullptr);
               g_object_unref(method_call);
@@ -1432,7 +1501,7 @@ static void mpv_plugin_handle_method_call(FlMethodChannel* channel, FlMethodCall
     // The output half of the gate is what stops the app offering an HDR toggle
     // on an SDR panel, where enabling it only invites the compositor to tone-map
     // a plane that never needed to be PQ in the first place.
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(hdr_available(self))));
+    response = bool_success_response(hdr_available(self));
   } else if (strcmp(method, "setVideoRect") == 0) {
     {
       auto read_int = [args](const char* key, int64_t* out) {
@@ -1515,7 +1584,7 @@ static void mpv_plugin_handle_method_call(FlMethodChannel* channel, FlMethodCall
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   } else if (strcmp(method, "isInitialized") == 0) {
     gboolean initialized = self->player && self->initialized;
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(initialized)));
+    response = bool_success_response(initialized);
   } else {
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
   }

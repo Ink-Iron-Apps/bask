@@ -134,6 +134,30 @@ class AccountPreferencesController extends ChangeNotifier with DisposableChangeN
     await _loadActive(ref);
   }
 
+  /// Make [ref]'s server remember the track picks playback reports for [key]
+  /// ([AccountPreferenceKey.rememberAudioSelections] or
+  /// [AccountPreferenceKey.rememberSubtitleSelections]) by turning the account
+  /// flag on when it is off — the user opted in through the local
+  /// Remember-track-selections toggle, and the server records and applies
+  /// reported stream indexes only behind that flag. Returns whether the server
+  /// will remember; false without a request when the dialect cannot
+  /// ([MediaBrowserDialect.persistsTrackSelectionsViaAccountFlags]).
+  ///
+  /// A flag already on is answered from the cache, so a session writes each
+  /// account at most once per key. Failures propagate: the caller decides
+  /// whether the pick counts as session-only.
+  Future<bool> ensureRemembersTrackSelections(AccountRef ref, AccountPreferenceKey key) async {
+    assert(
+      key == AccountPreferenceKey.rememberAudioSelections || key == AccountPreferenceKey.rememberSubtitleSelections,
+      'Not a track-selection memory flag: ${key.name}',
+    );
+    if (!(ref.backend.dialect?.persistsTrackSelectionsViaAccountFlags ?? false)) return false;
+    if ((await repository.load(ref))[key] == true) return true;
+    appLogger.i('Turning ${key.name} on for ${ref.key}: the local track-selection memory needs it');
+    final updated = await repository.update(ref, AccountPreferencesPatch.of(key, true));
+    return updated[key] == true;
+  }
+
   /// Wire dependencies; safe to call repeatedly from a proxy provider.
   void attach({
     required ConnectionRegistry connections,
@@ -280,6 +304,38 @@ class AccountPreferencesController extends ChangeNotifier with DisposableChangeN
     // the same notification, including transitions to no eligible principal.
     if (changed || refChanged) safeNotifyListeners();
     if (ref != null && (refChanged || repository.cached(ref) == null)) await _loadActive(ref);
+    unawaited(_loadNextUpRewatchingAccounts(accounts, playbackRef: ref));
+  }
+
+  /// Next Up rewatching is the one preference a Jellyfin client applies from
+  /// its own account's read ([AccountPreferenceKey.rewatchingInNextUp]), and
+  /// every Jellyfin account the profile browses shows Next Up, not only the
+  /// one playback takes its defaults from. Nothing waits on these, so they
+  /// load in the background once the bind has connected the clients.
+  Future<void> _loadNextUpRewatchingAccounts(
+    List<AccountPreferenceAccount> accounts, {
+    required AccountRef? playbackRef,
+  }) async {
+    final generation = _generation;
+    final accountGeneration = _accountGeneration;
+    await _activeProfile?.awaitBindingSettle();
+    for (final account in accounts) {
+      if (isDisposed || generation != _generation || accountGeneration != _accountGeneration) return;
+      final ref = account.ref;
+      if (ref == playbackRef || !(ref.backend.dialect?.supportsNextUpRewatching ?? false)) continue;
+      if (repository.cached(ref) != null) continue;
+      try {
+        await repository.load(ref);
+      } on AccountPreferencesUnavailableException {
+        appLogger.d('AccountPreferencesController: ${ref.key} unreachable, its Next Up keeps the default');
+      } catch (error, stackTrace) {
+        appLogger.w(
+          'AccountPreferencesController: failed to load ${ref.key} preferences',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    }
   }
 
   static bool _sameCredentials(AccountPreferenceAccount a, AccountPreferenceAccount b) {
@@ -346,15 +402,6 @@ class AccountPreferencesController extends ChangeNotifier with DisposableChangeN
       if (a[i].target.isDefaultConnection != b[i].target.isDefaultConnection) return false;
     }
     return true;
-  }
-
-  /// The account backing [connectionId] for the active profile, resolved fresh
-  /// so a caller during startup does not race the first snapshot.
-  Future<AccountPreferenceAccount?> accountForConnectionId(String connectionId) async {
-    for (final account in (await _readAccounts()).accounts) {
-      if (account.ref.connectionId == connectionId) return account;
-    }
-    return null;
   }
 
   /// Build a transport for [ref], or null when the account is currently

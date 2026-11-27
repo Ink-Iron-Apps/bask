@@ -27,8 +27,14 @@ void main() {
       // The guarantee existing installs rely on: adding palettes moved no
       // colour for anyone who has not picked one.
       for (final (dark, oled) in [(true, false), (false, false), (true, true)]) {
-        final withDefault = monoTheme(dark: dark, oled: oled);
-        final explicit = monoTheme(dark: dark, oled: oled, palette: ThemePalette.neutral);
+        final withDefault = monoTheme(
+          oled
+              ? MonoPalette.oled
+              : dark
+              ? MonoPalette.dark
+              : MonoPalette.light,
+        );
+        final explicit = monoTheme(ThemePalette.neutral.monoFor(dark: dark, oled: oled));
         expect(explicit.colorScheme, withDefault.colorScheme);
         expect(explicit.scaffoldBackgroundColor, withDefault.scaffoldBackgroundColor);
       }
@@ -80,13 +86,16 @@ void main() {
     });
 
     test('a palette reaches the accent roles of the built theme', () {
-      final neutral = monoTheme(dark: true, palette: ThemePalette.neutral);
+      final neutral = monoTheme(ThemePalette.neutral.monoFor(dark: true, oled: false));
       for (final palette in ThemePalette.values.where((p) => p != ThemePalette.neutral)) {
-        final theme = monoTheme(dark: true, palette: palette);
-        final expected = palette.colorsFor(dark: true, oled: false)!;
-        expect(theme.colorScheme.primary, expected.accent, reason: palette.name);
-        expect(theme.colorScheme.onPrimary, expected.onAccent, reason: palette.name);
-        expect(theme.scaffoldBackgroundColor, expected.bg, reason: palette.name);
+        // Against the palette the theme is actually built from: ember,
+        // glacier and paper carry upstream's tuned colours for the brightness
+        // they were drawn for rather than the hue recipe.
+        final mono = palette.monoFor(dark: true, oled: false);
+        final theme = monoTheme(mono);
+        expect(theme.colorScheme.primary, mono.accent, reason: palette.name);
+        expect(theme.colorScheme.onPrimary, mono.onAccent, reason: palette.name);
+        expect(theme.scaffoldBackgroundColor, mono.bg, reason: palette.name);
         expect(theme.colorScheme.primary, isNot(neutral.colorScheme.primary), reason: palette.name);
       }
     });

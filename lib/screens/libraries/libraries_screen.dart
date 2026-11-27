@@ -11,6 +11,8 @@ import '../../focus/input_mode_tracker.dart';
 import '../../mixins/tab_navigation_mixin.dart';
 import '../../mixins/tab_visibility_aware.dart';
 import '../../media/ids.dart';
+import '../../media/library_genre.dart';
+import '../../media/media_kind.dart';
 import '../../media/media_library.dart';
 import '../../providers/hidden_libraries_provider.dart';
 import '../../providers/libraries_provider.dart';
@@ -20,10 +22,12 @@ import '../../widgets/settings_builder.dart';
 import '../../utils/app_logger.dart';
 import '../../utils/platform_detector.dart';
 import '../../utils/content_utils.dart';
+import '../../utils/layout_constants.dart';
 import '../../widgets/app_menu.dart';
 import '../../widgets/desktop_app_bar.dart';
 import '../../widgets/focusable_tab_chip.dart';
 import '../../widgets/library_management_sheet.dart';
+import '../../services/media_list_playback_launcher.dart';
 import '../../services/storage_service.dart';
 import '../../mixins/refreshable.dart';
 import '../../i18n/strings.g.dart';
@@ -32,15 +36,25 @@ import 'state_messages.dart';
 import 'tabs/library_browse_tab.dart';
 import 'tabs/library_recommended_tab.dart';
 import 'tabs/library_collections_tab.dart';
+import 'tabs/library_genres_tab.dart';
 import 'tabs/library_playlists_tab.dart';
 import 'tabs/base_library_tab.dart';
 
-enum LibraryTabType { recommended, browse, collections, playlists }
+enum LibraryTabType { recommended, browse, collections, playlists, genres }
 
 List<LibraryTabType> visibleLibraryTabs(MediaLibrary library) {
   if (library.isShared) return [LibraryTabType.browse, LibraryTabType.playlists];
-  return LibraryTabType.values;
+  // Genres filter the library's own type; only movie and show libraries
+  // browse a type both backends tag with genres.
+  final hasGenres = library.kind == MediaKind.movie || library.kind == MediaKind.show;
+  return [
+    for (final tab in LibraryTabType.values)
+      if (tab != LibraryTabType.genres || hasGenres) tab,
+  ];
 }
+
+/// Entries of the narrow-phone toolbar's ⋮ menu.
+enum _LibrariesToolbarAction { manageLibraries, refresh }
 
 class LibrariesScreen extends StatefulWidget {
   final VoidCallback? onLibraryOrderChanged;
@@ -55,6 +69,7 @@ class LibrariesScreen extends StatefulWidget {
 class _LibrariesScreenState extends State<LibrariesScreen>
     with
         Refreshable,
+        ManualRefreshable,
         FullRefreshable,
         FocusableTab,
         LibraryLoadable,
@@ -64,13 +79,16 @@ class _LibrariesScreenState extends State<LibrariesScreen>
   final _recommendedTabKey = GlobalKey();
   final _browseTabKey = GlobalKey();
   final _collectionsTabKey = GlobalKey();
+  final _genresTabKey = GlobalKey();
   final _playlistsTabKey = GlobalKey();
 
-  String? _errorMessage;
   String? _selectedLibraryGlobalKey;
 
   /// Flag to prevent onTabChanged from focusing when we're programmatically changing tabs
   bool _isRestoringTab = false;
+
+  /// Whether a post-frame [_initializeWithLibraries] is already queued.
+  bool _initializeScheduled = false;
 
   /// Track which tabs have loaded data (used to trigger focus after tab restore)
   final Set<int> _loadedTabs = {};
@@ -78,8 +96,8 @@ class _LibrariesScreenState extends State<LibrariesScreen>
   /// Whether the browse tab has active filters (badges the Library options icon)
   bool _browseFiltersActive = false;
 
-  /// Key for the library dropdown menu button.
   final _libraryDropdownKey = GlobalKey<AppMenuButtonState<String>>();
+  final _toolbarMenuKey = GlobalKey<AppMenuButtonState<_LibrariesToolbarAction>>();
 
   List<LibraryTabType> _visibleTabs = LibraryTabType.values;
   List<FocusNode> _tabFocusNodes = List.generate(
@@ -127,8 +145,20 @@ class _LibrariesScreenState extends State<LibrariesScreen>
     super.initState();
     initTabNavigation();
 
-    // Initialize with libraries from the provider
+    _scheduleInitializeWithLibraries();
+  }
+
+  /// Run [_initializeWithLibraries] after the current frame, at most once per
+  /// frame. Besides the mount, the build schedules it whenever libraries are
+  /// on hand but none is selected: a first load that found none returns early,
+  /// and nothing else selects one when they arrive later — on phones the
+  /// library dropdown only renders once a library is selected, so the body
+  /// would stay blank.
+  void _scheduleInitializeWithLibraries() {
+    if (_initializeScheduled) return;
+    _initializeScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeScheduled = false;
       if (!mounted) return;
       _initializeWithLibraries();
     });
@@ -187,8 +217,12 @@ class _LibrariesScreenState extends State<LibrariesScreen>
   void onTabChanged() {
     if (_selectedLibraryGlobalKey != null && !tabController.indexIsChanging) {
       if (!_isRestoringTab) {
+        // Resolve both now: by the time storage resolves, a library switch may
+        // have replaced the selection.
+        final libraryGlobalKey = _selectedLibraryGlobalKey!;
+        final tabName = _visibleTabs[tabController.index].name;
         StorageService.getInstance().then((storage) {
-          storage.saveLibraryTab(_selectedLibraryGlobalKey!, _visibleTabs[tabController.index].name);
+          storage.saveLibraryTab(libraryGlobalKey, tabName);
         });
 
         if (!suppressAutoFocus) {
@@ -202,7 +236,10 @@ class _LibrariesScreenState extends State<LibrariesScreen>
 
   /// Focus the first item in the currently active tab.
   /// Used for initial load and tab switching - focuses the grid content directly.
-  void _focusCurrentTab() {
+  ///
+  /// With [awaitLoad], a tab that is still loading only parks focus on its tab
+  /// chip (see [_focusTabContent]) so its load completion focuses the content.
+  void _focusCurrentTab({bool awaitLoad = false}) {
     // Don't focus during tab animations - wait for animation to complete
     // This prevents race conditions during focus restoration
     if (tabController.indexIsChanging) {
@@ -225,23 +262,36 @@ class _LibrariesScreenState extends State<LibrariesScreen>
 
       final tabState = _getTabState(tabController.index);
       if (tabState != null) {
-        (tabState as dynamic).focusContentOrChrome();
+        _focusTabContent(tabState, awaitLoad: awaitLoad);
       } else {
         // State not available yet, retry after another frame
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _focusCurrentTabImmediate();
+          _focusCurrentTabImmediate(awaitLoad: awaitLoad);
         });
       }
     });
   }
 
   /// Focus without additional frame delay (used for retry)
-  void _focusCurrentTabImmediate() {
+  void _focusCurrentTabImmediate({bool awaitLoad = false}) {
     final tabState = _getTabState(tabController.index);
     if (tabState != null) {
-      (tabState as dynamic).focusContentOrChrome();
+      _focusTabContent(tabState, awaitLoad: awaitLoad);
     }
+  }
+
+  void _focusTabContent(State tabState, {required bool awaitLoad}) {
+    // A loading tab has no content yet, so focusContentOrChrome would fall
+    // back to focusTabBar, which sets suppressAutoFocus — and the load's
+    // onDataLoaded then leaves focus stranded on the tab bar. Hold focus on
+    // the tab chip without suppressing, so that completion moves it on.
+    if (awaitLoad && tabState is BaseLibraryTabState && tabState.isLoading) {
+      _resetOuterScroll();
+      getTabChipFocusNode(tabController.index).requestFocus();
+      return;
+    }
+    (tabState as dynamic).focusContentOrChrome();
   }
 
   /// Focus tab content when navigating DOWN from the tab bar.
@@ -276,13 +326,13 @@ class _LibrariesScreenState extends State<LibrariesScreen>
     });
   }
 
-  /// Get the state for a tab by index
   State? _getTabState(int index) {
     if (index < 0 || index >= _visibleTabs.length) return null;
     return switch (_visibleTabs[index]) {
       LibraryTabType.recommended => _recommendedTabKey.currentState,
       LibraryTabType.browse => _browseTabKey.currentState,
       LibraryTabType.collections => _collectionsTabKey.currentState,
+      LibraryTabType.genres => _genresTabKey.currentState,
       LibraryTabType.playlists => _playlistsTabKey.currentState,
     };
   }
@@ -300,6 +350,20 @@ class _LibrariesScreenState extends State<LibrariesScreen>
   void _handleBrowseFiltersActiveChanged(bool active) {
     if (_browseFiltersActive == active) return;
     setState(() => _browseFiltersActive = active);
+  }
+
+  /// Show [genre] in Browse: persist it as the selection, reload a Browse
+  /// page that is already built, and switch to it. A user switch like a chip
+  /// tap, so the Browse tab is saved and focus follows the load.
+  Future<void> _openGenre(MediaLibrary library, LibraryGenre genre, {required bool canGroupByFolders}) async {
+    final libraryGlobalKey = library.globalKey;
+    await saveGenreBrowseSelection(library, genre, canGroupByFolders: canGroupByFolders);
+    if (!mounted || _selectedLibraryGlobalKey != libraryGlobalKey) return;
+    final browseIndex = _visibleTabs.indexOf(LibraryTabType.browse);
+    if (browseIndex < 0) return;
+    final Object? browse = _browseTabKey.currentState;
+    if (browse is Refreshable) browse.refresh();
+    tabController.animateTo(browseIndex);
   }
 
   /// Handle when a tab's data has finished loading
@@ -320,11 +384,12 @@ class _LibrariesScreenState extends State<LibrariesScreen>
   /// Called by parent when the Libraries screen becomes visible.
   /// If the active tab has already loaded data (often the case after preloading
   /// while on another main tab), re-request focus so the first item is focused
-  /// once the screen is actually shown.
+  /// once the screen is actually shown. A tab still loading gets its content
+  /// focused when the load lands instead.
   @override
   void focusActiveTabIfReady() {
     if (_selectedLibraryGlobalKey == null) return;
-    _focusCurrentTab();
+    _focusCurrentTab(awaitLoad: true);
   }
 
   @override
@@ -359,7 +424,12 @@ class _LibrariesScreenState extends State<LibrariesScreen>
 
     final newIndex = currentTabType != null ? newTabs.indexOf(currentTabType) : -1;
     if (newIndex > 0) {
+      // Carrying the tab type over is not a user pick: it must neither focus
+      // nor save — the save would overwrite the destination library's saved
+      // tab before [_loadLibraryContent] restores it.
+      _isRestoringTab = true;
       tabController.index = newIndex;
+      _isRestoringTab = false;
     }
   }
 
@@ -367,6 +437,7 @@ class _LibrariesScreenState extends State<LibrariesScreen>
     LibraryTabType.recommended => t.libraries.tabs.recommended,
     LibraryTabType.browse => t.libraries.tabs.browse,
     LibraryTabType.collections => t.libraries.tabs.collections,
+    LibraryTabType.genres => t.libraries.tabs.genres,
     LibraryTabType.playlists => t.libraries.tabs.playlists,
   };
 
@@ -405,6 +476,15 @@ class _LibrariesScreenState extends State<LibrariesScreen>
         suppressAutoFocus: suppressAutoFocus,
         onDataLoaded: () => _handleTabDataLoaded(tabIndex),
         onBack: focusTabBar,
+      ),
+      LibraryTabType.genres => LibraryGenresTab(
+        key: _genresTabKey,
+        library: library,
+        isActive: isActive,
+        suppressAutoFocus: suppressAutoFocus,
+        onDataLoaded: () => _handleTabDataLoaded(tabIndex),
+        onBack: focusTabBar,
+        onGenreSelected: (genre) => unawaited(_openGenre(library, genre, canGroupByFolders: canGroupByFolders)),
       ),
       LibraryTabType.playlists => LibraryPlaylistsTab(
         key: _playlistsTabKey,
@@ -445,8 +525,6 @@ class _LibrariesScreenState extends State<LibrariesScreen>
 
     _updateState(() {
       _selectedLibraryGlobalKey = libraryGlobalKey;
-      _errorMessage = null;
-      // Clear loaded tabs tracking for new library
       _loadedTabs.clear();
     });
     widget.onLibrarySelected?.call(libraryGlobalKey);
@@ -521,7 +599,18 @@ class _LibrariesScreenState extends State<LibrariesScreen>
   // ignore: no-empty-block - visibility mixin contract; nothing to pause.
   void onTabHidden() {}
 
-  // Refresh every loaded tab for the selected library.
+  /// The toolbar refresh. Without a selected library the screen is showing the
+  /// provider's empty or error state, and there are no tabs to refetch: reload
+  /// the library list itself (the build selects one once they arrive).
+  @override
+  void manualRefresh() {
+    if (_selectedLibraryGlobalKey == null) {
+      unawaited(context.read<LibrariesProvider>().refresh());
+      return;
+    }
+    _refreshSelectedLibraryTabs();
+  }
+
   void _refreshSelectedLibraryTabs() {
     for (var i = 0; i < _visibleTabs.length; i++) {
       final Object? tabState = _getTabState(i);
@@ -537,7 +626,6 @@ class _LibrariesScreenState extends State<LibrariesScreen>
     appLogger.d('LibrariesScreen.fullRefresh() called - reloading all content');
     setState(() {
       _selectedLibraryGlobalKey = null;
-      _errorMessage = null;
     });
 
     // Reinitialize with current libraries from provider
@@ -553,7 +641,6 @@ class _LibrariesScreenState extends State<LibrariesScreen>
     if (isHidden) {
       await hiddenLibrariesProvider.unhideLibrary(library.globalKey);
     } else {
-      // Check if we're hiding the currently selected library
       final isCurrentlySelected = _selectedLibraryGlobalKey == library.globalKey;
 
       await hiddenLibrariesProvider.hideLibrary(library.globalKey);
@@ -578,6 +665,39 @@ class _LibrariesScreenState extends State<LibrariesScreen>
       context,
       onOrderChanged: _notifyLibraryOrderChanged,
       onToggleVisibility: _toggleLibraryVisibility,
+    );
+  }
+
+  /// The narrow-phone ⋮ holding Manage Libraries and Refresh. The action owns
+  /// keyboard and D-pad Select; the menu button inside it owns pointer taps.
+  FocusableAction _buildToolbarMenuAction() {
+    return FocusableAction(
+      debugLabel: 'libraries_more',
+      tooltip: t.common.options,
+      onPressed: () => _toolbarMenuKey.currentState?.showButtonMenu(focusFirstItem: true),
+      child: AppMenuButton<_LibrariesToolbarAction>(
+        key: _toolbarMenuKey,
+        icon: const AppIcon(Symbols.more_vert_rounded, fill: 1),
+        tooltip: t.common.options,
+        adaptiveSheet: true,
+        anchorAlignment: AppMenuAnchorAlignment.end,
+        onSelected: (action) {
+          switch (action) {
+            case _LibrariesToolbarAction.manageLibraries:
+              _showLibraryManagementSheet();
+            case _LibrariesToolbarAction.refresh:
+              manualRefresh();
+          }
+        },
+        entriesBuilder: (_) => [
+          AppMenuItem(
+            value: _LibrariesToolbarAction.manageLibraries,
+            icon: Symbols.edit_rounded,
+            label: t.libraries.manageLibraries,
+          ),
+          AppMenuItem(value: _LibrariesToolbarAction.refresh, icon: Symbols.refresh_rounded, label: t.common.refresh),
+        ],
+      ),
     );
   }
 
@@ -682,23 +802,42 @@ class _LibrariesScreenState extends State<LibrariesScreen>
           children: [
             AppIcon(ContentTypeHelper.getLibraryIcon(selectedLibrary.kind.id), fill: 1, size: 20),
             const SizedBox(width: 8),
+            // Flexible bounds the name to the space the toolbar actions leave,
+            // so a long name ellipsizes instead of painting under them (#3021).
             if (librariesSpanMultipleServers(visibleLibraries) && selectedLibrary.serverName != null)
-              Column(
-                crossAxisAlignment: .start,
-                mainAxisSize: .min,
-                children: [
-                  Text(selectedLibrary.title, style: Theme.of(context).textTheme.titleMedium),
-                  LibraryServerLabel(
-                    library: selectedLibrary,
-                    badgeSize: 10,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: .start,
+                  mainAxisSize: .min,
+                  children: [
+                    Text(
+                      selectedLibrary.title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: .ellipsis,
                     ),
-                  ),
-                ],
+                    LibraryServerLabel(
+                      library: selectedLibrary,
+                      badgeSize: 10,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                      ),
+                      constrainText: true,
+                    ),
+                  ],
+                ),
               )
             else
-              Text(selectedLibrary.title, style: Theme.of(context).textTheme.titleLarge),
+              Flexible(
+                child: Text(
+                  selectedLibrary.title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: .ellipsis,
+                ),
+              ),
             const SizedBox(width: 4),
             const AppIcon(Symbols.arrow_drop_down_rounded, fill: 1, size: 24),
           ],
@@ -716,10 +855,10 @@ class _LibrariesScreenState extends State<LibrariesScreen>
   }
 
   Widget _buildContent(BuildContext context, bool groupByServerSetting) {
-    // Watch libraries provider for updates
     final librariesProvider = context.watch<LibrariesProvider>();
     final allLibraries = librariesProvider.libraries;
     final isLoadingLibraries = librariesProvider.isLoading;
+    final librariesErrorMessage = librariesProvider.errorMessage;
 
     // Watch for hidden libraries changes to trigger rebuild
     final hiddenLibrariesProvider = context.watch<HiddenLibrariesProvider>();
@@ -747,15 +886,27 @@ class _LibrariesScreenState extends State<LibrariesScreen>
       return provider.getClientForServer(serverId)?.capabilities.folderGrouping ?? false;
     });
 
+    // Narrow phones fold Manage Libraries and Refresh into a ⋮ menu so the
+    // library picker keeps room for its name (#3021); Library options and
+    // Shuffle stay direct. With no libraries the menu would hold Refresh
+    // alone, so the empty and error states keep it as a button.
+    final collapseSecondaryActions =
+        !useSideNavigation && MediaQuery.sizeOf(context).width < ScreenBreakpoints.mobile && allLibraries.isNotEmpty;
+
+    // Stable labels let the action bar keep focus on a surviving action when
+    // the list changes shape: Library options comes and goes with Browse, and
+    // Manage and Refresh with the window width.
     List<FocusableAction> appBarActions() => [
-      if (allLibraries.isNotEmpty)
+      if (allLibraries.isNotEmpty && !collapseSecondaryActions)
         FocusableAction(
+          debugLabel: 'libraries_manage',
           icon: Symbols.edit_rounded,
           tooltip: t.libraries.manageLibraries,
           onPressed: _showLibraryManagementSheet,
         ),
       if (showBrowseOptionsAction)
         FocusableAction(
+          debugLabel: 'libraries_browse_options',
           icon: Symbols.tune_rounded,
           tooltip: t.libraries.libraryOptions,
           onPressed: _showBrowseOptionsForCurrentTab,
@@ -786,7 +937,22 @@ class _LibrariesScreenState extends State<LibrariesScreen>
                 )
               : null,
         ),
-      FocusableAction(icon: Symbols.refresh_rounded, tooltip: t.common.refresh, onPressed: _refreshSelectedLibraryTabs),
+      if (selectedLibrary != null && MediaListPlaybackLauncher.canShuffleLibrary(selectedLibrary))
+        FocusableAction(
+          debugLabel: 'libraries_shuffle',
+          icon: Symbols.shuffle_rounded,
+          tooltip: t.libraries.shuffleLibrary,
+          onPressed: () => unawaited(MediaListPlaybackLauncher.shuffleLibrary(context, selectedLibrary)),
+        ),
+      if (collapseSecondaryActions)
+        _buildToolbarMenuAction()
+      else
+        FocusableAction(
+          debugLabel: 'libraries_refresh',
+          icon: Symbols.refresh_rounded,
+          tooltip: t.common.refresh,
+          onPressed: manualRefresh,
+        ),
     ];
 
     Widget appBar({required bool floating}) => DesktopSliverAppBar(
@@ -847,15 +1013,12 @@ class _LibrariesScreenState extends State<LibrariesScreen>
     Widget body;
     if (isLoadingLibraries) {
       body = buildSimpleScroll(body: const Center(child: CircularProgressIndicator()));
-    } else if (_errorMessage != null && visibleLibraries.isEmpty && selectedLibrary == null) {
+    } else if (librariesErrorMessage != null && visibleLibraries.isEmpty && selectedLibrary == null) {
       body = buildSimpleScroll(
         body: ErrorStateWidget(
-          message: _errorMessage!,
+          message: librariesErrorMessage,
           icon: Symbols.error_outline_rounded,
-          onRetry: () {
-            final librariesProvider = context.read<LibrariesProvider>();
-            librariesProvider.refresh();
-          },
+          onRetry: manualRefresh,
         ),
       );
     } else if (visibleLibraries.isEmpty && selectedLibrary == null) {
@@ -879,83 +1042,93 @@ class _LibrariesScreenState extends State<LibrariesScreen>
           isActive: tabController.index == index,
           tabIndex: index,
         );
-        if (useTvRecommendedBackdrop) return tabContent;
-
-        return ClipRect(child: tabContent);
+        // Clip each tab so horizontal overflow (e.g. hub rows with Clip.none)
+        // doesn't bleed into adjacent tabs during swipe transitions — except
+        // the TV Recommended backdrop, which draws full-bleed. Toggling the
+        // clip rather than the wrapper keeps the page's widget type stable.
+        return ClipRect(clipBehavior: useTvRecommendedBackdrop ? Clip.none : Clip.hardEdge, child: tabContent);
       }
 
-      Widget buildTabs({bool activeOnly = false}) {
-        if (activeOnly) return buildTab(currentTabIndex);
+      final tabs = TabBarView(
+        key: ValueKey(_selectedLibraryGlobalKey),
+        controller: tabController,
+        // Disable swipe on desktop/TV - trackpad and d-pad scroll actions can trigger accidental tab switches.
+        // See: https://github.com/flutter/flutter/issues/11132
+        physics: useSideNavigation ? const NeverScrollableScrollPhysics() : null,
+        children: [for (int i = 0; i < _visibleTabs.length; i++) buildTab(i)],
+      );
 
-        final children = [for (int i = 0; i < _visibleTabs.length; i++) buildTab(i)];
-
-        return TabBarView(
-          key: ValueKey(_selectedLibraryGlobalKey),
-          controller: tabController,
-          // Disable swipe on desktop/TV - trackpad and d-pad scroll actions can trigger accidental tab switches.
-          // See: https://github.com/flutter/flutter/issues/11132
-          physics: useSideNavigation ? const NeverScrollableScrollPhysics() : null,
-          // Wrap each tab in ClipRect so horizontal overflow (e.g. hub rows
-          // with Clip.none) doesn't bleed into adjacent tabs during swipe transitions.
-          children: children,
-        );
-      }
-
-      if (useTvRecommendedBackdrop) {
-        body = Focus(
-          canRequestFocus: false,
-          skipTraversal: true,
-          onKeyEvent: (_, event) => event.logicalKey.isDpadDirection ? KeyEventResult.handled : KeyEventResult.ignored,
-          child: Stack(
-            fit: StackFit.expand,
-            clipBehavior: Clip.none,
-            children: [
-              buildTabs(activeOnly: true),
-              Positioned(top: 0, left: 0, right: 0, child: ExcludeFocusTraversal(child: buildTransparentTvTopBar())),
-            ],
-          ),
-        );
-      } else {
-        body = NestedScrollView(
-          controller: _outerScrollController,
-          floatHeaderSlivers: true,
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverOverlapAbsorber(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              sliver: appBar(floating: true),
-            ),
-            if (showMobileTabsRow)
-              SliverToBoxAdapter(
-                child: Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (int i = 0; i < _visibleTabs.length; i++) ...[
-                          if (i > 0) const SizedBox(width: 8),
-                          buildTabChip(
-                            _getTabLabel(_visibleTabs[i]),
-                            i,
-                            onSelectWhenActive: _focusCurrentTab,
-                            onNavigateDown: _focusCurrentTabFromTabBar,
-                            onNavigateToActions: () => _actionBarKey.currentState?.requestFocusOnFirst(),
+      // One tree shape for both layouts: the TV Recommended backdrop only
+      // drops the header slivers and overlays a transparent top bar. Swapping
+      // in a different body there unmounted the TabBarView and with it every
+      // kept-alive sibling tab, so each switch in or out of Recommended
+      // reloaded them from scratch and lost their scroll and filter state.
+      body = Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onKeyEvent: useTvRecommendedBackdrop
+            ? (_, event) => event.logicalKey.isDpadDirection ? KeyEventResult.handled : KeyEventResult.ignored
+            : null,
+        child: Stack(
+          fit: StackFit.expand,
+          clipBehavior: Clip.none,
+          children: [
+            NestedScrollView(
+              controller: _outerScrollController,
+              floatHeaderSlivers: true,
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                if (!useTvRecommendedBackdrop)
+                  SliverOverlapAbsorber(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    sliver: appBar(floating: true),
+                  ),
+                if (showMobileTabsRow && !useTvRecommendedBackdrop)
+                  SliverToBoxAdapter(
+                    child: Container(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      // Horizontal-only SafeArea: the strip's background
+                      // stays full-bleed; its chips clear a landscape notch
+                      // or iPhone Duo's portrait sensor column.
+                      child: SafeArea(
+                        top: false,
+                        bottom: false,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              for (int i = 0; i < _visibleTabs.length; i++) ...[
+                                if (i > 0) const SizedBox(width: 8),
+                                buildTabChip(
+                                  _getTabLabel(_visibleTabs[i]),
+                                  i,
+                                  onSelectWhenActive: _focusCurrentTab,
+                                  onNavigateDown: _focusCurrentTabFromTabBar,
+                                  onNavigateToActions: () => _actionBarKey.currentState?.requestFocusOnFirst(),
+                                ),
+                              ],
+                            ],
                           ),
-                        ],
-                      ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
+              ],
+              body: tabs,
+            ),
+            if (useTvRecommendedBackdrop)
+              Positioned(top: 0, left: 0, right: 0, child: ExcludeFocusTraversal(child: buildTransparentTvTopBar())),
           ],
-          body: buildTabs(),
-        );
-      }
+        ),
+      );
     } else {
+      if (_selectedLibraryGlobalKey == null) _scheduleInitializeWithLibraries();
       body = buildSimpleScroll(body: const SizedBox.shrink());
     }
 
+    // Behavior scrollbars would bind the NestedScrollView's shared inner
+    // controller, which holds one position per kept-alive tab, and break once
+    // a second tab is built. Each tab draws its own NestedTabScrollbar instead.
     final scrollBody = ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: body,

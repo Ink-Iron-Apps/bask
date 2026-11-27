@@ -55,6 +55,8 @@ final class AppDatabaseBootstrap {
     OfflineWatchProgress,
     SyncRules,
     SyncRuleDownloads,
+    DownloadCollections,
+    DownloadCollectionSyncs,
     Connections,
     Profiles,
     ProfileConnections,
@@ -366,7 +368,9 @@ class AppDatabase extends _$AppDatabase {
   static const FormatException _invalidRecoveryImage = FormatException('Invalid tvOS database recovery image');
 
   @override
-  int get schemaVersion => 24;
+  // 23 and 24 are this fork's; upstream used those same two numbers for three
+  // migrations of its own, which are renumbered 25 to 27 below.
+  int get schemaVersion => 27;
 
   @override
   MigrationStrategy get migration {
@@ -759,6 +763,34 @@ class AppDatabase extends _$AppDatabase {
             appLogger.i('Gave $capped unwatched sync rule(s) a $defaultUnwatchedSyncCount-episode window');
           }
         }
+        // Upstream numbered the next three 23, 24 and 25, but this fork had
+        // already spent 23 and 24 on the two above, so a Bask database can sit
+        // at 24 with none of them applied. They are renumbered above both
+        // schemes so that database still gets them, and every step ignores
+        // "already exists" so one that somehow has them is left alone.
+        if (from < 25) {
+          appLogger.i('Adding library identity columns to DownloadedMedia (v25 migration)');
+          await _ignoreAlreadyExists(
+            'DownloadedMedia.libraryId column',
+            () => m.addColumn(downloadedMedia, downloadedMedia.libraryId),
+          );
+          await _ignoreAlreadyExists(
+            'DownloadedMedia.libraryTitle column',
+            () => m.addColumn(downloadedMedia, downloadedMedia.libraryTitle),
+          );
+        }
+        if (from < 26) {
+          appLogger.i('Adding additionalPartPaths column to DownloadedMedia (v26 migration)');
+          await _ignoreAlreadyExists(
+            'DownloadedMedia.additionalPartPaths column',
+            () => m.addColumn(downloadedMedia, downloadedMedia.additionalPartPaths),
+          );
+        }
+        if (from < 27) {
+          appLogger.i('Adding download collection membership tables (v27 migration)');
+          await _ignoreAlreadyExists('DownloadCollections table', () => m.createTable(downloadCollections));
+          await _ignoreAlreadyExists('DownloadCollectionSyncs table', () => m.createTable(downloadCollectionSyncs));
+        }
       },
     );
   }
@@ -780,7 +812,6 @@ class AppDatabase extends _$AppDatabase {
     return value == null ? column.isNull() : column.equals(value);
   }
 
-  /// Get all pending offline watch actions for sync
   Future<List<OfflineWatchProgressItem>> getPendingWatchActions({String? profileId}) {
     final query = select(offlineWatchProgress)..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
     if (profileId != null) {
@@ -1075,23 +1106,16 @@ class AppDatabase extends _$AppDatabase {
   /// Update the retry state only if the action is still the snapshotted revision.
   Future<bool> updateSyncAttemptIfUnchanged(int id, int revision, String? errorMessage) {
     return _runPendingMutation(() async {
-      final existing = await (select(
-        offlineWatchProgress,
-      )..where((t) => t.id.equals(id) & t.updatedAt.equals(revision))).getSingleOrNull();
-      if (existing == null) return false;
-
-      final updated = await (update(offlineWatchProgress)..where((t) => t.id.equals(id) & t.updatedAt.equals(revision)))
-          .write(
-            OfflineWatchProgressCompanion(
-              syncAttempts: Value(existing.syncAttempts + 1),
-              lastError: Value(errorMessage),
-            ),
-          );
+      final updated = await customUpdate(
+        'UPDATE offline_watch_progress SET sync_attempts = sync_attempts + 1, last_error = ? '
+        'WHERE id = ? AND updated_at = ?',
+        variables: [Variable<String>(errorMessage), Variable<int>(id), Variable<int>(revision)],
+        updates: {offlineWatchProgress},
+      );
       return updated != 0;
     });
   }
 
-  /// Get count of pending sync items
   Future<int> getPendingSyncCount({String? profileId, int? maxSyncAttempts}) async {
     final query = selectOnly(offlineWatchProgress)..addColumns([offlineWatchProgress.id.count()]);
     if (profileId != null) {

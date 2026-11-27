@@ -6,14 +6,37 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
     final hasFrame = widget.hasFirstFrame?.value ?? true;
     widget.chromeController.setHasFirstFrame(hasFrame);
     if (hasFrame) {
+      if (_chromeFocusLostToFirstFrameGate) {
+        _chromeFocusLostToFirstFrameGate = false;
+        _restoreChromeFocusAfterOpen();
+      }
       // Retry with network-first if initial cache-first returned empty
       if (_chapters.isEmpty && _markers.isEmpty) {
         _loadPlaybackExtras(forceRefresh: true);
       }
       _syncCurrentMarkerForCurrentPosition();
     } else {
+      // Read now: the guard unmounts the transport row on the next build.
+      _chromeFocusLostToFirstFrameGate = _chromeScopeNode.hasFocus && !_chromeScopeNode.hasPrimaryFocus;
       _clearCurrentMarker();
     }
+  }
+
+  /// Gives Play/Pause the remote back once the first frame remounts the
+  /// transport row an open's [FirstFrameGuard] unmounted from under it
+  /// (#3022). [_onChromeScopeFocusChanged] parked the remote on the surface
+  /// meanwhile, and a paused viewer's chrome never auto-hides, so the focus
+  /// ring would otherwise stay gone until the next key. Whatever took focus
+  /// since — the viewer, a sheet, a prompt, the skip button's TV autofocus —
+  /// keeps it, and the automatic-grab policy of [_focusPlayPauseIfKeyboardMode]
+  /// still applies.
+  void _restoreChromeFocusAfterOpen() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_focusNode.hasPrimaryFocus || _sheetIsOpen()) return;
+      if (ModalRoute.of(context)?.isCurrent != true) return;
+      if (widget.playNextFocusNode != null || widget.playbackPromptOpen || _isSkipMarkerButtonVisible) return;
+      _focusPlayPauseIfKeyboardMode();
+    });
   }
 
   /// Focus Play/Pause when the viewer is already driving with keyboard/D-pad
@@ -58,9 +81,12 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
     });
   }
 
-  /// Controls hide delay: 5s on mobile/TV/keyboard-nav, 3s on desktop with mouse.
-  /// Maestro builds extend the delay because accessibility-tree queries can take
-  /// longer than the production timeout on physical devices.
+  /// Controls hide delay: 5s on touch mobile and under D-pad/keyboard
+  /// navigation, 3s on desktop with a mouse. Every D-pad press restarts the
+  /// timer, so traversing the bar never races it; a paused D-pad viewer keeps
+  /// the chrome until they dismiss it (see [PlayerChromeController.configure]).
+  /// Maestro builds extend the delay because accessibility-tree queries can
+  /// take longer than the production timeout on physical devices.
   Duration get _hideDelay {
     if (const bool.fromEnvironment('PLEZY_MAESTRO_E2E')) {
       return const Duration(seconds: 30);
@@ -72,7 +98,8 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
     return const Duration(seconds: 3);
   }
 
-  /// Shared hide logic: hides controls, notifies parent, updates traffic lights, restores focus.
+  /// Hide the controls. Notifying the parent, updating the traffic lights and
+  /// restoring focus all moved into [ChromeController.hide].
   void _hideControls() {
     if (!mounted) return;
     widget.chromeController.hide();
@@ -99,6 +126,16 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
     widget.chromeController.recordPointerActivity();
   }
 
+  /// Holds the chrome while any pointer is pressed on the controls, so a held
+  /// slider, scrub or button can't fade out and unmount under the pointer.
+  Widget _holdChromeWhilePressed({required Widget child}) => Listener(
+    behavior: HitTestBehavior.translucent,
+    onPointerDown: (event) => widget.chromeController.recordPointerDown(event.pointer),
+    onPointerUp: (event) => widget.chromeController.recordPointerUp(event.pointer),
+    onPointerCancel: (event) => widget.chromeController.recordPointerUp(event.pointer),
+    child: child,
+  );
+
   void _toggleControls() {
     widget.chromeController.toggle();
   }
@@ -114,7 +151,8 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
 
   /// Apply preferred orientations for the given lock state. Wired to
   /// [SettingsService.rotationLocked] via [bindEffect] so any change — from
-  /// this toggle or from the settings screen — fires the same SystemChrome call.
+  /// this toggle or from the settings screen — takes the same path, and
+  /// [OrientationHelper] keeps fixed-orientation platforms (car, TV) out of it.
   void _applyRotationLock(bool locked) {
     if (PlatformDetector.isAutomotive()) return;
     if (locked) {
@@ -143,33 +181,17 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
   }
 
   void _toggleScreenLock() {
-    final locking = !_isScreenLocked;
-    _setControlsState(() {
-      _isScreenLocked = locking;
-      if (locking) {
-        _showLockIcon = true;
-      }
-    });
-    if (locking) {
-      _cancelEdgeAdjustmentGesture();
-      widget.chromeController.hide(ignoreHolds: true);
-      _startLockIconHideTimer();
+    if (_isScreenLocked) {
+      _unlockScreen();
+      return;
     }
-  }
-
-  void _startLockIconHideTimer() {
-    _lockIconTimer?.cancel();
-    _lockIconTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted) _setControlsState(() => _showLockIcon = false);
-    });
+    _setControlsState(() => _isScreenLocked = true);
+    _cancelEdgeAdjustmentGesture();
+    widget.chromeController.hide(ignoreHolds: true);
   }
 
   void _unlockScreen() {
-    _setControlsState(() {
-      _isScreenLocked = false;
-      _showLockIcon = false;
-    });
-    _lockIconTimer?.cancel();
+    _setControlsState(() => _isScreenLocked = false);
     widget.chromeController.show();
   }
 
@@ -371,6 +393,17 @@ extension _PlexVideoControlsVisibilityMethods on _PlexVideoControlsState {
       if (ModalRoute.of(context)?.isCurrent != true) return;
       _focusNode.requestFocus();
     });
+  }
+
+  /// The chrome's own scope holds primary focus only after the control that
+  /// had it left the tree with nothing focusable remembered behind it: an
+  /// open's [FirstFrameGuard] unmounting the transport row under a focused
+  /// button, or a sheet closing back into that emptied scope (#3022). No key
+  /// stage answers there — the surface's Select, Tab and arrow stages need the
+  /// surface itself focused — so the remote went dead under visible chrome.
+  /// Park it on the surface, as the hide path and the vanishing skip button do.
+  void _onChromeScopeFocusChanged() {
+    if (_chromeScopeNode.hasPrimaryFocus) _claimPlayerSurfaceFocus();
   }
 
   bool _sheetIsOpen() => OverlaySheetController.maybeOf(context)?.isOpen ?? false;

@@ -20,7 +20,6 @@ void main() {
       videoHeight: 2160,
       videoFps: 23.976,
       hwdecCurrent: 'mediacodec',
-      currentVo: 'gpu',
       frameDropCount: 47,
       decoderFrameDropCount: 3,
       cacheUsed: 12 * 1024 * 1024,

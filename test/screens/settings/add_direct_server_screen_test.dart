@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// matters as much as what it accepts.
 void main() {
   Widget app() => MaterialApp(
-    theme: monoTheme(dark: true),
+    theme: monoTheme(MonoPalette.dark),
     home: const InputModeTracker(
       // No setupFactory: nothing below should reach a probe, and a test that
       // did would fail on the missing providers rather than pass quietly.

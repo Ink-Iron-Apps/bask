@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bask/i18n/strings.g.dart';
+import 'package:bask/models/audio_channel_limit.dart';
 import 'package:bask/models/audio_quality_preset.dart';
 import 'package:bask/screens/settings/playback_settings_screen.dart';
 import 'package:bask/services/settings_service.dart';
 import 'package:bask/theme/mono_theme.dart';
 import 'package:bask/models/player_setting_scope.dart';
+import 'package:bask/utils/platform_detector.dart';
 
 import '../../test_helpers/prefs.dart';
 
@@ -23,7 +25,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
 
     final title = find.text('Music Quality');
@@ -49,7 +51,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
 
     final title = find.text('Shader Preset');
@@ -77,7 +79,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
 
     final title = find.text('Play Next Countdown');
@@ -97,23 +99,101 @@ void main() {
     expect(find.descendant(of: tile, matching: find.text('Play immediately')), findsOneWidget);
   });
 
-  testWidgets('toggles deinterlacing on the mpv path', (tester) async {
+  testWidgets('picks inverse telecine on the mpv path', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1000, 1400);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
 
     final title = find.text('Deinterlacing');
     await tester.scrollUntilVisible(title, 500, scrollable: find.byType(Scrollable).first);
     await tester.ensureVisible(title);
     await tester.pumpAndSettle();
+    final tile = find.widgetWithText(ListTile, 'Deinterlacing');
+    expect(find.descendant(of: tile, matching: find.textContaining('Off · ')), findsOneWidget);
+
     await tester.tap(title);
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Film'));
+    await tester.pumpAndSettle();
 
-    expect(SettingsService.instance.read(SettingsService.deinterlace), isTrue);
+    final settings = SettingsService.instance;
+    expect(settings.read(SettingsService.deinterlaceMode), DeinterlaceMode.film);
+    expect(settings.prefs.getString(SettingsService.deinterlaceMode.key), 'film');
+    expect(find.descendant(of: tile, matching: find.textContaining('Film · ')), findsOneWidget);
+  });
+
+  testWidgets('audio passthrough says it is silencing the audio filters', (tester) async {
+    // This fork keeps the switch usable and explains the override on the row
+    // that causes it, rather than disabling it: the same note covers the
+    // dialogue boost, which upstream's version does not mention.
+    TvDetectionService.debugSetAppleTVOverride(true);
+    addTearDown(() => TvDetectionService.debugSetAppleTVOverride(null));
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1000, 1400);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final settings = SettingsService.instance;
+    await settings.write(SettingsService.audioNormalization, true);
+    expect(settings.read(SettingsService.audioPassthrough), isTrue);
+
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
+    await tester.pumpAndSettle();
+
+    final title = find.text('Audio Passthrough');
+    await tester.scrollUntilVisible(title, 500, scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(title);
+    await tester.pumpAndSettle();
+
+    final tile = find.widgetWithText(SwitchListTile, 'Audio Passthrough');
+    final note = find.descendant(of: tile, matching: find.textContaining(t.settings.audioPassthroughSuspendsFilters));
+    expect(note, findsOneWidget);
+
+    // Turning normalization off takes the note away; the switch itself was
+    // never blocked.
+    await settings.write(SettingsService.audioNormalization, false);
+    await tester.pumpAndSettle();
+    expect(note, findsNothing);
+    await tester.tap(title);
+    await tester.pumpAndSettle();
+    expect(settings.read(SettingsService.audioPassthrough), isFalse);
+  });
+
+  testWidgets('picks an audio channel limit and shows only the mix options it uses', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1000, 1400);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
+    await tester.pumpAndSettle();
+
+    final title = find.text('Audio Channels');
+    await tester.scrollUntilVisible(title, 500, scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(title);
+    await tester.pumpAndSettle();
+    expect(find.text('Center Channel Boost'), findsNothing);
+    expect(find.text('Normalize Volume on Downmix'), findsNothing);
+
+    await tester.tap(title);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Up to 5.1'));
+    await tester.pumpAndSettle();
+
+    final settings = SettingsService.instance;
+    expect(settings.read(SettingsService.audioChannelLimit), AudioChannelLimit.surround51);
+    // A 5.1 fold keeps the center channel, so only normalization applies.
+    expect(find.text('Center Channel Boost'), findsNothing);
+    expect(find.text('Normalize Volume on Downmix'), findsOneWidget);
+
+    await settings.write(SettingsService.audioChannelLimit, AudioChannelLimit.stereo);
+    await tester.pumpAndSettle();
+    expect(find.text('Center Channel Boost'), findsOneWidget);
+    expect(find.text('Normalize Volume on Downmix'), findsOneWidget);
   });
 
   testWidgets('turns the covered-source direct play off from the quality group (#2193)', (tester) async {
@@ -122,7 +202,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
 
     final title = find.text('Play Smaller Videos at Original Quality');
@@ -145,7 +225,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: monoTheme(dark: true).copyWith(platform: TargetPlatform.android),
+        theme: monoTheme(MonoPalette.dark).copyWith(platform: TargetPlatform.android),
         home: const PlaybackSettingsScreen(),
       ),
     );
@@ -164,6 +244,26 @@ void main() {
     expect(settings.read(SettingsService.gesturePinchToZoom), isTrue);
   });
 
+  testWidgets('shuffle starts at beginning toggle persists (#2303)', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1000, 1400);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
+    await tester.pumpAndSettle();
+
+    final title = find.text('Shuffle Starts at Beginning');
+    await tester.scrollUntilVisible(title, 500, scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(title);
+    await tester.pumpAndSettle();
+    await tester.tap(title);
+    await tester.pumpAndSettle();
+
+    expect(SettingsService.instance.read(SettingsService.shuffleStartsFromBeginning), isTrue);
+    expect(SettingsService.instance.prefs.getBool(SettingsService.shuffleStartsFromBeginning.key), isTrue);
+  });
+
   testWidgets('gesture toggles stay hidden on non-mobile layouts', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1000, 1400);
@@ -172,7 +272,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: monoTheme(dark: true).copyWith(platform: TargetPlatform.macOS),
+        theme: monoTheme(MonoPalette.dark).copyWith(platform: TargetPlatform.macOS),
         home: const PlaybackSettingsScreen(),
       ),
     );
@@ -190,7 +290,7 @@ void main() {
     // a switch read "on" while being inaudible.
     await SettingsService.instance.write(SettingsService.audioPassthrough, true);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Audio Passthrough'), 500, scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
@@ -206,7 +306,7 @@ void main() {
     await SettingsService.instance.write(SettingsService.audioPassthrough, true);
     await SettingsService.instance.write(SettingsService.audioNormalization, false);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Audio Passthrough'), 500, scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
@@ -220,7 +320,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
 
-    await tester.pumpWidget(MaterialApp(theme: monoTheme(dark: true), home: const PlaybackSettingsScreen()));
+    await tester.pumpWidget(MaterialApp(theme: monoTheme(MonoPalette.dark), home: const PlaybackSettingsScreen()));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Dialogue Boost'), 500, scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();

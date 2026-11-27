@@ -608,6 +608,15 @@ bool MpvPlayer::Initialize(HWND view) {
     // Let mpv use display/context detection instead of forcing HDR signaling.
     mpv_set_option_string(mpv_, "target-colorspace-hint", bask::mpv_common::TargetColorspaceHint(hdr_enabled_));
 
+    // Keep the display black point at absolute black. Under target-contrast=auto
+    // mpv's d3d11 context takes the black level Windows reports for the display
+    // (DXGI MinLuminance) as the target's, and libplacebo master (b915882d)
+    // now honors that for PQ output instead of forcing zero nits. TVs whose
+    // reported floor sits above what they render then show every video with
+    // lifted blacks (#2803). HDR10 sinks map PQ themselves, so send it absolute
+    // as released libplacebo does. A user mpv.conf line still overrides this.
+    mpv_set_option_string(mpv_, "target-contrast", "inf");
+
     // Fallback tone mapping when display doesn't support HDR. On Adreno,
     // per-frame tone-map LUT regeneration is pathological — see
     // SystemHasQualcommGpu — so both dynamic inputs to the LUT key are
@@ -772,6 +781,12 @@ void MpvPlayer::NotifyPowerSuspend() { LogRecovery("system suspending"); }
 
 void MpvPlayer::NotifyPowerResume() { audio_recovery_.RequestResume(); }
 
+void MpvPlayer::NotifyDisplayChange(WPARAM wparam, LPARAM lparam) {
+  if (!hwnd_) return;
+  HWND inner = ::FindWindowExW(hwnd_, nullptr, nullptr, nullptr);
+  if (inner) ::PostMessageW(inner, WM_DISPLAYCHANGE, wparam, lparam);
+}
+
 void MpvPlayer::LogRecovery(const std::string& text) {
   char log_msg[512];
   snprintf(log_msg, sizeof(log_msg), "MPV [warn] audio-recovery: %s", text.c_str());
@@ -814,10 +829,19 @@ void MpvPlayer::MaybeRunAudioRecovery() {
   if (action.reason == bask::mpv_common::AudioReloadReason::kNone) {
     return;
   }
+  if (action.reason == bask::mpv_common::AudioReloadReason::kGiveUp) {
+    // audio-fallback-to-null means the core will never end the file over a
+    // dead device itself, so the outcome is produced here: stop, and let the
+    // END_FILE handler report it as the AO_INIT_FAILED error Dart handles.
+    LogRecovery("audio output failed after " + std::to_string(action.attempt) + " reloads; ending playback");
+    audio_output_failed_ = true;
+    Command({"stop"});
+    return;
+  }
   const char* reason = action.reason == bask::mpv_common::AudioReloadReason::kResume ? "resume" : "null-fallback";
   TryAudioReload(reason, action.attempt, action.request_generation);
   if (action.exhausted) {
-    LogRecovery("audio recovery budget exhausted; waiting for device list change");
+    LogRecovery("audio recovery budget exhausted; ending playback if this reload fails");
   }
 }
 
@@ -844,7 +868,29 @@ void MpvPlayer::EventLoop() {
       break;
     }
     if (event->event_id != MPV_EVENT_NONE) {
+      // One event per wait leaves the rest pending, and the lines explaining a
+      // failed open are among the last mpv hands out, so an error END_FILE is
+      // followed here by a drain to MPV_EVENT_NONE, cut off once the hold has
+      // spanned its limit; see ErrorEndFileHold.
+      const bool error_end_file = bask::mpv_common::IsErrorEndFile(event);
+      if (error_end_file) held_events_.Begin();
       HandleMpvEvent(event);
+      if (error_end_file) {
+        bool draining = true;
+        bool shutdown = false;
+        while (draining && running_) {
+          mpv_event* pending = mpv_wait_event(mpv_, 0);
+          if (pending->event_id == MPV_EVENT_NONE) break;
+          if (pending->event_id == MPV_EVENT_SHUTDOWN) {
+            shutdown = true;
+            break;
+          }
+          HandleMpvEvent(pending);
+          draining = !held_events_.CountDequeued();
+        }
+        ReleaseHeldEvents();
+        if (shutdown) break;
+      }
     }
     // Idle waits are bounded at 100 ms; queued events can wake us sooner.
     // Audio recovery owns its elapsed-time deadlines.
@@ -861,9 +907,10 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
   switch (event->event_id) {
     case MPV_EVENT_LOG_MESSAGE: {
       auto* msg = static_cast<mpv_event_log_message*>(event->data);
-      char log_msg[512];
-      snprintf(log_msg, sizeof(log_msg), "MPV [%s] %s: %s", msg->level, msg->prefix, msg->text);
-      OutputDebugStringA(log_msg);
+      // No OutputDebugStringA mirror here: the record is forwarded to Dart
+      // below, where LogRedactionManager scrubs tokens and server URLs. The
+      // duplicate also cost a 512-byte stack buffer and an snprintf per mpv
+      // log record, on the event loop.
 
       flutter::EncodableMap data;
       data[flutter::EncodableValue("prefix")] = flutter::EncodableValue(SanitizeUtf8(msg->prefix));
@@ -885,13 +932,25 @@ void MpvPlayer::HandleMpvEvent(mpv_event* event) {
     }
     case MPV_EVENT_END_FILE: {
       audio_recovery_.SetFileLoaded(false);
+      // The stop that audio recovery issued on giving up ends the file with
+      // reason stop, which Dart would take for the user's own. It is reported
+      // as what it is - the AO_INIT_FAILED error the core would have raised
+      // without audio-fallback-to-null - under the cause tag Dart handles.
+      const bool audio_output_failed = audio_output_failed_;
+      audio_output_failed_ = false;
       auto* end = static_cast<mpv_event_end_file*>(event->data);
+      const int reason =
+          audio_output_failed ? static_cast<int>(MPV_END_FILE_REASON_ERROR) : static_cast<int>(end->reason);
+      const int error = audio_output_failed ? static_cast<int>(MPV_ERROR_AO_INIT_FAILED) : end->error;
       flutter::EncodableMap data;
       data[flutter::EncodableValue("sourceId")] = flutter::EncodableValue(end->playlist_entry_id);
-      data[flutter::EncodableValue("reason")] = flutter::EncodableValue(static_cast<int>(end->reason));
-      if (end->reason == MPV_END_FILE_REASON_ERROR) {
-        data[flutter::EncodableValue("error")] = flutter::EncodableValue(static_cast<int>(end->error));
-        data[flutter::EncodableValue("message")] = flutter::EncodableValue(SanitizeUtf8(mpv_error_string(end->error)));
+      data[flutter::EncodableValue("reason")] = flutter::EncodableValue(reason);
+      if (reason == MPV_END_FILE_REASON_ERROR) {
+        data[flutter::EncodableValue("error")] = flutter::EncodableValue(error);
+        data[flutter::EncodableValue("message")] = flutter::EncodableValue(SanitizeUtf8(mpv_error_string(error)));
+        if (audio_output_failed) {
+          data[flutter::EncodableValue("cause")] = flutter::EncodableValue(bask::mpv_common::kAudioOutputFailedCause);
+        }
       }
       SendEvent("end-file", data);
       break;
@@ -948,10 +1007,7 @@ void MpvPlayer::SendPropertyChange(const char* name, mpv_node* data) {
     list.push_back(flutter::EncodableValue());
   }
 
-  std::lock_guard<std::mutex> lock(callback_mutex_);
-  if (event_callback_) {
-    event_callback_(flutter::EncodableValue(list));
-  }
+  DeliverEvent(flutter::EncodableValue(std::move(list)), false);
 }
 
 void MpvPlayer::SendActiveSourceEvent(const std::string& name) {
@@ -981,9 +1037,23 @@ void MpvPlayer::SendEvent(const std::string& name, const flutter::EncodableMap& 
     event[flutter::EncodableValue("data")] = flutter::EncodableValue(data);
   }
 
+  DeliverEvent(flutter::EncodableValue(std::move(event)), name == "log-message");
+}
+
+void MpvPlayer::DeliverEvent(flutter::EncodableValue message, bool is_log_message) {
+  if (held_events_.ShouldHold(is_log_message)) {
+    held_events_.Hold(std::move(message));
+    return;
+  }
   std::lock_guard<std::mutex> lock(callback_mutex_);
   if (event_callback_) {
-    event_callback_(flutter::EncodableValue(event));
+    event_callback_(message);
+  }
+}
+
+void MpvPlayer::ReleaseHeldEvents() {
+  for (auto& message : held_events_.Release()) {
+    DeliverEvent(std::move(message), false);
   }
 }
 

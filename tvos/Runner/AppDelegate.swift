@@ -57,7 +57,7 @@ import wakelock_plus
     }
 
     let subtype = event.subtype
-    print("PlezyTvRemote: remote control event subtype=\(remoteControlSubtypeName(subtype))")
+    MpvLog.debug("PlezyTvRemote: remote control event subtype=\(remoteControlSubtypeName(subtype))")
     switch subtype {
     case .remoteControlPlay, .remoteControlPause, .remoteControlTogglePlayPause:
       sendPlayPauseEvent(source: "remote_control", detail: remoteControlSubtypeName(subtype))
@@ -80,7 +80,7 @@ import wakelock_plus
   }
 
   private func sendPlayPauseEvent(source: String, detail: String) {
-    print("PlezyTvRemote: intercepted play/pause source=\(source) detail=\(detail)")
+    MpvLog.debug("PlezyTvRemote: intercepted play/pause source=\(source) detail=\(detail)")
     tvRemoteChannel.sendMessage(["type": "play_pause", "source": source, "detail": detail])
   }
 
@@ -125,19 +125,15 @@ import wakelock_plus
       try session.setCategory(
         .playback, mode: .default, policy: .longFormAudio, options: [])
     } catch {
-      print("Failed to configure long-form audio session: \(error)")
+      MpvLog.debug("Failed to configure long-form audio session: \(error)")
       do {
         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
       } catch {
-        print("Failed to configure audio session: \(error)")
+        MpvLog.error("Failed to configure audio session: \(error)")
       }
     }
 
     application.beginReceivingRemoteControlEvents()
-
-    if let url = launchOptions?[UIApplication.LaunchOptionsKey.url] as? URL {
-      _ = SystemShelfPlugin.handleOpenURL(url)
-    }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -180,19 +176,20 @@ import wakelock_plus
     if let r = pluginRegistry.registrar(forPlugin: "SystemShelfPlugin") {
       SystemShelfPlugin.register(with: r)
     }
+    if let r = pluginRegistry.registrar(forPlugin: "DeepLinkPlugin") {
+      DeepLinkPlugin.register(with: r)
+    }
+    if let r = pluginRegistry.registrar(forPlugin: "AppIconPlugin") {
+      AppIconPlugin.register(with: r)
+    }
     if let r = pluginRegistry.registrar(forPlugin: "VideoDecodeCapabilitiesPlugin") {
       VideoDecodeCapabilitiesPlugin.register(with: r)
     }
-  }
-
-  override func application(
-    _ application: UIApplication,
-    open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-  ) -> Bool {
-    if SystemShelfPlugin.handleOpenURL(url) {
-      return true
+    if let r = pluginRegistry.registrar(forPlugin: "ExternalPlayerPlugin") {
+      ExternalPlayerPlugin.register(with: r)
     }
-    return super.application(application, open: url, options: options)
+    if let r = pluginRegistry.registrar(forPlugin: "InAppPurchasePlugin") {
+      InAppPurchasePlugin.register(with: r)
+    }
   }
 }

@@ -390,7 +390,7 @@ Future<void> _playDownloadedPlaylist(
     metadata: provider.metadata,
     downloads: provider.downloads,
   );
-  final queue = OfflinePlaylistQueue.build(id: playlist.key, members: members, shuffle: shuffle);
+  final queue = OfflinePlaylistQueue.build(members: members, shuffle: shuffle);
   if (queue == null) {
     showAppSnackBar(context, t.downloads.playlistNothingDownloaded);
     return;

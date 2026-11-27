@@ -3,7 +3,8 @@ import '../utils/platform_detector.dart';
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:cached_network_image_ce/cached_network_image.dart' show FileResponse;
+import 'package:cached_network_image_ce/cached_network_image.dart'
+    show FileResponse, HttpInterceptor, HttpRequestData, HttpRequestHandler;
 // CE's public conditional export hides the IO-only httpClientFactory parameter
 // behind a narrower unsupported-platform stub.
 // ignore: implementation_imports
@@ -83,16 +84,69 @@ class PlexImageCacheManager extends ce_cache.DefaultCacheManager {
     return limit;
   }
 
-  PlexImageCacheManager._()
-    : super(
-        stalePeriod: _artworkRetention,
-        maxNrOfCacheObjects: _resolvedObjectLimit(),
-        httpClientFactory: () => _SharedHttpClient(_artworkHttpClient.inner, _artworkRequestLimiter),
-        // Application support, not the cache directory: Android reclaims cache
-        // directories under storage pressure, which would discard the whole
-        // library's artwork at the moment the device is busiest.
-        cacheDirectoryProvider: getApplicationSupportDirectory,
-      );
+  /// One constructor, so the wiring a test exercises is the wiring the app
+  /// gets.
+  ///
+  /// Two of these existed, and only the testing one registered
+  /// [_ArtworkCredentialInterceptor]. The app therefore downloaded the
+  /// redacted URL [getFileStream] hands the cache — `X-Plex-Token=` with no
+  /// value, both in the query and inside the encoded `url=` — and PMS answered
+  /// 401 to every poster, thumbnail and logo while API calls on the same token
+  /// answered 200. Nothing caught it: the tests drove the constructor that had
+  /// the interceptor, and the URL builders, which are correct, had nothing to
+  /// report.
+  PlexImageCacheManager._({
+    super.stalePeriod = _artworkRetention,
+    int? maxNrOfCacheObjects,
+    http.Client Function()? httpClientFactory,
+    ce_cache.CacheDirectoryProvider? cacheDirectoryProvider,
+  }) : super(
+         maxNrOfCacheObjects: maxNrOfCacheObjects ?? _resolvedObjectLimit(),
+         httpClientFactory:
+             httpClientFactory ?? (() => _SharedHttpClient(_artworkHttpClient.inner, _artworkRequestLimiter)),
+         // Application support, not the cache directory: Android reclaims cache
+         // directories under storage pressure, which would discard the whole
+         // library's artwork at the moment the device is busiest.
+         cacheDirectoryProvider: cacheDirectoryProvider ?? getApplicationSupportDirectory,
+         // Not optional: without it the download carries the redacted URL and
+         // the server refuses every image.
+         httpInterceptors: const [_ArtworkCredentialInterceptor()],
+       );
+
+  @visibleForTesting
+  factory PlexImageCacheManager.forTesting({
+    required http.Client Function() httpClientFactory,
+    required ce_cache.CacheDirectoryProvider cacheDirectoryProvider,
+  }) {
+    return PlexImageCacheManager._(
+      stalePeriod: const Duration(days: 14),
+      maxNrOfCacheObjects: 3000,
+      httpClientFactory: httpClientFactory,
+      cacheDirectoryProvider: cacheDirectoryProvider,
+    );
+  }
+
+  /// Artwork URLs carry the server token in their query (see
+  /// [redactArtworkUrl]), and the cache persists each entry's URL — and, with
+  /// no explicit key, keys the entry by it — in plaintext metadata that
+  /// outlives sign-out. Hand the cache the redacted URL and let
+  /// [_ArtworkCredentialInterceptor] restore the real one for the download.
+  @override
+  Stream<FileResponse> getFileStream(
+    String url, {
+    String? key,
+    Map<String, String>? headers,
+    bool withProgress = false,
+  }) {
+    final redacted = redactArtworkUrl(url);
+    if (redacted == url) return super.getFileStream(url, key: key, headers: headers, withProgress: withProgress);
+    return super.getFileStream(
+      redacted,
+      key: key ?? redacted,
+      headers: {...?headers, _credentialedUrlHeader: url},
+      withProgress: withProgress,
+    );
+  }
 
   @override
   Stream<FileResponse> getImageFile(
@@ -109,6 +163,34 @@ class PlexImageCacheManager extends ce_cache.DefaultCacheManager {
   }
 }
 
+/// Query parameters that carry a media-server credential in artwork URLs:
+/// Plex's `X-Plex-Token` and Jellyfin/Emby's `api_key`. Plex's photo
+/// transcoder URLs also nest one inside their percent-encoded `url=` value.
+final _artworkCredentialParam = RegExp(
+  r'((?:X-Plex-Token|api_key|ApiKey)(?:=|%3D|%253D))[^&#%]+',
+  caseSensitive: false,
+);
+
+/// [url] with every credential value blanked: what the artwork cache records.
+@visibleForTesting
+String redactArtworkUrl(String url) => url.replaceAllMapped(_artworkCredentialParam, (match) => match[1]!);
+
+/// Request header carrying the credentialed URL from
+/// [PlexImageCacheManager.getFileStream] to [_ArtworkCredentialInterceptor].
+/// Never sent: the interceptor removes it.
+const _credentialedUrlHeader = 'x-bask-credentialed-url';
+
+class _ArtworkCredentialInterceptor extends HttpInterceptor {
+  const _ArtworkCredentialInterceptor();
+
+  @override
+  void onRequest(HttpRequestData request, HttpRequestHandler handler) {
+    final credentialedUrl = request.headers.remove(_credentialedUrlHeader);
+    if (credentialedUrl != null) request.url = credentialedUrl;
+    handler.next(request);
+  }
+}
+
 /// CE closes each factory-created client after a download. Wrap the app-wide
 /// shared client so image requests reuse its platform transport without
 /// transferring ownership of its lifecycle, and cap artwork fan-out globally.
@@ -116,13 +198,20 @@ class _SharedHttpClient extends http.BaseClient {
   final http.Client _inner;
   final _RequestLimiter _limiter;
   final Duration _unclaimedResponseTimeout;
+  final Duration _stallTimeout;
 
-  _SharedHttpClient(this._inner, this._limiter, {this._unclaimedResponseTimeout = const Duration(seconds: 2)});
+  _SharedHttpClient(
+    this._inner,
+    this._limiter, {
+    this._unclaimedResponseTimeout = const Duration(seconds: 2),
+    this._stallTimeout = const Duration(seconds: 30),
+  });
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final permit = await _limiter.acquire();
     var released = false;
+    final abort = Completer<void>();
 
     void release() {
       if (released) return;
@@ -130,8 +219,25 @@ class _SharedHttpClient extends http.BaseClient {
       permit.release();
     }
 
+    void abortTransport() {
+      if (!abort.isCompleted) abort.complete();
+    }
+
     try {
-      final response = await _inner.send(request);
+      // CE sets no timeouts, so a server that accepts the connection but never
+      // answers (or stops mid-body) would hold this slot forever, and once
+      // every slot is stuck no artwork loads until restart. Give up after
+      // [_stallTimeout] without progress and cancel the transfer.
+      final sent = _inner.send(_abortable(request, abort.future));
+      final response = await sent.timeout(
+        _stallTimeout,
+        onTimeout: () {
+          abortTransport();
+          // Transports without abort support may still answer later.
+          unawaited(sent.then<void>((late) => _cancelUnclaimedBody(late.stream), onError: (Object _) {}));
+          throw TimeoutException('Artwork response headers stalled', _stallTimeout);
+        },
+      );
 
       // CE's cache manager throws for any status other than 200/202 without
       // listening to the body, so _releaseWhenDone would never fire and the
@@ -156,7 +262,13 @@ class _SharedHttpClient extends http.BaseClient {
       }
 
       return http.StreamedResponse(
-        _releaseWhenDone(response.stream, release, claimTimeout: _unclaimedResponseTimeout),
+        _releaseWhenDone(
+          response.stream,
+          release,
+          claimTimeout: _unclaimedResponseTimeout,
+          stallTimeout: _stallTimeout,
+          onStall: abortTransport,
+        ),
         response.statusCode,
         contentLength: response.contentLength,
         request: response.request,
@@ -175,6 +287,19 @@ class _SharedHttpClient extends http.BaseClient {
   void close() {}
 }
 
+/// CE sends plain [http.Request]s; re-issue one as abortable so a stalled
+/// transfer is cancelled at the transport instead of only being abandoned.
+http.BaseRequest _abortable(http.BaseRequest request, Future<void> abortTrigger) {
+  if (request is! http.Request || request is http.Abortable) return request;
+  final abortable = http.AbortableRequest(request.method, request.url, abortTrigger: abortTrigger)
+    ..headers.addAll(request.headers)
+    ..followRedirects = request.followRedirects
+    ..maxRedirects = request.maxRedirects
+    ..persistentConnection = request.persistentConnection;
+  if (request.bodyBytes.isNotEmpty) abortable.bodyBytes = request.bodyBytes;
+  return abortable;
+}
+
 // ignore: unused-code
 /// Test hook: builds the throttled artwork client with an isolated limiter.
 @visibleForTesting
@@ -182,12 +307,20 @@ http.Client createArtworkHttpClientForTest(
   http.Client inner, {
   int maxConcurrent = 6,
   Duration unclaimedResponseTimeout = const Duration(seconds: 2),
-}) => _SharedHttpClient(inner, _RequestLimiter(maxConcurrent), unclaimedResponseTimeout: unclaimedResponseTimeout);
+  Duration stallTimeout = const Duration(seconds: 30),
+}) => _SharedHttpClient(
+  inner,
+  _RequestLimiter(maxConcurrent),
+  unclaimedResponseTimeout: unclaimedResponseTimeout,
+  stallTimeout: stallTimeout,
+);
 
 Stream<List<int>> _releaseWhenDone(
   Stream<List<int>> stream,
   void Function() release, {
   required Duration claimTimeout,
+  required Duration stallTimeout,
+  required void Function() onStall,
 }) {
   var claimed = false;
   var abandoned = false;
@@ -212,9 +345,12 @@ Stream<List<int>> _releaseWhenDone(
     claimed = true;
     claimTimer.cancel();
     try {
-      await for (final chunk in stream) {
+      await for (final chunk in stream.timeout(stallTimeout)) {
         yield chunk;
       }
+    } on TimeoutException {
+      onStall();
+      rethrow;
     } finally {
       release();
     }

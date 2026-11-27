@@ -15,6 +15,7 @@ import '../../utils/snackbar_helper.dart';
 import '../../widgets/app_icon.dart';
 import '../../widgets/dialog_action_button.dart';
 import '../../widgets/focusable_list_tile.dart';
+import '../../widgets/scroll_ink_boundary.dart';
 import '../../widgets/tv_color_picker.dart';
 import '../../widgets/tv_number_spinner.dart';
 
@@ -35,6 +36,9 @@ String themePaletteLabel(settings.ThemePalette palette) => switch (palette) {
   settings.ThemePalette.amber => t.settings.paletteAmber,
   settings.ThemePalette.crimson => t.settings.paletteCrimson,
   settings.ThemePalette.slate => t.settings.paletteSlate,
+  settings.ThemePalette.ember => t.settings.paletteEmber,
+  settings.ThemePalette.glacier => t.settings.paletteGlacier,
+  settings.ThemePalette.paper => t.settings.palettePaper,
 };
 
 /// Model for option selection dialogs.
@@ -94,6 +98,19 @@ Future<T?> guardSettingsOperation<T, E extends Object>(
   }
 }
 
+/// Closes the dialog [dialogContext] belongs to with [result], only while that
+/// dialog is the top route.
+///
+/// `Navigator.pop` removes whatever is topmost. A select or cancel reaching a
+/// dialog that another dialog now covers, or one already closing, would close
+/// that other route — with this dialog's result (#3197: a covered language
+/// picker's choice was handed to the tab picker above it). Such input is stale
+/// and is dropped.
+void _popDialogIfCurrent<T>(BuildContext dialogContext, [T? result]) {
+  if (!(ModalRoute.isCurrentOf(dialogContext) ?? false)) return;
+  Navigator.pop<T>(dialogContext, result);
+}
+
 void _showSettingsInputDialog({
   required BuildContext context,
   required String title,
@@ -146,7 +163,7 @@ class _SettingsInputDialogState extends State<_SettingsInputDialog> {
   Future<void> _save() async {
     try {
       final shouldClose = await widget.onSave(context);
-      if (shouldClose && mounted) Navigator.pop(context);
+      if (shouldClose && mounted) _popDialogIfCurrent(context);
     } on PlatformException catch (error, stackTrace) {
       if (!mounted) return;
       showSettingsFailure(context, operation: 'Settings input save', error: error, stackTrace: stackTrace);
@@ -163,7 +180,7 @@ class _SettingsInputDialogState extends State<_SettingsInputDialog> {
       content: widget.contentBuilder(context, context, setState, _saveFocusNode),
       actions: [
         ...?widget.leadingActionsBuilder?.call(context, setState),
-        DialogActionButton(onPressed: () => Navigator.pop(context), label: t.common.cancel),
+        DialogActionButton(onPressed: () => _popDialogIfCurrent(context), label: t.common.cancel),
         DialogActionButton(focusNode: _saveFocusNode, onPressed: _save, label: t.common.save),
       ],
     );
@@ -188,27 +205,85 @@ Future<DialogOption<T>?> showSelectionDialog<T>({
     builder: (dialogContext) => AlertDialog(
       title: Text(title),
       contentPadding: const EdgeInsets.only(top: 12, bottom: 24),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: .min,
-          children: options.map((option) {
-            final selected = option.value == currentValue;
-            return FocusableListTile(
-              key: ValueKey(option.value),
-              leading: AppIcon(
-                selected ? Symbols.radio_button_checked_rounded : Symbols.radio_button_unchecked_rounded,
-                color: selected ? Theme.of(dialogContext).colorScheme.primary : null,
-              ),
-              title: Text(option.title),
-              subtitle: option.subtitle != null ? Text(option.subtitle!) : null,
-              selected: selected,
-              autofocus: focusFirstItem && selected,
-              onTap: () => Navigator.pop(dialogContext, option),
-            );
-          }).toList(),
+      content: ScrollInkBoundary(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: .min,
+            children: options.map((option) {
+              final selected = option.value == currentValue;
+              return FocusableListTile(
+                key: ValueKey(option.value),
+                leading: AppIcon(
+                  selected ? Symbols.radio_button_checked_rounded : Symbols.radio_button_unchecked_rounded,
+                  color: selected ? Theme.of(dialogContext).colorScheme.primary : null,
+                ),
+                title: Text(option.title),
+                subtitle: option.subtitle != null ? Text(option.subtitle!) : null,
+                selected: selected,
+                autofocus: focusFirstItem && selected,
+                onTap: () => _popDialogIfCurrent(dialogContext, option),
+              );
+            }).toList(),
+          ),
         ),
       ),
     ),
+  );
+}
+
+/// Shows a checkbox dialog with focusable rows and Save/Cancel. [onSave]
+/// receives the checked values in [options] order. Values in [locked] render
+/// checked and disabled, so D-pad traversal skips them.
+void showChecklistDialog<T>({
+  required BuildContext context,
+  required String title,
+  required List<DialogOption<T>> options,
+  required Set<T> checked,
+  Set<T> locked = const {},
+  required Future<void> Function(List<T> checked) onSave,
+}) {
+  final current = {...checked, ...locked};
+  final focusFirstItem = InputModeTracker.isKeyboardMode(context, listen: false);
+  final firstEditable = options.where((option) => !locked.contains(option.value)).firstOrNull?.value;
+
+  _showSettingsInputDialog(
+    context: context,
+    title: title,
+    contentBuilder: (_, _, setDialogState, _) => ScrollInkBoundary(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: .min,
+          children: [
+            for (final option in options)
+              FocusableCheckboxListTile(
+                key: ValueKey(option.value),
+                value: current.contains(option.value),
+                onChanged: locked.contains(option.value)
+                    ? null
+                    : (value) => setDialogState(() {
+                        if (value ?? false) {
+                          current.add(option.value);
+                        } else {
+                          current.remove(option.value);
+                        }
+                      }),
+                title: Text(option.title),
+                subtitle: option.subtitle != null ? Text(option.subtitle!) : null,
+                autofocus: focusFirstItem && option.value == firstEditable,
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+              ),
+          ],
+        ),
+      ),
+    ),
+    onSave: (_) async {
+      await onSave([
+        for (final option in options)
+          if (current.contains(option.value)) option.value,
+      ]);
+      return true;
+    },
   );
 }
 
@@ -281,7 +356,7 @@ void _showNumericInputDialogTV({
               });
             },
             onConfirm: () => saveFocusNode.requestFocus(),
-            onCancel: () => Navigator.pop(dialogContext),
+            onCancel: () => _popDialogIfCurrent(dialogContext),
           ),
           const SizedBox(height: 8),
           Text(

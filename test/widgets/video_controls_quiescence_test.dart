@@ -188,6 +188,9 @@ class _IdlePlayer implements Player {
   Future<String?> getProperty(String name) async => null;
 
   @override
+  Future<bool> isHdrOutputSupported() async => false;
+
+  @override
   Future<AudioRenderingMode?> getAudioRenderingMode() async => null;
 
   @override
@@ -219,15 +222,6 @@ class _IdlePlayer implements Player {
     playbackRestart: const Stream<void>.empty(),
     backendSwitched: const Stream<void>.empty(),
   );
-
-  // Asked only on a Linux host: the settings sheet probes the video plane's
-  // HDR capability as it opens, and PlayerNative.usesLinuxVideoPlane is
-  // Platform.isLinux. Without an answer here the sheet's first build threw,
-  // so this file passed on Windows and failed on Linux. Answering false keeps
-  // the sheet identical on both, which is what the frame-scheduling
-  // assertions below are actually about.
-  @override
-  Future<bool> isHdrOutputSupported() async => false;
 
   // The sheet asks on every build, to decide whether to tell the viewer that
   // passthrough is silencing the audio filters. False keeps those rows plain,

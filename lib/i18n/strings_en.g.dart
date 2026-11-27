@@ -41,11 +41,14 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 
 	// Translations
 	late final Translations$app$en app = Translations$app$en.internal(_root);
+	late final Translations$appIcon$en appIcon = Translations$appIcon$en.internal(_root);
 	late final Translations$auth$en auth = Translations$auth$en.internal(_root);
 	late final Translations$common$en common = Translations$common$en.internal(_root);
 	late final Translations$screens$en screens = Translations$screens$en.internal(_root);
 	late final Translations$update$en update = Translations$update$en.internal(_root);
+	late final Translations$supporter$en supporter = Translations$supporter$en.internal(_root);
 	late final Translations$settings$en settings = Translations$settings$en.internal(_root);
+	late final Translations$themeEditor$en themeEditor = Translations$themeEditor$en.internal(_root);
 	late final Translations$search$en search = Translations$search$en.internal(_root);
 	late final Translations$hotkeys$en hotkeys = Translations$hotkeys$en.internal(_root);
 	late final Translations$fileInfo$en fileInfo = Translations$fileInfo$en.internal(_root);
@@ -93,6 +96,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$addServer$en addServer = Translations$addServer$en.internal(_root);
 	late final Translations$serverHealth$en serverHealth = Translations$serverHealth$en.internal(_root);
 	late final Translations$serverActivity$en serverActivity = Translations$serverActivity$en.internal(_root);
+	late final Translations$deepLinks$en deepLinks = Translations$deepLinks$en.internal(_root);
 }
 
 // Path: app
@@ -105,6 +109,41 @@ class Translations$app$en {
 
 	/// en: 'Bask Media Player'
 	String get title => 'Bask Media Player';
+}
+
+// Path: appIcon
+class Translations$appIcon$en {
+	Translations$appIcon$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'App icon'
+	String get title => 'App icon';
+
+	/// en: 'Default'
+	String get defaultIcon => 'Default';
+
+	/// en: 'Current icon'
+	String get current => 'Current icon';
+
+	/// en: 'Part of the Theme & Icon Pack'
+	String get locked => 'Part of the Theme & Icon Pack';
+
+	/// en: 'Alternate icons are part of the Theme & Icon Pack.'
+	String get lockedHint => 'Alternate icons are part of the Theme & Icon Pack.';
+
+	/// en: 'Couldn't change the app icon'
+	String get changeFailed => 'Couldn\'t change the app icon';
+
+	/// en: 'The new icon appears on your home screen once you leave Bask.'
+	String get launcherHint => 'The new icon appears on your home screen once you leave Bask.';
+
+	/// en: 'The new banner appears once you leave Bask. Android TV can keep showing the old one until the TV restarts.'
+	String get tvLauncherHint => 'The new banner appears once you leave Bask. Android TV can keep showing the old one until the TV restarts.';
+
+	late final Translations$appIcon$names$en names = Translations$appIcon$names$en.internal(_root);
 }
 
 // Path: auth
@@ -393,6 +432,68 @@ class Translations$update$en {
 	String get checkFailed => 'Failed to check for updates';
 }
 
+// Path: supporter
+class Translations$supporter$en {
+	Translations$supporter$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Theme & Icon Pack'
+	String get title => 'Theme & Icon Pack';
+
+	/// en: 'An optional one-time purchase that adds cosmetic extras:'
+	String get intro => 'An optional one-time purchase that adds cosmetic extras:';
+
+	/// en: 'Preset themes'
+	String get presetThemes => 'Preset themes';
+
+	/// en: 'Ember, Glacier, Forest, Plum and Paper'
+	String get presetThemesDescription => 'Ember, Glacier, Forest, Plum and Paper';
+
+	/// en: 'Custom theme'
+	String get customTheme => 'Custom theme';
+
+	/// en: 'Pick every color yourself'
+	String get customThemeDescription => 'Pick every color yourself';
+
+	/// en: 'App icons'
+	String get appIcons => 'App icons';
+
+	/// en: 'Choose an alternate Bask icon'
+	String get appIconsDescription => 'Choose an alternate Bask icon';
+
+	/// en: 'Buy for ${price}'
+	String buy({required Object price}) => 'Buy for ${price}';
+
+	/// en: 'Loading price...'
+	String get loadingPrice => 'Loading price...';
+
+	/// en: 'Restore Purchases'
+	String get restore => 'Restore Purchases';
+
+	/// en: 'Your purchase is waiting for payment or approval. The extras unlock as soon as the store completes it.'
+	String get pending => 'Your purchase is waiting for payment or approval. The extras unlock as soon as the store completes it.';
+
+	/// en: 'Thanks for your purchase'
+	String get thankYouTitle => 'Thanks for your purchase';
+
+	/// en: 'The Theme & Icon Pack is unlocked.'
+	String get thankYouBody => 'The Theme & Icon Pack is unlocked.';
+
+	/// en: 'Unlock themes and app icons with a one-time purchase'
+	String get tileSubtitle => 'Unlock themes and app icons with a one-time purchase';
+
+	/// en: 'Unlock themes with a one-time purchase'
+	String get tileSubtitleThemesOnly => 'Unlock themes with a one-time purchase';
+
+	/// en: 'Unlocked — thanks for your purchase'
+	String get tileUnlocked => 'Unlocked — thanks for your purchase';
+
+	late final Translations$supporter$errors$en errors = Translations$supporter$errors$en.internal(_root);
+}
+
 // Path: settings
 class Translations$settings$en {
 	Translations$settings$en.internal(this._root);
@@ -502,6 +603,30 @@ class Translations$settings$en {
 
 	/// en: 'Slate'
 	String get paletteSlate => 'Slate';
+
+	/// en: 'Ember'
+	String get paletteEmber => 'Ember';
+
+	/// en: 'Glacier'
+	String get paletteGlacier => 'Glacier';
+
+	/// en: 'Paper'
+	String get palettePaper => 'Paper';
+
+	/// en: 'Ember'
+	String get emberTheme => 'Ember';
+
+	/// en: 'Glacier'
+	String get glacierTheme => 'Glacier';
+
+	/// en: 'Forest'
+	String get forestTheme => 'Forest';
+
+	/// en: 'Plum'
+	String get plumTheme => 'Plum';
+
+	/// en: 'Paper'
+	String get paperTheme => 'Paper';
 
 	/// en: 'Library Density'
 	String get libraryDensity => 'Library Density';
@@ -686,6 +811,15 @@ class Translations$settings$en {
 	/// en: 'Direct play videos already within the quality limit instead of transcoding them'
 	String get directPlayCoveredQualityDescription => 'Direct play videos already within the quality limit instead of transcoding them';
 
+	/// en: 'Video Codecs'
+	String get videoCodecs => 'Video Codecs';
+
+	/// en: 'Unchecked codecs are transcoded by the server'
+	String get videoCodecsDescription => 'Unchecked codecs are transcoded by the server';
+
+	/// en: 'Always accepted'
+	String get videoCodecsAlwaysAccepted => 'Always accepted';
+
 	/// en: 'Music Quality'
 	String get musicQualityTitle => 'Music Quality';
 
@@ -718,6 +852,9 @@ class Translations$settings$en {
 
 	/// en: 'Remember audio and subtitle choices per title'
 	String get rememberTrackSelectionsDescription => 'Remember audio and subtitle choices per title';
+
+	/// en: 'Plex saves each choice on the server per file; Jellyfin also turns on the account's Remember selections; Emby is not supported'
+	String get rememberTrackSelectionsBackendRule => 'Plex saves each choice on the server per file; Jellyfin also turns on the account\'s Remember selections; Emby is not supported';
 
 	/// en: 'Use server's per-episode track selections'
 	String get followServerTrackSelections => 'Use server\'s per-episode track selections';
@@ -776,8 +913,8 @@ class Translations$settings$en {
 	/// en: 'Watch Together Relay'
 	String get watchTogetherRelay => 'Watch Together Relay';
 
-	/// en: 'Set a custom relay. Everyone must use the same server.'
-	String get watchTogetherRelayDescription => 'Set a custom relay. Everyone must use the same server.';
+	/// en: 'Public Open Watch Party relays unless you set your own'
+	String get watchTogetherRelayDescription => 'Public Open Watch Party relays unless you set your own';
 
 	/// en: 'https://my-relay.example.com'
 	String get watchTogetherRelayHint => 'https://my-relay.example.com';
@@ -983,6 +1120,9 @@ class Translations$settings$en {
 	/// en: 'Shortcuts reset to defaults'
 	String get shortcutsReset => 'Shortcuts reset to defaults';
 
+	/// en: 'This will replace your custom shortcuts with the defaults. Continue?'
+	String get resetShortcutsConfirm => 'This will replace your custom shortcuts with the defaults. Continue?';
+
 	/// en: 'About'
 	String get about => 'About';
 
@@ -1027,6 +1167,12 @@ class Translations$settings$en {
 
 	/// en: 'Start the next episode automatically when one ends'
 	String get autoPlayNextEpisodeDescription => 'Start the next episode automatically when one ends';
+
+	/// en: 'Shuffle Starts at Beginning'
+	String get shuffleStartsFromBeginning => 'Shuffle Starts at Beginning';
+
+	/// en: 'Start each episode at the beginning when shuffling instead of resuming'
+	String get shuffleStartsFromBeginningDescription => 'Start each episode at the beginning when shuffling instead of resuming';
 
 	/// en: 'Play Next Countdown'
 	String get playNextCountdown => 'Play Next Countdown';
@@ -1232,6 +1378,12 @@ class Translations$settings$en {
 	/// en: 'Allow mobile devices on your network to control this app'
 	String get companionRemoteServerDescription => 'Allow mobile devices on your network to control this app';
 
+	/// en: 'Couldn't start the companion server'
+	String get companionRemoteServerStartFailed => 'Couldn\'t start the companion server';
+
+	/// en: 'Couldn't stop the companion server'
+	String get companionRemoteServerStopFailed => 'Couldn\'t stop the companion server';
+
 	/// en: 'Auto Picture-in-Picture'
 	String get autoPip => 'Auto Picture-in-Picture';
 
@@ -1310,6 +1462,39 @@ class Translations$settings$en {
 	/// en: 'Mix surround audio down to two channels for stereo speakers or headphones'
 	String get audioDownmixDescription => 'Mix surround audio down to two channels for stereo speakers or headphones';
 
+	/// en: 'Use Apple's native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.'
+	String get audioPassthroughDescriptionApple => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.';
+
+	/// en: 'Use Apple's native Dolby decoder for Dolby Digital Plus, including Atmos. On iOS, iPadOS and tvOS 26 or later, TrueHD Atmos and DTS:X play as spatial audio. Other DTS and TrueHD tracks play as multichannel PCM. Turn off if you have no sound.'
+	String get audioPassthroughDescriptionAppleSpatial => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. On iOS, iPadOS and tvOS 26 or later, TrueHD Atmos and DTS:X play as spatial audio. Other DTS and TrueHD tracks play as multichannel PCM. Turn off if you have no sound.';
+
+	/// en: 'Off while loudness normalization is on'
+	String get audioPassthroughOverriddenByNormalization => 'Off while loudness normalization is on';
+
+	/// en: 'Audio Channels'
+	String get audioChannelLimit => 'Audio Channels';
+
+	/// en: 'Mix decoded audio down for speakers, headphones, or HDMI setups that cannot play every channel'
+	String get audioChannelLimitDescription => 'Mix decoded audio down for speakers, headphones, or HDMI setups that cannot play every channel';
+
+	/// en: 'Original'
+	String get audioChannelLimitOriginal => 'Original';
+
+	/// en: 'Play every channel in the track'
+	String get audioChannelLimitOriginalDescription => 'Play every channel in the track';
+
+	/// en: 'Up to 5.1'
+	String get audioChannelLimitSurround51 => 'Up to 5.1';
+
+	/// en: 'Mix 7.1 down to 5.1 for TVs and receivers that only take 5.1 PCM. Passthrough is unaffected.'
+	String get audioChannelLimitSurround51Description => 'Mix 7.1 down to 5.1 for TVs and receivers that only take 5.1 PCM. Passthrough is unaffected.';
+
+	/// en: 'Stereo'
+	String get audioChannelLimitStereo => 'Stereo';
+
+	/// en: 'Mix down to two channels for stereo speakers or headphones. Turns passthrough off.'
+	String get audioChannelLimitStereoDescription => 'Mix down to two channels for stereo speakers or headphones. Turns passthrough off.';
+
 	/// en: 'Center Channel Boost'
 	String get downmixCenterBoost => 'Center Channel Boost';
 
@@ -1358,11 +1543,59 @@ class Translations$settings$en {
 	/// en: 'Strip Dolby Vision RPU/EL layers and present plain HEVC'
 	String get dvConversionHevcStripDescription => 'Strip Dolby Vision RPU/EL layers and present plain HEVC';
 
+	/// en: 'Disable Dolby Vision'
+	String get disableDolbyVision => 'Disable Dolby Vision';
+
+	/// en: 'Play the file's HDR10 or HLG layer instead of Dolby Vision, when it has one'
+	String get disableDolbyVisionDescription => 'Play the file\'s HDR10 or HLG layer instead of Dolby Vision, when it has one';
+
+	/// en: 'HDR to SDR Conversion'
+	String get hdrSdrConversion => 'HDR to SDR Conversion';
+
+	/// en: 'Choose what converts HDR video when the display can't show HDR.'
+	String get hdrSdrConversionDescription => 'Choose what converts HDR video when the display can\'t show HDR.';
+
+	/// en: 'Auto'
+	String get hdrSdrConversionAuto => 'Auto';
+
+	/// en: 'Device on Android 9 and later, player on older versions'
+	String get hdrSdrConversionAutoDescription => 'Device on Android 9 and later, player on older versions';
+
+	/// en: 'Device'
+	String get hdrSdrConversionDevice => 'Device';
+
+	/// en: 'Your device's video hardware converts it. Fastest, but colors depend on the device'
+	String get hdrSdrConversionDeviceDescription => 'Your device\'s video hardware converts it. Fastest, but colors depend on the device';
+
+	/// en: 'Player'
+	String get hdrSdrConversionPlayer => 'Player';
+
+	/// en: 'The player converts it. Consistent colors, but 4K may stutter on low-end TV boxes'
+	String get hdrSdrConversionPlayerDescription => 'The player converts it. Consistent colors, but 4K may stutter on low-end TV boxes';
+
 	/// en: 'Deinterlacing'
 	String get deinterlace => 'Deinterlacing';
 
 	/// en: 'Remove combing artifacts from interlaced video (mpv player only)'
 	String get deinterlaceDescription => 'Remove combing artifacts from interlaced video (mpv player only)';
+
+	/// en: 'Off'
+	String get deinterlaceOff => 'Off';
+
+	/// en: 'Show interlaced video as it is decoded'
+	String get deinterlaceOffDescription => 'Show interlaced video as it is decoded';
+
+	/// en: 'Video'
+	String get deinterlaceVideo => 'Video';
+
+	/// en: 'Turn each field into a full frame. For video shot for TV, like sports, news, and concerts'
+	String get deinterlaceVideoDescription => 'Turn each field into a full frame. For video shot for TV, like sports, news, and concerts';
+
+	/// en: 'Film'
+	String get deinterlaceFilm => 'Film';
+
+	/// en: 'Restore the original frames of film and animation telecined to 29.97 fps, common on NTSC DVDs. Video shot for TV stutters. Live TV uses Video'
+	String get deinterlaceFilmDescription => 'Restore the original frames of film and animation telecined to 29.97 fps, common on NTSC DVDs. Video shot for TV stutters. Live TV uses Video';
 
 	/// en: 'Ask for profile on app open'
 	String get requireProfileSelectionOnOpen => 'Ask for profile on app open';
@@ -1510,6 +1743,9 @@ class Translations$settings$en {
 
 	/// en: 'Aspect Ratio'
 	String get scopeAspectRatio => 'Aspect Ratio';
+
+	/// en: 'Zoom'
+	String get scopeZoom => 'Zoom';
 
 	/// en: 'Audio & Subtitle Sync'
 	String get scopeSyncOffsets => 'Audio & Subtitle Sync';
@@ -1674,6 +1910,94 @@ class Translations$settings$en {
 	String get subtitleRateCorrectionAlwaysDescription => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent';
 }
 
+// Path: themeEditor
+class Translations$themeEditor$en {
+	Translations$themeEditor$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Built-in'
+	String get builtIn => 'Built-in';
+
+	/// en: 'Presets'
+	String get presets => 'Presets';
+
+	/// en: 'Custom'
+	String get custom => 'Custom';
+
+	/// en: 'Not created yet'
+	String get customEmpty => 'Not created yet';
+
+	/// en: 'Edit custom theme'
+	String get editCustom => 'Edit custom theme';
+
+	/// en: 'Choose every color yourself'
+	String get editCustomDescription => 'Choose every color yourself';
+
+	/// en: 'Unlock with the Theme & Icon Pack'
+	String get locked => 'Unlock with the Theme & Icon Pack';
+
+	/// en: 'Saved — unlocks with the Theme & Icon Pack'
+	String get savedLocked => 'Saved — unlocks with the Theme & Icon Pack';
+
+	/// en: 'Custom Theme'
+	String get title => 'Custom Theme';
+
+	/// en: 'Start from'
+	String get startFrom => 'Start from';
+
+	/// en: 'Copy all colors from another theme'
+	String get startFromDescription => 'Copy all colors from another theme';
+
+	/// en: 'Colors'
+	String get colors => 'Colors';
+
+	/// en: 'Preview'
+	String get preview => 'Preview';
+
+	late final Translations$themeEditor$slots$en slots = Translations$themeEditor$slots$en.internal(_root);
+
+	/// en: 'Opacity'
+	String get opacity => 'Opacity';
+
+	/// en: '#RRGGBB or #AARRGGBB'
+	String get hexHint => '#RRGGBB or #AARRGGBB';
+
+	/// en: 'From other themes'
+	String get fromOtherThemes => 'From other themes';
+
+	/// en: '${theme} ${color}'
+	String swatchLabel({required Object theme, required Object color}) => '${theme} ${color}';
+
+	late final Translations$themeEditor$contrast$en contrast = Translations$themeEditor$contrast$en.internal(_root);
+
+	/// en: '${pair}: ${ratio}:1, below the recommended ${minimum}:1'
+	String lowContrast({required Object pair, required Object ratio, required Object minimum}) => '${pair}: ${ratio}:1, below the recommended ${minimum}:1';
+
+	/// en: 'Discard changes?'
+	String get discardTitle => 'Discard changes?';
+
+	/// en: 'Your unsaved color changes will be lost.'
+	String get discardMessage => 'Your unsaved color changes will be lost.';
+
+	/// en: 'Discard'
+	String get discard => 'Discard';
+
+	/// en: 'Episode ${number}'
+	String previewCardTitle({required Object number}) => 'Episode ${number}';
+
+	/// en: '${minutes} min left'
+	String previewCardSubtitle({required Object minutes}) => '${minutes} min left';
+
+	/// en: 'Autoplay'
+	String get previewSwitch => 'Autoplay';
+
+	/// en: 'Secondary text reads like this'
+	String get previewMutedText => 'Secondary text reads like this';
+}
+
 // Path: search
 class Translations$search$en {
 	Translations$search$en.internal(this._root);
@@ -1693,6 +2017,9 @@ class Translations$search$en {
 
 	/// en: 'Enter a title, actor, or keyword'
 	String get enterTitleActorOrKeyword => 'Enter a title, actor, or keyword';
+
+	/// en: 'People'
+	String get people => 'People';
 }
 
 // Path: hotkeys
@@ -2185,6 +2512,9 @@ class Translations$mediaMenu$en {
 	/// en: 'Failed to delete media item'
 	String get mediaFailedToDelete => 'Failed to delete media item';
 
+	/// en: 'Media deletion is turned off on this server. Turn on "Allow media deletion" in the server's Library settings.'
+	String get mediaDeletionDisabledOnServer => 'Media deletion is turned off on this server. Turn on "Allow media deletion" in the server\'s Library settings.';
+
 	/// en: 'Rate'
 	String get rate => 'Rate';
 
@@ -2524,8 +2854,11 @@ class Translations$videoControls$en {
 	/// en: 'Screen lock'
 	String get screenLockButton => 'Screen lock';
 
-	/// en: 'Long press to unlock'
-	String get longPressToUnlock => 'Long press to unlock';
+	/// en: 'Tap to unlock'
+	String get tapToUnlock => 'Tap to unlock';
+
+	/// en: 'Tap again to unlock'
+	String get tapAgainToUnlock => 'Tap again to unlock';
 
 	/// en: 'Video timeline'
 	String get timelineSlider => 'Video timeline';
@@ -2545,8 +2878,14 @@ class Translations$videoControls$en {
 	/// en: 'Screenshot saved'
 	String get screenshotSaved => 'Screenshot saved';
 
+	/// en: 'Couldn't take a screenshot'
+	String get screenshotFailed => 'Couldn\'t take a screenshot';
+
 	/// en: 'Zoom ${percent}%'
 	String zoomPercent({required Object percent}) => 'Zoom ${percent}%';
+
+	/// en: 'Volume ${percent}%'
+	String volumePercent({required Object percent}) => 'Volume ${percent}%';
 
 	late final Translations$videoControls$pipErrors$en pipErrors = Translations$videoControls$pipErrors$en.internal(_root);
 
@@ -2588,6 +2927,9 @@ class Translations$videoControls$en {
 
 	/// en: 'Failed to download subtitle'
 	String get subtitleDownloadFailed => 'Failed to download subtitle';
+
+	/// en: 'The subtitle didn't appear in time. The download may have failed'
+	String get subtitleDownloadTimedOut => 'The subtitle didn\'t appear in time. The download may have failed';
 
 	/// en: 'Search languages...'
 	String get searchLanguages => 'Search languages...';
@@ -2700,6 +3042,9 @@ class Translations$messages$en {
 	/// en: 'Playback could not be started.'
 	String get playbackFailed => 'Playback could not be started.';
 
+	/// en: 'Playback could not be started: ${error}'
+	String playbackFailedDetail({required Object error}) => 'Playback could not be started: ${error}';
+
 	/// en: 'The audio output stopped responding. Check the TV or receiver's audio connection; if other apps have no sound either, restart the device.'
 	String get audioOutputFailed => 'The audio output stopped responding. Check the TV or receiver\'s audio connection; if other apps have no sound either, restart the device.';
 
@@ -2796,6 +3141,9 @@ class Translations$messages$en {
 	/// en: 'Server error (HTTP 500). A bandwidth/transcoding limit likely rejected this session. Ask the owner to adjust it.'
 	String get serverLimitBody => 'Server error (HTTP 500). A bandwidth/transcoding limit likely rejected this session. Ask the owner to adjust it.';
 
+	/// en: 'Try transcoding'
+	String get serverLimitTranscode => 'Try transcoding';
+
 	/// en: 'File unavailable'
 	String get mediaUnreadableTitle => 'File unavailable';
 
@@ -2807,6 +3155,12 @@ class Translations$messages$en {
 
 	/// en: 'The server kept refusing to stream this file (HTTP 503). It may be restarting, busy, or the file's storage may be offline. Try again in a moment — if it keeps happening, ask the server owner to check the server and the file's storage.'
 	String get serverBusyBody => 'The server kept refusing to stream this file (HTTP 503). It may be restarting, busy, or the file\'s storage may be offline. Try again in a moment — if it keeps happening, ask the server owner to check the server and the file\'s storage.';
+
+	/// en: 'Playback not allowed'
+	String get playbackNotAllowedTitle => 'Playback not allowed';
+
+	/// en: 'The server refused to stream this item (HTTP 403). Your account may not have permission to play it, or the server may only allow playback on its local network.'
+	String get playbackNotAllowedBody => 'The server refused to stream this item (HTTP 403). Your account may not have permission to play it, or the server may only allow playback on its local network.';
 
 	/// en: 'Logs uploaded'
 	String get logsUploaded => 'Logs uploaded';
@@ -3039,6 +3393,12 @@ class Translations$profiles$en {
 	/// en: 'Remove ${displayName} and all Plex Home users? Sign back in anytime.'
 	String signOutPlexMessage({required Object displayName}) => 'Remove ${displayName} and all Plex Home users? Sign back in anytime.';
 
+	/// en: 'Also delete downloads'
+	String get signOutPlexDeleteDownloads => 'Also delete downloads';
+
+	/// en: 'Otherwise they stay on this device and come back when you sign back in to this account.'
+	String get signOutPlexDeleteDownloadsDescription => 'Otherwise they stay on this device and come back when you sign back in to this account.';
+
 	/// en: 'Signed out of Plex.'
 	String get signedOutPlex => 'Signed out of Plex.';
 
@@ -3227,6 +3587,12 @@ class Translations$connections$en {
 	/// en: 'Session expired for ${count} servers'
 	String sessionExpiredMany({required Object count}) => 'Session expired for ${count} servers';
 
+	/// en: '${name} refused access for this account'
+	String accessDeniedOne({required Object name}) => '${name} refused access for this account';
+
+	/// en: '${count} servers refused access for this account'
+	String accessDeniedMany({required Object count}) => '${count} servers refused access for this account';
+
 	/// en: 'Sign in again'
 	String get signInAgain => 'Sign in again';
 
@@ -3365,6 +3731,9 @@ class Translations$discover$en {
 	/// en: 'Continue Watching in ${library}'
 	String continueWatchingIn({required Object library}) => 'Continue Watching in ${library}';
 
+	/// en: 'Select Version'
+	String get selectVersion => 'Select Version';
+
 	/// en: 'Next Up'
 	String get nextUp => 'Next Up';
 
@@ -3439,6 +3808,8 @@ class Translations$discover$en {
 
 	/// en: 'Watched elsewhere ${count} h ago'
 	String watchedElsewhereHours({required Object count}) => 'Watched elsewhere ${count} h ago';
+
+	late final Translations$discover$person$en person = Translations$discover$person$en.internal(_root);
 }
 
 // Path: errors
@@ -3484,6 +3855,27 @@ class Translations$errors$en {
 
 	/// en: 'Couldn't update rating'
 	String get failedToRate => 'Couldn\'t update rating';
+
+	/// en: 'the connection timed out'
+	String get reasonTimedOut => 'the connection timed out';
+
+	/// en: 'the server could not be reached'
+	String get reasonUnreachable => 'the server could not be reached';
+
+	/// en: 'the server refused the request'
+	String get reasonRefused => 'the server refused the request';
+
+	/// en: 'the item is no longer on the server'
+	String get reasonNotFound => 'the item is no longer on the server';
+
+	/// en: 'the server reported an error'
+	String get reasonServerError => 'the server reported an error';
+
+	/// en: 'the request was cancelled'
+	String get reasonCancelled => 'the request was cancelled';
+
+	/// en: 'an unexpected error occurred'
+	String get reasonUnexpected => 'an unexpected error occurred';
 }
 
 // Path: libraries
@@ -3596,6 +3988,9 @@ class Translations$libraries$en {
 	/// en: 'Library options'
 	String get libraryOptions => 'Library options';
 
+	/// en: 'Shuffle library'
+	String get shuffleLibrary => 'Shuffle library';
+
 	/// en: 'library content'
 	String get content => 'library content';
 
@@ -3611,6 +4006,9 @@ class Translations$libraries$en {
 	/// en: 'No collections in this library'
 	String get noCollections => 'No collections in this library';
 
+	/// en: 'No genres in this library'
+	String get noGenres => 'No genres in this library';
+
 	/// en: 'No folders found'
 	String get noFoldersFound => 'No folders found';
 
@@ -3621,6 +4019,7 @@ class Translations$libraries$en {
 	late final Translations$libraries$groupings$en groupings = Translations$libraries$groupings$en.internal(_root);
 	late final Translations$libraries$filterCategories$en filterCategories = Translations$libraries$filterCategories$en.internal(_root);
 	late final Translations$libraries$sortLabels$en sortLabels = Translations$libraries$sortLabels$en.internal(_root);
+	late final Translations$libraries$advancedFilters$en advancedFilters = Translations$libraries$advancedFilters$en.internal(_root);
 }
 
 // Path: about
@@ -4001,6 +4400,9 @@ class Translations$liveTv$en {
 	/// en: 'LIVE'
 	String get live => 'LIVE';
 
+	/// en: 'NEW'
+	String get premiereBadge => 'NEW';
+
 	/// en: 'Reload Guide'
 	String get reloadGuide => 'Reload Guide';
 
@@ -4178,8 +4580,14 @@ class Translations$liveTv$en {
 	/// en: 'Guide refresh requested'
 	String get guideReloadRequested => 'Guide refresh requested';
 
+	/// en: 'Couldn't refresh the guide'
+	String get guideReloadFailed => 'Couldn\'t refresh the guide';
+
 	/// en: 'Rule re-evaluation requested'
 	String get rulesProcessRequested => 'Rule re-evaluation requested';
+
+	/// en: 'Couldn't re-evaluate recording rules'
+	String get rulesProcessFailed => 'Couldn\'t re-evaluate recording rules';
 
 	/// en: 'Record show'
 	String get recordShow => 'Record show';
@@ -4200,6 +4608,12 @@ class Translations$liveTv$en {
 
 	/// en: 'Could not build the stream URL'
 	String get failedToBuildStreamUrl => 'Could not build the stream URL';
+
+	/// en: 'Couldn't start the channel: ${reason}'
+	String playbackStartFailed({required Object reason}) => 'Couldn\'t start the channel: ${reason}';
+
+	/// en: 'Couldn't switch channel: ${reason}'
+	String channelSwitchFailed({required Object reason}) => 'Couldn\'t switch channel: ${reason}';
 }
 
 // Path: collections
@@ -4464,44 +4878,86 @@ class Translations$watchTogether$en {
 	/// en: 'Watch content in sync with friends and family'
 	String get description => 'Watch content in sync with friends and family';
 
-	/// en: 'Create Session'
-	String get createSession => 'Create Session';
+	/// en: 'Create Room'
+	String get createRoom => 'Create Room';
 
-	/// en: 'Creating...'
-	String get creating => 'Creating...';
+	/// en: 'Creating room...'
+	String get creatingRoom => 'Creating room...';
 
-	/// en: 'Join Session'
-	String get joinSession => 'Join Session';
+	/// en: 'Join Room'
+	String get joinRoom => 'Join Room';
 
-	/// en: 'Joining...'
-	String get joining => 'Joining...';
+	/// en: 'Joining room...'
+	String get joiningRoom => 'Joining room...';
 
-	/// en: 'Control Mode'
-	String get controlMode => 'Control Mode';
+	/// en: 'Connecting...'
+	String get connecting => 'Connecting...';
 
-	/// en: 'Who can control playback?'
-	String get controlModeQuestion => 'Who can control playback?';
+	/// en: 'Rooms use the public Open Watch Party relays.'
+	String get relayPublic => 'Rooms use the public Open Watch Party relays.';
 
-	/// en: 'Host Only'
-	String get hostOnly => 'Host Only';
+	/// en: 'Rooms use your relay at ${url}.'
+	String relayCustom({required Object url}) => 'Rooms use your relay at ${url}.';
 
-	/// en: 'Anyone'
-	String get anyone => 'Anyone';
+	/// en: 'Recent Rooms'
+	String get recentRooms => 'Recent Rooms';
 
-	/// en: 'Hosting Session'
-	String get hostingSession => 'Hosting Session';
+	/// en: 'Room actions'
+	String get roomActions => 'Room actions';
 
-	/// en: 'In Session'
-	String get inSession => 'In Session';
+	/// en: 'Rename Room'
+	String get renameRoom => 'Rename Room';
 
-	/// en: 'Session Code'
-	String get sessionCode => 'Session Code';
+	/// en: 'Remove'
+	String get removeRoom => 'Remove';
+
+	/// en: 'Enter the 6-character code from the host.'
+	String get enterRoomCode => 'Enter the 6-character code from the host.';
+
+	/// en: 'Room Code'
+	String get roomCode => 'Room Code';
+
+	/// en: 'Paste'
+	String get paste => 'Paste';
+
+	/// en: 'The clipboard doesn't contain a room code'
+	String get noCodeInClipboard => 'The clipboard doesn\'t contain a room code';
+
+	/// en: 'Copy Code'
+	String get copyCode => 'Copy Code';
+
+	/// en: 'Room code copied'
+	String get codeCopied => 'Room code copied';
+
+	/// en: 'Share Invite'
+	String get shareInvite => 'Share Invite';
+
+	/// en: 'Invite copied. Paste it into a message.'
+	String get inviteCopied => 'Invite copied. Paste it into a message.';
+
+	/// en: 'Join my Watch Together room in Bask: open Watch Together, choose Join Room and enter ${code}.'
+	String inviteMessage({required Object code}) => 'Join my Watch Together room in Bask: open Watch Together, choose Join Room and enter ${code}.';
 
 	/// en: 'Open Watch Together session controls'
 	String get openSessionControls => 'Open Watch Together session controls';
 
-	/// en: 'Copy session code'
-	String get copySessionCode => 'Copy session code';
+	/// en: 'Reconnecting...'
+	String get reconnecting => 'Reconnecting...';
+
+	/// en: 'The connection dropped. You rejoin the room automatically.'
+	String get reconnectingDescription => 'The connection dropped. You rejoin the room automatically.';
+
+	/// en: 'Connected'
+	String get connected => 'Connected';
+
+	/// en: 'Disconnected'
+	String get disconnected => 'Disconnected';
+
+	/// en: 'You are the host'
+	String get youAreHost => 'You are the host';
+
+	/// en: 'Hosted by ${name}'
+	String hostedBy({required Object name}) => 'Hosted by ${name}';
 
 	/// en: 'Host controls playback'
 	String get hostControlsPlayback => 'Host controls playback';
@@ -4509,23 +4965,155 @@ class Translations$watchTogether$en {
 	/// en: 'Anyone can control playback'
 	String get anyoneCanControl => 'Anyone can control playback';
 
-	/// en: 'Host controls'
-	String get hostControls => 'Host controls';
+	/// en: 'Room locked'
+	String get roomLocked => 'Room locked';
 
-	/// en: 'Anyone controls'
-	String get anyoneControls => 'Anyone controls';
+	/// en: 'Now Playing'
+	String get nowPlaying => 'Now Playing';
+
+	/// en: 'Nothing playing'
+	String get nothingPlaying => 'Nothing playing';
+
+	/// en: 'Play something from any library to share it with the room.'
+	String get nothingPlayingHost => 'Play something from any library to share it with the room.';
+
+	/// en: 'When the host plays something, it opens here.'
+	String get nothingPlayingGuest => 'When the host plays something, it opens here.';
+
+	/// en: 'This video has no catalogue match, so only people with access to the same server can play it.'
+	String get notShareable => 'This video has no catalogue match, so only people with access to the same server can play it.';
+
+	/// en: 'Looking for this video in your libraries...'
+	String get searching => 'Looking for this video in your libraries...';
+
+	/// en: 'Your copy'
+	String get yourCopy => 'Your copy';
+
+	/// en: 'You're sharing your copy'
+	String get sharingYourCopy => 'You\'re sharing your copy';
+
+	/// en: 'Playing your copy, ${difference}'
+	String playingOtherLength({required Object difference}) => 'Playing your copy, ${difference}';
+
+	/// en: 'Your Copy Is a Different Length'
+	String get mismatchTitle => 'Your Copy Is a Different Length';
+
+	/// en: 'Your closest copy is ${difference} than the room's video. It may be another cut or version.'
+	String mismatchDescription({required Object difference}) => 'Your closest copy is ${difference} than the room\'s video. It may be another cut or version.';
+
+	/// en: 'Play Anyway'
+	String get playAnyway => 'Play Anyway';
+
+	/// en: 'Choose Another Copy'
+	String get chooseAnotherCopy => 'Choose Another Copy';
+
+	/// en: 'Don't Play'
+	String get dontPlay => 'Don\'t Play';
+
+	/// en: 'You don't have this video'
+	String get unavailableTitle => 'You don\'t have this video';
+
+	/// en: 'Bask couldn't find it in your libraries. Pick a copy yourself or search again.'
+	String get unavailableDescription => 'Bask couldn\'t find it in your libraries. Pick a copy yourself or search again.';
+
+	/// en: 'Choose a Copy'
+	String get chooseCopy => 'Choose a Copy';
+
+	/// en: 'Search Again'
+	String get searchAgain => 'Search Again';
+
+	/// en: 'No copies found in your libraries.'
+	String get noCandidates => 'No copies found in your libraries.';
+
+	/// en: 'Couldn't play this copy for the room'
+	String get choiceFailed => 'Couldn\'t play this copy for the room';
+
+	/// en: '${duration} longer'
+	String lengthLonger({required Object duration}) => '${duration} longer';
+
+	/// en: '${duration} shorter'
+	String lengthShorter({required Object duration}) => '${duration} shorter';
+
+	/// en: 'Same length'
+	String get lengthSame => 'Same length';
+
+	/// en: 'Length unknown'
+	String get lengthUnknown => 'Length unknown';
+
+	/// en: 'Join Current Playback'
+	String get joinCurrentPlayback => 'Join Current Playback';
+
+	/// en: 'Jump back into what the host is currently watching'
+	String get joinCurrentPlaybackDescription => 'Jump back into what the host is currently watching';
+
+	/// en: 'Stop Video for Everyone'
+	String get stopMedia => 'Stop Video for Everyone';
+
+	/// en: 'Sync Offset'
+	String get syncOffset => 'Sync Offset';
+
+	/// en: 'Shift your video if it runs ahead of or behind the room.'
+	String get syncOffsetDescription => 'Shift your video if it runs ahead of or behind the room.';
+
+	/// en: 'Your copy is ${difference} than the room's video.'
+	String offsetHint({required Object difference}) => 'Your copy is ${difference} than the room\'s video.';
+
+	/// en: 'Use ${offset}'
+	String applyDifference({required Object offset}) => 'Use ${offset}';
+
+	/// en: '-1 s'
+	String get offsetMinusSecond => '-1 s';
+
+	/// en: '-100 ms'
+	String get offsetMinusTenth => '-100 ms';
+
+	/// en: '+100 ms'
+	String get offsetPlusTenth => '+100 ms';
+
+	/// en: '+1 s'
+	String get offsetPlusSecond => '+1 s';
 
 	/// en: 'Participants'
 	String get participants => 'Participants';
 
-	/// en: 'Host'
-	String get host => 'Host';
+	/// en: '(one) {${n} participant} (other) {${n} participants}'
+	String participantCount({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} participant',
+		other: '${n} participants',
+	);
 
 	/// en: 'HOST'
 	String get hostBadge => 'HOST';
 
-	/// en: 'You are the host'
-	String get youAreHost => 'You are the host';
+	/// en: '${name} (You)'
+	String nameYou({required Object name}) => '${name} (You)';
+
+	/// en: 'Idle'
+	String get playerIdle => 'Idle';
+
+	/// en: 'Loading'
+	String get playerLoading => 'Loading';
+
+	/// en: 'Ready'
+	String get playerReady => 'Ready';
+
+	/// en: 'Buffering'
+	String get playerBuffering => 'Buffering';
+
+	/// en: 'Searching'
+	String get matchSearching => 'Searching';
+
+	/// en: 'Has the video'
+	String get matchMatched => 'Has the video';
+
+	/// en: 'Different length'
+	String get matchMismatched => 'Different length';
+
+	/// en: 'Doesn't have the video'
+	String get matchUnavailable => 'Doesn\'t have the video';
+
+	/// en: 'Offset ${offset}'
+	String participantOffset({required Object offset}) => 'Offset ${offset}';
 
 	/// en: 'Make host'
 	String get makeHost => 'Make host';
@@ -4539,148 +5127,66 @@ class Translations$watchTogether$en {
 	/// en: 'Transfer'
 	String get transfer => 'Transfer';
 
-	/// en: '${name} is now the host'
-	String hostChangedTo({required Object name}) => '${name} is now the host';
+	/// en: 'Remove from Room'
+	String get removeParticipant => 'Remove from Room';
 
-	/// en: 'You are now the host'
-	String get youAreNowHost => 'You are now the host';
+	/// en: 'Remove ${name}?'
+	String removeParticipantQuestion({required Object name}) => 'Remove ${name}?';
 
-	/// en: 'Couldn't make ${name} the host'
-	String hostTransferFailed({required Object name}) => 'Couldn\'t make ${name} the host';
+	/// en: '${name} leaves the room. They can join again with the code unless you lock the room.'
+	String removeParticipantConfirm({required Object name}) => '${name} leaves the room. They can join again with the code unless you lock the room.';
 
-	/// en: 'Watching with others'
-	String get watchingWithOthers => 'Watching with others';
+	/// en: 'Remove'
+	String get remove => 'Remove';
 
-	/// en: 'End Session'
-	String get endSession => 'End Session';
+	/// en: 'Room Settings'
+	String get roomSettings => 'Room Settings';
 
-	/// en: 'Leave Session'
-	String get leaveSession => 'Leave Session';
+	/// en: 'Let Everyone Control Playback'
+	String get letEveryoneControl => 'Let Everyone Control Playback';
 
-	/// en: 'End Session?'
-	String get endSessionQuestion => 'End Session?';
+	/// en: 'Lock Room'
+	String get lockRoom => 'Lock Room';
 
-	/// en: 'Leave Session?'
-	String get leaveSessionQuestion => 'Leave Session?';
+	/// en: 'Nobody new can join'
+	String get lockRoomDescription => 'Nobody new can join';
 
-	/// en: 'This will end the session for all participants.'
-	String get endSessionConfirm => 'This will end the session for all participants.';
+	/// en: 'Leave Room'
+	String get leaveRoom => 'Leave Room';
 
-	/// en: 'You will be removed from the session.'
-	String get leaveSessionConfirm => 'You will be removed from the session.';
+	/// en: 'Leave Room?'
+	String get leaveRoomQuestion => 'Leave Room?';
 
-	/// en: 'This will end the watch session for all participants.'
-	String get endSessionConfirmOverlay => 'This will end the watch session for all participants.';
-
-	/// en: 'You will be disconnected from the watch session.'
-	String get leaveSessionConfirmOverlay => 'You will be disconnected from the watch session.';
-
-	/// en: 'End'
-	String get end => 'End';
+	/// en: 'You can join again with the room code.'
+	String get leaveRoomConfirm => 'You can join again with the room code.';
 
 	/// en: 'Leave'
 	String get leave => 'Leave';
 
-	/// en: 'Syncing...'
-	String get syncing => 'Syncing...';
+	/// en: 'End Room'
+	String get endRoom => 'End Room';
 
-	/// en: 'Join Watch Session'
-	String get joinWatchSession => 'Join Watch Session';
+	/// en: 'End Room?'
+	String get endRoomQuestion => 'End Room?';
 
-	/// en: 'Enter 5-character code'
-	String get enterCodeHint => 'Enter 5-character code';
+	/// en: 'This ends the room for everyone.'
+	String get endRoomConfirm => 'This ends the room for everyone.';
 
-	/// en: 'Paste from clipboard'
-	String get pasteFromClipboard => 'Paste from clipboard';
+	/// en: 'End'
+	String get end => 'End';
 
-	/// en: 'Please enter a session code'
-	String get pleaseEnterCode => 'Please enter a session code';
+	/// en: 'Playback didn't start'
+	String get playBlockedTitle => 'Playback didn\'t start';
 
-	/// en: 'Session code must be 5 characters'
-	String get codeMustBe5Chars => 'Session code must be 5 characters';
+	/// en: 'Press play to start watching with the room.'
+	String get playBlockedDescription => 'Press play to start watching with the room.';
 
-	/// en: 'Enter the host's session code to join.'
-	String get joinInstructions => 'Enter the host\'s session code to join.';
-
-	/// en: 'Failed to create session'
-	String get failedToCreate => 'Failed to create session';
-
-	/// en: 'Failed to join session'
-	String get failedToJoin => 'Failed to join session';
-
-	/// en: 'Session code copied to clipboard'
-	String get sessionCodeCopied => 'Session code copied to clipboard';
-
-	/// en: 'Relay server unreachable. ISP blocking may prevent Watch Together.'
-	String get relayUnreachable => 'Relay server unreachable. ISP blocking may prevent Watch Together.';
-
-	/// en: 'Reconnecting to host...'
-	String get reconnectingToHost => 'Reconnecting to host...';
-
-	/// en: 'Current Playback'
-	String get currentPlayback => 'Current Playback';
-
-	/// en: 'Join Current Playback'
-	String get joinCurrentPlayback => 'Join Current Playback';
-
-	/// en: 'Jump back into what the host is currently watching'
-	String get joinCurrentPlaybackDescription => 'Jump back into what the host is currently watching';
-
-	/// en: 'Failed to open current playback'
-	String get failedToOpenCurrentPlayback => 'Failed to open current playback';
-
-	/// en: '${name} joined'
-	String participantJoined({required Object name}) => '${name} joined';
-
-	/// en: '${name} left'
-	String participantLeft({required Object name}) => '${name} left';
-
-	/// en: '${name} paused'
-	String participantPaused({required Object name}) => '${name} paused';
-
-	/// en: '${name} resumed'
-	String participantResumed({required Object name}) => '${name} resumed';
-
-	/// en: '${name} changed the playback position'
-	String participantSeeked({required Object name}) => '${name} changed the playback position';
-
-	/// en: '${name} set the speed to ${speed}'
-	String participantChangedSpeed({required Object name, required Object speed}) => '${name} set the speed to ${speed}';
-
-	/// en: '${name} is buffering'
-	String participantBuffering({required Object name}) => '${name} is buffering';
-
-	/// en: '${name} is on an older app version — sync unavailable'
-	String participantNeedsUpdate({required Object name}) => '${name} is on an older app version — sync unavailable';
-
-	/// en: 'Resuming without ${name}'
-	String resumingWithout({required Object name}) => 'Resuming without ${name}';
-
-	/// en: 'Waiting for others to load...'
-	String get waitingForParticipants => 'Waiting for others to load...';
-
-	/// en: 'Waiting for ${name}...'
-	String waitingForName({required Object name}) => 'Waiting for ${name}...';
-
-	/// en: 'Recent Rooms'
-	String get recentRooms => 'Recent Rooms';
-
-	/// en: 'Rename Room'
-	String get renameRoom => 'Rename Room';
-
-	/// en: 'Remove'
-	String get removeRoom => 'Remove';
-
-	/// en: 'Couldn't switch — server unavailable for sync'
-	String get guestSwitchUnavailable => 'Couldn\'t switch — server unavailable for sync';
-
-	/// en: 'Couldn't switch — content not found on this server'
-	String get guestSwitchFailed => 'Couldn\'t switch — content not found on this server';
-
-	/// en: 'User'
-	String get defaultDisplayName => 'User';
-
+	late final Translations$watchTogether$notices$en notices = Translations$watchTogether$notices$en.internal(_root);
+	late final Translations$watchTogether$ended$en ended = Translations$watchTogether$ended$en.internal(_root);
 	late final Translations$watchTogether$errors$en errors = Translations$watchTogether$errors$en.internal(_root);
+
+	/// en: 'Episode ${number}'
+	String untitledEpisode({required Object number}) => 'Episode ${number}';
 }
 
 // Path: downloads
@@ -4733,8 +5239,11 @@ class Translations$downloads$en {
 	/// en: 'Server error: file may exceed the remote bitrate limit'
 	String get serverErrorBitrate => 'Server error: file may exceed the remote bitrate limit';
 
-	/// en: 'Downloads stopped because device storage is full. Free some space, then retry.'
-	String get storageFull => 'Downloads stopped because device storage is full. Free some space, then retry.';
+	/// en: 'Downloads stopped to protect available storage. Free some space or choose another download location, then retry.'
+	String get storageFull => 'Downloads stopped to protect available storage. Free some space or choose another download location, then retry.';
+
+	/// en: 'Downloads stopped because available storage could not be checked. Check the download location, then retry.'
+	String get storageUnavailable => 'Downloads stopped because available storage could not be checked. Check the download location, then retry.';
 
 	/// en: '${count} episodes queued for download'
 	String episodesQueued({required Object count}) => '${count} episodes queued for download';
@@ -4744,6 +5253,15 @@ class Translations$downloads$en {
 
 	/// en: 'Delete "${title}" from this device?'
 	String deleteConfirm({required Object title}) => 'Delete "${title}" from this device?';
+
+	/// en: 'Delete downloads'
+	String get deleteCollectionDownloads => 'Delete downloads';
+
+	/// en: 'Delete every download in "${title}" from this device?'
+	String deleteCollectionDownloadsConfirm({required Object title}) => 'Delete every download in "${title}" from this device?';
+
+	/// en: 'Downloads deleted'
+	String get collectionDownloadsDeleted => 'Downloads deleted';
 
 	/// en: 'Canceled Download'
 	String get cancelledDownloadTitle => 'Canceled Download';
@@ -4795,6 +5313,12 @@ class Translations$downloads$en {
 
 	/// en: 'Resume all'
 	String get resumeAll => 'Resume all';
+
+	/// en: 'Retry all failed'
+	String get retryAll => 'Retry all failed';
+
+	/// en: 'Retry failed downloads'
+	String get retryFailed => 'Retry failed downloads';
 
 	/// en: 'Delete all'
 	String get deleteAll => 'Delete all';
@@ -4904,6 +5428,9 @@ class Translations$downloads$en {
 	/// en: 'Sign in required'
 	String get syncRuleSignInRequired => 'Sign in required';
 
+	/// en: 'Access denied'
+	String get syncRuleAccessDenied => 'Access denied';
+
 	/// en: 'Not available for current profile'
 	String get syncRuleNotAvailableForProfile => 'Not available for current profile';
 
@@ -4914,6 +5441,14 @@ class Translations$downloads$en {
 	String get syncRuleListCreated => 'Sync rule created';
 
 	late final Translations$downloads$backgroundWarning$en backgroundWarning = Translations$downloads$backgroundWarning$en.internal(_root);
+
+	/// en: 'Downloads options'
+	String get options => 'Downloads options';
+
+	late final Translations$downloads$groupings$en groupings = Translations$downloads$groupings$en.internal(_root);
+
+	/// en: 'Unknown library'
+	String get unknownLibrary => 'Unknown library';
 
 	/// en: 'Unknown Show'
 	String get unknownShow => 'Unknown Show';
@@ -4930,11 +5465,29 @@ class Translations$downloads$en {
 	/// en: 'File not found (404)'
 	String get errorFileNotFound => 'File not found (404)';
 
+	/// en: 'Download not allowed by the server (403)'
+	String get errorDownloadNotAllowed => 'Download not allowed by the server (403)';
+
 	/// en: 'Download failed'
 	String get errorDownloadFailed => 'Download failed';
 
-	/// en: 'Post-processing failed: ${error}'
-	String errorPostProcessing({required Object error}) => 'Post-processing failed: ${error}';
+	/// en: 'Download failed: ${reason}'
+	String errorDownloadFailedWithReason({required Object reason}) => 'Download failed: ${reason}';
+
+	/// en: 'Download failed (HTTP ${status})'
+	String errorHttpStatus({required Object status}) => 'Download failed (HTTP ${status})';
+
+	/// en: 'Post-processing failed: ${reason}'
+	String errorPostProcessing({required Object reason}) => 'Post-processing failed: ${reason}';
+
+	/// en: 'the file could not be saved on this device'
+	String get reasonFileNotSaved => 'the file could not be saved on this device';
+
+	/// en: 'the partial download could not be resumed'
+	String get reasonCannotResume => 'the partial download could not be resumed';
+
+	/// en: 'this device is out of storage'
+	String get reasonDeviceStorageFull => 'this device is out of storage';
 
 	/// en: 'Downloading...'
 	String get notificationDownloading => 'Downloading...';
@@ -4944,9 +5497,6 @@ class Translations$downloads$en {
 
 	/// en: 'Download paused'
 	String get notificationPaused => 'Download paused';
-
-	/// en: 'Retry all failed'
-	String get retryAll => 'Retry all failed';
 
 	/// en: 'Retry ${count} failed downloads'
 	String retryAllFailed({required Object count}) => 'Retry ${count} failed downloads';
@@ -5297,6 +5847,9 @@ class Translations$videoSettings$en {
 
 	/// en: 'Default'
 	String get pictureNeutral => 'Default';
+
+	/// en: 'Decodes audio to PCM; passthrough is off while this is on'
+	String get audioNormalizationDisablesPassthrough => 'Decodes audio to PCM; passthrough is off while this is on';
 }
 
 // Path: performanceOverlay
@@ -5342,6 +5895,27 @@ class Translations$performanceOverlay$en {
 
 	/// en: 'DV Path'
 	String get dvPath => 'DV Path';
+
+	/// en: 'Dolby Vision decoder'
+	String get dvRouteDecoder => 'Dolby Vision decoder';
+
+	/// en: 'Dolby Vision decoder (P7→8.1)'
+	String get dvRouteDecoderP81 => 'Dolby Vision decoder (P7→8.1)';
+
+	/// en: 'Base layer'
+	String get dvRouteBaseLayer => 'Base layer';
+
+	/// en: 'HDR10 base layer'
+	String get dvRouteBaseLayerHdr10 => 'HDR10 base layer';
+
+	/// en: 'HLG base layer'
+	String get dvRouteBaseLayerHlg => 'HLG base layer';
+
+	/// en: 'SDR base layer'
+	String get dvRouteBaseLayerSdr => 'SDR base layer';
+
+	/// en: 'RPU reshaped (gpu-next)'
+	String get dvRouteReshaped => 'RPU reshaped (gpu-next)';
 
 	/// en: 'P7 Conv'
 	String get p7Conversion => 'P7 Conv';
@@ -5408,6 +5982,9 @@ class Translations$performanceOverlay$en {
 
 	/// en: 'Player'
 	String get player => 'Player';
+
+	/// en: 'Play Method'
+	String get playMethod => 'Play Method';
 
 	/// en: 'Memory'
 	String get memory => 'Memory';
@@ -5738,6 +6315,9 @@ class Translations$metadataEdit$en {
 
 	/// en: 'Mood'
 	String get mood => 'Mood';
+
+	/// en: 'Quick Tag...'
+	String get quickTag => 'Quick Tag...';
 }
 
 // Path: matchScreen
@@ -6037,6 +6617,7 @@ class Translations$services$en {
 	String connectFailed({required Object service}) => 'Couldn\'t connect to ${service}. Try again.';
 
 	late final Translations$services$names$en names = Translations$services$names$en.internal(_root);
+	late final Translations$services$simklReconnect$en simklReconnect = Translations$services$simklReconnect$en.internal(_root);
 	late final Translations$services$deviceCode$en deviceCode = Translations$services$deviceCode$en.internal(_root);
 	late final Translations$services$oauthProxy$en oauthProxy = Translations$services$oauthProxy$en.internal(_root);
 	late final Translations$services$pendingAuth$en pendingAuth = Translations$services$pendingAuth$en.internal(_root);
@@ -6397,6 +6978,144 @@ class Translations$serverActivity$en {
 	String messageFailed({required Object error}) => 'Could not send the message: ${error}';
 }
 
+// Path: deepLinks
+class Translations$deepLinks$en {
+	Translations$deepLinks$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'This Bask link isn't valid.'
+	String get invalid => 'This Bask link isn\'t valid.';
+
+	/// en: 'No profile matches "${profile}".'
+	String profileNotFound({required Object profile}) => 'No profile matches "${profile}".';
+
+	/// en: 'Couldn't reach the server for this link.'
+	String get serverUnavailable => 'Couldn\'t reach the server for this link.';
+
+	/// en: 'Couldn't find this title in your libraries.'
+	String get notFound => 'Couldn\'t find this title in your libraries.';
+
+	/// en: 'This link can't be played.'
+	String get unsupportedItem => 'This link can\'t be played.';
+
+	/// en: 'No Live TV server is available for this link.'
+	String get noLiveTv => 'No Live TV server is available for this link.';
+
+	/// en: 'Couldn't find channel "${channel}".'
+	String channelNotFound({required Object channel}) => 'Couldn\'t find channel "${channel}".';
+
+	/// en: 'Show link'
+	String get showLink => 'Show link';
+
+	/// en: 'Show profile link'
+	String get showProfileLink => 'Show profile link';
+
+	/// en: 'Link'
+	String get dialogTitle => 'Link';
+
+	/// en: 'Opening this link plays the next episode. Add &mode=shuffle to play the show on shuffle.'
+	String get showHint => 'Opening this link plays the next episode. Add &mode=shuffle to play the show on shuffle.';
+
+	/// en: 'Opening this link plays the movie.'
+	String get movieHint => 'Opening this link plays the movie.';
+
+	/// en: 'Opening this link plays this episode.'
+	String get episodeHint => 'Opening this link plays this episode.';
+
+	/// en: 'Opening this link switches to this profile.'
+	String get profileHint => 'Opening this link switches to this profile.';
+
+	/// en: 'Open as ${name}'
+	String openAsProfile({required Object name}) => 'Open as ${name}';
+
+	/// en: 'Copy'
+	String get copy => 'Copy';
+
+	/// en: 'Link copied'
+	String get copied => 'Link copied';
+}
+
+// Path: appIcon.names
+class Translations$appIcon$names$en {
+	Translations$appIcon$names$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Midnight'
+	String get midnight => 'Midnight';
+
+	/// en: 'Ember'
+	String get ember => 'Ember';
+
+	/// en: 'Paper'
+	String get paper => 'Paper';
+
+	/// en: 'OLED'
+	String get oled => 'OLED';
+
+	/// en: 'Line'
+	String get line => 'Line';
+
+	/// en: 'Ocean'
+	String get ocean => 'Ocean';
+
+	/// en: 'Ultraviolet'
+	String get ultraviolet => 'Ultraviolet';
+
+	/// en: 'Matcha'
+	String get matcha => 'Matcha';
+
+	/// en: 'Sunset'
+	String get sunset => 'Sunset';
+
+	/// en: 'Gold'
+	String get gold => 'Gold';
+
+	/// en: 'Titanium'
+	String get titanium => 'Titanium';
+
+	/// en: 'Glass'
+	String get glass => 'Glass';
+
+	/// en: 'CRT'
+	String get crt => 'CRT';
+
+	/// en: 'VHS'
+	String get vhs => 'VHS';
+
+	/// en: 'Synthwave'
+	String get synthwave => 'Synthwave';
+
+	/// en: 'Pixel'
+	String get pixel => 'Pixel';
+
+	/// en: 'Neon'
+	String get neon => 'Neon';
+
+	/// en: 'Sticker'
+	String get sticker => 'Sticker';
+
+	/// en: 'Ticket'
+	String get ticket => 'Ticket';
+
+	/// en: 'Pop'
+	String get pop => 'Pop';
+
+	/// en: 'Strata'
+	String get strata => 'Strata';
+
+	/// en: 'Facet'
+	String get facet => 'Facet';
+
+	/// en: 'Tilde'
+	String get tilde => 'Tilde';
+}
+
 // Path: common.ratingSource
 class Translations$common$ratingSource$en {
 	Translations$common$ratingSource$en.internal(this._root);
@@ -6437,6 +7156,12 @@ class Translations$common$ratingSource$en {
 
 	/// en: 'Rotten Tomatoes audience'
 	String get rottenTomatoesAudience => 'Rotten Tomatoes audience';
+
+	/// en: 'Metacritic'
+	String get metacritic => 'Metacritic';
+
+	/// en: 'Letterboxd'
+	String get letterboxd => 'Letterboxd';
 }
 
 // Path: common.mediaKind
@@ -6482,6 +7207,90 @@ class Translations$common$mediaKind$en {
 
 	/// en: 'Folder'
 	String get folder => 'Folder';
+}
+
+// Path: supporter.errors
+class Translations$supporter$errors$en {
+	Translations$supporter$errors$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Purchases aren't available. Check that you're signed in to the store and purchases are allowed on this device.'
+	String get storeUnavailable => 'Purchases aren\'t available. Check that you\'re signed in to the store and purchases are allowed on this device.';
+
+	/// en: 'The Theme & Icon Pack isn't available in your store right now.'
+	String get productNotFound => 'The Theme & Icon Pack isn\'t available in your store right now.';
+
+	/// en: 'Couldn't load the price. Check your connection and try again.'
+	String get productQueryFailed => 'Couldn\'t load the price. Check your connection and try again.';
+
+	/// en: 'The purchase didn't go through. Try again.'
+	String get purchaseFailed => 'The purchase didn\'t go through. Try again.';
+
+	/// en: 'Couldn't reach the store to restore your purchase. Try again.'
+	String get restoreFailed => 'Couldn\'t reach the store to restore your purchase. Try again.';
+
+	/// en: 'No Theme & Icon Pack purchase was found for this store account.'
+	String get nothingToRestore => 'No Theme & Icon Pack purchase was found for this store account.';
+}
+
+// Path: themeEditor.slots
+class Translations$themeEditor$slots$en {
+	Translations$themeEditor$slots$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Background'
+	String get bg => 'Background';
+
+	/// en: 'Surface'
+	String get surface => 'Surface';
+
+	/// en: 'Outline'
+	String get outline => 'Outline';
+
+	/// en: 'Text'
+	String get text => 'Text';
+
+	/// en: 'Secondary text'
+	String get textMuted => 'Secondary text';
+
+	/// en: 'Accent'
+	String get accent => 'Accent';
+}
+
+// Path: themeEditor.contrast
+class Translations$themeEditor$contrast$en {
+	Translations$themeEditor$contrast$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Text on background'
+	String get textOnBg => 'Text on background';
+
+	/// en: 'Text on surface'
+	String get textOnSurface => 'Text on surface';
+
+	/// en: 'Secondary text on background'
+	String get textMutedOnBg => 'Secondary text on background';
+
+	/// en: 'Secondary text on surface'
+	String get textMutedOnSurface => 'Secondary text on surface';
+
+	/// en: 'Accent on background'
+	String get accentOnBg => 'Accent on background';
+
+	/// en: 'Accent on surface'
+	String get accentOnSurface => 'Accent on surface';
+
+	/// en: 'Button label on accent'
+	String get labelOnAccent => 'Button label on accent';
 }
 
 // Path: hotkeys.actions
@@ -6787,6 +7596,30 @@ class Translations$accountPreferences$mediaReviewsOptions$en {
 	String get nobody => 'Hidden';
 }
 
+// Path: discover.person
+class Translations$discover$person$en {
+	Translations$discover$person$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Born'
+	String get born => 'Born';
+
+	/// en: 'Died'
+	String get died => 'Died';
+
+	/// en: 'Birthplace'
+	String get birthplace => 'Birthplace';
+
+	/// en: '${date} (age ${age})'
+	String dateWithAge({required Object date, required Object age}) => '${date} (age ${age})';
+
+	/// en: '${date} (aged ${age})'
+	String dateWithAgeAtDeath({required Object date, required Object age}) => '${date} (aged ${age})';
+}
+
 // Path: libraries.tabs
 class Translations$libraries$tabs$en {
 	Translations$libraries$tabs$en.internal(this._root);
@@ -6803,6 +7636,9 @@ class Translations$libraries$tabs$en {
 
 	/// en: 'Collections'
 	String get collections => 'Collections';
+
+	/// en: 'Genres'
+	String get genres => 'Genres';
 
 	/// en: 'Playlists'
 	String get playlists => 'Playlists';
@@ -6875,6 +7711,9 @@ class Translations$libraries$filterCategories$en {
 
 	/// en: 'Favorites'
 	String get favorites => 'Favorites';
+
+	/// en: 'File Path'
+	String get filePath => 'File Path';
 }
 
 // Path: libraries.sortLabels
@@ -6944,6 +7783,102 @@ class Translations$libraries$sortLabels$en {
 
 	/// en: 'Last Episode Date Added'
 	String get lastEpisodeDateAdded => 'Last Episode Date Added';
+
+	/// en: 'Date Downloaded'
+	String get dateDownloaded => 'Date Downloaded';
+
+	/// en: 'Size'
+	String get size => 'Size';
+
+	/// en: 'Library'
+	String get library => 'Library';
+}
+
+// Path: libraries.advancedFilters
+class Translations$libraries$advancedFilters$en {
+	Translations$libraries$advancedFilters$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Include'
+	String get include => 'Include';
+
+	/// en: 'Exclude'
+	String get exclude => 'Exclude';
+
+	/// en: 'Any'
+	String get any => 'Any';
+
+	/// en: 'Yes'
+	String get yes => 'Yes';
+
+	/// en: 'No'
+	String get no => 'No';
+
+	/// en: 'Not ${value}'
+	String not({required Object value}) => 'Not ${value}';
+
+	/// en: '${count} selected'
+	String valueCount({required Object count}) => '${count} selected';
+
+	/// en: '${count} excluded'
+	String valueCountExcluded({required Object count}) => '${count} excluded';
+
+	/// en: 'Search values'
+	String get searchValues => 'Search values';
+
+	/// en: 'No values'
+	String get noValues => 'No values';
+
+	/// en: 'Contains'
+	String get matchContains => 'Contains';
+
+	/// en: 'Does not contain'
+	String get matchNotContains => 'Does not contain';
+
+	/// en: 'Is'
+	String get matchIs => 'Is';
+
+	/// en: 'Is not'
+	String get matchIsNot => 'Is not';
+
+	/// en: 'Begins with'
+	String get matchBeginsWith => 'Begins with';
+
+	/// en: 'Ends with'
+	String get matchEndsWith => 'Ends with';
+
+	/// en: 'Type to match'
+	String get textHint => 'Type to match';
+
+	/// en: 'From'
+	String get from => 'From';
+
+	/// en: 'To'
+	String get to => 'To';
+
+	/// en: '${from} to ${to}'
+	String range({required Object from, required Object to}) => '${from} to ${to}';
+
+	/// en: '${value} and up'
+	String atLeast({required Object value}) => '${value} and up';
+
+	/// en: 'Up to ${value}'
+	String atMost({required Object value}) => 'Up to ${value}';
+
+	/// en: 'Last ${count} days'
+	String dateLastDays({required Object count}) => 'Last ${count} days';
+
+	/// en: 'Past year'
+	String get dateLastYear => 'Past year';
+
+	/// en: 'Older than ${count} days'
+	String dateOlderThanDays({required Object count}) => 'Older than ${count} days';
+
+	/// en: 'Older than a year'
+	String get dateOlderThanYear => 'Older than a year';
 }
 
 // Path: explore.rows
@@ -7251,6 +8186,9 @@ class Translations$explore$creditRole$en {
 
 	// Translations
 
+	/// en: 'Actor'
+	String get actor => 'Actor';
+
 	/// en: 'Director'
 	String get director => 'Director';
 
@@ -7368,6 +8306,12 @@ class Translations$explore$detail$en {
 	/// en: 'Open on ${site}'
 	String openOn({required Object site}) => 'Open on ${site}';
 
+	/// en: 'Couldn't open the trailer on this device'
+	String get trailerUnavailable => 'Couldn\'t open the trailer on this device';
+
+	/// en: 'Couldn't open this link on this device'
+	String get linkUnavailable => 'Couldn\'t open this link on this device';
+
 	/// en: 'Crew'
 	String get crew => 'Crew';
 
@@ -7453,6 +8397,114 @@ class Translations$music$discography$en {
 	String get compilations => 'Compilations';
 }
 
+// Path: watchTogether.notices
+class Translations$watchTogether$notices$en {
+	Translations$watchTogether$notices$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: '${name} pressed play'
+	String pressedPlay({required Object name}) => '${name} pressed play';
+
+	/// en: 'Playback started'
+	String get playbackStarted => 'Playback started';
+
+	/// en: '${name} paused'
+	String paused({required Object name}) => '${name} paused';
+
+	/// en: 'Playback paused'
+	String get playbackPaused => 'Playback paused';
+
+	/// en: '${name} jumped to ${position}'
+	String jumpedTo({required Object name, required Object position}) => '${name} jumped to ${position}';
+
+	/// en: 'Jumped to ${position}'
+	String roomJumpedTo({required Object position}) => 'Jumped to ${position}';
+
+	/// en: '${name} set the speed to ${speed}'
+	String changedSpeed({required Object name, required Object speed}) => '${name} set the speed to ${speed}';
+
+	/// en: 'Speed set to ${speed}'
+	String speedChanged({required Object speed}) => 'Speed set to ${speed}';
+
+	/// en: '${name} started ${title}'
+	String startedMedia({required Object name, required Object title}) => '${name} started ${title}';
+
+	/// en: 'Now playing ${title}'
+	String mediaStarted({required Object title}) => 'Now playing ${title}';
+
+	/// en: '${name} stopped the video'
+	String stoppedMedia({required Object name}) => '${name} stopped the video';
+
+	/// en: 'The video stopped'
+	String get mediaStopped => 'The video stopped';
+
+	/// en: 'Waiting for ${name}...'
+	String waitingFor({required Object name}) => 'Waiting for ${name}...';
+
+	/// en: 'Waiting for someone to catch up...'
+	String get waitingForSomeone => 'Waiting for someone to catch up...';
+
+	/// en: 'Finished'
+	String get finished => 'Finished';
+
+	/// en: '${name} is now the host'
+	String hostChangedTo({required Object name}) => '${name} is now the host';
+
+	/// en: 'You are now the host'
+	String get youAreNowHost => 'You are now the host';
+
+	/// en: '${name} joined'
+	String joined({required Object name}) => '${name} joined';
+
+	/// en: '${name} left'
+	String left({required Object name}) => '${name} left';
+
+	/// en: 'Only the host can control playback'
+	String get controlRefused => 'Only the host can control playback';
+
+	/// en: 'Some servers couldn't be searched for the room's video'
+	String get searchFailed => 'Some servers couldn\'t be searched for the room\'s video';
+
+	/// en: 'Press play to start'
+	String get playBlocked => 'Press play to start';
+
+	/// en: 'Couldn't share this video with the room'
+	String get shareFailed => 'Couldn\'t share this video with the room';
+
+	/// en: 'Downloads aren't shared with the room while their server is offline'
+	String get downloadNotShared => 'Downloads aren\'t shared with the room while their server is offline';
+
+	/// en: 'Couldn't open the room's video'
+	String get openFailed => 'Couldn\'t open the room\'s video';
+}
+
+// Path: watchTogether.ended
+class Translations$watchTogether$ended$en {
+	Translations$watchTogether$ended$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'The host ended the room'
+	String get ended => 'The host ended the room';
+
+	/// en: 'You were removed from the room'
+	String get kicked => 'You were removed from the room';
+
+	/// en: 'The room expired'
+	String get expired => 'The room expired';
+
+	/// en: 'You joined this room on another device'
+	String get replaced => 'You joined this room on another device';
+
+	/// en: 'Lost the connection to the room'
+	String get lost => 'Lost the connection to the room';
+}
+
 // Path: watchTogether.errors
 class Translations$watchTogether$errors$en {
 	Translations$watchTogether$errors$en.internal(this._root);
@@ -7461,20 +8513,47 @@ class Translations$watchTogether$errors$en {
 
 	// Translations
 
-	/// en: 'The relay did not respond in time'
-	String get timedOut => 'The relay did not respond in time';
+	/// en: 'That isn't a room code. Codes have 6 letters and digits, without 0, 1, I, L or O.'
+	String get invalidCode => 'That isn\'t a room code. Codes have 6 letters and digits, without 0, 1, I, L or O.';
 
-	/// en: 'The connection closed before the session was ready'
-	String get connectionLost => 'The connection closed before the session was ready';
+	/// en: 'No room has that code. It may have ended.'
+	String get roomNotFound => 'No room has that code. It may have ended.';
 
-	/// en: 'The relay sent an unexpected response'
-	String get invalidRelayResponse => 'The relay sent an unexpected response';
+	/// en: 'That room is full.'
+	String get roomFull => 'That room is full.';
 
-	/// en: 'The host ended the session'
-	String get sessionEnded => 'The host ended the session';
+	/// en: 'The host locked that room.'
+	String get roomLocked => 'The host locked that room.';
 
-	/// en: 'Unable to resume this session. Join or create a room to continue.'
-	String get sessionUnavailable => 'Unable to resume this session. Join or create a room to continue.';
+	/// en: 'Watch Together is busy right now. Try again later.'
+	String get relayFull => 'Watch Together is busy right now. Try again later.';
+
+	/// en: 'Couldn't reach the Watch Together relay. Check your connection.'
+	String get unreachable => 'Couldn\'t reach the Watch Together relay. Check your connection.';
+
+	/// en: 'Too many attempts. Wait a moment and try again.'
+	String get rateLimited => 'Too many attempts. Wait a moment and try again.';
+
+	/// en: 'This version of Bask can't use the relay. Update the app.'
+	String get clientBlocked => 'This version of Bask can\'t use the relay. Update the app.';
+
+	/// en: 'Only the host can do that.'
+	String get forbidden => 'Only the host can do that.';
+
+	/// en: 'You're not in a room.'
+	String get notInRoom => 'You\'re not in a room.';
+
+	/// en: 'You're already in a room.'
+	String get alreadyInRoom => 'You\'re already in a room.';
+
+	/// en: 'Couldn't rejoin the room.'
+	String get resumeFailed => 'Couldn\'t rejoin the room.';
+
+	/// en: 'The relay doesn't support this.'
+	String get unsupported => 'The relay doesn\'t support this.';
+
+	/// en: 'Something went wrong. Try again.'
+	String get generic => 'Something went wrong. Try again.';
 }
 
 // Path: downloads.backgroundWarning
@@ -7562,6 +8641,21 @@ class Translations$downloads$backgroundWarning$en {
 
 	/// en: 'Couldn't open dontkillmyapp.com on this device'
 	String get linkUnavailable => 'Couldn\'t open dontkillmyapp.com on this device';
+}
+
+// Path: downloads.groupings
+class Translations$downloads$groupings$en {
+	Translations$downloads$groupings$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Library'
+	String get library => 'Library';
+
+	/// en: 'Collections'
+	String get collections => 'Collections';
 }
 
 // Path: companionRemote.session
@@ -7810,6 +8904,21 @@ class Translations$services$names$en {
 	String get mdblist => 'MDBList';
 }
 
+// Path: services.simklReconnect
+class Translations$services$simklReconnect$en {
+	Translations$services$simklReconnect$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Reconnect Simkl'
+	String get title => 'Reconnect Simkl';
+
+	/// en: 'Simkl is retiring the sign-in method this connection uses. Reconnecting opens simkl.com to approve Bask — Bask never sees your password. Your watch history stays on Simkl.'
+	String get subtitle => 'Simkl is retiring the sign-in method this connection uses. Reconnecting opens simkl.com to approve Bask — Bask never sees your password. Your watch history stays on Simkl.';
+}
+
 // Path: services.deviceCode
 class Translations$services$deviceCode$en {
 	Translations$services$deviceCode$en.internal(this._root);
@@ -7924,6 +9033,37 @@ extension on Translations {
 	dynamic _flatMapFunction(String path) {
 		return switch (path) {
 			'app.title' => 'Bask Media Player',
+			'appIcon.title' => 'App icon',
+			'appIcon.defaultIcon' => 'Default',
+			'appIcon.current' => 'Current icon',
+			'appIcon.locked' => 'Part of the Theme & Icon Pack',
+			'appIcon.lockedHint' => 'Alternate icons are part of the Theme & Icon Pack.',
+			'appIcon.changeFailed' => 'Couldn\'t change the app icon',
+			'appIcon.launcherHint' => 'The new icon appears on your home screen once you leave Bask.',
+			'appIcon.tvLauncherHint' => 'The new banner appears once you leave Bask. Android TV can keep showing the old one until the TV restarts.',
+			'appIcon.names.midnight' => 'Midnight',
+			'appIcon.names.ember' => 'Ember',
+			'appIcon.names.paper' => 'Paper',
+			'appIcon.names.oled' => 'OLED',
+			'appIcon.names.line' => 'Line',
+			'appIcon.names.ocean' => 'Ocean',
+			'appIcon.names.ultraviolet' => 'Ultraviolet',
+			'appIcon.names.matcha' => 'Matcha',
+			'appIcon.names.sunset' => 'Sunset',
+			'appIcon.names.gold' => 'Gold',
+			'appIcon.names.titanium' => 'Titanium',
+			'appIcon.names.glass' => 'Glass',
+			'appIcon.names.crt' => 'CRT',
+			'appIcon.names.vhs' => 'VHS',
+			'appIcon.names.synthwave' => 'Synthwave',
+			'appIcon.names.pixel' => 'Pixel',
+			'appIcon.names.neon' => 'Neon',
+			'appIcon.names.sticker' => 'Sticker',
+			'appIcon.names.ticket' => 'Ticket',
+			'appIcon.names.pop' => 'Pop',
+			'appIcon.names.strata' => 'Strata',
+			'appIcon.names.facet' => 'Facet',
+			'appIcon.names.tilde' => 'Tilde',
 			'auth.signInWithPlex' => 'Sign in with Plex',
 			'auth.showQRCode' => 'Show QR Code',
 			'auth.authenticate' => 'Authenticate',
@@ -7998,6 +9138,8 @@ extension on Translations {
 			'common.ratingSource.trakt' => 'Trakt',
 			'common.ratingSource.rottenTomatoesCritic' => 'Rotten Tomatoes critics',
 			'common.ratingSource.rottenTomatoesAudience' => 'Rotten Tomatoes audience',
+			'common.ratingSource.metacritic' => 'Metacritic',
+			'common.ratingSource.letterboxd' => 'Letterboxd',
 			'common.notAvailable' => 'N/A',
 			'common.url' => 'URL',
 			'common.letterKeys' => 'ABC',
@@ -8029,6 +9171,29 @@ extension on Translations {
 			'update.viewRelease' => 'View Release',
 			'update.latestVersion' => 'You are on the latest version',
 			'update.checkFailed' => 'Failed to check for updates',
+			'supporter.title' => 'Theme & Icon Pack',
+			'supporter.intro' => 'An optional one-time purchase that adds cosmetic extras:',
+			'supporter.presetThemes' => 'Preset themes',
+			'supporter.presetThemesDescription' => 'Ember, Glacier, Forest, Plum and Paper',
+			'supporter.customTheme' => 'Custom theme',
+			'supporter.customThemeDescription' => 'Pick every color yourself',
+			'supporter.appIcons' => 'App icons',
+			'supporter.appIconsDescription' => 'Choose an alternate Bask icon',
+			'supporter.buy' => ({required Object price}) => 'Buy for ${price}',
+			'supporter.loadingPrice' => 'Loading price...',
+			'supporter.restore' => 'Restore Purchases',
+			'supporter.pending' => 'Your purchase is waiting for payment or approval. The extras unlock as soon as the store completes it.',
+			'supporter.thankYouTitle' => 'Thanks for your purchase',
+			'supporter.thankYouBody' => 'The Theme & Icon Pack is unlocked.',
+			'supporter.tileSubtitle' => 'Unlock themes and app icons with a one-time purchase',
+			'supporter.tileSubtitleThemesOnly' => 'Unlock themes with a one-time purchase',
+			'supporter.tileUnlocked' => 'Unlocked — thanks for your purchase',
+			'supporter.errors.storeUnavailable' => 'Purchases aren\'t available. Check that you\'re signed in to the store and purchases are allowed on this device.',
+			'supporter.errors.productNotFound' => 'The Theme & Icon Pack isn\'t available in your store right now.',
+			'supporter.errors.productQueryFailed' => 'Couldn\'t load the price. Check your connection and try again.',
+			'supporter.errors.purchaseFailed' => 'The purchase didn\'t go through. Try again.',
+			'supporter.errors.restoreFailed' => 'Couldn\'t reach the store to restore your purchase. Try again.',
+			'supporter.errors.nothingToRestore' => 'No Theme & Icon Pack purchase was found for this store account.',
 			'settings.title' => 'Settings',
 			'settings.supportDeveloper' => 'Support Bask',
 			'settings.supportDeveloperDescription' => 'Donate via Liberapay to fund development',
@@ -8063,6 +9228,14 @@ extension on Translations {
 			'settings.paletteAmber' => 'Amber',
 			'settings.paletteCrimson' => 'Crimson',
 			'settings.paletteSlate' => 'Slate',
+			'settings.paletteEmber' => 'Ember',
+			'settings.paletteGlacier' => 'Glacier',
+			'settings.palettePaper' => 'Paper',
+			'settings.emberTheme' => 'Ember',
+			'settings.glacierTheme' => 'Glacier',
+			'settings.forestTheme' => 'Forest',
+			'settings.plumTheme' => 'Plum',
+			'settings.paperTheme' => 'Paper',
 			'settings.libraryDensity' => 'Library Density',
 			'settings.displayScale' => 'Display Scale',
 			'settings.compact' => 'Compact',
@@ -8124,6 +9297,9 @@ extension on Translations {
 			'settings.cellularQualitySameAsDefault' => 'Same as Default Quality',
 			'settings.directPlayCoveredQuality' => 'Play Smaller Videos at Original Quality',
 			'settings.directPlayCoveredQualityDescription' => 'Direct play videos already within the quality limit instead of transcoding them',
+			'settings.videoCodecs' => 'Video Codecs',
+			'settings.videoCodecsDescription' => 'Unchecked codecs are transcoded by the server',
+			'settings.videoCodecsAlwaysAccepted' => 'Always accepted',
 			'settings.musicQualityTitle' => 'Music Quality',
 			'settings.subtitleStyling' => 'Subtitle Styling',
 			'settings.subtitleStylingDescription' => 'Customize subtitle appearance',
@@ -8135,6 +9311,7 @@ extension on Translations {
 			'settings.minutesUnit' => ({required Object minutes}) => '${minutes} minutes',
 			'settings.rememberTrackSelections' => 'Remember track selections per show/movie',
 			'settings.rememberTrackSelectionsDescription' => 'Remember audio and subtitle choices per title',
+			'settings.rememberTrackSelectionsBackendRule' => 'Plex saves each choice on the server per file; Jellyfin also turns on the account\'s Remember selections; Emby is not supported',
 			'settings.followServerTrackSelections' => 'Use server\'s per-episode track selections',
 			'settings.followServerTrackSelectionsDescription' => 'On episode change, apply the audio and subtitles selected on the server instead of carrying over the current choice',
 			'settings.resumeMusicOnLaunch' => 'Remember music session',
@@ -8154,7 +9331,7 @@ extension on Translations {
 			'settings.videoPlayerNavigation' => 'Video Player Navigation',
 			'settings.videoPlayerNavigationDescription' => 'Use arrow keys to navigate video player controls',
 			'settings.watchTogetherRelay' => 'Watch Together Relay',
-			'settings.watchTogetherRelayDescription' => 'Set a custom relay. Everyone must use the same server.',
+			'settings.watchTogetherRelayDescription' => 'Public Open Watch Party relays unless you set your own',
 			'settings.watchTogetherRelayHint' => 'https://my-relay.example.com',
 			'settings.watchTogetherRelayInvalid' => 'Enter a valid HTTP or HTTPS relay base URL.',
 			'settings.crashReporting' => 'Crash Reporting',
@@ -8223,6 +9400,7 @@ extension on Translations {
 			'settings.importSettingsInvalidFile' => 'This file isn\'t a valid Bask settings export',
 			'settings.importSettingsNoUser' => 'Sign in before importing settings',
 			'settings.shortcutsReset' => 'Shortcuts reset to defaults',
+			'settings.resetShortcutsConfirm' => 'This will replace your custom shortcuts with the defaults. Continue?',
 			'settings.about' => 'About',
 			'settings.aboutDescription' => 'App information and licenses',
 			'settings.updates' => 'Updates',
@@ -8238,6 +9416,8 @@ extension on Translations {
 			'settings.autoPlayAndSkip' => 'Auto-Play & Skip',
 			'settings.autoPlayNextEpisode' => 'Auto-Play Next Episode',
 			'settings.autoPlayNextEpisodeDescription' => 'Start the next episode automatically when one ends',
+			'settings.shuffleStartsFromBeginning' => 'Shuffle Starts at Beginning',
+			'settings.shuffleStartsFromBeginningDescription' => 'Start each episode at the beginning when shuffling instead of resuming',
 			'settings.playNextCountdown' => 'Play Next Countdown',
 			'settings.playNextCountdownImmediate' => 'Play immediately',
 			'settings.skipIntroMode' => 'Skip Intro',
@@ -8306,6 +9486,8 @@ extension on Translations {
 			'settings.manageLibrariesDescription' => 'Reorder and hide libraries',
 			'settings.companionRemoteServer' => 'Companion Remote Server',
 			'settings.companionRemoteServerDescription' => 'Allow mobile devices on your network to control this app',
+			'settings.companionRemoteServerStartFailed' => 'Couldn\'t start the companion server',
+			'settings.companionRemoteServerStopFailed' => 'Couldn\'t stop the companion server',
 			'settings.autoPip' => 'Auto Picture-in-Picture',
 			'settings.autoPipDescription' => 'Automatically enter picture-in-picture when you leave the app during playback',
 			'settings.matchContentFrameRate' => 'Match Content Frame Rate',
@@ -8332,6 +9514,17 @@ extension on Translations {
 			'settings.dialogueBoostGainLabel' => 'Strength (dB)',
 			'settings.audioDownmix' => 'Downmix to Stereo',
 			'settings.audioDownmixDescription' => 'Mix surround audio down to two channels for stereo speakers or headphones',
+			'settings.audioPassthroughDescriptionApple' => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.',
+			'settings.audioPassthroughDescriptionAppleSpatial' => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. On iOS, iPadOS and tvOS 26 or later, TrueHD Atmos and DTS:X play as spatial audio. Other DTS and TrueHD tracks play as multichannel PCM. Turn off if you have no sound.',
+			'settings.audioPassthroughOverriddenByNormalization' => 'Off while loudness normalization is on',
+			'settings.audioChannelLimit' => 'Audio Channels',
+			'settings.audioChannelLimitDescription' => 'Mix decoded audio down for speakers, headphones, or HDMI setups that cannot play every channel',
+			'settings.audioChannelLimitOriginal' => 'Original',
+			'settings.audioChannelLimitOriginalDescription' => 'Play every channel in the track',
+			'settings.audioChannelLimitSurround51' => 'Up to 5.1',
+			'settings.audioChannelLimitSurround51Description' => 'Mix 7.1 down to 5.1 for TVs and receivers that only take 5.1 PCM. Passthrough is unaffected.',
+			'settings.audioChannelLimitStereo' => 'Stereo',
+			'settings.audioChannelLimitStereoDescription' => 'Mix down to two channels for stereo speakers or headphones. Turns passthrough off.',
 			'settings.downmixCenterBoost' => 'Center Channel Boost',
 			'settings.downmixCenterBoostValue' => ({required Object db}) => '${db} dB',
 			'settings.downmixCenterBoostLabel' => 'Boost (dB)',
@@ -8348,8 +9541,26 @@ extension on Translations {
 			'settings.dvConversionNativeDescription' => 'Force native DV7 and suppress DV conversion retry',
 			'settings.dvConversionDv81Description' => 'Force inline RPU conversion to Dolby Vision profile 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Strip Dolby Vision RPU/EL layers and present plain HEVC',
+			'settings.disableDolbyVision' => 'Disable Dolby Vision',
+			'settings.disableDolbyVisionDescription' => 'Play the file\'s HDR10 or HLG layer instead of Dolby Vision, when it has one',
+			'settings.hdrSdrConversion' => 'HDR to SDR Conversion',
+			_ => null,
+		} ?? switch (path) {
+			'settings.hdrSdrConversionDescription' => 'Choose what converts HDR video when the display can\'t show HDR.',
+			'settings.hdrSdrConversionAuto' => 'Auto',
+			'settings.hdrSdrConversionAutoDescription' => 'Device on Android 9 and later, player on older versions',
+			'settings.hdrSdrConversionDevice' => 'Device',
+			'settings.hdrSdrConversionDeviceDescription' => 'Your device\'s video hardware converts it. Fastest, but colors depend on the device',
+			'settings.hdrSdrConversionPlayer' => 'Player',
+			'settings.hdrSdrConversionPlayerDescription' => 'The player converts it. Consistent colors, but 4K may stutter on low-end TV boxes',
 			'settings.deinterlace' => 'Deinterlacing',
 			'settings.deinterlaceDescription' => 'Remove combing artifacts from interlaced video (mpv player only)',
+			'settings.deinterlaceOff' => 'Off',
+			'settings.deinterlaceOffDescription' => 'Show interlaced video as it is decoded',
+			'settings.deinterlaceVideo' => 'Video',
+			'settings.deinterlaceVideoDescription' => 'Turn each field into a full frame. For video shot for TV, like sports, news, and concerts',
+			'settings.deinterlaceFilm' => 'Film',
+			'settings.deinterlaceFilmDescription' => 'Restore the original frames of film and animation telecined to 29.97 fps, common on NTSC DVDs. Video shot for TV stutters. Live TV uses Video',
 			'settings.requireProfileSelectionOnOpen' => 'Ask for profile on app open',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Show profile selection every time the app is opened',
 			'settings.forceTvMode' => 'Force TV mode',
@@ -8399,6 +9610,7 @@ extension on Translations {
 			'settings.scopePlaybackSpeed' => 'Playback Speed',
 			'settings.scopeShaderPreset' => 'Shader Preset',
 			'settings.scopeAspectRatio' => 'Aspect Ratio',
+			'settings.scopeZoom' => 'Zoom',
 			'settings.scopeSyncOffsets' => 'Audio & Subtitle Sync',
 			'settings.playerScopeOff' => 'Don\'t save',
 			'settings.playerScopeGlobal' => 'Everywhere',
@@ -8435,8 +9647,6 @@ extension on Translations {
 			'settings.bufferSizeAuto' => 'Auto (Recommended)',
 			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB memory available. A ${size}MB buffer may affect playback.',
 			'settings.autoSkip' => 'Auto Skip',
-			_ => null,
-		} ?? switch (path) {
 			'settings.autoSkipIntro' => 'Auto Skip Intro',
 			'settings.autoSkipIntroDescription' => 'Automatically skip intro markers after a few seconds',
 			'settings.autoSkipCredits' => 'Auto Skip Credits',
@@ -8455,10 +9665,49 @@ extension on Translations {
 			'settings.subtitleRateCorrectionCertainDescription' => 'Only when subtitles run past the end of the video, which correctly timed ones never do',
 			'settings.subtitleRateCorrectionAlways' => 'Also when they stop short',
 			'settings.subtitleRateCorrectionAlwaysDescription' => 'Catches 25 fps subtitles over a 23.976 fps film, at the cost of occasionally correcting a film whose credits are silent',
+			'themeEditor.builtIn' => 'Built-in',
+			'themeEditor.presets' => 'Presets',
+			'themeEditor.custom' => 'Custom',
+			'themeEditor.customEmpty' => 'Not created yet',
+			'themeEditor.editCustom' => 'Edit custom theme',
+			'themeEditor.editCustomDescription' => 'Choose every color yourself',
+			'themeEditor.locked' => 'Unlock with the Theme & Icon Pack',
+			'themeEditor.savedLocked' => 'Saved — unlocks with the Theme & Icon Pack',
+			'themeEditor.title' => 'Custom Theme',
+			'themeEditor.startFrom' => 'Start from',
+			'themeEditor.startFromDescription' => 'Copy all colors from another theme',
+			'themeEditor.colors' => 'Colors',
+			'themeEditor.preview' => 'Preview',
+			'themeEditor.slots.bg' => 'Background',
+			'themeEditor.slots.surface' => 'Surface',
+			'themeEditor.slots.outline' => 'Outline',
+			'themeEditor.slots.text' => 'Text',
+			'themeEditor.slots.textMuted' => 'Secondary text',
+			'themeEditor.slots.accent' => 'Accent',
+			'themeEditor.opacity' => 'Opacity',
+			'themeEditor.hexHint' => '#RRGGBB or #AARRGGBB',
+			'themeEditor.fromOtherThemes' => 'From other themes',
+			'themeEditor.swatchLabel' => ({required Object theme, required Object color}) => '${theme} ${color}',
+			'themeEditor.contrast.textOnBg' => 'Text on background',
+			'themeEditor.contrast.textOnSurface' => 'Text on surface',
+			'themeEditor.contrast.textMutedOnBg' => 'Secondary text on background',
+			'themeEditor.contrast.textMutedOnSurface' => 'Secondary text on surface',
+			'themeEditor.contrast.accentOnBg' => 'Accent on background',
+			'themeEditor.contrast.accentOnSurface' => 'Accent on surface',
+			'themeEditor.contrast.labelOnAccent' => 'Button label on accent',
+			'themeEditor.lowContrast' => ({required Object pair, required Object ratio, required Object minimum}) => '${pair}: ${ratio}:1, below the recommended ${minimum}:1',
+			'themeEditor.discardTitle' => 'Discard changes?',
+			'themeEditor.discardMessage' => 'Your unsaved color changes will be lost.',
+			'themeEditor.discard' => 'Discard',
+			'themeEditor.previewCardTitle' => ({required Object number}) => 'Episode ${number}',
+			'themeEditor.previewCardSubtitle' => ({required Object minutes}) => '${minutes} min left',
+			'themeEditor.previewSwitch' => 'Autoplay',
+			'themeEditor.previewMutedText' => 'Secondary text reads like this',
 			'search.hint' => 'Search movies, shows, music...',
 			'search.tryDifferentTerm' => 'Try a different search term',
 			'search.searchYourMedia' => 'Search your media',
 			'search.enterTitleActorOrKeyword' => 'Enter a title, actor, or keyword',
+			'search.people' => 'People',
 			'hotkeys.setShortcutFor' => ({required Object actionName}) => 'Set Shortcut for ${actionName}',
 			'hotkeys.clearShortcut' => 'Clear shortcut',
 			'hotkeys.noShortcutSet' => 'No shortcut set',
@@ -8637,6 +9886,7 @@ extension on Translations {
 			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Your server did not provide file details for this item, so Bask cannot check which files this will remove. It may delete more than the item named above.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Media item deleted successfully',
 			'mediaMenu.mediaFailedToDelete' => 'Failed to delete media item',
+			'mediaMenu.mediaDeletionDisabledOnServer' => 'Media deletion is turned off on this server. Turn on "Allow media deletion" in the server\'s Library settings.',
 			'mediaMenu.rate' => 'Rate',
 			'mediaMenu.playFromBeginning' => 'Play from Beginning',
 			'mediaMenu.playVersion' => 'Play Version...',
@@ -8735,14 +9985,17 @@ extension on Translations {
 			'videoControls.rotationLockButton' => 'Rotation lock',
 			'videoControls.lockScreen' => 'Lock screen',
 			'videoControls.screenLockButton' => 'Screen lock',
-			'videoControls.longPressToUnlock' => 'Long press to unlock',
+			'videoControls.tapToUnlock' => 'Tap to unlock',
+			'videoControls.tapAgainToUnlock' => 'Tap again to unlock',
 			'videoControls.timelineSlider' => 'Video timeline',
 			'videoControls.volumeSlider' => 'Volume level',
 			'videoControls.endsAt' => ({required Object time}) => 'Ends at ${time}',
 			'videoControls.pipActive' => 'Playing in Picture-in-Picture',
 			'videoControls.pipFailed' => 'Picture-in-picture failed to start',
 			'videoControls.screenshotSaved' => 'Screenshot saved',
+			'videoControls.screenshotFailed' => 'Couldn\'t take a screenshot',
 			'videoControls.zoomPercent' => ({required Object percent}) => 'Zoom ${percent}%',
+			'videoControls.volumePercent' => ({required Object percent}) => 'Volume ${percent}%',
 			'videoControls.pipErrors.androidVersion' => 'Requires Android 8.0 or newer',
 			'videoControls.pipErrors.iosVersion' => 'Requires iOS 15.0 or newer',
 			'videoControls.pipErrors.permissionDisabled' => 'Picture-in-picture is disabled. Enable it in system settings.',
@@ -8764,6 +10017,7 @@ extension on Translations {
 			'videoControls.subtitleDownloaded' => 'Subtitle downloaded',
 			'videoControls.subtitleDownloadedNotApplied' => 'Subtitle downloaded, but it could not be selected',
 			'videoControls.subtitleDownloadFailed' => 'Failed to download subtitle',
+			'videoControls.subtitleDownloadTimedOut' => 'The subtitle didn\'t appear in time. The download may have failed',
 			'videoControls.searchLanguages' => 'Search languages...',
 			'videoControls.skipIntro' => 'Skip Intro',
 			'videoControls.skipCredits' => 'Skip Credits',
@@ -8797,12 +10051,15 @@ extension on Translations {
 			'messages.playbackDataInvalid' => 'The server returned invalid playback information.',
 			'messages.playbackCancelled' => 'Playback was canceled.',
 			'messages.playbackFailed' => 'Playback could not be started.',
+			'messages.playbackFailedDetail' => ({required Object error}) => 'Playback could not be started: ${error}',
 			'messages.audioOutputFailed' => 'The audio output stopped responding. Check the TV or receiver\'s audio connection; if other apps have no sound either, restart the device.',
 			'messages.mediaUnavailable' => 'This content is no longer available.',
 			'messages.errorLoadingFileInfo' => ({required Object error}) => 'Error loading file info: ${error}',
 			'messages.errorLoadingSeries' => 'Error loading series',
 			'messages.musicNotSupported' => 'Music playback is not yet supported',
 			'messages.noDescriptionAvailable' => 'No description available',
+			_ => null,
+		} ?? switch (path) {
 			'messages.noProfilesAvailable' => 'No profiles available',
 			'messages.contactAdminForProfiles' => 'Contact your server administrator to add profiles',
 			'messages.unableToDetermineLibrarySection' => 'Unable to determine library section for this item',
@@ -8829,10 +10086,13 @@ extension on Translations {
 			'messages.switchingToCompatiblePlayer' => 'Switching to compatible player...',
 			'messages.serverLimitTitle' => 'Playback failed',
 			'messages.serverLimitBody' => 'Server error (HTTP 500). A bandwidth/transcoding limit likely rejected this session. Ask the owner to adjust it.',
+			'messages.serverLimitTranscode' => 'Try transcoding',
 			'messages.mediaUnreadableTitle' => 'File unavailable',
 			'messages.mediaUnreadableBody' => 'The server found this item but could not read its file (HTTP 404). The file was probably moved, deleted, or its storage is offline. Ask the server owner to check the file and rescan the library.',
 			'messages.serverBusyTitle' => 'Stream unavailable',
 			'messages.serverBusyBody' => 'The server kept refusing to stream this file (HTTP 503). It may be restarting, busy, or the file\'s storage may be offline. Try again in a moment — if it keeps happening, ask the server owner to check the server and the file\'s storage.',
+			'messages.playbackNotAllowedTitle' => 'Playback not allowed',
+			'messages.playbackNotAllowedBody' => 'The server refused to stream this item (HTTP 403). Your account may not have permission to play it, or the server may only allow playback on its local network.',
 			'messages.logsUploaded' => 'Logs uploaded',
 			'messages.logsUploadFailed' => 'Failed to upload logs',
 			'messages.logId' => 'Log ID',
@@ -8898,6 +10158,8 @@ extension on Translations {
 			'profiles.signOut' => 'Sign out',
 			'profiles.signOutPlexTitle' => 'Sign out of Plex?',
 			'profiles.signOutPlexMessage' => ({required Object displayName}) => 'Remove ${displayName} and all Plex Home users? Sign back in anytime.',
+			'profiles.signOutPlexDeleteDownloads' => 'Also delete downloads',
+			'profiles.signOutPlexDeleteDownloadsDescription' => 'Otherwise they stay on this device and come back when you sign back in to this account.',
 			'profiles.signedOutPlex' => 'Signed out of Plex.',
 			'profiles.signOutFailed' => 'Sign out failed.',
 			'profiles.sectionTitle' => 'Profiles',
@@ -8949,8 +10211,6 @@ extension on Translations {
 			'profiles.pinProtectionOptional' => 'PIN protection (optional)',
 			'profiles.pinExplain' => '4-digit PIN required to switch profiles.',
 			'profiles.continueButton' => 'Continue',
-			_ => null,
-		} ?? switch (path) {
 			'profiles.pinsDontMatch' => 'PINs don\'t match',
 			'profiles.tokenIdentityMismatch' => 'The Plex profile token resolved to an unexpected server',
 			'profiles.plexEndpoints.title' => 'Server addresses',
@@ -8969,6 +10229,8 @@ extension on Translations {
 			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Add to ${displayName}: Plex, Jellyfin, Emby, or another profile connection',
 			'connections.sessionExpiredOne' => ({required Object name}) => 'Session expired for ${name}',
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Session expired for ${count} servers',
+			'connections.accessDeniedOne' => ({required Object name}) => '${name} refused access for this account',
+			'connections.accessDeniedMany' => ({required Object count}) => '${count} servers refused access for this account',
 			'connections.signInAgain' => 'Sign in again',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Edit ${product} connection',
 			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Add or remove URLs for ${serverName}. Bask will use the reachable URL with the lowest latency.',
@@ -9034,6 +10296,7 @@ extension on Translations {
 			'discover.addMediaToLibraries' => 'Add some media to your libraries',
 			'discover.continueWatching' => 'Continue Watching',
 			'discover.continueWatchingIn' => ({required Object library}) => 'Continue Watching in ${library}',
+			'discover.selectVersion' => 'Select Version',
 			'discover.nextUp' => 'Next Up',
 			'discover.nextUpIn' => ({required Object library}) => 'Next Up in ${library}',
 			'discover.recentlyAdded' => 'Recently Added',
@@ -9058,6 +10321,11 @@ extension on Translations {
 			'discover.watchedElsewhereJustNow' => 'Watched elsewhere just now',
 			'discover.watchedElsewhereMinutes' => ({required Object count}) => 'Watched elsewhere ${count} min ago',
 			'discover.watchedElsewhereHours' => ({required Object count}) => 'Watched elsewhere ${count} h ago',
+			'discover.person.born' => 'Born',
+			'discover.person.died' => 'Died',
+			'discover.person.birthplace' => 'Birthplace',
+			'discover.person.dateWithAge' => ({required Object date, required Object age}) => '${date} (age ${age})',
+			'discover.person.dateWithAgeAtDeath' => ({required Object date, required Object age}) => '${date} (aged ${age})',
 			'errors.searchFailed' => ({required Object error}) => 'Search failed: ${error}',
 			'errors.searchUnavailable' => 'Search could not reach any media server.',
 			'errors.connectionTimeout' => ({required Object context}) => 'Connection timeout while loading ${context}',
@@ -9070,6 +10338,13 @@ extension on Translations {
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => 'Failed to switch to ${displayName}',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => 'Failed to delete ${displayName}',
 			'errors.failedToRate' => 'Couldn\'t update rating',
+			'errors.reasonTimedOut' => 'the connection timed out',
+			'errors.reasonUnreachable' => 'the server could not be reached',
+			'errors.reasonRefused' => 'the server refused the request',
+			'errors.reasonNotFound' => 'the item is no longer on the server',
+			'errors.reasonServerError' => 'the server reported an error',
+			'errors.reasonCancelled' => 'the request was cancelled',
+			'errors.reasonUnexpected' => 'an unexpected error occurred',
 			'libraries.title' => 'Libraries',
 			'libraries.fallbackTitle' => 'Library',
 			'libraries.scanLibraryFiles' => 'Scan Library Files',
@@ -9104,16 +10379,19 @@ extension on Translations {
 			'libraries.showLibrary' => 'Show library',
 			'libraries.hideLibrary' => 'Hide library',
 			'libraries.libraryOptions' => 'Library options',
+			'libraries.shuffleLibrary' => 'Shuffle library',
 			'libraries.content' => 'library content',
 			'libraries.selectLibrary' => 'Select library',
 			'libraries.filtersWithCount' => ({required Object count}) => 'Filters (${count})',
 			'libraries.noRecommendations' => 'No recommendations available',
 			'libraries.noCollections' => 'No collections in this library',
+			'libraries.noGenres' => 'No genres in this library',
 			'libraries.noFoldersFound' => 'No folders found',
 			'libraries.folders' => 'folders',
 			'libraries.tabs.recommended' => 'Recommended',
 			'libraries.tabs.browse' => 'Browse',
 			'libraries.tabs.collections' => 'Collections',
+			'libraries.tabs.genres' => 'Genres',
 			'libraries.tabs.playlists' => 'Playlists',
 			'libraries.groupings.title' => 'Grouping',
 			'libraries.groupings.all' => 'All',
@@ -9132,6 +10410,7 @@ extension on Translations {
 			'libraries.filterCategories.unwatched' => 'Unwatched',
 			'libraries.filterCategories.unplayed' => 'Unplayed',
 			'libraries.filterCategories.favorites' => 'Favorites',
+			'libraries.filterCategories.filePath' => 'File Path',
 			'libraries.sortLabels.title' => 'Title',
 			'libraries.sortLabels.dateAdded' => 'Date Added',
 			'libraries.sortLabels.releaseDate' => 'Release Date',
@@ -9152,6 +10431,35 @@ extension on Translations {
 			'libraries.sortLabels.dateShared' => 'Date Shared',
 			'libraries.sortLabels.latestEpisodeAirDate' => 'Latest Episode Air Date',
 			'libraries.sortLabels.lastEpisodeDateAdded' => 'Last Episode Date Added',
+			'libraries.sortLabels.dateDownloaded' => 'Date Downloaded',
+			'libraries.sortLabels.size' => 'Size',
+			'libraries.sortLabels.library' => 'Library',
+			'libraries.advancedFilters.include' => 'Include',
+			'libraries.advancedFilters.exclude' => 'Exclude',
+			'libraries.advancedFilters.any' => 'Any',
+			'libraries.advancedFilters.yes' => 'Yes',
+			'libraries.advancedFilters.no' => 'No',
+			'libraries.advancedFilters.not' => ({required Object value}) => 'Not ${value}',
+			'libraries.advancedFilters.valueCount' => ({required Object count}) => '${count} selected',
+			'libraries.advancedFilters.valueCountExcluded' => ({required Object count}) => '${count} excluded',
+			'libraries.advancedFilters.searchValues' => 'Search values',
+			'libraries.advancedFilters.noValues' => 'No values',
+			'libraries.advancedFilters.matchContains' => 'Contains',
+			'libraries.advancedFilters.matchNotContains' => 'Does not contain',
+			'libraries.advancedFilters.matchIs' => 'Is',
+			'libraries.advancedFilters.matchIsNot' => 'Is not',
+			'libraries.advancedFilters.matchBeginsWith' => 'Begins with',
+			'libraries.advancedFilters.matchEndsWith' => 'Ends with',
+			'libraries.advancedFilters.textHint' => 'Type to match',
+			'libraries.advancedFilters.from' => 'From',
+			'libraries.advancedFilters.to' => 'To',
+			'libraries.advancedFilters.range' => ({required Object from, required Object to}) => '${from} to ${to}',
+			'libraries.advancedFilters.atLeast' => ({required Object value}) => '${value} and up',
+			'libraries.advancedFilters.atMost' => ({required Object value}) => 'Up to ${value}',
+			'libraries.advancedFilters.dateLastDays' => ({required Object count}) => 'Last ${count} days',
+			'libraries.advancedFilters.dateLastYear' => 'Past year',
+			'libraries.advancedFilters.dateOlderThanDays' => ({required Object count}) => 'Older than ${count} days',
+			'libraries.advancedFilters.dateOlderThanYear' => 'Older than a year',
 			'about.title' => 'About',
 			'about.openSourceLicenses' => 'Open Source Licenses',
 			'about.versionLabel' => ({required Object version}) => 'Version ${version}',
@@ -9264,6 +10572,8 @@ extension on Translations {
 			'explore.badge.nextEpisodeIn' => ({required Object episode, required Object duration}) => 'Ep ${episode} in ${duration}',
 			'explore.badge.nextAiringIn' => ({required Object duration}) => 'Next in ${duration}',
 			'explore.badge.episodesShort' => ({required Object n}) => '${n} eps',
+			_ => null,
+		} ?? switch (path) {
 			'explore.badge.minutesPerEpisode' => ({required Object n}) => '${n} min/ep',
 			'explore.badge.adult' => '18+',
 			'explore.badge.rankFavorited' => ({required Object n}) => '#${n} favorited',
@@ -9304,6 +10614,7 @@ extension on Translations {
 			'explore.sourceMaterial.webComic' => 'Web comic',
 			'explore.sourceMaterial.musicRelease' => 'Music',
 			'explore.sourceMaterial.otherMedia' => 'Other',
+			'explore.creditRole.actor' => 'Actor',
 			'explore.creditRole.director' => 'Director',
 			'explore.creditRole.writer' => 'Writer',
 			'explore.creditRole.producer' => 'Producer',
@@ -9339,6 +10650,8 @@ extension on Translations {
 			'explore.detail.watchOn' => 'Watch on',
 			'explore.detail.watchTrailer' => 'Watch trailer',
 			'explore.detail.openOn' => ({required Object site}) => 'Open on ${site}',
+			'explore.detail.trailerUnavailable' => 'Couldn\'t open the trailer on this device',
+			'explore.detail.linkUnavailable' => 'Couldn\'t open this link on this device',
 			'explore.detail.crew' => 'Crew',
 			'explore.detail.ratings' => 'Ratings',
 			'explore.detail.schedule' => 'Schedule',
@@ -9364,6 +10677,7 @@ extension on Translations {
 			'liveTv.channelNumber' => ({required Object number}) => 'Channel ${number}',
 			'liveTv.unknownChannel' => 'Unknown channel',
 			'liveTv.live' => 'LIVE',
+			'liveTv.premiereBadge' => 'NEW',
 			'liveTv.reloadGuide' => 'Reload Guide',
 			'liveTv.searchGuide' => 'Search Guide',
 			'liveTv.searchHint' => 'Search channels & programs',
@@ -9423,7 +10737,9 @@ extension on Translations {
 			'liveTv.editRuleAction' => 'Edit',
 			'liveTv.recordingRuleUpdated' => 'Recording rule updated',
 			'liveTv.guideReloadRequested' => 'Guide refresh requested',
+			'liveTv.guideReloadFailed' => 'Couldn\'t refresh the guide',
 			'liveTv.rulesProcessRequested' => 'Rule re-evaluation requested',
+			'liveTv.rulesProcessFailed' => 'Couldn\'t re-evaluate recording rules',
 			'liveTv.recordShow' => 'Record show',
 			'liveTv.recordSettings.startEarly' => 'Start early (seconds)',
 			'liveTv.recordSettings.endLate' => 'End late (seconds)',
@@ -9438,6 +10754,8 @@ extension on Translations {
 			'liveTv.invalidPlaybackData' => ({required Object product}) => '${product} returned invalid Live TV playback data',
 			'liveTv.failedToStartChannel' => 'Could not start the live channel',
 			'liveTv.failedToBuildStreamUrl' => 'Could not build the stream URL',
+			'liveTv.playbackStartFailed' => ({required Object reason}) => 'Couldn\'t start the channel: ${reason}',
+			'liveTv.channelSwitchFailed' => ({required Object reason}) => 'Couldn\'t switch channel: ${reason}',
 			'collections.title' => 'Collections',
 			'collections.collection' => 'Collection',
 			'collections.empty' => 'Collection is empty',
@@ -9463,8 +10781,6 @@ extension on Translations {
 			'playlists.noPlaylists' => 'No playlists found',
 			'playlists.create' => 'Create Playlist',
 			'playlists.playlistName' => 'Playlist Name',
-			_ => null,
-		} ?? switch (path) {
 			'playlists.enterPlaylistName' => 'Enter playlist name',
 			'playlists.delete' => 'Delete Playlist',
 			'playlists.removeItem' => 'Remove from Playlist',
@@ -9517,83 +10833,151 @@ extension on Translations {
 			'music.discography.compilations' => 'Compilations',
 			'watchTogether.title' => 'Watch Together',
 			'watchTogether.description' => 'Watch content in sync with friends and family',
-			'watchTogether.createSession' => 'Create Session',
-			'watchTogether.creating' => 'Creating...',
-			'watchTogether.joinSession' => 'Join Session',
-			'watchTogether.joining' => 'Joining...',
-			'watchTogether.controlMode' => 'Control Mode',
-			'watchTogether.controlModeQuestion' => 'Who can control playback?',
-			'watchTogether.hostOnly' => 'Host Only',
-			'watchTogether.anyone' => 'Anyone',
-			'watchTogether.hostingSession' => 'Hosting Session',
-			'watchTogether.inSession' => 'In Session',
-			'watchTogether.sessionCode' => 'Session Code',
+			'watchTogether.createRoom' => 'Create Room',
+			'watchTogether.creatingRoom' => 'Creating room...',
+			'watchTogether.joinRoom' => 'Join Room',
+			'watchTogether.joiningRoom' => 'Joining room...',
+			'watchTogether.connecting' => 'Connecting...',
+			'watchTogether.relayPublic' => 'Rooms use the public Open Watch Party relays.',
+			'watchTogether.relayCustom' => ({required Object url}) => 'Rooms use your relay at ${url}.',
+			'watchTogether.recentRooms' => 'Recent Rooms',
+			'watchTogether.roomActions' => 'Room actions',
+			'watchTogether.renameRoom' => 'Rename Room',
+			'watchTogether.removeRoom' => 'Remove',
+			'watchTogether.enterRoomCode' => 'Enter the 6-character code from the host.',
+			'watchTogether.roomCode' => 'Room Code',
+			'watchTogether.paste' => 'Paste',
+			'watchTogether.noCodeInClipboard' => 'The clipboard doesn\'t contain a room code',
+			'watchTogether.copyCode' => 'Copy Code',
+			'watchTogether.codeCopied' => 'Room code copied',
+			'watchTogether.shareInvite' => 'Share Invite',
+			'watchTogether.inviteCopied' => 'Invite copied. Paste it into a message.',
+			'watchTogether.inviteMessage' => ({required Object code}) => 'Join my Watch Together room in Bask: open Watch Together, choose Join Room and enter ${code}.',
 			'watchTogether.openSessionControls' => 'Open Watch Together session controls',
-			'watchTogether.copySessionCode' => 'Copy session code',
+			'watchTogether.reconnecting' => 'Reconnecting...',
+			'watchTogether.reconnectingDescription' => 'The connection dropped. You rejoin the room automatically.',
+			'watchTogether.connected' => 'Connected',
+			'watchTogether.disconnected' => 'Disconnected',
+			'watchTogether.youAreHost' => 'You are the host',
+			'watchTogether.hostedBy' => ({required Object name}) => 'Hosted by ${name}',
 			'watchTogether.hostControlsPlayback' => 'Host controls playback',
 			'watchTogether.anyoneCanControl' => 'Anyone can control playback',
-			'watchTogether.hostControls' => 'Host controls',
-			'watchTogether.anyoneControls' => 'Anyone controls',
+			'watchTogether.roomLocked' => 'Room locked',
+			'watchTogether.nowPlaying' => 'Now Playing',
+			'watchTogether.nothingPlaying' => 'Nothing playing',
+			'watchTogether.nothingPlayingHost' => 'Play something from any library to share it with the room.',
+			'watchTogether.nothingPlayingGuest' => 'When the host plays something, it opens here.',
+			'watchTogether.notShareable' => 'This video has no catalogue match, so only people with access to the same server can play it.',
+			'watchTogether.searching' => 'Looking for this video in your libraries...',
+			'watchTogether.yourCopy' => 'Your copy',
+			'watchTogether.sharingYourCopy' => 'You\'re sharing your copy',
+			'watchTogether.playingOtherLength' => ({required Object difference}) => 'Playing your copy, ${difference}',
+			'watchTogether.mismatchTitle' => 'Your Copy Is a Different Length',
+			'watchTogether.mismatchDescription' => ({required Object difference}) => 'Your closest copy is ${difference} than the room\'s video. It may be another cut or version.',
+			'watchTogether.playAnyway' => 'Play Anyway',
+			'watchTogether.chooseAnotherCopy' => 'Choose Another Copy',
+			'watchTogether.dontPlay' => 'Don\'t Play',
+			'watchTogether.unavailableTitle' => 'You don\'t have this video',
+			'watchTogether.unavailableDescription' => 'Bask couldn\'t find it in your libraries. Pick a copy yourself or search again.',
+			'watchTogether.chooseCopy' => 'Choose a Copy',
+			'watchTogether.searchAgain' => 'Search Again',
+			'watchTogether.noCandidates' => 'No copies found in your libraries.',
+			'watchTogether.choiceFailed' => 'Couldn\'t play this copy for the room',
+			'watchTogether.lengthLonger' => ({required Object duration}) => '${duration} longer',
+			'watchTogether.lengthShorter' => ({required Object duration}) => '${duration} shorter',
+			'watchTogether.lengthSame' => 'Same length',
+			'watchTogether.lengthUnknown' => 'Length unknown',
+			'watchTogether.joinCurrentPlayback' => 'Join Current Playback',
+			'watchTogether.joinCurrentPlaybackDescription' => 'Jump back into what the host is currently watching',
+			'watchTogether.stopMedia' => 'Stop Video for Everyone',
+			'watchTogether.syncOffset' => 'Sync Offset',
+			'watchTogether.syncOffsetDescription' => 'Shift your video if it runs ahead of or behind the room.',
+			'watchTogether.offsetHint' => ({required Object difference}) => 'Your copy is ${difference} than the room\'s video.',
+			'watchTogether.applyDifference' => ({required Object offset}) => 'Use ${offset}',
+			'watchTogether.offsetMinusSecond' => '-1 s',
+			'watchTogether.offsetMinusTenth' => '-100 ms',
+			'watchTogether.offsetPlusTenth' => '+100 ms',
+			'watchTogether.offsetPlusSecond' => '+1 s',
 			'watchTogether.participants' => 'Participants',
-			'watchTogether.host' => 'Host',
+			'watchTogether.participantCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} participant', other: '${n} participants', ), 
 			'watchTogether.hostBadge' => 'HOST',
-			'watchTogether.youAreHost' => 'You are the host',
+			'watchTogether.nameYou' => ({required Object name}) => '${name} (You)',
+			'watchTogether.playerIdle' => 'Idle',
+			'watchTogether.playerLoading' => 'Loading',
+			'watchTogether.playerReady' => 'Ready',
+			'watchTogether.playerBuffering' => 'Buffering',
+			'watchTogether.matchSearching' => 'Searching',
+			'watchTogether.matchMatched' => 'Has the video',
+			'watchTogether.matchMismatched' => 'Different length',
+			'watchTogether.matchUnavailable' => 'Doesn\'t have the video',
+			'watchTogether.participantOffset' => ({required Object offset}) => 'Offset ${offset}',
 			'watchTogether.makeHost' => 'Make host',
 			'watchTogether.makeHostQuestion' => 'Transfer host?',
 			'watchTogether.makeHostConfirm' => ({required Object name}) => '${name} will control playback and drive the session for everyone.',
 			'watchTogether.transfer' => 'Transfer',
-			'watchTogether.hostChangedTo' => ({required Object name}) => '${name} is now the host',
-			'watchTogether.youAreNowHost' => 'You are now the host',
-			'watchTogether.hostTransferFailed' => ({required Object name}) => 'Couldn\'t make ${name} the host',
-			'watchTogether.watchingWithOthers' => 'Watching with others',
-			'watchTogether.endSession' => 'End Session',
-			'watchTogether.leaveSession' => 'Leave Session',
-			'watchTogether.endSessionQuestion' => 'End Session?',
-			'watchTogether.leaveSessionQuestion' => 'Leave Session?',
-			'watchTogether.endSessionConfirm' => 'This will end the session for all participants.',
-			'watchTogether.leaveSessionConfirm' => 'You will be removed from the session.',
-			'watchTogether.endSessionConfirmOverlay' => 'This will end the watch session for all participants.',
-			'watchTogether.leaveSessionConfirmOverlay' => 'You will be disconnected from the watch session.',
-			'watchTogether.end' => 'End',
+			'watchTogether.removeParticipant' => 'Remove from Room',
+			'watchTogether.removeParticipantQuestion' => ({required Object name}) => 'Remove ${name}?',
+			'watchTogether.removeParticipantConfirm' => ({required Object name}) => '${name} leaves the room. They can join again with the code unless you lock the room.',
+			'watchTogether.remove' => 'Remove',
+			'watchTogether.roomSettings' => 'Room Settings',
+			'watchTogether.letEveryoneControl' => 'Let Everyone Control Playback',
+			'watchTogether.lockRoom' => 'Lock Room',
+			'watchTogether.lockRoomDescription' => 'Nobody new can join',
+			'watchTogether.leaveRoom' => 'Leave Room',
+			'watchTogether.leaveRoomQuestion' => 'Leave Room?',
+			'watchTogether.leaveRoomConfirm' => 'You can join again with the room code.',
 			'watchTogether.leave' => 'Leave',
-			'watchTogether.syncing' => 'Syncing...',
-			'watchTogether.joinWatchSession' => 'Join Watch Session',
-			'watchTogether.enterCodeHint' => 'Enter 5-character code',
-			'watchTogether.pasteFromClipboard' => 'Paste from clipboard',
-			'watchTogether.pleaseEnterCode' => 'Please enter a session code',
-			'watchTogether.codeMustBe5Chars' => 'Session code must be 5 characters',
-			'watchTogether.joinInstructions' => 'Enter the host\'s session code to join.',
-			'watchTogether.failedToCreate' => 'Failed to create session',
-			'watchTogether.failedToJoin' => 'Failed to join session',
-			'watchTogether.sessionCodeCopied' => 'Session code copied to clipboard',
-			'watchTogether.relayUnreachable' => 'Relay server unreachable. ISP blocking may prevent Watch Together.',
-			'watchTogether.reconnectingToHost' => 'Reconnecting to host...',
-			'watchTogether.currentPlayback' => 'Current Playback',
-			'watchTogether.joinCurrentPlayback' => 'Join Current Playback',
-			'watchTogether.joinCurrentPlaybackDescription' => 'Jump back into what the host is currently watching',
-			'watchTogether.failedToOpenCurrentPlayback' => 'Failed to open current playback',
-			'watchTogether.participantJoined' => ({required Object name}) => '${name} joined',
-			'watchTogether.participantLeft' => ({required Object name}) => '${name} left',
-			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
-			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
-			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
-			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
-			'watchTogether.participantBuffering' => ({required Object name}) => '${name} is buffering',
-			'watchTogether.participantNeedsUpdate' => ({required Object name}) => '${name} is on an older app version — sync unavailable',
-			'watchTogether.resumingWithout' => ({required Object name}) => 'Resuming without ${name}',
-			'watchTogether.waitingForParticipants' => 'Waiting for others to load...',
-			'watchTogether.waitingForName' => ({required Object name}) => 'Waiting for ${name}...',
-			'watchTogether.recentRooms' => 'Recent Rooms',
-			'watchTogether.renameRoom' => 'Rename Room',
-			'watchTogether.removeRoom' => 'Remove',
-			'watchTogether.guestSwitchUnavailable' => 'Couldn\'t switch — server unavailable for sync',
-			'watchTogether.guestSwitchFailed' => 'Couldn\'t switch — content not found on this server',
-			'watchTogether.defaultDisplayName' => 'User',
-			'watchTogether.errors.timedOut' => 'The relay did not respond in time',
-			'watchTogether.errors.connectionLost' => 'The connection closed before the session was ready',
-			'watchTogether.errors.invalidRelayResponse' => 'The relay sent an unexpected response',
-			'watchTogether.errors.sessionEnded' => 'The host ended the session',
-			'watchTogether.errors.sessionUnavailable' => 'Unable to resume this session. Join or create a room to continue.',
+			'watchTogether.endRoom' => 'End Room',
+			'watchTogether.endRoomQuestion' => 'End Room?',
+			'watchTogether.endRoomConfirm' => 'This ends the room for everyone.',
+			'watchTogether.end' => 'End',
+			'watchTogether.playBlockedTitle' => 'Playback didn\'t start',
+			'watchTogether.playBlockedDescription' => 'Press play to start watching with the room.',
+			'watchTogether.notices.pressedPlay' => ({required Object name}) => '${name} pressed play',
+			'watchTogether.notices.playbackStarted' => 'Playback started',
+			'watchTogether.notices.paused' => ({required Object name}) => '${name} paused',
+			'watchTogether.notices.playbackPaused' => 'Playback paused',
+			'watchTogether.notices.jumpedTo' => ({required Object name, required Object position}) => '${name} jumped to ${position}',
+			'watchTogether.notices.roomJumpedTo' => ({required Object position}) => 'Jumped to ${position}',
+			'watchTogether.notices.changedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
+			'watchTogether.notices.speedChanged' => ({required Object speed}) => 'Speed set to ${speed}',
+			'watchTogether.notices.startedMedia' => ({required Object name, required Object title}) => '${name} started ${title}',
+			'watchTogether.notices.mediaStarted' => ({required Object title}) => 'Now playing ${title}',
+			'watchTogether.notices.stoppedMedia' => ({required Object name}) => '${name} stopped the video',
+			'watchTogether.notices.mediaStopped' => 'The video stopped',
+			'watchTogether.notices.waitingFor' => ({required Object name}) => 'Waiting for ${name}...',
+			'watchTogether.notices.waitingForSomeone' => 'Waiting for someone to catch up...',
+			'watchTogether.notices.finished' => 'Finished',
+			'watchTogether.notices.hostChangedTo' => ({required Object name}) => '${name} is now the host',
+			'watchTogether.notices.youAreNowHost' => 'You are now the host',
+			'watchTogether.notices.joined' => ({required Object name}) => '${name} joined',
+			'watchTogether.notices.left' => ({required Object name}) => '${name} left',
+			'watchTogether.notices.controlRefused' => 'Only the host can control playback',
+			'watchTogether.notices.searchFailed' => 'Some servers couldn\'t be searched for the room\'s video',
+			'watchTogether.notices.playBlocked' => 'Press play to start',
+			'watchTogether.notices.shareFailed' => 'Couldn\'t share this video with the room',
+			'watchTogether.notices.downloadNotShared' => 'Downloads aren\'t shared with the room while their server is offline',
+			'watchTogether.notices.openFailed' => 'Couldn\'t open the room\'s video',
+			'watchTogether.ended.ended' => 'The host ended the room',
+			'watchTogether.ended.kicked' => 'You were removed from the room',
+			'watchTogether.ended.expired' => 'The room expired',
+			'watchTogether.ended.replaced' => 'You joined this room on another device',
+			'watchTogether.ended.lost' => 'Lost the connection to the room',
+			'watchTogether.errors.invalidCode' => 'That isn\'t a room code. Codes have 6 letters and digits, without 0, 1, I, L or O.',
+			'watchTogether.errors.roomNotFound' => 'No room has that code. It may have ended.',
+			'watchTogether.errors.roomFull' => 'That room is full.',
+			'watchTogether.errors.roomLocked' => 'The host locked that room.',
+			'watchTogether.errors.relayFull' => 'Watch Together is busy right now. Try again later.',
+			'watchTogether.errors.unreachable' => 'Couldn\'t reach the Watch Together relay. Check your connection.',
+			'watchTogether.errors.rateLimited' => 'Too many attempts. Wait a moment and try again.',
+			'watchTogether.errors.clientBlocked' => 'This version of Bask can\'t use the relay. Update the app.',
+			'watchTogether.errors.forbidden' => 'Only the host can do that.',
+			'watchTogether.errors.notInRoom' => 'You\'re not in a room.',
+			'watchTogether.errors.alreadyInRoom' => 'You\'re already in a room.',
+			'watchTogether.errors.resumeFailed' => 'Couldn\'t rejoin the room.',
+			'watchTogether.errors.unsupported' => 'The relay doesn\'t support this.',
+			'watchTogether.errors.generic' => 'Something went wrong. Try again.',
+			'watchTogether.untitledEpisode' => ({required Object number}) => 'Episode ${number}',
 			'downloads.title' => 'Downloads',
 			'downloads.manage' => 'Manage',
 			'downloads.tvShows' => 'TV Shows',
@@ -9608,10 +10992,14 @@ extension on Translations {
 			'downloads.downloadQueued' => 'Download queued',
 			'downloads.downloadResumed' => 'Download resumed',
 			'downloads.serverErrorBitrate' => 'Server error: file may exceed the remote bitrate limit',
-			'downloads.storageFull' => 'Downloads stopped because device storage is full. Free some space, then retry.',
+			'downloads.storageFull' => 'Downloads stopped to protect available storage. Free some space or choose another download location, then retry.',
+			'downloads.storageUnavailable' => 'Downloads stopped because available storage could not be checked. Check the download location, then retry.',
 			'downloads.episodesQueued' => ({required Object count}) => '${count} episodes queued for download',
 			'downloads.downloadDeleted' => 'Download deleted',
 			'downloads.deleteConfirm' => ({required Object title}) => 'Delete "${title}" from this device?',
+			'downloads.deleteCollectionDownloads' => 'Delete downloads',
+			'downloads.deleteCollectionDownloadsConfirm' => ({required Object title}) => 'Delete every download in "${title}" from this device?',
+			'downloads.collectionDownloadsDeleted' => 'Downloads deleted',
 			'downloads.cancelledDownloadTitle' => 'Canceled Download',
 			'downloads.cancelledDownloadMessage' => 'This download was canceled. What would you like to do?',
 			'downloads.allEpisodesAlreadyDownloaded' => 'All episodes already downloaded',
@@ -9629,6 +11017,8 @@ extension on Translations {
 			'downloads.noDownloadsTree' => 'No downloads',
 			'downloads.pauseAll' => 'Pause all',
 			'downloads.resumeAll' => 'Resume all',
+			'downloads.retryAll' => 'Retry all failed',
+			'downloads.retryFailed' => 'Retry failed downloads',
 			'downloads.deleteAll' => 'Delete all',
 			'downloads.selectVersion' => 'Select Version',
 			'downloads.allEpisodes' => 'All episodes',
@@ -9665,6 +11055,7 @@ extension on Translations {
 			'downloads.syncRuleAvailable' => 'Available',
 			'downloads.syncRuleOffline' => 'Offline',
 			'downloads.syncRuleSignInRequired' => 'Sign in required',
+			'downloads.syncRuleAccessDenied' => 'Access denied',
 			'downloads.syncRuleNotAvailableForProfile' => 'Not available for current profile',
 			'downloads.syncRuleUnknownServer' => 'Unknown server',
 			'downloads.syncRuleListCreated' => 'Sync rule created',
@@ -9694,17 +11085,28 @@ extension on Translations {
 			'downloads.backgroundWarning.statusUnknown' => 'Not checked yet',
 			'downloads.backgroundWarning.settingsUnavailable' => 'Couldn\'t open system settings on this device',
 			'downloads.backgroundWarning.linkUnavailable' => 'Couldn\'t open dontkillmyapp.com on this device',
+			'downloads.options' => 'Downloads options',
+			_ => null,
+		} ?? switch (path) {
+			'downloads.groupings.library' => 'Library',
+			'downloads.groupings.collections' => 'Collections',
+			'downloads.unknownLibrary' => 'Unknown library',
 			'downloads.unknownShow' => 'Unknown Show',
 			'downloads.unknownSeason' => 'Unknown Season',
 			'downloads.unknownAlbum' => 'Unknown Album',
 			'downloads.completedOfTotal' => ({required Object completed, required Object total}) => '${completed}/${total} completed',
 			'downloads.errorFileNotFound' => 'File not found (404)',
+			'downloads.errorDownloadNotAllowed' => 'Download not allowed by the server (403)',
 			'downloads.errorDownloadFailed' => 'Download failed',
-			'downloads.errorPostProcessing' => ({required Object error}) => 'Post-processing failed: ${error}',
+			'downloads.errorDownloadFailedWithReason' => ({required Object reason}) => 'Download failed: ${reason}',
+			'downloads.errorHttpStatus' => ({required Object status}) => 'Download failed (HTTP ${status})',
+			'downloads.errorPostProcessing' => ({required Object reason}) => 'Post-processing failed: ${reason}',
+			'downloads.reasonFileNotSaved' => 'the file could not be saved on this device',
+			'downloads.reasonCannotResume' => 'the partial download could not be resumed',
+			'downloads.reasonDeviceStorageFull' => 'this device is out of storage',
 			'downloads.notificationDownloading' => 'Downloading...',
 			'downloads.notificationComplete' => 'Download complete',
 			'downloads.notificationPaused' => 'Download paused',
-			'downloads.retryAll' => 'Retry all failed',
 			'downloads.retryAllFailed' => ({required Object count}) => 'Retry ${count} failed downloads',
 			'downloads.unknownPlaylist' => 'Unknown playlist',
 			'downloads.deleteSelectedConfirm' => ({required Object count}) => 'Delete ${count} selected downloads?',
@@ -9873,6 +11275,7 @@ extension on Translations {
 			'videoSettings.pictureSaturation' => 'Saturation',
 			'videoSettings.pictureGamma' => 'Gamma',
 			'videoSettings.pictureNeutral' => 'Default',
+			'videoSettings.audioNormalizationDisablesPassthrough' => 'Decodes audio to PCM; passthrough is off while this is on',
 			'performanceOverlay.color' => 'Color',
 			'performanceOverlay.performance' => 'Performance',
 			'performanceOverlay.buffer' => 'Buffer',
@@ -9885,6 +11288,13 @@ extension on Translations {
 			'performanceOverlay.rotation' => 'Rotation',
 			'performanceOverlay.dvSource' => 'DV Source',
 			'performanceOverlay.dvPath' => 'DV Path',
+			'performanceOverlay.dvRouteDecoder' => 'Dolby Vision decoder',
+			'performanceOverlay.dvRouteDecoderP81' => 'Dolby Vision decoder (P7→8.1)',
+			'performanceOverlay.dvRouteBaseLayer' => 'Base layer',
+			'performanceOverlay.dvRouteBaseLayerHdr10' => 'HDR10 base layer',
+			'performanceOverlay.dvRouteBaseLayerHlg' => 'HLG base layer',
+			'performanceOverlay.dvRouteBaseLayerSdr' => 'SDR base layer',
+			'performanceOverlay.dvRouteReshaped' => 'RPU reshaped (gpu-next)',
 			'performanceOverlay.p7Conversion' => 'P7 Conv',
 			'performanceOverlay.sampleRate' => 'Sample Rate',
 			'performanceOverlay.pixelFormat' => 'Pixel Fmt',
@@ -9907,6 +11317,7 @@ extension on Translations {
 			'performanceOverlay.cacheLimit' => 'Cache Limit',
 			'performanceOverlay.speed' => 'Speed',
 			'performanceOverlay.player' => 'Player',
+			'performanceOverlay.playMethod' => 'Play Method',
 			'performanceOverlay.memory' => 'Memory',
 			'performanceOverlay.uiFps' => 'UI FPS',
 			'performanceOverlay.fps' => 'FPS',
@@ -9977,8 +11388,6 @@ extension on Translations {
 			'metadataEdit.keep' => 'Keep',
 			'metadataEdit.allEpisodes' => 'All episodes',
 			'metadataEdit.latestEpisodes' => ({required Object count}) => '${count} latest episodes',
-			_ => null,
-		} ?? switch (path) {
 			'metadataEdit.latestEpisode' => 'Latest episode',
 			'metadataEdit.episodesAddedPastDays' => ({required Object count}) => 'Episodes added in the past ${count} days',
 			'metadataEdit.deleteAfterPlaying' => 'Delete Episodes After Playing',
@@ -10013,6 +11422,7 @@ extension on Translations {
 			'metadataEdit.label' => 'Label',
 			'metadataEdit.style' => 'Style',
 			'metadataEdit.mood' => 'Mood',
+			'metadataEdit.quickTag' => 'Quick Tag...',
 			'matchScreen.match' => 'Match...',
 			'matchScreen.fixMatch' => 'Fix Match...',
 			'matchScreen.unmatch' => 'Unmatch',
@@ -10102,6 +11512,8 @@ extension on Translations {
 			'services.names.simkl' => 'Simkl',
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
+			'services.simklReconnect.title' => 'Reconnect Simkl',
+			'services.simklReconnect.subtitle' => 'Simkl is retiring the sign-in method this connection uses. Reconnecting opens simkl.com to approve Bask — Bask never sees your password. Your watch history stays on Simkl.',
 			'services.deviceCode.title' => ({required Object service}) => 'Activate Bask on ${service}',
 			'services.deviceCode.instructions' => 'Scan the QR code, or visit the address below and enter this code:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Open ${service} to activate',
@@ -10188,6 +11600,8 @@ extension on Translations {
 			'addServer.redirectUnsupportedEnterFinal' => ({required Object product}) => 'The server redirected to an unsupported URL. Enter the final ${product} URL directly.',
 			'serverHealth.title' => 'Server health',
 			'serverHealth.subtitle' => 'Which endpoint each server is on, and how it is answering',
+			_ => null,
+		} ?? switch (path) {
 			'serverHealth.linkLocal' => 'On your network',
 			'serverHealth.linkRemote' => 'Direct, over the internet',
 			'serverHealth.linkRelay' => 'Through the Plex relay',
@@ -10234,6 +11648,23 @@ extension on Translations {
 			'serverActivity.messageSend' => 'Send',
 			'serverActivity.messageSent' => 'Message sent',
 			'serverActivity.messageFailed' => ({required Object error}) => 'Could not send the message: ${error}',
+			'deepLinks.invalid' => 'This Bask link isn\'t valid.',
+			'deepLinks.profileNotFound' => ({required Object profile}) => 'No profile matches "${profile}".',
+			'deepLinks.serverUnavailable' => 'Couldn\'t reach the server for this link.',
+			'deepLinks.notFound' => 'Couldn\'t find this title in your libraries.',
+			'deepLinks.unsupportedItem' => 'This link can\'t be played.',
+			'deepLinks.noLiveTv' => 'No Live TV server is available for this link.',
+			'deepLinks.channelNotFound' => ({required Object channel}) => 'Couldn\'t find channel "${channel}".',
+			'deepLinks.showLink' => 'Show link',
+			'deepLinks.showProfileLink' => 'Show profile link',
+			'deepLinks.dialogTitle' => 'Link',
+			'deepLinks.showHint' => 'Opening this link plays the next episode. Add &mode=shuffle to play the show on shuffle.',
+			'deepLinks.movieHint' => 'Opening this link plays the movie.',
+			'deepLinks.episodeHint' => 'Opening this link plays this episode.',
+			'deepLinks.profileHint' => 'Opening this link switches to this profile.',
+			'deepLinks.openAsProfile' => ({required Object name}) => 'Open as ${name}',
+			'deepLinks.copy' => 'Copy',
+			'deepLinks.copied' => 'Link copied',
 			_ => null,
 		};
 	}
