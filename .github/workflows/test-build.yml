@@ -1,6 +1,7 @@
 name: Bask test build
 
-# Builds installable, signed APKs from any branch without publishing a release.
+# Builds installable, signed APKs and a portable Windows app from any branch
+# without publishing a release.
 #
 # This exists for changes that tests cannot prove: a database migration needs a
 # device whose database predates it, and the native build needs a real
@@ -9,8 +10,12 @@ name: Bask test build
 # -- a different key fails to install over it, and uninstalling first would
 # destroy the very database the migration is supposed to be tested against.
 #
+# The Windows job exists so a test build has somewhere to go that is not one
+# of the real devices: those run released versions only, so a diagnostic build
+# is tried on predator instead.
+#
 # Nothing here bumps the version, writes a tag or touches a release. The APKs
-# are run artifacts and expire.
+# and the zip are run artifacts and expire.
 
 on:
   workflow_dispatch:
@@ -19,6 +24,15 @@ on:
         description: "versionName to stamp (default 2.99.0-test, which nothing can outrank)"
         required: false
         type: string
+      targets:
+        description: "What to build"
+        required: false
+        default: both
+        type: choice
+        options:
+          - both
+          - apk
+          - windows
 
 # Every step is written in bash, same reason as the other workflows: a Windows
 # runner would otherwise get PowerShell and fail on the first pipeline.
@@ -40,6 +54,7 @@ env:
 
 jobs:
   apk:
+    if: ${{ inputs.targets != 'windows' }}
     runs-on: ${{ vars.SELF_HOSTED_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -172,4 +187,92 @@ jobs:
         with:
           name: bask-test-apks
           path: build/app/outputs/flutter-apk/Bask-*.apk
+          if-no-files-found: error
+
+  windows:
+    # GitHub's own Windows runners build this; it needs no self-hosted machine.
+    # Separate from the APK job because a single job has a single OS, and a
+    # Windows toolchain failure must not take the APKs with it.
+    if: ${{ inputs.targets != 'apk' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Stamp the test version
+        # Same reason as the APK job: high enough that the in-app updater finds
+        # nothing newer and cannot replace the build being tested.
+        env:
+          VERSION: ${{ inputs.version || '2.99.0-test' }}
+        run: |
+          build=$(sed -n 's/^version: .*+\([0-9]*\)$/\1/p' pubspec.yaml)
+          if [ -z "$build" ]; then
+            echo "::error::pubspec.yaml has no +<build> suffix to preserve"
+            exit 1
+          fi
+          sed -i "s/^version: .*/version: ${VERSION}+${build}/" pubspec.yaml
+          grep '^version:' pubspec.yaml
+
+      - name: Install the patched Windows engine
+        # Bask cannot composite on a stock engine: the video is a child HWND
+        # inside the Flutter view, and what puts the UI above it is the patched
+        # engine presenting on a topmost DirectComposition visual. A stock
+        # engine builds an app whose player controls are present, clickable and
+        # invisible, which is useless for testing anything else.
+        id: windows_engine
+        run: |
+          flutter precache --windows
+          powershell -NoProfile -ExecutionPolicy Bypass -File windows/tool/install-patched-engine.ps1
+          sdk=$(dirname "$(dirname "$(command -v flutter)")")
+          dll="$sdk/bin/cache/artifacts/engine/windows-x64-release/flutter_windows.dll"
+          [ -f "$dll" ] || { echo "::error::No engine DLL at $dll"; exit 1; }
+          echo "engine_sha=$(sha256sum "$dll" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Build the portable Windows app
+        run: |
+          flutter build windows --release \
+            --dart-define=UPDATE_RELEASES_REPO=https://api.github.com/repos/${{ github.repository }}
+
+      - name: Verify the Windows bundle
+        # The checks a file listing cannot make: that the engine in the bundle
+        # is the patched one this build installed, and that the app actually
+        # starts.
+        run: |
+          bundle=build/windows/x64/runner/Release
+          powershell -NoProfile -ExecutionPolicy Bypass -File windows/tool/verify-bundle.ps1 \
+            -BundleDir "$bundle" -ExpectedEngineSha "${{ steps.windows_engine.outputs.engine_sha }}"
+
+      - name: Package the portable Windows app
+        env:
+          VERSION: ${{ inputs.version || '2.99.0-test' }}
+        run: |
+          bundle=build/windows/x64/runner/Release
+          # The marker is what makes it portable: with it beside the exe the
+          # app keeps its database, preferences, caches and downloads in
+          # ./bask-data instead of %APPDATA%, so the folder is the whole
+          # install and deleting it leaves the machine as it was. That matters
+          # more here than in a release: this is a throwaway diagnostic build
+          # on a machine that is not meant to keep one.
+          printf '%s\n' \
+            'Delete this file to make this copy store its data in %APPDATA% instead.' \
+            'While it exists, everything Bask writes stays in the bask-data folder next to the executable.' \
+            > "$bundle/portable.txt"
+          rm -rf build/windows-portable && mkdir -p build/windows-portable
+          cp -r "$bundle" "build/windows-portable/Bask-${VERSION}-windows-x64"
+          (cd build/windows-portable && 7z a -tzip "Bask-${VERSION}-windows-x64-portable.zip" "Bask-${VERSION}-windows-x64" >/dev/null)
+          ls -la build/windows-portable/*.zip
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: bask-test-windows
+          path: build/windows-portable/*.zip
           if-no-files-found: error
