@@ -84,28 +84,48 @@ class PlexImageCacheManager extends ce_cache.DefaultCacheManager {
     return limit;
   }
 
-  PlexImageCacheManager._()
-    : super(
-        stalePeriod: _artworkRetention,
-        maxNrOfCacheObjects: _resolvedObjectLimit(),
-        httpClientFactory: () => _SharedHttpClient(_artworkHttpClient.inner, _artworkRequestLimiter),
-        // Application support, not the cache directory: Android reclaims cache
-        // directories under storage pressure, which would discard the whole
-        // library's artwork at the moment the device is busiest.
-        cacheDirectoryProvider: getApplicationSupportDirectory,
-      );
-
-  @visibleForTesting
-  PlexImageCacheManager.forTesting({
-    required http.Client Function() httpClientFactory,
-    required ce_cache.CacheDirectoryProvider cacheDirectoryProvider,
+  /// One constructor, so the wiring a test exercises is the wiring the app
+  /// gets.
+  ///
+  /// Two of these existed, and only the testing one registered
+  /// [_ArtworkCredentialInterceptor]. The app therefore downloaded the
+  /// redacted URL [getFileStream] hands the cache — `X-Plex-Token=` with no
+  /// value, both in the query and inside the encoded `url=` — and PMS answered
+  /// 401 to every poster, thumbnail and logo while API calls on the same token
+  /// answered 200. Nothing caught it: the tests drove the constructor that had
+  /// the interceptor, and the URL builders, which are correct, had nothing to
+  /// report.
+  PlexImageCacheManager._({
+    Duration stalePeriod = _artworkRetention,
+    int? maxNrOfCacheObjects,
+    http.Client Function()? httpClientFactory,
+    ce_cache.CacheDirectoryProvider? cacheDirectoryProvider,
   }) : super(
-         stalePeriod: const Duration(days: 14),
-         maxNrOfCacheObjects: 3000,
-         httpClientFactory: httpClientFactory,
-         cacheDirectoryProvider: cacheDirectoryProvider,
+         stalePeriod: stalePeriod,
+         maxNrOfCacheObjects: maxNrOfCacheObjects ?? _resolvedObjectLimit(),
+         httpClientFactory:
+             httpClientFactory ?? (() => _SharedHttpClient(_artworkHttpClient.inner, _artworkRequestLimiter)),
+         // Application support, not the cache directory: Android reclaims cache
+         // directories under storage pressure, which would discard the whole
+         // library's artwork at the moment the device is busiest.
+         cacheDirectoryProvider: cacheDirectoryProvider ?? getApplicationSupportDirectory,
+         // Not optional: without it the download carries the redacted URL and
+         // the server refuses every image.
          httpInterceptors: const [_ArtworkCredentialInterceptor()],
        );
+
+  @visibleForTesting
+  factory PlexImageCacheManager.forTesting({
+    required http.Client Function() httpClientFactory,
+    required ce_cache.CacheDirectoryProvider cacheDirectoryProvider,
+  }) {
+    return PlexImageCacheManager._(
+      stalePeriod: const Duration(days: 14),
+      maxNrOfCacheObjects: 3000,
+      httpClientFactory: httpClientFactory,
+      cacheDirectoryProvider: cacheDirectoryProvider,
+    );
+  }
 
   /// Artwork URLs carry the server token in their query (see
   /// [redactArtworkUrl]), and the cache persists each entry's URL — and, with
